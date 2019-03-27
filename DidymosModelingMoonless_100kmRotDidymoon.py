@@ -1,9 +1,9 @@
 #import java, os
 import  orekit
 orekit.initVM()
-from orekit.pyhelpers import  setup_orekit_curdir
+from orekit.pyhelpers import setup_orekit_curdir
 setup_orekit_curdir()
-import bpy
+#import bpy
 import scipy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,7 +22,7 @@ from org.orekit.propagation.events import DateDetector
 from org.orekit.propagation.events.handlers import RecordAndContinue
 from org.orekit.propagation.events.handlers import EventHandler;
 from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
-import BlenderControllerMK2
+#import BlenderControllerMK2
 import sys
 from mathutils import Matrix, Vector, Quaternion, Euler 
 import subprocess
