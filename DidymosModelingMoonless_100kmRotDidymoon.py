@@ -24,7 +24,7 @@ from org.orekit.propagation.events.handlers import EventHandler;
 from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
 #import BlenderControllerMK2
 import sys
-from mathutils import Matrix, Vector, Quaternion, Euler 
+#from mathutils import Matrix, Vector, Quaternion, Euler 
 import subprocess
 from contextlib import redirect_stdout, redirect_stderr
 import io
