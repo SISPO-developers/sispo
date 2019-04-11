@@ -3,7 +3,7 @@ import  orekit
 orekit.initVM()
 from orekit.pyhelpers import setup_orekit_curdir
 setup_orekit_curdir()
-#import bpy
+import bpy
 import scipy
 import numpy as np
 import matplotlib.pyplot as plt
@@ -22,13 +22,13 @@ from org.orekit.propagation.events import DateDetector
 from org.orekit.propagation.events.handlers import RecordAndContinue
 from org.orekit.propagation.events.handlers import EventHandler;
 from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
-#import BlenderControllerMK2
+import BlenderControllerMK2
 import sys
-#from mathutils import Matrix, Vector, Quaternion, Euler 
+from mathutils import Matrix, Vector, Quaternion, Euler 
 import subprocess
 from contextlib import redirect_stdout, redirect_stderr
 import io
-#import cv2
+import cv2
 import time
 import os
 import copy
@@ -38,6 +38,9 @@ from array import array
 import skimage.filters
 import skimage.transform
 import simplejson as json
+
+import os 
+dir_path = os.path.dirname(os.path.realpath(__file__))
 
 series_name='Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter'
 time_steps=500#1000#1000#50#1000
@@ -61,7 +64,7 @@ series_name+=str(time_steps)+'_'
 
 
 if(len(sys.argv)<2):
-    scratchloc='D:/temp/didymos'
+    scratchloc=dir_path + '\\temp\\didymos'
 else:
     scratchloc=sys.argv[1]
 
@@ -108,9 +111,6 @@ class TimeSampler(DateDetector):
         print(dtout)
         DateDetector.__init__(self,dtout/2.,1.,self.times)
 
-    
-import os 
-dir_path = os.path.dirname(os.path.realpath(__file__))
 
 import quantities as pq
 #Didymos data https://ssd.jpl.nasa.gov/horizons.cgi
@@ -254,7 +254,7 @@ blender.SetCamera(lens=230,sensor=3.45E-3*2464,camera_name='LightingReferenceCam
 asteroid_scenes=['MainScene','AsteroidOnly','AsteroidConstDistance']
 star_scenes=['MainScene','BackgroundStars']
 
-Asteroid=blender.LoadObject(dir_path+"..\\..\\..\\didymos2.blend","Didymos.001",asteroid_scenes)
+Asteroid=blender.LoadObject(dir_path+"\\Didymos\\didymos2.blend","Didymos.001",asteroid_scenes)
 AsteroidBC=blender.CreateEmpty('AsteroidBC',asteroid_scenes)
 MoonOrbiter=blender.CreateEmpty('MoonOrbiter',asteroid_scenes)
 Asteroid.parent=AsteroidBC
@@ -267,19 +267,19 @@ MoonBC.parent=MoonOrbiter
 MoonBC.location=(1.17,0,0)
 
 
-Moon=blender.LoadObject(dir_path+"..\\..\\..\\didymos2.blend","Didymos",asteroid_scenes)
+Moon=blender.LoadObject(dir_path+"\\Didymos\didymos2.blend","Didymos",asteroid_scenes)
 Moon.location=(0,0,0)
 Moon.parent=MoonBC
 
-Sun=blender.LoadObject(dir_path+"..\\..\\..\\didymos_lowpoly.blend","Sun",asteroid_scenes+['LightingReference'])
+Sun=blender.LoadObject(dir_path+"\\Didymos\\didymos_lowpoly.blend","Sun",asteroid_scenes+['LightingReference'])
 
-CalibrationDisk=blender.LoadObject(dir_path+"..\\..\\..\\didymos_lowpoly.blend","CalibrationDisk",['LightingReference'])
+CalibrationDisk=blender.LoadObject(dir_path+"\\Didymos\\didymos_lowpoly.blend","CalibrationDisk",['LightingReference'])
 CalibrationDisk.location=(0,0,0)
 
 
 frame_index=0
 
-star_template=blender.LoadObject(dir_path+"..\\..\\..\\StarTemplate.blend","TemplateStar",star_scenes)
+star_template=blender.LoadObject(dir_path+"\\Didymos\\StarTemplate.blend","TemplateStar",star_scenes)
 star_template.location=(1E20,1E20,1E20)
 
 def RA_DEC(vec):
@@ -332,7 +332,7 @@ def GetUCAC4(RA,RA_W,DEC,DEC_W,fn='ucac4.txt'):
     
 
 
-    command='..\\Release\\UCAC4_interface.exe %f %f %f %f -h F:\\ucac4\\ %s'%(RA,DEC,RA_W,DEC_W,fn)
+    command='E:\\01_MasterThesis\\00_Code\\star_cats\\u4test.exe %f %f %f %f -h E:\\01_MasterThesis\\02_Data\\UCAC4 %s'%(RA,DEC,RA_W,DEC_W,fn)
     print(command)
     
     for i in range(0,5):

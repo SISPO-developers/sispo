@@ -1,4 +1,4 @@
-#import cv2
+import cv2
 import bpy
 import numpy as np
 import time
@@ -13,10 +13,10 @@ class BlenderController:
         self.scene=scene=bpy.context.scene
         self.scene.name=scene_names[0]
         self.cameras=bpy.data.cameras
-        scene.world.horizon_color=(0,0,0)
+        scene.world.color=(0,0,0)
         #Clear everything on the scene
         for ob in bpy.data.objects:
-            ob.select=True
+            ob.select_set(True)
         bpy.ops.object.delete()
 
         if len(scene_names)>1:
@@ -36,7 +36,7 @@ class BlenderController:
             scene_names=self.scene_names
 
         if( device!='CPU' and device!='GPU'):
-            if(len(bpy.context.user_preferences.addons['cycles'].preferences.devices)>0):
+            if(len(bpy.context.preferences.addons['cycles'].preferences.devices)>0):
                 device='GPU'
                 tile=tile_GPU
             else:
@@ -114,7 +114,7 @@ class BlenderController:
             scene_names=self.scene_names
         for scene_name in scene_names:
             scene=bpy.data.scenes[scene_name]
-            bpy.context.screen.scene =scene
+            bpy.context.window.scene =scene
             scene.cycles.seed=time.time()
             scene.update()
     def Render(self,name='',scene_name='MainScene'):
@@ -125,7 +125,7 @@ class BlenderController:
         scene=bpy.data.scenes[scene_name]
         print("Rendering seed: %d"%(scene.cycles.seed))    
         scene.render.filepath=name
-        bpy.context.screen.scene =scene
+        bpy.context.window.scene =scene
         bpy.ops.render.render( write_still=True )
         # get viewer pixels
 
@@ -141,7 +141,7 @@ class BlenderController:
                 scene_names=self.scene_names
             for scene_name in scene_names:
                 scene=bpy.data.scenes[scene_name]
-                scene.objects.link(object)
+                scene.collection.objects.link(object)
             return object
         return None
         
@@ -162,7 +162,7 @@ class BlenderController:
         for scene_name in scene_names:
             scene=bpy.data.scenes[scene_name]
             scene.camera=camera
-            scene.objects.link(camera)
+            scene.collection.objects.link(camera)
 
     def TargetCamera(self,target,camera_name='Camera'):
         camera=bpy.data.objects[camera_name]
@@ -177,15 +177,15 @@ class BlenderController:
             scene_names=self.scene_names
         for scene_name in scene_names:
             scene=bpy.data.scenes[scene_name]
-            scene.objects.link(e)
+            scene.collection.objects.link(e)
         return e
     def SaveBlenderDfile(self,fn):
         bpy.ops.wm.save_as_mainfile(fn)
 
     def GetCameraVectors(self,camera_name,scene_name):
         camera=bpy.data.objects[camera_name]
-        up = camera.matrix_world.to_quaternion() * Vector((0.0, 1.0, 0.0))
-        cam_direction = camera.matrix_world.to_quaternion() * Vector((0.0, 0.0, -1.0))
+        up = camera.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
+        cam_direction = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
         right=cam_direction.cross(up)
 
         scene=bpy.data.scenes[scene_name]
