@@ -1,4 +1,3 @@
-#import java, os
 import  orekit
 orekit.initVM()
 from orekit.pyhelpers import setup_orekit_curdir
@@ -39,11 +38,11 @@ import skimage.filters
 import skimage.transform
 import simplejson as json
 
-import os 
+
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
 series_name='Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter'
-time_steps=500#1000#1000#50#1000
+time_steps=5#500#1000#1000#50#1000
 factor=10#15#12#10#5#7#Higher values slow down closest encounter phase
 mode=1
 pass_duration=2.*60#*2#3600.*24.*30*4*3
@@ -112,7 +111,6 @@ class TimeSampler(DateDetector):
         DateDetector.__init__(self,dtout/2.,1.,self.times)
 
 
-import quantities as pq
 #Didymos data https://ssd.jpl.nasa.gov/horizons.cgi
 didymos_a=	1.644641475071416E+00	*utils.Constants.IAU_2012_ASTRONOMICAL_UNIT
 didymos_P=   7.703805051391988E+02*utils.Constants.JULIAN_DAY
@@ -312,7 +310,7 @@ def GetFOV_RA_DEC(leftedge_vec,rightedge_vec,downedge_vec,upedge_vec):
 
     #print(('RA',ra_cent,'+-',ra_w,'DEC',dec_cent,'+-',dec_w))
     return ra_cent,ra_w,dec_cent,dec_w
-import sys
+
 errorlog='starfield_errorlog%f.txt'%time.time()
 def GetUCAC4(RA,RA_W,DEC,DEC_W,fn='ucac4.txt'):
     global errorlog
