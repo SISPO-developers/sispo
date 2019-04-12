@@ -179,7 +179,7 @@
 %
 \RequirePackage[T1]{fontenc}%
 \RequirePackage{inputenc}% For scands in both Finnish and English input docs
-\RequirePackage[swedish, finnish, english]{babel}%
+\RequirePackage[english, finnish, swedish]{babel}%
 \RequirePackage{lmodern}%
 \RequirePackage[kerning, spacing, babel]{microtype}%
 %
