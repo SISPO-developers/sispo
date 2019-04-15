@@ -1,9 +1,12 @@
-import bpy
 import time
 import zlib
 import struct
-from mathutils import Vector 
-import time
+
+
+
+import bpy
+from mathutils import Vector
+
 
 class BlenderController:
     def __init__(self, scratchdisk, scene_names = ['MainScene']):
@@ -22,10 +25,10 @@ class BlenderController:
                 bpy.ops.scene.new(type='FULL_COPY')
                 scene = bpy.context.scene
                 scene.name = scene_name
-        self.scenes = bpy.data.scenes    
+        self.scenes = bpy.data.scenes
        
         self.scratchdisk = scratchdisk
-       
+        
         self.render_ID = zlib.crc32(struct.pack("!f", time.time()))
 
     def SetRenderer(self, device = 'Auto', tile = 64, tile_GPU = 512, scene_names = []):
@@ -33,13 +36,13 @@ class BlenderController:
         if len(scene_names) == 0:
             scene_names = self.scene_names
 
-        if(device != 'CPU' and device != 'GPU'):
+        if device != 'CPU' and device != 'GPU':
             if(len(bpy.context.preferences.addons['cycles'].preferences.devices) > 0):
                 device = 'GPU'
                 tile = tile_GPU
             else:
                 device = 'CPU'
-            
+
         if device == 'GPU':
             bpy.context.user_preferences.addons['cycles'].preferences.compute_device_type = 'CUDA'
             print('Rendering with GPUs:')
@@ -81,8 +84,8 @@ class BlenderController:
     def SetExposure(self, exposure):
         for scene_name in self.scene_names:
             scene = bpy.data.scenes[scene_name]
-
-            scene.view_settings.exposure = exposure      
+            
+            scene.view_settings.exposure = exposure
 
     def SetOutputFormat(self, res_x, res_y, file_format = 'OPEN_EXR', color_depth = '32', use_preview = True, scene_names = []):
         if len(scene_names) == 0:
@@ -141,7 +144,7 @@ class BlenderController:
                 scene.collection.objects.link(object)
             return object
         return None
-        
+
     def SetCamera(self, lens = 35, sensor = 32, clip_start = 1E-5, clip_end = 1E32, mode = 'PERSP', ortho_scale = 7, camera_name = 'Camera', scene_names = []):#Modes are 'ORTHO' and 'PERSP'
         cam = bpy.data.cameras.new(camera_name)
         camera = bpy.data.objects.new('Camera', cam)
@@ -190,7 +193,7 @@ class BlenderController:
         res_x = scene.render.resolution_x
         res_y = scene.render.resolution_y
 
-        max_dim = max(res_x, res_y)
+        #max_dim = max(res_x, res_y)
         if res_x > res_y:
             sensor_w = camera.data.sensor_width
             sensor_h = camera.data.sensor_width * res_y / res_x
