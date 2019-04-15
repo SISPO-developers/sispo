@@ -1,3 +1,5 @@
+"""Main simulation module."""
+
 import math
 import subprocess
 import sys
@@ -65,9 +67,6 @@ else:
         series_name += '_darkside'
 series_name += str(time_steps) + '_'
 
-
-
-
 if(len(sys.argv)<2):
     scratchloc = dir_path + '\\temp\\didymos'
 else:
@@ -78,12 +77,15 @@ if not os.path.isdir(scratchdir):
     os.makedirs(scratchdir)
 
 class TimingEvent(PythonEventHandler):
+    """TiminigEvent handler."""
     def __init__(self):
+        """Initialise a TimingEvent handler."""
         PythonEventHandler.__init__(self)
         self.data = []
         self.events = 0
 
     def handle_event(self, s, detector, increasing):
+        """Handle event occurance."""
         self.events += 1
         if self.events%100 == 0:
             print (s.getDate(), " : event %d"%(self.events))
@@ -92,10 +94,13 @@ class TimingEvent(PythonEventHandler):
         return EventHandler.Action.CONTINUE
     
     def reset_state(self, detector, oldState):
+        """Reset TimingEvent handler to given state."""
         return oldState
 
 class TimeSampler(DateDetector):
+    """."""
     def __init__(self, start, end, steps, mode=1, factor=2):#mode=1 linear, mode=2 double exponential
+        """Initialise TimeSampler."""
         duration = end.durationFrom(start)
         dt = duration / (steps-1)
         dtout = dt
@@ -309,6 +314,7 @@ star_template = blender.load_object(dir_path + "\\Didymos\\StarTemplate.blend", 
 star_template.location = (1E20,1E20,1E20)
 
 def get_RA_DEC(vec):
+    """Calculate Right Ascension and ..."""
     vec = vec.normalized()
     dec = math.asin(vec.z)
     
@@ -316,6 +322,7 @@ def get_RA_DEC(vec):
     return (ra + math.pi, dec)
 
 def get_FOV_RA_DEC(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
+    """Calculate field of view centre and size."""
     ra_max = max(math.degrees(get_RA_DEC(rightedge_vec)[0]), math.degrees(get_RA_DEC(leftedge_vec)[0]))
     ra_min = min(math.degrees(get_RA_DEC(rightedge_vec)[0]), math.degrees(get_RA_DEC(leftedge_vec)[0]))
     
@@ -341,6 +348,7 @@ def get_FOV_RA_DEC(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
 errorlog = 'starfield_errorlog%f.txt'%time.time()
 
 def get_UCAC4_data(RA, RA_W, DEC, DEC_W, fn='ucac4.txt'):
+    """Retrieve starmap data from UCAC4 catalog."""
     global errorlog
     if sys.platform.startswith("win"):
         # Don't display the Windows GPF dialog if the invoked program dies.
@@ -381,6 +389,7 @@ def get_UCAC4_data(RA, RA_W, DEC, DEC_W, fn='ucac4.txt'):
     return out
 
 def write_openEXR(fn, picture):
+    """Save image in OpenEXR file format."""
     h = len(picture)
     w = len(picture[0])
     c = len(picture[0][0])
@@ -403,12 +412,14 @@ def write_openEXR(fn, picture):
     x.close()
 
 class StarCache:
+    """Handling stars in field of view, for rendering of scene."""
     def __init__(self, template, parent=None):
         self.template = template
         self.star_array = []
         self.parent = parent
 
     def set_stars(self, stardata, cam_direction, sat_position, R, pixelsize_at_R, scene_names):
+        """Set current stars in the field of view."""
         if len(self.star_array) < len(stardata):
             for i in range(0, len(stardata) - len(self.star_array)):
                 new_obj = self.template.copy()
@@ -461,7 +472,7 @@ class StarCache:
         return total_flux
 
     def render_stars_directly(self, stardata, cam_direction, right_vec, up_vec, res_x, res_y, fn):
-       
+        """Render given stars."""
         up_vec -= cam_direction
         right_vec -= cam_direction
         total_flux = 0.
@@ -517,11 +528,12 @@ class StarCache:
         #for c in range(0,3):
         #    starmap2[:,:,c]*=flux*(1E4)/np.sum(starmap2[:,:,c])
         #starmap2 = np.asarray(starmap2,dtype = 'float32')
-        write_openEXR(fn,starmap3)
+        write_openEXR(fn, starmap3)
 
         return (total_flux, np.sum(starmap3[:,:,0]))
  
 def vec_string(vec, prec):
+    """Create string from vector data."""
     o = '['
     fs = '%%.%de'%(prec)
     #i = 0
@@ -533,6 +545,7 @@ def vec_string(vec, prec):
     return o + ']'
 
 def mat_string(vec, prec):
+    """Create string from matrix data."""
     o = '['
     #fs = '%%.%de'%(prec)
     i = 0
@@ -690,6 +703,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     metadict['Camera f,w,x,y'] = (f,w,x_res,y_res)
 
     def serializer(o):
+        """."""
         try:
             return np.asarray(o, dtype='float64').tolist()
         except:
@@ -709,8 +723,6 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     print("Frame %d complete"%(frame_index))
     #frame_index+ = 1
     #break
-
-
 
   
 fig = plt.figure(1)

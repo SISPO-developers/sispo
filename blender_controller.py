@@ -1,3 +1,5 @@
+"""Module to controll blender bpy module."""
+
 import time
 import zlib
 import struct
@@ -7,7 +9,9 @@ from mathutils import Vector
 
 
 class BlenderController:
+    """Class to control blender module behaviour."""
     def __init__(self, scratchdisk, scene_names=['MainScene']):
+        """Initialise blender controller class."""
         self.scene_names = scene_names
         self.scene = scene = bpy.context.scene
         self.scene.name = scene_names[0]
@@ -25,9 +29,10 @@ class BlenderController:
                 scene.name = scene_name
         self.scenes = bpy.data.scenes       
         self.scratchdisk = scratchdisk
-        self.render_ID = zlib.crc32(struct.pack("!f", time.time()))
+        self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
     def set_renderer(self, device='Auto', tile=64, tile_GPU=512, scene_names=[]):
+        """Set blender rendering device."""
         print("Render setting %r" % (device))
         if len(scene_names) == 0:
             scene_names = self.scene_names
@@ -78,6 +83,7 @@ class BlenderController:
             scene.view_settings.look = 'None'
 
     def set_exposure(self, exposure):
+        """Set exposure value."""
         for scene_name in self.scene_names:
             scene = bpy.data.scenes[scene_name]
             
@@ -86,12 +92,13 @@ class BlenderController:
     def set_output_format(
             self, res_x, res_y, file_format='OPEN_EXR', color_depth='32',
             use_preview=True, scene_names=[]):
+        """Set output file format."""
         if len(scene_names) == 0:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
             scene.render.image_settings.file_format = file_format
-            scene.render.filepath = self.scratchdisk + 'r%0.8X.exr' % (self.render_ID)
+            scene.render.filepath = self.scratchdisk + 'r%0.8X.exr' % (self.render_id)
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
             scene.render.resolution_percentage = 100
@@ -101,6 +108,7 @@ class BlenderController:
             scene.render.image_settings.use_zbuffer = True
 
     def set_samples(self, samples=6, scene_names=[]):
+        """Set number of samples to render for each pixel."""
         if len(scene_names) == 0:
             scene_names = self.scene_names
         for scene_name in scene_names:
@@ -108,6 +116,7 @@ class BlenderController:
             scene.cycles.samples = samples
 
     def update(self, scene_names=[]):
+        """Update scenes."""
         if len(scene_names) == 0:
             scene_names = self.scene_names
         for scene_name in scene_names:
@@ -117,8 +126,9 @@ class BlenderController:
             scene.update()
 
     def render(self, name='', scene_name='MainScene'):
+        """Render scenes."""
         if name == '':
-            name = self.scratchdisk + 'r%0.8X.exr' % (self.render_ID)
+            name = self.scratchdisk + 'r%0.8X.exr' % (self.render_id)
               
         scene = bpy.data.scenes[scene_name]
         print("Rendering seed: %d" % (scene.cycles.seed))    
@@ -131,7 +141,7 @@ class BlenderController:
         return 0 #TODO: only dummy, change later
 
     def load_object(self, filename, object_name, scene_names=[]):
-
+        """Load blender object from file."""
         with bpy.data.libraries.load(filename) as (data_from, data_to):
             data_to.objects = [name for name in data_from.objects if name == object_name]
         if len(data_to.objects) > 0:
@@ -145,8 +155,9 @@ class BlenderController:
             return object
         return None
 
-    def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode='PERSP', 
-                   ortho_scale=7, camera_name='Camera', scene_names=[]):#Modes are 'ORTHO' and 'PERSP'
+    def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode='PERSP',#Modes are 'ORTHO' and 'PERSP'
+                   ortho_scale=7, camera_name='Camera', scene_names=[]):
+        """Set camera configuration values."""
         cam = bpy.data.cameras.new(camera_name)
         camera = bpy.data.objects.new('Camera', cam)
         camera.name = camera_name
@@ -166,6 +177,7 @@ class BlenderController:
             scene.collection.objects.link(camera)
 
     def target_camera(self, target, camera_name='Camera'):
+        """Target camera towards target."""
         camera = bpy.data.objects[camera_name]
         camera_constr = camera.constraints.new(type='TRACK_TO')
         camera_constr.track_axis = 'TRACK_NEGATIVE_Z'
@@ -173,6 +185,7 @@ class BlenderController:
         camera_constr.target = target
 
     def create_empty(self, name='Empty', scene_names=[]):
+        """Create new, empty blender object."""
         e = bpy.data.objects.new(name, None)
         if len(scene_names) == 0:
             scene_names = self.scene_names
@@ -182,9 +195,11 @@ class BlenderController:
         return e
 
     def save_blender_dfile(self, fn):
+        """Save a blender d file."""
         bpy.ops.wm.save_as_mainfile(fn)
 
     def get_camera_vectors(self, camera_name, scene_name):
+        """Get camera position and direction vectors."""
         camera = bpy.data.objects[camera_name]
         up = camera.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
         cam_direction = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
