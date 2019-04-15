@@ -9,20 +9,10 @@ from array import array
 import numpy as np
 import matplotlib.pyplot as plt
 
-import  orekit
+import orekit
 orekit.initVM()
 from orekit.pyhelpers import setup_orekit_curdir
 setup_orekit_curdir()
-import bpy
-#import scipy
-
-#import cv2
-#import Imath
-import OpenEXR
-import skimage.filters
-import skimage.transform
-import simplejson as json
-
 import org.orekit.orbits as orbits
 import org.orekit.utils as utils
 from org.orekit.utils import PVCoordinates
@@ -37,6 +27,15 @@ from org.orekit.propagation.events import DateDetector
 from org.orekit.propagation.events.handlers import RecordAndContinue
 from org.orekit.propagation.events.handlers import EventHandler
 from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
+import bpy
+#import scipy
+#import cv2
+#import Imath
+import OpenEXR
+import skimage.filters
+import skimage.transform
+import simplejson as json
+
 import blender_controller
 
 #from mathutils import Matrix, Vector, Quaternion, Euler 
@@ -86,7 +85,7 @@ class TimingEvent(PythonEventHandler):
     def eventOccurred(self, s, detector, increasing):
         self.events += 1
         if self.events%100 == 0:
-            print (s.getDate()," : event %d"%(self.events))
+            print (s.getDate(), " : event %d"%(self.events))
         
         self.data.append(s)
         return EventHandler.Action.CONTINUE
@@ -133,7 +132,6 @@ initialDate = AbsoluteDate(2017,8, 19, 0, 0, 0.000, utc)
 inertialFrame_ephemeris = FramesFactory.getICRF()
 ICRF = FramesFactory.getICRF()
 mu = 1.32712440018E20
-
 
 
 didymos_orbit = orbits.KeplerianOrbit(didymos_a, didymos_e, didymos_i, didymos_omega, didymos_Omega, didymos_M, orbits.PositionAngle.MEAN, inertialFrame_ephemeris, initialDate, mu)
@@ -230,11 +228,10 @@ kepler_sat.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagating asteroid")
 kepler.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagated")
-#print (time_sample_handler.data) 
+#print(time_sample_handler.data) 
 
 
-
-blender = BlenderControllerMK2.BlenderController(scratchloc + '/scratch/', scene_names=['MainScene', 'BackgroundStars', 'AsteroidOnly', 'AsteroidConstDistance', 'LightingReference'])
+blender = blender_controller.BlenderController(scratchloc + '/scratch/', scene_names=['MainScene', 'BackgroundStars', 'AsteroidOnly', 'AsteroidConstDistance', 'LightingReference'])
 if len(sys.argv) < 3:
     blender.set_renderer('Auto', 128, 512)
 else:
