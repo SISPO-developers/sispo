@@ -23,10 +23,8 @@ class BlenderController:
                 bpy.ops.scene.new(type='FULL_COPY')
                 scene = bpy.context.scene
                 scene.name = scene_name
-        self.scenes = bpy.data.scenes
-       
+        self.scenes = bpy.data.scenes       
         self.scratchdisk = scratchdisk
-        
         self.render_ID = zlib.crc32(struct.pack("!f", time.time()))
 
     def set_renderer(self, device='Auto', tile=64, tile_GPU=512, scene_names=[]):
@@ -130,7 +128,7 @@ class BlenderController:
         # get viewer pixels
 
         #return cv2.imread(self.scene.render.filepath)
-        return None
+        return 0 #TODO: only dummy, change later
 
     def load_object(self, filename, object_name, scene_names=[]):
 
