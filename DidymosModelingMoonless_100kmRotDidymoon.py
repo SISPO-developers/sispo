@@ -37,7 +37,7 @@ from org.orekit.propagation.events import DateDetector
 from org.orekit.propagation.events.handlers import RecordAndContinue
 from org.orekit.propagation.events.handlers import EventHandler
 from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
-import BlenderControllerMK2
+import blender_controller
 
 #from mathutils import Matrix, Vector, Quaternion, Euler 
 
@@ -51,7 +51,7 @@ series_name = 'Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter'
 time_steps = 2#500#1000#1000#50#1000
 factor = 10#15#12#10#5#7#Higher values slow down closest encounter phase
 mode = 1
-pass_duration = 2.*60#*2#3600.*24.*30*4*3
+pass_duration = 2. * 60#*2#3600.*24.*30*4*3
 terminator = True#False#True
 sunnyside = False#True#False
 cycles_samples = 48#48#48#24#24#8#6#24
