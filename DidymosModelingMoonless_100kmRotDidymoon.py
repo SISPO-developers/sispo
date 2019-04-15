@@ -16,8 +16,8 @@ setup_orekit_curdir()
 import bpy
 #import scipy
 
-import cv2
-import Imath
+#import cv2
+#import Imath
 import OpenEXR
 import skimage.filters
 import skimage.transform
@@ -102,18 +102,19 @@ class TimeSampler(DateDetector):
         self.times = []
         t = 0.
         self.recorder = RecordAndContinue()
-        if(mode == 1):
+        if mode == 1:
             for i in range(0, steps):
                 self.times.append(start.getDate().shiftedBy(t))
                 t += dt
-        elif(mode == 2):
+        elif mode == 2:
             halfdur = duration / 2.
             
-            for i in range(0,steps):
+            for i in range(0, steps):
                 t2 = halfdur + math.sinh((t-halfdur) * factor / halfdur) * halfdur/math.sinh(factor)
                 self.times.append(start.getDate().shiftedBy(t2))
                 t += dt
             dtout = duration * math.sinh(factor/steps) / math.sinh(factor)
+
         print(dtout)
         DateDetector.__init__(self, dtout/2., 1., self.times)
 
@@ -292,7 +293,7 @@ def RA_DEC(vec):
     dec = math.asin(vec.z)
     
     ra = math.acos(vec.x / math.cos(dec))
-    return (ra+math.pi, dec)
+    return (ra + math.pi, dec)
 
 def GetFOV_RA_DEC(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
     ra_max = max(math.degrees(RA_DEC(rightedge_vec)[0]), math.degrees(RA_DEC(leftedge_vec)[0]))
@@ -365,6 +366,7 @@ def WriteOpenEXR(fn, picture):
 
     hdr = OpenEXR.Header(w, h)
     x = OpenEXR.OutputFile(fn, hdr)
+
     if c == 4:
         dataR = picture[:,:,0].tobytes()
         dataG = picture[:,:,1].tobytes()
@@ -387,7 +389,7 @@ class StarCache:
 
     def SetStars(self, stardata, cam_direction, sat_position, R, pixelsize_at_R, scene_names):
         if len(self.star_array) < len(stardata):
-            for i in range(0, len(stardata)-len(self.star_array)):
+            for i in range(0, len(stardata) - len(self.star_array)):
                 new_obj = self.template.copy()
                 new_obj.data = self.template.data.copy()
                 new_obj.animation_data_clear()

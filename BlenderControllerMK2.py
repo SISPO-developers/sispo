@@ -9,7 +9,7 @@ from mathutils import Vector
 
 
 class BlenderController:
-    def __init__(self, scratchdisk, scene_names = ['MainScene']):
+    def __init__(self, scratchdisk, scene_names=['MainScene']):
         self.scene_names = scene_names
         self.scene = scene = bpy.context.scene
         self.scene.name = scene_names[0]
@@ -31,13 +31,13 @@ class BlenderController:
         
         self.render_ID = zlib.crc32(struct.pack("!f", time.time()))
 
-    def SetRenderer(self, device = 'Auto', tile = 64, tile_GPU = 512, scene_names = []):
+    def SetRenderer(self, device='Auto', tile = 64, tile_GPU = 512, scene_names=[]):
         print("Render setting %r" % (device))
         if len(scene_names) == 0:
             scene_names = self.scene_names
 
         if device != 'CPU' and device != 'GPU':
-            if(len(bpy.context.preferences.addons['cycles'].preferences.devices) > 0):
+            if len(bpy.context.preferences.addons['cycles'].preferences.devices) > 0:
                 device = 'GPU'
                 tile = tile_GPU
             else:
@@ -87,7 +87,7 @@ class BlenderController:
             
             scene.view_settings.exposure = exposure
 
-    def SetOutputFormat(self, res_x, res_y, file_format = 'OPEN_EXR', color_depth = '32', use_preview = True, scene_names = []):
+    def SetOutputFormat(self, res_x, res_y, file_format='OPEN_EXR', color_depth='32', use_preview=True, scene_names=[]):
         if len(scene_names) == 0:
             scene_names = self.scene_names
         for scene_name in scene_names:
@@ -117,7 +117,8 @@ class BlenderController:
             bpy.context.window.scene = scene
             scene.cycles.seed = time.time()
             scene.update()
-    def Render(self, name = '', scene_name = 'MainScene'):
+
+    def Render(self, name='', scene_name='MainScene'):
         if name == '':
             name = self.scratchdisk + 'r%0.8X.exr' % (self.render_ID)
               
@@ -129,8 +130,9 @@ class BlenderController:
         # get viewer pixels
 
         #return cv2.imread(self.scene.render.filepath)
+        return None
 
-    def LoadObject(self, filename, object_name, scene_names = []):
+    def LoadObject(self, filename, object_name, scene_names=[]):
 
         with bpy.data.libraries.load(filename) as (data_from, data_to):
             data_to.objects = [name for name in data_from.objects if name == object_name]
