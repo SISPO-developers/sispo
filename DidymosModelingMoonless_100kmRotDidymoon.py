@@ -236,9 +236,9 @@ print("Propagated")
 
 blender = BlenderControllerMK2.BlenderController(scratchloc + '/scratch/', scene_names=['MainScene', 'BackgroundStars', 'AsteroidOnly', 'AsteroidConstDistance', 'LightingReference'])
 if len(sys.argv) < 3:
-    blender.SetRenderer('Auto', 128, 512)
+    blender.set_renderer('Auto', 128, 512)
 else:
-    blender.SetRenderer(sys.argv[2], 128, 512)
+    blender.set_renderer(sys.argv[2], 128, 512)
 
 if len(sys.argv) < 6:
     start_frame = 0
@@ -251,41 +251,41 @@ else:
 
 print("Start %d end %d skip %d"%(start_frame, end_frame, skip_frame))
 
-blender.SetSamples(cycles_samples)
-blender.SetOutputFormat(2464, 2056)
-blender.SetCamera(lens=230, sensor=3.45E-3*2464, camera_name='SatelliteCamera', scene_names=['MainScene','BackgroundStars','AsteroidOnly'])
-blender.SetCamera(lens=230, sensor=3.45E-3*2464, camera_name='ConstantDistanceCamera', scene_names=['AsteroidConstDistance'])
-blender.SetCamera(lens=230, sensor=3.45E-3*2464, camera_name='LightingReferenceCamera', scene_names=['LightingReference'])
+blender.set_samples(cycles_samples)
+blender.set_output_format(2464, 2056)
+blender.set_camera(lens=230, sensor=3.45E-3*2464, camera_name='SatelliteCamera', scene_names=['MainScene','BackgroundStars','AsteroidOnly'])
+blender.set_camera(lens=230, sensor=3.45E-3*2464, camera_name='ConstantDistanceCamera', scene_names=['AsteroidConstDistance'])
+blender.set_camera(lens=230, sensor=3.45E-3*2464, camera_name='LightingReferenceCamera', scene_names=['LightingReference'])
 
 asteroid_scenes = ['MainScene','AsteroidOnly', 'AsteroidConstDistance']
 star_scenes = ['MainScene', 'BackgroundStars']
 
-Asteroid = blender.LoadObject(dir_path + "\\Didymos\\didymos2.blend", "Didymos.001", asteroid_scenes)
-AsteroidBC = blender.CreateEmpty('AsteroidBC', asteroid_scenes)
-MoonOrbiter = blender.CreateEmpty('MoonOrbiter', asteroid_scenes)
+Asteroid = blender.load_object(dir_path + "\\Didymos\\didymos2.blend", "Didymos.001", asteroid_scenes)
+AsteroidBC = blender.create_empty('AsteroidBC', asteroid_scenes)
+MoonOrbiter = blender.create_empty('MoonOrbiter', asteroid_scenes)
 Asteroid.parent = AsteroidBC
 Asteroid.rotation_mode = 'AXIS_ANGLE'
 MoonOrbiter.rotation_mode = 'AXIS_ANGLE'
 
 MoonOrbiter.parent = AsteroidBC
-MoonBC = blender.CreateEmpty('MoonBC', asteroid_scenes)
+MoonBC = blender.create_empty('MoonBC', asteroid_scenes)
 MoonBC.parent = MoonOrbiter
 MoonBC.location = (1.17, 0, 0)
 
 
-Moon = blender.LoadObject(dir_path + "\\Didymos\\didymos2.blend", "Didymos", asteroid_scenes)
+Moon = blender.load_object(dir_path + "\\Didymos\\didymos2.blend", "Didymos", asteroid_scenes)
 Moon.location = (0, 0, 0)
 Moon.parent = MoonBC
 
-Sun = blender.LoadObject(dir_path + "\\Didymos\\didymos_lowpoly.blend", "Sun", asteroid_scenes + ['LightingReference'])
+Sun = blender.load_object(dir_path + "\\Didymos\\didymos_lowpoly.blend", "Sun", asteroid_scenes + ['LightingReference'])
 
-CalibrationDisk = blender.LoadObject(dir_path + "\\Didymos\\didymos_lowpoly.blend", "CalibrationDisk", ['LightingReference'])
+CalibrationDisk = blender.load_object(dir_path + "\\Didymos\\didymos_lowpoly.blend", "CalibrationDisk", ['LightingReference'])
 CalibrationDisk.location = (0, 0, 0)
 
 
 frame_index = 0
 
-star_template = blender.LoadObject(dir_path + "\\Didymos\\StarTemplate.blend", "TemplateStar", star_scenes)
+star_template = blender.load_object(dir_path + "\\Didymos\\StarTemplate.blend", "TemplateStar", star_scenes)
 star_template.location = (1E20,1E20,1E20)
 
 def RA_DEC(vec):
@@ -522,14 +522,14 @@ def mat_string(vec, prec):
     return o + ']'
 
 
-star_cache = StarCache(star_template, blender.CreateEmpty("StarParent", star_scenes))
+star_cache = StarCache(star_template, blender.create_empty("StarParent", star_scenes))
 #cmd = 'mkdir "'+scratchloc+'/'+series_name+'"'
 #print(cmd)
 
 #subprocess.call(cmd)
 ucac_fn = scratchloc + '/%s/ucac4_%d.txt'%(series_name, time.time())
 scaler = 1000.
-blender.SetExposure(exposure)
+blender.set_exposure(exposure)
 for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end_frame:skip_frame], time_sample_handler.data[start_frame:end_frame:skip_frame], range(0,time_steps)[start_frame:end_frame:skip_frame]):
     #if frame_index<332:
    #     continue
@@ -566,13 +566,13 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     moon_orbiter = 2.*math.pi*t / (11.9*3600)
     MoonOrbiter.rotation_axis_angle = (moon_orbiter, 0, 0, 1)
 
-    blender.TargetCamera(Asteroid, 'SatelliteCamera')
-    blender.TargetCamera(Asteroid, 'ConstantDistanceCamera')
-    blender.TargetCamera(Sun, "CalibrationDisk")#A bit unorthodox use
-    blender.TargetCamera(CalibrationDisk, 'LightingReferenceCamera')
-    blender.Update()
+    blender.target_camera(Asteroid, 'SatelliteCamera')
+    blender.target_camera(Asteroid, 'ConstantDistanceCamera')
+    blender.target_camera(Sun, "CalibrationDisk")#A bit unorthodox use
+    blender.target_camera(CalibrationDisk, 'LightingReferenceCamera')
+    blender.update()
 
-    (cam_direction, up, right, leftedge_vec, rightedge_vec, downedge_vec, upedge_vec) = blender.GetCameraVectors('SatelliteCamera', 'MainScene')
+    (cam_direction, up, right, leftedge_vec, rightedge_vec, downedge_vec, upedge_vec) = blender.get_camera_vectors('SatelliteCamera', 'MainScene')
 
     (ra_cent, ra_w, dec_cent, dec_w) = GetFOV_RA_DEC(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec)
     
@@ -595,7 +595,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     fn_base5 = scratchloc + '/%s/%s_starmap_direct_%.4d.exr'%(series_name, series_name, frame_index)
     (starfield_flux2, flux3) = star_cache.DirectlyRenderStars(starlist, cam_direction, rightedge_vec, upedge_vec, x_res, y_res, fn_base5)
 
-    blender.Update()
+    blender.update()
     fn_base = scratchloc + '/%s/%s%.4d'%(series_name, series_name, frame_index)
     print("Saving blend file")
     #bpy.ops.wm.save_as_mainfile(filepath = fn_base+'.blend')
@@ -608,19 +608,19 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     #result = blender.Render(fn_base2,'BackgroundStars')
 
     fn_base3 = scratchloc + '/%s/%s_asteroid_%.4d'%(series_name, series_name, frame_index)
-    blender.Update(['AsteroidOnly'])
+    blender.update(['AsteroidOnly'])
     
-    result = blender.Render(fn_base3, 'AsteroidOnly')
+    result = blender.render(fn_base3, 'AsteroidOnly')
 
 
     fn_base4 = scratchloc + '/%s/%s_asteroid_constant_%.4d'%(series_name, series_name, frame_index)
-    blender.Update(['AsteroidConstDistance'])
+    blender.update(['AsteroidConstDistance'])
     
-    result = blender.Render(fn_base4, 'AsteroidConstDistance')
+    result = blender.render(fn_base4, 'AsteroidConstDistance')
 
     fn_base6 = scratchloc+'/%s/%s_calibration_reference_%.4d'%(series_name, series_name, frame_index)
-    blender.Update(['LightingReference'])
-    result = blender.Render(fn_base6, 'LightingReference')
+    blender.update(['LightingReference'])
+    result = blender.render(fn_base6, 'LightingReference')
 
     print("Rendering complete")
     bpy.ops.wm.save_as_mainfile(filepath=fn_base+'.blend')
