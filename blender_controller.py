@@ -131,7 +131,7 @@ class BlenderController:
             name = self.scratchdisk + 'r%0.8X.exr' % (self.render_id)
               
         scene = bpy.data.scenes[scene_name]
-        print("Rendering seed: %d" % (scene.cycles.seed))    
+        print("Rendering seed: %d" % (scene.cycles.seed))
         scene.render.filepath = name
         bpy.context.window.scene = scene
         bpy.ops.render.render(write_still=True)
@@ -145,14 +145,14 @@ class BlenderController:
         with bpy.data.libraries.load(filename) as (data_from, data_to):
             data_to.objects = [name for name in data_from.objects if name == object_name]
         if len(data_to.objects) > 0:
-            object = data_to.objects[0]
-            object.animation_data_clear()
+            blender_object = data_to.objects[0]
+            blender_object.animation_data_clear()
             if len(scene_names) == 0:
                 scene_names = self.scene_names
             for scene_name in scene_names:
                 scene = bpy.data.scenes[scene_name]
-                scene.collection.objects.link(object)
-            return object
+                scene.collection.objects.link(blender_object)
+            return blender_object
         return None
 
     def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode='PERSP',#Modes are 'ORTHO' and 'PERSP'
@@ -186,17 +186,17 @@ class BlenderController:
 
     def create_empty(self, name='Empty', scene_names=[]):
         """Create new, empty blender object."""
-        e = bpy.data.objects.new(name, None)
+        empty_object = bpy.data.objects.new(name, None)
         if len(scene_names) == 0:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
-            scene.collection.objects.link(e)
-        return e
+            scene.collection.objects.link(empty_object)
+        return empty_object
 
-    def save_blender_dfile(self, fn):
+    def save_blender_dfile(self, file_name):
         """Save a blender d file."""
-        bpy.ops.wm.save_as_mainfile(fn)
+        bpy.ops.wm.save_as_mainfile(file_name)
 
     def get_camera_vectors(self, camera_name, scene_name):
         """Get camera position and direction vectors."""
