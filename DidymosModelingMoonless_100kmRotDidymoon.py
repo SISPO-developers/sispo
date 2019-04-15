@@ -22,7 +22,7 @@ from org.orekit.time import AbsoluteDate,TimeScalesFactory
 #from org.orekit.data import DirectoryCrawler
 from org.orekit.propagation.analytical import KeplerianPropagator
 from org.hipparchus.geometry.euclidean.threed import Vector3D
-#from mpl_toolkits.mplot3d import Axes3D
+from mpl_toolkits.mplot3d import Axes3D
 from org.orekit.propagation.events import DateDetector
 from org.orekit.propagation.events.handlers import RecordAndContinue
 from org.orekit.propagation.events.handlers import EventHandler
@@ -109,7 +109,7 @@ class TimeSampler(DateDetector):
             halfdur = duration / 2.
             
             for i in range(0, steps):
-                t2 = halfdur + math.sinh((t-halfdur) * factor / halfdur) * halfdur/math.sinh(factor)
+                t2 = halfdur + math.sinh((t-halfdur) * factor/halfdur) * halfdur/math.sinh(factor)
                 self.times.append(start.getDate().shiftedBy(t2))
                 t += dt
             dtout = duration * math.sinh(factor/steps) / math.sinh(factor)
@@ -134,7 +134,9 @@ ICRF = FramesFactory.getICRF()
 mu = 1.32712440018E20
 
 
-didymos_orbit = orbits.KeplerianOrbit(didymos_a, didymos_e, didymos_i, didymos_omega, didymos_Omega, didymos_M, orbits.PositionAngle.MEAN, inertialFrame_ephemeris, initialDate, mu)
+didymos_orbit = orbits.KeplerianOrbit(
+    didymos_a, didymos_e, didymos_i, didymos_omega, didymos_Omega, didymos_M,
+    orbits.PositionAngle.MEAN, inertialFrame_ephemeris, initialDate, mu)
 kepler = KeplerianPropagator(didymos_orbit)
 
 
@@ -169,7 +171,8 @@ else:
     sat_pos = didymos_pos.add(shiftvec)
 
 sat_vel = didymos_vel.scalarMultiply((didymos_vel.getNorm()-10000.) / didymos_vel.getNorm())#0.95)
-print("Relative vel", (didymos_vel.subtract(sat_vel)), " len ", didymos_vel.subtract(sat_vel).getNorm())
+print("Relative vel", (didymos_vel.subtract(sat_vel)), " len ", 
+      didymos_vel.subtract(sat_vel).getNorm())
 print("Distance from sun", didymos_pos.getNorm() / utils.Constants.IAU_2012_ASTRONOMICAL_UNIT)
 
 sat_orbit = orbits.KeplerianOrbit(PVCoordinates(sat_pos, sat_vel), ICRF, minimum_distance_time, mu)
@@ -183,11 +186,13 @@ long_orbit_start = minimum_distance_time.getDate().shiftedBy(-3600. * 24. * 365 
 long_orbit_end = minimum_distance_time.getDate().shiftedBy(3600. * 24. * 365 * 2)
 
 time_sample_handler_long = TimingEvent().of_(TimeSampler)
-time_sampler_long = TimeSampler(long_orbit_start, long_orbit_end, time_steps_long, mode=1).withHandler(time_sample_handler_long)
+time_sampler_long = TimeSampler(long_orbit_start, long_orbit_end, time_steps_long,
+                               mode=1).withHandler(time_sample_handler_long)
 kepler_sat_long.addEventDetector(time_sampler_long)
 
 time_sample_handler2_long = TimingEvent().of_(TimeSampler)
-time_sampler2_long = TimeSampler(long_orbit_start, long_orbit_end, time_steps_long, mode=1).withHandler(time_sample_handler2_long)
+time_sampler2_long = TimeSampler(long_orbit_start, long_orbit_end, time_steps_long,
+                               mode=1).withHandler(time_sample_handler2_long)
 kepler_long.addEventDetector(time_sampler2_long)
 
 kepler_sat_long.propagate(long_orbit_start.getDate(), long_orbit_end.getDate())
@@ -205,17 +210,21 @@ for (didymos, sat) in zip(time_sample_handler2_long.data, time_sample_handler_lo
     sat_pos = np.asarray(pvc2.getPosition().toArray())
     asteroid_pos = np.asarray(pvc.getPosition().toArray())
     #a.getDate()
-    long_orbit_file.write(str(a.getDate()) + ' ' + str(asteroid_pos).replace('[','').replace(']','') + ',' + str(sat_pos).replace('[','').replace(']','') + '\n')
+    long_orbit_file.write(str(a.getDate()) + ' '
+                          + str(asteroid_pos).replace('[','').replace(']','') + ','
+                          + str(sat_pos).replace('[','').replace(']','') + '\n')
 long_orbit_file.close()
 
 detector_start = minimum_distance_time.getDate().shiftedBy(-pass_duration/2.)
 detector_end = minimum_distance_time.getDate().shiftedBy(pass_duration/2.)
 time_sample_handler = TimingEvent().of_(TimeSampler)
-time_sampler = TimeSampler(detector_start, detector_end, time_steps, mode, factor=factor).withHandler(time_sample_handler)
+time_sampler = TimeSampler(detector_start, detector_end, time_steps, mode, 
+                           factor=factor).withHandler(time_sample_handler)
 kepler_sat.addEventDetector(time_sampler)
 
 time_sample_handler2 = TimingEvent().of_(TimeSampler)
-time_sampler2 = TimeSampler(detector_start, detector_end, time_steps, mode, factor=factor).withHandler(time_sample_handler2)
+time_sampler2 = TimeSampler(detector_start, detector_end, time_steps, mode, 
+                           factor=factor).withHandler(time_sample_handler2)
 kepler.addEventDetector(time_sampler2)
 
 
@@ -231,7 +240,13 @@ print("Propagated")
 #print(time_sample_handler.data) 
 
 
-blender = blender_controller.BlenderController(scratchloc + '/scratch/', scene_names=['MainScene', 'BackgroundStars', 'AsteroidOnly', 'AsteroidConstDistance', 'LightingReference'])
+blender = blender_controller.BlenderController(scratchloc + '/scratch/', 
+                                               scene_names=[
+                                                   'MainScene',
+                                                   'BackgroundStars',
+                                                   'AsteroidOnly',
+                                                   'AsteroidConstDistance',
+                                                   'LightingReference'])
 if len(sys.argv) < 3:
     blender.set_renderer('Auto', 128, 512)
 else:
@@ -250,14 +265,18 @@ print("Start %d end %d skip %d"%(start_frame, end_frame, skip_frame))
 
 blender.set_samples(cycles_samples)
 blender.set_output_format(2464, 2056)
-blender.set_camera(lens=230, sensor=3.45E-3*2464, camera_name='SatelliteCamera', scene_names=['MainScene','BackgroundStars','AsteroidOnly'])
-blender.set_camera(lens=230, sensor=3.45E-3*2464, camera_name='ConstantDistanceCamera', scene_names=['AsteroidConstDistance'])
-blender.set_camera(lens=230, sensor=3.45E-3*2464, camera_name='LightingReferenceCamera', scene_names=['LightingReference'])
+blender.set_camera(lens=230, sensor=3.45E-3*2464, camera_name='SatelliteCamera',
+                    scene_names=['MainScene','BackgroundStars','AsteroidOnly'])
+blender.set_camera(lens=230, sensor=3.45E-3*2464, camera_name='ConstantDistanceCamera',
+                    scene_names=['AsteroidConstDistance'])
+blender.set_camera(lens=230, sensor=3.45E-3*2464, camera_name='LightingReferenceCamera',
+                    scene_names=['LightingReference'])
 
 asteroid_scenes = ['MainScene','AsteroidOnly', 'AsteroidConstDistance']
 star_scenes = ['MainScene', 'BackgroundStars']
 
-Asteroid = blender.load_object(dir_path + "\\Didymos\\didymos2.blend", "Didymos.001", asteroid_scenes)
+Asteroid = blender.load_object(dir_path + "\\Didymos\\didymos2.blend", "Didymos.001",
+                                asteroid_scenes)
 AsteroidBC = blender.create_empty('AsteroidBC', asteroid_scenes)
 MoonOrbiter = blender.create_empty('MoonOrbiter', asteroid_scenes)
 Asteroid.parent = AsteroidBC
@@ -274,15 +293,18 @@ Moon = blender.load_object(dir_path + "\\Didymos\\didymos2.blend", "Didymos", as
 Moon.location = (0, 0, 0)
 Moon.parent = MoonBC
 
-Sun = blender.load_object(dir_path + "\\Didymos\\didymos_lowpoly.blend", "Sun", asteroid_scenes + ['LightingReference'])
+Sun = blender.load_object(dir_path + "\\Didymos\\didymos_lowpoly.blend", "Sun",
+                            asteroid_scenes + ['LightingReference'])
 
-CalibrationDisk = blender.load_object(dir_path + "\\Didymos\\didymos_lowpoly.blend", "CalibrationDisk", ['LightingReference'])
+CalibrationDisk = blender.load_object(dir_path + "\\Didymos\\didymos_lowpoly.blend",
+                                        "CalibrationDisk", ['LightingReference'])
 CalibrationDisk.location = (0, 0, 0)
 
 
 frame_index = 0
 
-star_template = blender.load_object(dir_path + "\\Didymos\\StarTemplate.blend", "TemplateStar", star_scenes)
+star_template = blender.load_object(dir_path + "\\Didymos\\StarTemplate.blend", "TemplateStar", 
+                                    star_scenes)
 star_template.location = (1E20,1E20,1E20)
 
 def RA_DEC(vec):
@@ -413,7 +435,8 @@ class StarCache:
             
             pixel_factor = 10
             star.location = np.asarray(vec)*R + sat_pos_rel#Always keep satellite in center to emulate large distances
-            star.scale = (pixelsize_at_R/pixel_factor, pixelsize_at_R/pixel_factor, pixelsize_at_R/pixel_factor)
+            star.scale = (pixelsize_at_R/pixel_factor, pixelsize_at_R/pixel_factor, 
+                            pixelsize_at_R/pixel_factor)
 
             flux = math.pow(10, -0.4 * (star_data[2]-10.)) 
             flux0 = math.pow(10, -0.4 * (star_data[2])) 
@@ -527,7 +550,9 @@ star_cache = StarCache(star_template, blender.create_empty("StarParent", star_sc
 ucac_fn = scratchloc + '/%s/ucac4_%d.txt'%(series_name, time.time())
 scaler = 1000.
 blender.set_exposure(exposure)
-for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end_frame:skip_frame], time_sample_handler.data[start_frame:end_frame:skip_frame], range(0,time_steps)[start_frame:end_frame:skip_frame]):
+for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end_frame:skip_frame],
+                                        time_sample_handler.data[start_frame:end_frame:skip_frame],
+                                        range(0,time_steps)[start_frame:end_frame:skip_frame]):
     #if frame_index<332:
    #     continue
     
@@ -571,7 +596,8 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
     (cam_direction, up, right, leftedge_vec, rightedge_vec, downedge_vec, upedge_vec) = blender.get_camera_vectors('SatelliteCamera', 'MainScene')
 
-    (ra_cent, ra_w, dec_cent, dec_w) = GetFOV_RA_DEC(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec)
+    (ra_cent, ra_w, dec_cent, dec_w) = GetFOV_RA_DEC(leftedge_vec, rightedge_vec, downedge_vec, 
+                                                        upedge_vec)
     
     starlist = GetUCAC4(ra_cent, ra_w,dec_cent, dec_w, ucac_fn)
 
@@ -589,8 +615,11 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     f = blender.cameras['SatelliteCamera'].data.lens
     w = blender.cameras['SatelliteCamera'].data.sensor_width
 
-    fn_base5 = scratchloc + '/%s/%s_starmap_direct_%.4d.exr'%(series_name, series_name, frame_index)
-    (starfield_flux2, flux3) = star_cache.DirectlyRenderStars(starlist, cam_direction, rightedge_vec, upedge_vec, x_res, y_res, fn_base5)
+    fn_base5 = scratchloc + '/%s/%s_starmap_direct_%.4d.exr'%(series_name, series_name,
+                                                                frame_index)
+    (starfield_flux2, flux3) = star_cache.DirectlyRenderStars(starlist, cam_direction,
+                                                                rightedge_vec, 
+                                                                upedge_vec, x_res, y_res, fn_base5)
 
     blender.update()
     fn_base = scratchloc + '/%s/%s%.4d'%(series_name, series_name, frame_index)
