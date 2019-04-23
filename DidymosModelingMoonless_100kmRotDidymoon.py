@@ -2,8 +2,6 @@
 
 import blender_controller
 import bpy
-from mpl_toolkits.mplot3d import Axes3D
-
 import math
 import subprocess
 import sys
@@ -23,22 +21,24 @@ import orekit
 vm = orekit.initVM()
 from orekit.pyhelpers import setup_orekit_curdir
 setup_orekit_curdir()
-from org.orekit.time import AbsoluteDate, TimeScalesFactory
-from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
-from org.orekit.propagation.events.handlers import EventHandler
-from org.orekit.propagation.events.handlers import RecordAndContinue
-from org.orekit.propagation.events import DateDetector
-from org.hipparchus.geometry.euclidean.threed import Vector3D
-from org.orekit.propagation.analytical import KeplerianPropagator
-from org.orekit.frames import FramesFactory
-from org.orekit.utils import PVCoordinates
-import org.orekit.utils as utils
 import org.orekit.orbits as orbits
+import org.orekit.utils as utils
+from org.orekit.utils import PVCoordinates
+from org.orekit.frames import FramesFactory
+from org.orekit.propagation.analytical import KeplerianPropagator
+from org.hipparchus.geometry.euclidean.threed import Vector3D
+from org.orekit.propagation.events import DateDetector
+from org.orekit.propagation.events.handlers import RecordAndContinue
+from org.orekit.propagation.events.handlers import EventHandler
+from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
+from org.orekit.time import AbsoluteDate, TimeScalesFactory
 #from org.orekit.data import DataProvidersManager
 #from org.orekit.data import DirectoryCrawler
 #import scipy
 #import cv2
 #import Imath
+
+from mpl_toolkits.mplot3d import Axes3D
 
 
 #from mathutils import Matrix, Vector, Quaternion, Euler
@@ -79,6 +79,7 @@ if not os.path.isdir(scratchdir):
 
 class TimingEvent(PythonEventHandler):
     """TimingEvent handler."""
+
     def __init__(self):
         """Initialise a TimingEvent handler."""
         PythonEventHandler.__init__(self)
@@ -102,6 +103,7 @@ class TimingEvent(PythonEventHandler):
 class TimeSampler(DateDetector):
     """."""
     # mode=1 linear, mode=2 double exponential
+
     def __init__(self, start, end, steps, mode=1, factor=2):
         """Initialise TimeSampler."""
         duration = end.durationFrom(start)
@@ -425,6 +427,7 @@ def write_OpenEXR(fn, picture):
 
 class StarCache:
     """Handling stars in field of view, for rendering of scene."""
+
     def __init__(self, template, parent=None):
         """Initialise StarCache."""
         self.template = template
@@ -615,7 +618,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
     constant_distance_camera = blender.cameras['ConstantDistanceCamera']
     constant_distance_camera.location = sat_pos_rel * 1E3 \
-                                / np.sqrt(np.dot(sat_pos_rel, sat_pos_rel))
+        / np.sqrt(np.dot(sat_pos_rel, sat_pos_rel))
 
     reference_camera = blender.cameras['LightingReferenceCamera']
     reference_camera.location = -asteroid_pos * 1E3 \
@@ -639,7 +642,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
      upedge_vec) = blender.get_camera_vectors('SatelliteCamera', 'MainScene')
 
     (ra_cent, ra_w, dec_cent, dec_w) = get_FOV(leftedge_vec, rightedge_vec, downedge_vec,
-                                                     upedge_vec)
+                                               upedge_vec)
 
     starlist = get_UCAC4(ra_cent, ra_w, dec_cent, dec_w, ucac_fn)
 
@@ -660,8 +663,8 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     fn_base5 = scratchloc + '/%s/%s_starmap_direct_%.4d.exr' % (series_name, series_name,
                                                                 frame_index)
     (starfield_flux2, flux3) = star_cache.render_stars_directly(starlist, cam_direction,
-                                                              rightedge_vec,
-                                                              upedge_vec, x_res, y_res, fn_base5)
+                                                                rightedge_vec,
+                                                                upedge_vec, x_res, y_res, fn_base5)
 
     blender.update()
     fn_base = scratchloc \
@@ -684,14 +687,14 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
     fn_base4 = scratchloc \
         + '/%s/%s_asteroid_constant_%.4d' % (series_name,
-                                            series_name, frame_index)
+                                             series_name, frame_index)
     blender.update(['AsteroidConstDistance'])
 
     result = blender.render(fn_base4, 'AsteroidConstDistance')
 
     fn_base6 = scratchloc \
         + '/%s/%s_calibration_reference_%.4d' % (series_name,
-                                                series_name, frame_index)
+                                                 series_name, frame_index)
     blender.update(['LightingReference'])
     result = blender.render(fn_base6, 'LightingReference')
 
@@ -707,12 +710,14 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
     metafile.write('%s Didymos (m)\n' % (write_vec_string(asteroid_pos, 17)))
     metafile.write('%s Satellite (m)\n' % (write_vec_string(sat_pos, 17)))
-    metafile.write('%s Satellite relative \n' % (write_vec_string(sat_pos_rel, 17)))
+    metafile.write('%s Satellite relative \n' %
+                   (write_vec_string(sat_pos_rel, 17)))
     metafile.write('%s Satellite matrix \n' %
                    (write_mat_string(satellite_camera.matrix_world, 17)))
     metafile.write('%s Asteroid matrix \n' %
                    (write_mat_string(Asteroid.matrix_world, 17)))
-    metafile.write('%s Sun matrix \n' % (write_mat_string(Sun.matrix_world, 17)))
+    metafile.write('%s Sun matrix \n' %
+                   (write_mat_string(Sun.matrix_world, 17)))
     metafile.write('%s Constant distance matrix \n' %
                    (write_mat_string(constant_distance_camera.matrix_world, 17)))
     metafile.write('%s Reference matrix \n' %

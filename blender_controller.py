@@ -10,6 +10,7 @@ from mathutils import Vector
 
 class BlenderController:
     """Class to control blender module behaviour."""
+
     def __init__(self, scratchdisk, scene_names=['MainScene']):
         """Initialise blender controller class."""
         self.scene_names = scene_names
@@ -98,7 +99,7 @@ class BlenderController:
             scene = bpy.data.scenes[scene_name]
             scene.render.image_settings.file_format = file_format
             scene.render.filepath = self.scratchdisk \
-                                    + 'r%0.8X.exr' % (self.render_ID)
+                + 'r%0.8X.exr' % (self.render_ID)
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
             scene.render.resolution_percentage = 100
