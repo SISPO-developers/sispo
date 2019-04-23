@@ -418,7 +418,7 @@ class StarCache:
         self.star_array = []
         self.parent = parent
 
-    def SetStars(self, stardata, cam_direction, sat_position, R, pixelsize_at_R, scene_names):
+    def set_stars(self, stardata, cam_direction, sat_position, R, pixelsize_at_R, scene_names):
         if len(self.star_array) < len(stardata):
             for i in range(0, len(stardata) - len(self.star_array)):
                 new_obj = self.template.copy()
@@ -472,7 +472,7 @@ class StarCache:
 
         return total_flux
 
-    def DirectlyRenderStars(self, stardata, cam_direction, right_vec, up_vec, res_x, res_y, fn):
+    def render_stars_directly(self, stardata, cam_direction, right_vec, up_vec, res_x, res_y, fn):
 
         up_vec -= cam_direction
         right_vec -= cam_direction
@@ -643,7 +643,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
     fn_base5 = scratchloc + '/%s/%s_starmap_direct_%.4d.exr' % (series_name, series_name,
                                                                 frame_index)
-    (starfield_flux2, flux3) = star_cache.DirectlyRenderStars(starlist, cam_direction,
+    (starfield_flux2, flux3) = star_cache.render_stars_directly(starlist, cam_direction,
                                                               rightedge_vec,
                                                               upedge_vec, x_res, y_res, fn_base5)
 
