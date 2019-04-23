@@ -32,7 +32,6 @@ import bpy
 #import cv2
 #import Imath
 
-
 import OpenEXR
 import skimage.filters
 import skimage.transform
