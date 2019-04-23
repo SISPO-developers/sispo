@@ -389,7 +389,7 @@ def get_UCAC4(RA, RA_W, DEC, DEC_W, fn='ucac4.txt'):
     return out
 
 
-def WriteOpenEXR(fn, picture):
+def write_OpenEXR(fn, picture):
     h = len(picture)
     w = len(picture[0])
     c = len(picture[0][0])
@@ -535,7 +535,7 @@ class StarCache:
         # for c in range(0,3):
         #    starmap2[:,:,c]*=flux*(1E4)/np.sum(starmap2[:,:,c])
         #starmap2 = np.asarray(starmap2,dtype = 'float32')
-        WriteOpenEXR(fn, starmap3)
+        write_OpenEXR(fn, starmap3)
 
         return (total_flux, np.sum(starmap3[:, :, 0]))
 
