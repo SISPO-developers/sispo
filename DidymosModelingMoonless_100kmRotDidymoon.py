@@ -101,10 +101,10 @@ class TimingEvent(PythonEventHandler):
 
 class TimeSampler(DateDetector):
     """."""
-    # mode=1 linear, mode=2 double exponential
 
     def __init__(self, start, end, steps, mode=1, factor=2):
         """Initialise TimeSampler."""
+        # mode=1 linear, mode=2 double exponential
         duration = end.durationFrom(start)
         dt = duration / (steps - 1)
         dtout = dt
@@ -141,13 +141,13 @@ didymos_M = math.radians(1.967164895190036E+02)
 
 utc = TimeScalesFactory.getTDB()
 initialDate = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, utc)
-inertialFrame_ephemeris = FramesFactory.getICRF()
+#inertialFrame_ephemeris = FramesFactory.getICRF()
 ICRF = FramesFactory.getICRF()
 mu = 1.32712440018E20
 
 
 didymos_orbit = orbits.KeplerianOrbit(didymos_a, didymos_e, didymos_i, didymos_omega, didymos_Omega, didymos_M,
-                                      orbits.PositionAngle.MEAN, inertialFrame_ephemeris, initialDate, mu)
+                                      orbits.PositionAngle.MEAN, ICRF, initialDate, mu)
 kepler = KeplerianPropagator(didymos_orbit)
 
 
