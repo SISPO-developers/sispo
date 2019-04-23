@@ -573,7 +573,7 @@ def write_mat_string(vec, prec):
     """Write data matrix into string."""
     o = '['
     #fs = '%%.%de'%(prec)
-    i = 0
+    #i = 0
     for (n, v) in enumerate(vec):
 
         o += (write_vec_string(v, prec))
