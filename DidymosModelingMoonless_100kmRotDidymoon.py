@@ -1,7 +1,6 @@
 """Main simulation module."""
 
-import blender_controller
-import bpy
+#import io
 import math
 import subprocess
 import sys
@@ -9,6 +8,7 @@ import time
 import os
 import copy
 from array import array
+#from contextlib import redirect_stdout, redirect_stderr
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -37,14 +37,13 @@ from org.orekit.time import AbsoluteDate, TimeScalesFactory
 #import scipy
 #import cv2
 #import Imath
-
 from mpl_toolkits.mplot3d import Axes3D
-
-
 #from mathutils import Matrix, Vector, Quaternion, Euler
 
-#from contextlib import redirect_stdout, redirect_stderr
-#import io
+
+import bpy
+import blender_controller
+
 
 dir_path = os.path.dirname(os.path.realpath(__file__))
 
