@@ -346,7 +346,7 @@ def get_FOV(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
 errorlog = 'starfield_errorlog%f.txt' % time.time()
 
 
-def GetUCAC4(RA, RA_W, DEC, DEC_W, fn='ucac4.txt'):
+def get_UCAC4(RA, RA_W, DEC, DEC_W, fn='ucac4.txt'):
     global errorlog
     if sys.platform.startswith("win"):
         # Don't display the Windows GPF dialog if the invoked program dies.
@@ -625,7 +625,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     (ra_cent, ra_w, dec_cent, dec_w) = get_FOV(leftedge_vec, rightedge_vec, downedge_vec,
                                                      upedge_vec)
 
-    starlist = GetUCAC4(ra_cent, ra_w, dec_cent, dec_w, ucac_fn)
+    starlist = get_UCAC4(ra_cent, ra_w, dec_cent, dec_w, ucac_fn)
 
     #R = 100000000.
     # pixelsize_at_R =
