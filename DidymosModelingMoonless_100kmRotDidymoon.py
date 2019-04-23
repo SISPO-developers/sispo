@@ -1,3 +1,4 @@
+"""Main simulation module."""
 
 import blender_controller
 import bpy
@@ -77,12 +78,15 @@ if not os.path.isdir(scratchdir):
 
 
 class TimingEvent(PythonEventHandler):
+    """TimingEvent handler."""
     def __init__(self):
+        """Initialise a TimingEvent handler."""
         PythonEventHandler.__init__(self)
         self.data = []
         self.events = 0
 
     def eventOccurred(self, s, detector, increasing):
+        """Handle occured event."""
         self.events += 1
         if self.events % 100 == 0:
             print(s.getDate(), " : event %d" % (self.events))
@@ -91,12 +95,15 @@ class TimingEvent(PythonEventHandler):
         return EventHandler.Action.CONTINUE
 
     def resetState(self, detector, oldState):
+        """Reset TimingEvent handler to given state."""
         return oldState
 
 
 class TimeSampler(DateDetector):
+    """."""
     # mode=1 linear, mode=2 double exponential
     def __init__(self, start, end, steps, mode=1, factor=2):
+        """Initialise TimeSampler."""
         duration = end.durationFrom(start)
         dt = duration / (steps - 1)
         dtout = dt
@@ -312,6 +319,7 @@ star_template.location = (1E20, 1E20, 1E20)
 
 
 def get_RA_DEC(vec):
+    """Calculate Right Ascension (RA) and Declination (DEC)."""
     vec = vec.normalized()
     dec = math.asin(vec.z)
 
@@ -320,6 +328,7 @@ def get_RA_DEC(vec):
 
 
 def get_FOV(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
+    """Calculate centre and size of a camera's current Field of View (FOV)."""
     ra_max = max(math.degrees(get_RA_DEC(rightedge_vec)[
                  0]), math.degrees(get_RA_DEC(leftedge_vec)[0]))
     ra_min = min(math.degrees(get_RA_DEC(rightedge_vec)[
@@ -347,6 +356,7 @@ errorlog = 'starfield_errorlog%f.txt' % time.time()
 
 
 def get_UCAC4(RA, RA_W, DEC, DEC_W, fn='ucac4.txt'):
+    """Retrieve starmap data from UCAC4 catalog."""
     global errorlog
     if sys.platform.startswith("win"):
         # Don't display the Windows GPF dialog if the invoked program dies.
@@ -390,6 +400,7 @@ def get_UCAC4(RA, RA_W, DEC, DEC_W, fn='ucac4.txt'):
 
 
 def write_OpenEXR(fn, picture):
+    """Save image in OpenEXR file format."""
     h = len(picture)
     w = len(picture[0])
     c = len(picture[0][0])
@@ -413,12 +424,15 @@ def write_OpenEXR(fn, picture):
 
 
 class StarCache:
+    """Handling stars in field of view, for rendering of scene."""
     def __init__(self, template, parent=None):
+        """Initialise StarCache."""
         self.template = template
         self.star_array = []
         self.parent = parent
 
     def set_stars(self, stardata, cam_direction, sat_position, R, pixelsize_at_R, scene_names):
+        """Set current stars in the field of view."""
         if len(self.star_array) < len(stardata):
             for i in range(0, len(stardata) - len(self.star_array)):
                 new_obj = self.template.copy()
@@ -473,7 +487,7 @@ class StarCache:
         return total_flux
 
     def render_stars_directly(self, stardata, cam_direction, right_vec, up_vec, res_x, res_y, fn):
-
+        """Render given stars."""
         up_vec -= cam_direction
         right_vec -= cam_direction
         total_flux = 0.
@@ -541,6 +555,7 @@ class StarCache:
 
 
 def write_vec_string(vec, prec):
+    """Write data vector into string."""
     o = '['
     fs = '%%.%de' % (prec)
     #i = 0
@@ -553,6 +568,7 @@ def write_vec_string(vec, prec):
 
 
 def write_mat_string(vec, prec):
+    """Write data matrix into string."""
     o = '['
     #fs = '%%.%de'%(prec)
     i = 0
@@ -723,6 +739,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     metadict['Camera f,w,x,y'] = (f, w, x_res, y_res)
 
     def serializer(o):
+        """."""
         try:
             return np.asarray(o, dtype='float64').tolist()
         except:
