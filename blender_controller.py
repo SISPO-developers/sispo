@@ -29,7 +29,6 @@ class BlenderController:
                 scene = bpy.context.scene
                 scene.name = scene_name
         self.scenes = bpy.data.scenes
-
         self.scratchdisk = scratchdisk
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
