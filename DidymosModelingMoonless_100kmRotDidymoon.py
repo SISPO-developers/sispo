@@ -8,6 +8,10 @@ from array import array
 
 import numpy as np
 import matplotlib.pyplot as plt
+import OpenEXR
+import skimage.filters
+import skimage.transform
+import simplejson as json
 
 import orekit
 orekit.initVM()
@@ -22,19 +26,16 @@ from org.orekit.time import AbsoluteDate,TimeScalesFactory
 #from org.orekit.data import DirectoryCrawler
 from org.orekit.propagation.analytical import KeplerianPropagator
 from org.hipparchus.geometry.euclidean.threed import Vector3D
-from mpl_toolkits.mplot3d import Axes3D
 from org.orekit.propagation.events import DateDetector
 from org.orekit.propagation.events.handlers import RecordAndContinue
 from org.orekit.propagation.events.handlers import EventHandler
 from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
+from mpl_toolkits.mplot3d import Axes3D
 import bpy
 #import scipy
 #import cv2
 #import Imath
-import OpenEXR
-import skimage.filters
-import skimage.transform
-import simplejson as json
+
 
 import blender_controller
 
