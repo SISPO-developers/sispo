@@ -540,7 +540,7 @@ class StarCache:
         return (total_flux, np.sum(starmap3[:, :, 0]))
 
 
-def vec_string(vec, prec):
+def write_vec_string(vec, prec):
     o = '['
     fs = '%%.%de' % (prec)
     #i = 0
@@ -552,13 +552,13 @@ def vec_string(vec, prec):
     return o + ']'
 
 
-def mat_string(vec, prec):
+def write_mat_string(vec, prec):
     o = '['
     #fs = '%%.%de'%(prec)
     i = 0
     for (n, v) in enumerate(vec):
 
-        o += (vec_string(v, prec))
+        o += (write_vec_string(v, prec))
         if n < len(vec) - 1:
             o += ','
     return o + ']'
@@ -689,20 +689,20 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     metafile.write('%e %e total_flux (in Mag 0 units)\n' %
                    (starfield_flux2, flux3))
 
-    metafile.write('%s Didymos (m)\n' % (vec_string(asteroid_pos, 17)))
-    metafile.write('%s Satellite (m)\n' % (vec_string(sat_pos, 17)))
-    metafile.write('%s Satellite relative \n' % (vec_string(sat_pos_rel, 17)))
+    metafile.write('%s Didymos (m)\n' % (write_vec_string(asteroid_pos, 17)))
+    metafile.write('%s Satellite (m)\n' % (write_vec_string(sat_pos, 17)))
+    metafile.write('%s Satellite relative \n' % (write_vec_string(sat_pos_rel, 17)))
     metafile.write('%s Satellite matrix \n' %
-                   (mat_string(satellite_camera.matrix_world, 17)))
+                   (write_mat_string(satellite_camera.matrix_world, 17)))
     metafile.write('%s Asteroid matrix \n' %
-                   (mat_string(Asteroid.matrix_world, 17)))
-    metafile.write('%s Sun matrix \n' % (mat_string(Sun.matrix_world, 17)))
+                   (write_mat_string(Asteroid.matrix_world, 17)))
+    metafile.write('%s Sun matrix \n' % (write_mat_string(Sun.matrix_world, 17)))
     metafile.write('%s Constant distance matrix \n' %
-                   (mat_string(constant_distance_camera.matrix_world, 17)))
+                   (write_mat_string(constant_distance_camera.matrix_world, 17)))
     metafile.write('%s Reference matrix \n' %
-                   (mat_string(reference_camera.matrix_world, 17)))
+                   (write_mat_string(reference_camera.matrix_world, 17)))
     metafile.write('%s Camera f,w,x,y \n' %
-                   (vec_string([f, w, x_res, y_res], 17)))
+                   (write_vec_string([f, w, x_res, y_res], 17)))
 
     metafile.close()
 
