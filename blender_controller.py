@@ -10,7 +10,6 @@ from mathutils import Vector
 
 class BlenderController:
     """Class to control blender module behaviour."""
-
     def __init__(self, scratchdisk, scene_names=['MainScene']):
         """Initialise blender controller class."""
         self.scene_names = scene_names
@@ -18,7 +17,7 @@ class BlenderController:
         self.scene.name = scene_names[0]
         self.cameras = bpy.data.cameras
         scene.world.color = (0, 0, 0)
-        # Clear everything on the scene
+        #Clear everything on the scene
         for ob in bpy.data.objects:
             ob.select_set(True)
         bpy.ops.object.delete()
@@ -28,7 +27,7 @@ class BlenderController:
                 bpy.ops.scene.new(type='FULL_COPY')
                 scene = bpy.context.scene
                 scene.name = scene_name
-        self.scenes = bpy.data.scenes
+        self.scenes = bpy.data.scenes       
         self.scratchdisk = scratchdisk
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
@@ -77,7 +76,7 @@ class BlenderController:
             cycles.transparent_min_bounces = 8
             cycles.transparent_max_bounces = 128
             cycles.use_square_samples = True
-            # cycles.use_animated_seed=True
+            #cycles.use_animated_seed=True
             cycles.seed = time.time()
             cycles.film_transparent = True
             scene.view_settings.view_transform = 'Raw'
@@ -87,18 +86,19 @@ class BlenderController:
         """Set exposure value."""
         for scene_name in self.scene_names:
             scene = bpy.data.scenes[scene_name]
-
+            
             scene.view_settings.exposure = exposure
 
-    def set_output_format(self, res_x, res_y, file_format='OPEN_EXR', color_depth='32', use_preview=True, scene_names=[]):
+    def set_output_format(
+            self, res_x, res_y, file_format='OPEN_EXR', color_depth='32',
+            use_preview=True, scene_names=[]):
         """Set output file format."""
         if len(scene_names) == 0:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
             scene.render.image_settings.file_format = file_format
-            scene.render.filepath = self.scratchdisk + \
-                'r%0.8X.exr' % (self.render_id)
+            scene.render.filepath = self.scratchdisk + 'r%0.8X.exr' % (self.render_id)
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
             scene.render.resolution_percentage = 100
@@ -129,7 +129,7 @@ class BlenderController:
         """Render scenes."""
         if name == '':
             name = self.scratchdisk + 'r%0.8X.exr' % (self.render_id)
-
+              
         scene = bpy.data.scenes[scene_name]
         print("Rendering seed: %d" % (scene.cycles.seed))
         scene.render.filepath = name
@@ -137,14 +137,13 @@ class BlenderController:
         bpy.ops.render.render(write_still=True)
         # get viewer pixels
 
-        # return cv2.imread(self.scene.render.filepath)
-        return 0  # TODO: only dummy, change later
+        #return cv2.imread(self.scene.render.filepath)
+        return 0 #TODO: only dummy, change later
 
     def load_object(self, filename, object_name, scene_names=[]):
         """Load blender object from file."""
         with bpy.data.libraries.load(filename) as (data_from, data_to):
-            data_to.objects = [
-                name for name in data_from.objects if name == object_name]
+            data_to.objects = [name for name in data_from.objects if name == object_name]
         if len(data_to.objects) > 0:
             blender_object = data_to.objects[0]
             blender_object.animation_data_clear()
@@ -156,7 +155,7 @@ class BlenderController:
             return blender_object
         return None
 
-    def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode='PERSP',  # Modes are 'ORTHO' and 'PERSP'
+    def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode='PERSP',#Modes are 'ORTHO' and 'PERSP'
                    ortho_scale=7, camera_name='Camera', scene_names=[]):
         """Set camera configuration values."""
         cam = bpy.data.cameras.new(camera_name)
@@ -210,7 +209,7 @@ class BlenderController:
         res_x = scene.render.resolution_x
         res_y = scene.render.resolution_y
 
-        # max_dim = max(res_x, res_y)
+        #max_dim = max(res_x, res_y)
         if res_x > res_y:
             sensor_w = camera.data.sensor_width
             sensor_h = camera.data.sensor_width * res_y / res_x
