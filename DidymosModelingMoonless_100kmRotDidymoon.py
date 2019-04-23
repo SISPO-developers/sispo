@@ -7,7 +7,7 @@ import sys
 import time
 import os
 import copy
-from array import array
+#from array import array
 #from contextlib import redirect_stdout, redirect_stderr
 
 import numpy as np
