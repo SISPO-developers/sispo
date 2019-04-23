@@ -111,9 +111,9 @@ class TimeSampler(DateDetector):
             halfdur = duration / 2.
 
             for i in range(0, steps):
-                t2 = halfdur + \
-                    math.sinh((t - halfdur) * factor / halfdur) * \
-                    halfdur / math.sinh(factor)
+                t2 = halfdur \
+                    + math.sinh((t - halfdur) * factor / halfdur) \
+                    * halfdur / math.sinh(factor)
                 self.times.append(start.getDate().shiftedBy(t2))
                 t += dt
             dtout = duration * math.sinh(factor / steps) / math.sinh(factor)
@@ -182,8 +182,8 @@ sat_orbit = orbits.KeplerianOrbit(PVCoordinates(
     sat_pos, sat_vel), ICRF, minimum_distance_time, mu)
 kepler_sat = KeplerianPropagator(sat_orbit)
 kepler_sat_long = KeplerianPropagator(sat_orbit)
-min_timestep = pass_duration * \
-    math.sinh(factor / time_steps) / math.sinh(factor)
+min_timestep = pass_duration \
+    * math.sinh(factor / time_steps) / math.sinh(factor)
 kepler_long = KeplerianPropagator(didymos_orbit)
 
 time_steps_long = 2000
@@ -598,12 +598,12 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     satellite_camera.location = sat_pos_rel
 
     constant_distance_camera = blender.cameras['ConstantDistanceCamera']
-    constant_distance_camera.location = sat_pos_rel * \
-        1E3 / np.sqrt(np.dot(sat_pos_rel, sat_pos_rel))
+    constant_distance_camera.location = sat_pos_rel * 1E3 \
+                                / np.sqrt(np.dot(sat_pos_rel, sat_pos_rel))
 
     reference_camera = blender.cameras['LightingReferenceCamera']
-    reference_camera.location = -asteroid_pos * 1E3 / \
-        np.sqrt(np.dot(asteroid_pos, asteroid_pos))
+    reference_camera.location = -asteroid_pos * 1E3 \
+        / np.sqrt(np.dot(asteroid_pos, asteroid_pos))
 
     Sun.location = -asteroid_pos / scaler
 
@@ -648,8 +648,8 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
                                                               upedge_vec, x_res, y_res, fn_base5)
 
     blender.update()
-    fn_base = scratchloc + \
-        '/%s/%s%.4d' % (series_name, series_name, frame_index)
+    fn_base = scratchloc \
+        + '/%s/%s%.4d' % (series_name, series_name, frame_index)
     print("Saving blend file")
     #bpy.ops.wm.save_as_mainfile(filepath = fn_base+'.blend')
     print("Rendering")
@@ -660,22 +660,22 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     # scratchloc+'/%s/%s_stars_%.4d'%(series_name,series_name,frame_index)
     #result = blender.Render(fn_base2,'BackgroundStars')
 
-    fn_base3 = scratchloc + \
-        '/%s/%s_asteroid_%.4d' % (series_name, series_name, frame_index)
+    fn_base3 = scratchloc \
+        + '/%s/%s_asteroid_%.4d' % (series_name, series_name, frame_index)
     blender.update(['AsteroidOnly'])
 
     result = blender.render(fn_base3, 'AsteroidOnly')
 
-    fn_base4 = scratchloc + \
-        '/%s/%s_asteroid_constant_%.4d' % (series_name,
-                                           series_name, frame_index)
+    fn_base4 = scratchloc \
+        + '/%s/%s_asteroid_constant_%.4d' % (series_name,
+                                            series_name, frame_index)
     blender.update(['AsteroidConstDistance'])
 
     result = blender.render(fn_base4, 'AsteroidConstDistance')
 
-    fn_base6 = scratchloc + \
-        '/%s/%s_calibration_reference_%.4d' % (
-            series_name, series_name, frame_index)
+    fn_base6 = scratchloc \
+        + '/%s/%s_calibration_reference_%.4d' % (series_name,
+                                                series_name, frame_index)
     blender.update(['LightingReference'])
     result = blender.render(fn_base6, 'LightingReference')
 
