@@ -45,35 +45,36 @@ import bpy
 import blender_controller
 
 
-dir_path = os.path.dirname(os.path.realpath(__file__))
+ROOT_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
-series_name = 'Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter'
-time_steps = 2  # 500#1000#1000#50#1000
-factor = 10  # 15#12#10#5#7#Higher values slow down closest encounter phase
-mode = 1
-pass_duration = 2. * 60  # *2#3600.*24.*30*4*3
-terminator = True  # False#True
-sunnyside = False  # True#False
-cycles_samples = 48  # 48#48#24#24#8#6#24
-exposure = 1.554
-if terminator:
-    series_name += '_terminator'
+SERIES_NAME = 'Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter'
+TIME_STEPS = 2  # 500#1000#1000#50#1000
+FACTOR = 10  # 15#12#10#5#7#Higher values slow down closest encounter phase
+MODE = 1
+ENCOUNTER_DURATION = 2. * 60  # *2#3600.*24.*30*4*3
+TERMINATOR = True  # False#True
+SUNNYSIDE = False  # True#False
+CYCLES_SAMPLES = 48  # 48#48#24#24#8#6#24
+EXPOSURE = 1.554
+
+if TERMINATOR:
+    SERIES_NAME += '_terminator'
 else:
-    if sunnyside:
-        series_name += '_sunnyside'
+    if SUNNYSIDE:
+        SERIES_NAME += '_sunnyside'
     else:
-        series_name += '_darkside'
-series_name += str(time_steps) + '_'
+        SERIES_NAME += '_darkside'
+SERIES_NAME += str(TIME_STEPS) + '_'
 
 
 if(len(sys.argv) < 2):
-    scratchloc = dir_path + '\\temp\\didymos'
+    TEMP_DIR_PATH = ROOT_DIR_PATH + '\\temp\\didymos'
 else:
-    scratchloc = sys.argv[1]
+    TEMP_DIR_PATH = sys.argv[1]
 
-scratchdir = scratchloc + '/' + series_name
-if not os.path.isdir(scratchdir):
-    os.makedirs(scratchdir)
+TEMP_SERIES_DIR_PATH = TEMP_DIR_PATH + '\\' + SERIES_NAME
+if not os.path.isdir(TEMP_SERIES_DIR_PATH):
+    os.makedirs(TEMP_SERIES_DIR_PATH)
 
 
 class TimingEvent(PythonEventHandler):
@@ -131,68 +132,68 @@ class TimeSampler(DateDetector):
 
 
 # Didymos data https://ssd.jpl.nasa.gov/horizons.cgi
-didymos_a = 1.644641475071416E+00 * utils.Constants.IAU_2012_ASTRONOMICAL_UNIT
-didymos_P = 7.703805051391988E+02 * utils.Constants.JULIAN_DAY
-didymos_e = 3.838774437558215E-01
-didymos_i = math.radians(3.408231185574551E+00)
-didymos_omega = math.radians(3.192958853076784E+02)
-didymos_Omega = math.radians(7.320940216397703E+01)
-didymos_M = math.radians(1.967164895190036E+02)
+SSB_a = 1.644641475071416E+00 * utils.Constants.IAU_2012_ASTRONOMICAL_UNIT
+SSB_P = 7.703805051391988E+02 * utils.Constants.JULIAN_DAY
+SSB_e = 3.838774437558215E-01
+SSB_i = math.radians(3.408231185574551E+00)
+SSB_omega = math.radians(3.192958853076784E+02)
+SSB_Omega = math.radians(7.320940216397703E+01)
+SSB_M = math.radians(1.967164895190036E+02)
 
-utc = TimeScalesFactory.getTDB()
-initialDate = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, utc)
+UTC = TimeScalesFactory.getTDB()
+DATE_INITIAL = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, UTC)
 #inertialFrame_ephemeris = FramesFactory.getICRF()
 ICRF = FramesFactory.getICRF()
-mu = 1.32712440018E20
+MU_SUN = 1.32712440018E20
 
 
-didymos_orbit = orbits.KeplerianOrbit(didymos_a, didymos_e, didymos_i, didymos_omega, didymos_Omega, didymos_M,
-                                      orbits.PositionAngle.MEAN, ICRF, initialDate, mu)
-kepler = KeplerianPropagator(didymos_orbit)
+SSB_orbit = orbits.KeplerianOrbit(SSB_a, SSB_e, SSB_i, SSB_omega, SSB_Omega, SSB_M,
+                                      orbits.PositionAngle.MEAN, ICRF, DATE_INITIAL, MU_SUN)
+SSB_PROPAGATOR = KeplerianPropagator(SSB_orbit)
 
 
-pos = []
-pos_sat = []
+SSB_POS_HISTORY = []
+SC_POS_HISTORY = []
 
-orbit_start = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, utc)
+orbit_start = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, UTC)
 
-minimum_distance_time = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, utc)
+minimum_distance_time = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, UTC)
 
-encounter_prop = kepler.propagate(minimum_distance_time.getDate())
-didymos_pos = encounter_prop.getPVCoordinates(ICRF).getPosition()
-didymos_vel = encounter_prop.getPVCoordinates(ICRF).getVelocity()
+encounter_prop = SSB_PROPAGATOR.propagate(minimum_distance_time.getDate())
+SSB_POS = encounter_prop.getPVCoordinates(ICRF).getPosition()
+SSB_VEL = encounter_prop.getPVCoordinates(ICRF).getVelocity()
 
 
-dirvec = didymos_pos.normalize()
+SSB_DIRECTION_VEC = SSB_POS.normalize()
 
-flyby_distance = 1E5 * 3
+ENCOUNTER_MINIMUM_DISTANCE = 1E5 * 3
 
-if not terminator:
-    if not sunnyside:
-        flyby_distance *= -1
-    dirvec = dirvec.scalarMultiply(flyby_distance)
-    sat_pos = didymos_pos.subtract(dirvec)  # Minimum distance 1000km approx
+if not TERMINATOR:
+    if not SUNNYSIDE:
+        ENCOUNTER_MINIMUM_DISTANCE *= -1
+    SSB_DIRECTION_VEC = SSB_DIRECTION_VEC.scalarMultiply(ENCOUNTER_MINIMUM_DISTANCE)
+    sat_pos = SSB_POS.subtract(SSB_DIRECTION_VEC)  # Minimum distance 1000km approx
 else:
-    shiftvec = dirvec.scalarMultiply(-0.15)
+    shiftvec = SSB_DIRECTION_VEC.scalarMultiply(-0.15)
     shiftvec = shiftvec.add(Vector3D(0., 0., 1.))
     shiftvec = shiftvec.normalize()
-    shiftvec = shiftvec.scalarMultiply(flyby_distance)
-    sat_pos = didymos_pos.add(shiftvec)
+    shiftvec = shiftvec.scalarMultiply(ENCOUNTER_MINIMUM_DISTANCE)
+    sat_pos = SSB_POS.add(shiftvec)
 
-sat_vel = didymos_vel.scalarMultiply(
-    (didymos_vel.getNorm() - 10000.) / didymos_vel.getNorm())  # 0.95)
-print("Relative vel", (didymos_vel.subtract(sat_vel)), " len ",
-      didymos_vel.subtract(sat_vel).getNorm())
-print("Distance from sun", didymos_pos.getNorm() /
+sat_vel = SSB_VEL.scalarMultiply(
+    (SSB_VEL.getNorm() - 10000.) / SSB_VEL.getNorm())  # 0.95)
+print("Relative vel", (SSB_VEL.subtract(sat_vel)), " len ",
+      SSB_VEL.subtract(sat_vel).getNorm())
+print("Distance from sun", SSB_POS.getNorm() /
       utils.Constants.IAU_2012_ASTRONOMICAL_UNIT)
 
 sat_orbit = orbits.KeplerianOrbit(PVCoordinates(
-    sat_pos, sat_vel), ICRF, minimum_distance_time, mu)
+    sat_pos, sat_vel), ICRF, minimum_distance_time, MU_SUN)
 kepler_sat = KeplerianPropagator(sat_orbit)
 kepler_sat_long = KeplerianPropagator(sat_orbit)
-min_timestep = pass_duration \
-    * math.sinh(factor / time_steps) / math.sinh(factor)
-kepler_long = KeplerianPropagator(didymos_orbit)
+min_timestep = ENCOUNTER_DURATION \
+    * math.sinh(FACTOR / TIME_STEPS) / math.sinh(FACTOR)
+kepler_long = KeplerianPropagator(SSB_orbit)
 
 time_steps_long = 2000
 long_orbit_start = minimum_distance_time.getDate().shiftedBy(-3600. * 24. * 365 * 2)
@@ -213,8 +214,9 @@ print("Propagating asteroid")
 kepler_long.propagate(long_orbit_start.getDate(), long_orbit_end.getDate())
 
 
-long_orbit_file = open(scratchloc + '/%s/%s_long_orbit.txt' %
-                       (series_name, series_name), 'wt')
+long_orbit_file = open(TEMP_DIR_PATH + '/%s/%s_long_orbit.txt' %
+                       (SERIES_NAME, SERIES_NAME), 'wt')
+
 for (didymos, sat) in zip(time_sample_handler2_long.data, time_sample_handler_long.data):
     a = didymos
 
@@ -228,30 +230,30 @@ for (didymos, sat) in zip(time_sample_handler2_long.data, time_sample_handler_lo
         '[', '').replace(']', '') + ',' + str(sat_pos).replace('[', '').replace(']', '') + '\n')
 long_orbit_file.close()
 
-detector_start = minimum_distance_time.getDate().shiftedBy(-pass_duration / 2.)
-detector_end = minimum_distance_time.getDate().shiftedBy(pass_duration / 2.)
+detector_start = minimum_distance_time.getDate().shiftedBy(-ENCOUNTER_DURATION / 2.)
+detector_end = minimum_distance_time.getDate().shiftedBy(ENCOUNTER_DURATION / 2.)
 time_sample_handler = TimingEvent().of_(TimeSampler)
-time_sampler = TimeSampler(detector_start, detector_end, time_steps, mode,
-                           factor=factor).withHandler(time_sample_handler)
+time_sampler = TimeSampler(detector_start, detector_end, TIME_STEPS, MODE,
+                           factor=FACTOR).withHandler(time_sample_handler)
 kepler_sat.addEventDetector(time_sampler)
 
 time_sample_handler2 = TimingEvent().of_(TimeSampler)
-time_sampler2 = TimeSampler(detector_start, detector_end, time_steps, mode,
-                            factor=factor).withHandler(time_sample_handler2)
-kepler.addEventDetector(time_sampler2)
+time_sampler2 = TimeSampler(detector_start, detector_end, TIME_STEPS, MODE,
+                            factor=FACTOR).withHandler(time_sample_handler2)
+SSB_PROPAGATOR.addEventDetector(time_sampler2)
 
 
-distances = []
+DISTANCE_HISTORY = []
 
 print("Starting propagator")
 print("Propagating satellite")
 kepler_sat.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagating asteroid")
-kepler.propagate(detector_start.getDate(), detector_end.getDate())
+SSB_PROPAGATOR.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagated")
 # print(time_sample_handler.data)
 
-blender = blender_controller.BlenderController(scratchloc + '/scratch/',
+blender = blender_controller.BlenderController(TEMP_DIR_PATH + '/scratch/',
                                                scene_names=['MainScene',
                                                             'BackgroundStars',
                                                             'AsteroidOnly',
@@ -264,7 +266,7 @@ else:
 
 if len(sys.argv) < 6:
     start_frame = 0
-    end_frame = time_steps
+    end_frame = TIME_STEPS
     skip_frame = 1
 else:
     start_frame = int(sys.argv[3])
@@ -273,7 +275,7 @@ else:
 
 print("Start %d end %d skip %d" % (start_frame, end_frame, skip_frame))
 
-blender.set_samples(cycles_samples)
+blender.set_samples(CYCLES_SAMPLES)
 blender.set_output_format(2464, 2056)
 blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name='SatelliteCamera',
                    scene_names=['MainScene', 'BackgroundStars', 'AsteroidOnly'])
@@ -285,7 +287,7 @@ blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name='LightingReferen
 asteroid_scenes = ['MainScene', 'AsteroidOnly', 'AsteroidConstDistance']
 star_scenes = ['MainScene', 'BackgroundStars']
 
-Asteroid = blender.load_object(dir_path + "\\Didymos\\didymos2.blend", "Didymos.001",
+Asteroid = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\didymos2.blend", "Didymos.001",
                                asteroid_scenes)
 AsteroidBC = blender.create_empty('AsteroidBC', asteroid_scenes)
 MoonOrbiter = blender.create_empty('MoonOrbiter', asteroid_scenes)
@@ -300,21 +302,21 @@ MoonBC.location = (1.17, 0, 0)
 
 
 Moon = blender.load_object(
-    dir_path + "\\Didymos\\didymos2.blend", "Didymos", asteroid_scenes)
+    ROOT_DIR_PATH + "\\Didymos\\didymos2.blend", "Didymos", asteroid_scenes)
 Moon.location = (0, 0, 0)
 Moon.parent = MoonBC
 
-Sun = blender.load_object(dir_path + "\\Didymos\\didymos_lowpoly.blend", "Sun",
+Sun = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\didymos_lowpoly.blend", "Sun",
                           asteroid_scenes + ['LightingReference'])
 
-CalibrationDisk = blender.load_object(dir_path + "\\Didymos\\didymos_lowpoly.blend",
+CalibrationDisk = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\didymos_lowpoly.blend",
                                       "CalibrationDisk", ['LightingReference'])
 CalibrationDisk.location = (0, 0, 0)
 
 
 frame_index = 0
 
-star_template = blender.load_object(dir_path + "\\Didymos\\StarTemplate.blend", "TemplateStar",
+star_template = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\StarTemplate.blend", "TemplateStar",
                                     star_scenes)
 star_template.location = (1E20, 1E20, 1E20)
 
@@ -588,12 +590,12 @@ star_cache = StarCache(
 # print(cmd)
 
 # subprocess.call(cmd)
-ucac_fn = scratchloc + '/%s/ucac4_%d.txt' % (series_name, time.time())
+STAR_CAT_FN = TEMP_DIR_PATH + '/%s/ucac4_%d.txt' % (SERIES_NAME, time.time())
 scaler = 1000.
-blender.set_exposure(exposure)
+blender.set_exposure(EXPOSURE)
 for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end_frame:skip_frame],
                                        time_sample_handler.data[start_frame:end_frame:skip_frame],
-                                       range(0, time_steps)[start_frame:end_frame:skip_frame]):
+                                       range(0, TIME_STEPS)[start_frame:end_frame:skip_frame]):
     # if frame_index<332:
    #     continue
 
@@ -643,7 +645,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     (ra_cent, ra_w, dec_cent, dec_w) = get_FOV(leftedge_vec, rightedge_vec, downedge_vec,
                                                upedge_vec)
 
-    starlist = get_UCAC4(ra_cent, ra_w, dec_cent, dec_w, ucac_fn)
+    starlist = get_UCAC4(ra_cent, ra_w, dec_cent, dec_w, STAR_CAT_FN)
 
     #R = 100000000.
     # pixelsize_at_R =
@@ -659,15 +661,15 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     f = blender.cameras['SatelliteCamera'].data.lens
     w = blender.cameras['SatelliteCamera'].data.sensor_width
 
-    fn_base5 = scratchloc + '/%s/%s_starmap_direct_%.4d.exr' % (series_name, series_name,
+    fn_base5 = TEMP_DIR_PATH + '/%s/%s_starmap_direct_%.4d.exr' % (SERIES_NAME, SERIES_NAME,
                                                                 frame_index)
     (starfield_flux2, flux3) = star_cache.render_stars_directly(starlist, cam_direction,
                                                                 rightedge_vec,
                                                                 upedge_vec, x_res, y_res, fn_base5)
 
     blender.update()
-    fn_base = scratchloc \
-        + '/%s/%s%.4d' % (series_name, series_name, frame_index)
+    fn_base = TEMP_DIR_PATH \
+        + '/%s/%s%.4d' % (SERIES_NAME, SERIES_NAME, frame_index)
     print("Saving blend file")
     #bpy.ops.wm.save_as_mainfile(filepath = fn_base+'.blend')
     print("Rendering")
@@ -678,22 +680,22 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     # scratchloc+'/%s/%s_stars_%.4d'%(series_name,series_name,frame_index)
     #result = blender.Render(fn_base2,'BackgroundStars')
 
-    fn_base3 = scratchloc \
-        + '/%s/%s_asteroid_%.4d' % (series_name, series_name, frame_index)
+    fn_base3 = TEMP_DIR_PATH \
+        + '/%s/%s_asteroid_%.4d' % (SERIES_NAME, SERIES_NAME, frame_index)
     blender.update(['AsteroidOnly'])
 
     result = blender.render(fn_base3, 'AsteroidOnly')
 
-    fn_base4 = scratchloc \
-        + '/%s/%s_asteroid_constant_%.4d' % (series_name,
-                                             series_name, frame_index)
+    fn_base4 = TEMP_DIR_PATH \
+        + '/%s/%s_asteroid_constant_%.4d' % (SERIES_NAME,
+                                             SERIES_NAME, frame_index)
     blender.update(['AsteroidConstDistance'])
 
     result = blender.render(fn_base4, 'AsteroidConstDistance')
 
-    fn_base6 = scratchloc \
-        + '/%s/%s_calibration_reference_%.4d' % (series_name,
-                                                 series_name, frame_index)
+    fn_base6 = TEMP_DIR_PATH \
+        + '/%s/%s_calibration_reference_%.4d' % (SERIES_NAME,
+                                                 SERIES_NAME, frame_index)
     blender.update(['LightingReference'])
     result = blender.render(fn_base6, 'LightingReference')
 
@@ -754,23 +756,23 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     with open(fn_base + '.json', 'w') as _file:
         json.dump(metadict, _file, default=serializer)
 
-    distances.append([t, distance])
-    pos.append(asteroid_pos)
-    pos_sat.append(sat_pos)
+    DISTANCE_HISTORY.append([t, distance])
+    SSB_POS_HISTORY.append(asteroid_pos)
+    SC_POS_HISTORY.append(sat_pos)
 
     print("Frame %d complete" % (frame_index))
-    # frame_index+ = 1
+    # frame_index += 1
     # break
 
 
 fig = plt.figure(1)
-pos = np.asarray(pos, dtype='float64').transpose()
-pos_sat = np.asarray(pos_sat, dtype='float64').transpose()
-distances = np.asarray(distances, dtype='float64').transpose()
+SSB_POS_HISTORY = np.asarray(SSB_POS_HISTORY, dtype='float64').transpose()
+SC_POS_HISTORY = np.asarray(SC_POS_HISTORY, dtype='float64').transpose()
+DISTANCE_HISTORY = np.asarray(DISTANCE_HISTORY, dtype='float64').transpose()
 plt.clf()
 ax = fig.add_subplot(111, projection='3d')
-ax.plot(pos[0], pos[1], pos[2])
-ax.plot(pos_sat[0], pos_sat[1], pos_sat[2])
+ax.plot(SSB_POS_HISTORY[0], SSB_POS_HISTORY[1], SSB_POS_HISTORY[2])
+ax.plot(SC_POS_HISTORY[0], SC_POS_HISTORY[1], SC_POS_HISTORY[2])
 
 au = utils.Constants.IAU_2012_ASTRONOMICAL_UNIT
 # ax.set_xlim(-3*au,3*au)
@@ -778,6 +780,6 @@ au = utils.Constants.IAU_2012_ASTRONOMICAL_UNIT
 # ax.set_zlim(-3*au,3*au)
 plt.figure(2)
 plt.clf()
-plt.plot(distances[0], distances[1])
+plt.plot(DISTANCE_HISTORY[0], DISTANCE_HISTORY[1])
 
 plt.show()
