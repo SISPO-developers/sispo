@@ -3,8 +3,8 @@ executors:
     ci-executor:
         docker:
             - image: circleci/python:3.7.3
-            environment:
-                PIPENV_VENV_IN_PROJECT: true  
+                environment:
+                    PIPENV_VENV_IN_PROJECT: true  
 
 jobs:
     linting:
