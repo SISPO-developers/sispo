@@ -8,6 +8,10 @@ jobs:
   prepare-conda-env:
     executor: ci-executor
     steps:
+      -run:
+          name: update conda
+          command: >
+              conda update conda
       - run:
           name: add channel conda-forge
           command: >
