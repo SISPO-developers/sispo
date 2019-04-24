@@ -14,7 +14,7 @@ jobs:
               conda config --append channels conda-forge
 
       - run:
-          name: update conda
+          name: update conda packages
           command: >
               conda update --all
 
