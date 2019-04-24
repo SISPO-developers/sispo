@@ -34,20 +34,20 @@ from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
 from org.orekit.time import AbsoluteDate, TimeScalesFactory
 #from org.orekit.data import DataProvidersManager
 #from org.orekit.data import DirectoryCrawler
+from mpl_toolkits.mplot3d import Axes3D
 #import scipy
 #import cv2
 #import Imath
-from mpl_toolkits.mplot3d import Axes3D
-#from mathutils import Matrix, Vector, Quaternion, Euler
 
 
 import bpy
+#from mathutils import Matrix, Vector, Quaternion, Euler
 import blender_controller
 
 
 ROOT_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
-SERIES_NAME = 'Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter'
+SERIES_NAME = "Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter"
 TIME_STEPS = 2  # 500#1000#1000#50#1000
 FACTOR = 10  # 15#12#10#5#7#Higher values slow down closest encounter phase
 MODE = 1
@@ -58,21 +58,21 @@ CYCLES_SAMPLES = 48  # 48#48#24#24#8#6#24
 EXPOSURE = 1.554
 
 if TERMINATOR:
-    SERIES_NAME += '_terminator'
+    SERIES_NAME += "_terminator"
 else:
     if SUNNYSIDE:
-        SERIES_NAME += '_sunnyside'
+        SERIES_NAME += "_sunnyside"
     else:
-        SERIES_NAME += '_darkside'
-SERIES_NAME += str(TIME_STEPS) + '_'
+        SERIES_NAME += "_darkside"
+SERIES_NAME += str(TIME_STEPS) + "_"
 
 
 if(len(sys.argv) < 2):
-    TEMP_DIR_PATH = ROOT_DIR_PATH + '\\temp\\didymos'
+    TEMP_DIR_PATH = ROOT_DIR_PATH + "\\temp\\didymos"
 else:
     TEMP_DIR_PATH = sys.argv[1]
 
-TEMP_SERIES_DIR_PATH = TEMP_DIR_PATH + '\\' + SERIES_NAME
+TEMP_SERIES_DIR_PATH = TEMP_DIR_PATH + "\\" + SERIES_NAME
 if not os.path.isdir(TEMP_SERIES_DIR_PATH):
     os.makedirs(TEMP_SERIES_DIR_PATH)
 
@@ -214,8 +214,8 @@ print("Propagating asteroid")
 kepler_long.propagate(long_orbit_start.getDate(), long_orbit_end.getDate())
 
 
-long_orbit_file = open(TEMP_DIR_PATH + '/%s/%s_long_orbit.txt' %
-                       (SERIES_NAME, SERIES_NAME), 'wt')
+long_orbit_file = open(TEMP_DIR_PATH + "/%s/%s_long_orbit.txt" %
+                       (SERIES_NAME, SERIES_NAME), "wt")
 
 for (didymos, sat) in zip(time_sample_handler2_long.data, time_sample_handler_long.data):
     a = didymos
@@ -226,8 +226,8 @@ for (didymos, sat) in zip(time_sample_handler2_long.data, time_sample_handler_lo
     sat_pos = np.asarray(pvc2.getPosition().toArray())
     asteroid_pos = np.asarray(pvc.getPosition().toArray())
     # a.getDate()
-    long_orbit_file.write(str(a.getDate()) + ' ' + str(asteroid_pos).replace(
-        '[', '').replace(']', '') + ',' + str(sat_pos).replace('[', '').replace(']', '') + '\n')
+    long_orbit_file.write(str(a.getDate()) + " " + str(asteroid_pos).replace(
+        "[", "").replace("]", "") + "," + str(sat_pos).replace("[", "").replace("]", "") + "\n")
 long_orbit_file.close()
 
 detector_start = minimum_distance_time.getDate().shiftedBy(-ENCOUNTER_DURATION / 2.)
@@ -253,14 +253,14 @@ SSB_PROPAGATOR.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagated")
 # print(time_sample_handler.data)
 
-blender = blender_controller.BlenderController(TEMP_DIR_PATH + '/scratch/',
-                                               scene_names=['MainScene',
-                                                            'BackgroundStars',
-                                                            'AsteroidOnly',
-                                                            'AsteroidConstDistance',
-                                                            'LightingReference'])
+blender = blender_controller.BlenderController(TEMP_DIR_PATH + "/scratch/",
+                                               scene_names=["MainScene",
+                                                            "BackgroundStars",
+                                                            "AsteroidOnly",
+                                                            "AsteroidConstDistance",
+                                                            "LightingReference"])
 if len(sys.argv) < 3:
-    blender.set_renderer('Auto', 128, 512)
+    blender.set_renderer("Auto", 128, 512)
 else:
     blender.set_renderer(sys.argv[2], 128, 512)
 
@@ -277,26 +277,26 @@ print("Start %d end %d skip %d" % (start_frame, end_frame, skip_frame))
 
 blender.set_samples(CYCLES_SAMPLES)
 blender.set_output_format(2464, 2056)
-blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name='SatelliteCamera',
-                   scene_names=['MainScene', 'BackgroundStars', 'AsteroidOnly'])
-blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name='ConstantDistanceCamera',
-                   scene_names=['AsteroidConstDistance'])
-blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name='LightingReferenceCamera',
-                   scene_names=['LightingReference'])
+blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name="SatelliteCamera",
+                   scene_names=["MainScene", "BackgroundStars", "AsteroidOnly"])
+blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name="ConstantDistanceCamera",
+                   scene_names=["AsteroidConstDistance"])
+blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name="LightingReferenceCamera",
+                   scene_names=["LightingReference"])
 
-asteroid_scenes = ['MainScene', 'AsteroidOnly', 'AsteroidConstDistance']
-star_scenes = ['MainScene', 'BackgroundStars']
+asteroid_scenes = ["MainScene", "AsteroidOnly", "AsteroidConstDistance"]
+star_scenes = ["MainScene", "BackgroundStars"]
 
 Asteroid = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\didymos2.blend", "Didymos.001",
                                asteroid_scenes)
-AsteroidBC = blender.create_empty('AsteroidBC', asteroid_scenes)
-MoonOrbiter = blender.create_empty('MoonOrbiter', asteroid_scenes)
+AsteroidBC = blender.create_empty("AsteroidBC", asteroid_scenes)
+MoonOrbiter = blender.create_empty("MoonOrbiter", asteroid_scenes)
 Asteroid.parent = AsteroidBC
-Asteroid.rotation_mode = 'AXIS_ANGLE'
-MoonOrbiter.rotation_mode = 'AXIS_ANGLE'
+Asteroid.rotation_mode = "AXIS_ANGLE"
+MoonOrbiter.rotation_mode = "AXIS_ANGLE"
 
 MoonOrbiter.parent = AsteroidBC
-MoonBC = blender.create_empty('MoonBC', asteroid_scenes)
+MoonBC = blender.create_empty("MoonBC", asteroid_scenes)
 MoonBC.parent = MoonOrbiter
 MoonBC.location = (1.17, 0, 0)
 
@@ -307,10 +307,10 @@ Moon.location = (0, 0, 0)
 Moon.parent = MoonBC
 
 Sun = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\didymos_lowpoly.blend", "Sun",
-                          asteroid_scenes + ['LightingReference'])
+                          asteroid_scenes + ["LightingReference"])
 
 CalibrationDisk = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\didymos_lowpoly.blend",
-                                      "CalibrationDisk", ['LightingReference'])
+                                      "CalibrationDisk", ["LightingReference"])
 CalibrationDisk.location = (0, 0, 0)
 
 
@@ -331,7 +331,7 @@ def get_RA_DEC(vec):
 
 
 def get_FOV(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
-    """Calculate centre and size of a camera's current Field of View (FOV)."""
+    """Calculate centre and size of a camera"s current Field of View (FOV)."""
     ra_max = max(math.degrees(get_RA_DEC(rightedge_vec)[
                  0]), math.degrees(get_RA_DEC(leftedge_vec)[0]))
     ra_min = min(math.degrees(get_RA_DEC(rightedge_vec)[
@@ -351,21 +351,21 @@ def get_FOV(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
     dec_cent = (dec_max + dec_min) / 2
     dec_w = (dec_max - dec_min)
 
-    # print(('RA',ra_cent,'+-',ra_w,'DEC',dec_cent,'+-',dec_w))
+    # print(("RA",ra_cent,"+-",ra_w,"DEC",dec_cent,"+-",dec_w))
     return ra_cent, ra_w, dec_cent, dec_w
 
 
-errorlog = 'starfield_errorlog%f.txt' % time.time()
+errorlog = "starfield_errorlog%f.txt" % time.time()
 
 
-def get_UCAC4(RA, RA_W, DEC, DEC_W, fn='ucac4.txt'):
+def get_UCAC4(RA, RA_W, DEC, DEC_W, fn="ucac4.txt"):
     """Retrieve starmap data from UCAC4 catalog."""
     global errorlog
     if sys.platform.startswith("win"):
         # Don't display the Windows GPF dialog if the invoked program dies.
         # See comp.os.ms-windows.programmer.win32
         # How to suppress crash notification dialog?, Jan 14,2004 -
-        # Raymond Chen's response [1]
+        # Raymond Chen"s response [1]
 
         import ctypes
         SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
@@ -373,10 +373,10 @@ def get_UCAC4(RA, RA_W, DEC, DEC_W, fn='ucac4.txt'):
         # subprocess_flags = 0x8000000 #win32con.CREATE_NO_WINDOW?
     # else:
         #subprocess_flags = 0
-    # command='%s %f %f %f %f -h %s
-    # %s'%(ucac_exe,self.ra_cent,self.dec_cent,self.ra_w,self.dec_w,ucac_data,ucac_out)
+    # command="%s %f %f %f %f -h %s
+    # %s"%(ucac_exe,self.ra_cent,self.dec_cent,self.ra_w,self.dec_w,ucac_data,ucac_out)
 
-    command = 'E:\\01_MasterThesis\\00_Code\\star_cats\\u4test.exe %f %f %f %f -h E:\\01_MasterThesis\\02_Data\\UCAC4 %s' % (
+    command = "E:\\01_MasterThesis\\00_Code\\star_cats\\u4test.exe %f %f %f %f -h E:\\01_MasterThesis\\02_Data\\UCAC4 %s" % (
         RA, DEC, RA_W, DEC_W, fn)
     print(command)
 
@@ -385,12 +385,12 @@ def get_UCAC4(RA, RA_W, DEC, DEC_W, fn='ucac4.txt'):
         print("Retcode ", retcode)
         if retcode == 0:
             break
-        fout = open(errorlog, 'at')
+        fout = open(errorlog, "at")
         fout.write("%f,\'%s\',%d\n" % (time.time(), command, retcode))
         fout.close()
-    file = open(fn, 'rt')
+    file = open(fn, "rt")
     lines = file.readlines()
-    print('Lines', len(lines))
+    print("Lines", len(lines))
     out = []
     for line in lines[1:]:
 
@@ -416,13 +416,13 @@ def write_OpenEXR(fn, picture):
         dataG = picture[:, :, 1].tobytes()
         dataB = picture[:, :, 2].tobytes()
         dataA = picture[:, :, 3].tobytes()
-        x.writePixels({'R': dataR, 'G': dataG, 'B': dataB, 'A': dataA})
+        x.writePixels({"R": dataR, "G": dataG, "B": dataB, "A": dataA})
     elif c == 3:
         dataR = picture[:, :, 0].tobytes()
         dataG = picture[:, :, 1].tobytes()
         dataB = picture[:, :, 2].tobytes()
 
-        x.writePixels({'R': dataR, 'G': dataG, 'B': dataB})
+        x.writePixels({"R": dataR, "G": dataG, "B": dataB})
     x.close()
 
 
@@ -474,7 +474,7 @@ class StarCache:
             total_flux += flux0
 
             star.material_slots[0].material.node_tree.nodes.get(
-                'Emission').inputs[1].default_value = flux * pixel_factor * pixel_factor
+                "Emission").inputs[1].default_value = flux * pixel_factor * pixel_factor
 
             for scene_name in scene_names:
                 scene = bpy.data.scenes[scene_name]
@@ -501,8 +501,8 @@ class StarCache:
         f_over_w_ccd_2 = 1. / np.sqrt(np.dot(right_vec, right_vec))
         right_norm = right_vec * f_over_w_ccd_2
 
-        print('F_over_w %f f_over_h %f' % (f_over_w_ccd_2, f_over_h_ccd_2))
-        print('Res %d x %d' % (res_x, res_y))
+        print("F_over_w %f f_over_h %f" % (f_over_w_ccd_2, f_over_h_ccd_2))
+        print("Res %d x %d" % (res_x, res_y))
 
         ss = 2
         #rx = res_x * ss
@@ -549,10 +549,10 @@ class StarCache:
                 starmap2[:, :, c], (ss, ss)) * (ss * ss)
 
         # starmap2 = skimage.transform.rescale(starmap2,1./ss,mode =
-        # 'constant')#,multichannel = True)
+        # "constant")#,multichannel = True)
         # for c in range(0,3):
         #    starmap2[:,:,c]*=flux*(1E4)/np.sum(starmap2[:,:,c])
-        #starmap2 = np.asarray(starmap2,dtype = 'float32')
+        #starmap2 = np.asarray(starmap2,dtype = "float32")
         write_OpenEXR(fn, starmap3)
 
         return (total_flux, np.sum(starmap3[:, :, 0]))
@@ -560,37 +560,37 @@ class StarCache:
 
 def write_vec_string(vec, prec):
     """Write data vector into string."""
-    o = '['
-    fs = '%%.%de' % (prec)
+    o = "["
+    fs = "%%.%de" % (prec)
     #i = 0
     for (n, v) in enumerate(vec):
 
         o += fs % (v)
         if n < len(vec) - 1:
-            o += ','
-    return o + ']'
+            o += ","
+    return o + "]"
 
 
 def write_mat_string(vec, prec):
     """Write data matrix into string."""
-    o = '['
-    #fs = '%%.%de'%(prec)
+    o = "["
+    #fs = "%%.%de"%(prec)
     #i = 0
     for (n, v) in enumerate(vec):
 
         o += (write_vec_string(v, prec))
         if n < len(vec) - 1:
-            o += ','
-    return o + ']'
+            o += ","
+    return o + "]"
 
 
 star_cache = StarCache(
     star_template, blender.create_empty("StarParent", star_scenes))
-#cmd = 'mkdir "'+scratchloc+'/'+series_name+'"'
+#cmd = "mkdir ""+scratchloc+"/"+series_name+'"'
 # print(cmd)
 
 # subprocess.call(cmd)
-STAR_CAT_FN = TEMP_DIR_PATH + '/%s/ucac4_%d.txt' % (SERIES_NAME, time.time())
+STAR_CAT_FN = TEMP_DIR_PATH + "/%s/ucac4_%d.txt" % (SERIES_NAME, time.time())
 scaler = 1000.
 blender.set_exposure(EXPOSURE)
 for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end_frame:skip_frame],
@@ -614,14 +614,14 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
     sat_pos_rel = (sat_pos - asteroid_pos) / scaler
 
-    satellite_camera = blender.cameras['SatelliteCamera']
+    satellite_camera = blender.cameras["SatelliteCamera"]
     satellite_camera.location = sat_pos_rel
 
-    constant_distance_camera = blender.cameras['ConstantDistanceCamera']
+    constant_distance_camera = blender.cameras["ConstantDistanceCamera"]
     constant_distance_camera.location = sat_pos_rel * 1E3 \
         / np.sqrt(np.dot(sat_pos_rel, sat_pos_rel))
 
-    reference_camera = blender.cameras['LightingReferenceCamera']
+    reference_camera = blender.cameras["LightingReferenceCamera"]
     reference_camera.location = -asteroid_pos * 1E3 \
         / np.sqrt(np.dot(asteroid_pos, asteroid_pos))
 
@@ -633,14 +633,14 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     moon_orbiter = 2. * math.pi * t / (11.9 * 3600)
     MoonOrbiter.rotation_axis_angle = (moon_orbiter, 0, 0, 1)
 
-    blender.target_camera(Asteroid, 'SatelliteCamera')
-    blender.target_camera(Asteroid, 'ConstantDistanceCamera')
+    blender.target_camera(Asteroid, "SatelliteCamera")
+    blender.target_camera(Asteroid, "ConstantDistanceCamera")
     blender.target_camera(Sun, "CalibrationDisk")  # A bit unorthodox use
-    blender.target_camera(CalibrationDisk, 'LightingReferenceCamera')
+    blender.target_camera(CalibrationDisk, "LightingReferenceCamera")
     blender.update()
 
     (cam_direction, up, right, leftedge_vec, rightedge_vec, downedge_vec,
-     upedge_vec) = blender.get_camera_vectors('SatelliteCamera', 'MainScene')
+     upedge_vec) = blender.get_camera_vectors("SatelliteCamera", "MainScene")
 
     (ra_cent, ra_w, dec_cent, dec_w) = get_FOV(leftedge_vec, rightedge_vec, downedge_vec,
                                                upedge_vec)
@@ -649,19 +649,19 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
     #R = 100000000.
     # pixelsize_at_R =
-    # R*math.radians(ra_w)/blender.scenes['BackgroundStars'].render.resolution_x
+    # R*math.radians(ra_w)/blender.scenes["BackgroundStars"].render.resolution_x
     #print("Pixel size at %f is %f"%(R,pixelsize_at_R))
     i = 0
     print("Found %d stars in FOV" % (len(starlist)))
     # starfield_flux =
     # star_cache.SetStars(starlist,cam_direction,sat_pos_rel,R,pixelsize_at_R,star_scenes)
 
-    x_res = blender.scenes['BackgroundStars'].render.resolution_x
-    y_res = blender.scenes['BackgroundStars'].render.resolution_y
-    f = blender.cameras['SatelliteCamera'].data.lens
-    w = blender.cameras['SatelliteCamera'].data.sensor_width
+    x_res = blender.scenes["BackgroundStars"].render.resolution_x
+    y_res = blender.scenes["BackgroundStars"].render.resolution_y
+    f = blender.cameras["SatelliteCamera"].data.lens
+    w = blender.cameras["SatelliteCamera"].data.sensor_width
 
-    fn_base5 = TEMP_DIR_PATH + '/%s/%s_starmap_direct_%.4d.exr' % (SERIES_NAME, SERIES_NAME,
+    fn_base5 = TEMP_DIR_PATH + "/%s/%s_starmap_direct_%.4d.exr" % (SERIES_NAME, SERIES_NAME,
                                                                 frame_index)
     (starfield_flux2, flux3) = star_cache.render_stars_directly(starlist, cam_direction,
                                                                 rightedge_vec,
@@ -669,91 +669,91 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
     blender.update()
     fn_base = TEMP_DIR_PATH \
-        + '/%s/%s%.4d' % (SERIES_NAME, SERIES_NAME, frame_index)
+        + "/%s/%s%.4d" % (SERIES_NAME, SERIES_NAME, frame_index)
     print("Saving blend file")
-    #bpy.ops.wm.save_as_mainfile(filepath = fn_base+'.blend')
+    #bpy.ops.wm.save_as_mainfile(filepath = fn_base+".blend")
     print("Rendering")
 
-    #result = blender.Render(fn_base,'MainScene')
+    #result = blender.Render(fn_base,"MainScene")
 
     # fn_base2 =
-    # scratchloc+'/%s/%s_stars_%.4d'%(series_name,series_name,frame_index)
-    #result = blender.Render(fn_base2,'BackgroundStars')
+    # scratchloc+"/%s/%s_stars_%.4d"%(series_name,series_name,frame_index)
+    #result = blender.Render(fn_base2,"BackgroundStars")
 
     fn_base3 = TEMP_DIR_PATH \
-        + '/%s/%s_asteroid_%.4d' % (SERIES_NAME, SERIES_NAME, frame_index)
-    blender.update(['AsteroidOnly'])
+        + "/%s/%s_asteroid_%.4d" % (SERIES_NAME, SERIES_NAME, frame_index)
+    blender.update(["AsteroidOnly"])
 
-    result = blender.render(fn_base3, 'AsteroidOnly')
+    result = blender.render(fn_base3, "AsteroidOnly")
 
     fn_base4 = TEMP_DIR_PATH \
-        + '/%s/%s_asteroid_constant_%.4d' % (SERIES_NAME,
+        + "/%s/%s_asteroid_constant_%.4d" % (SERIES_NAME,
                                              SERIES_NAME, frame_index)
-    blender.update(['AsteroidConstDistance'])
+    blender.update(["AsteroidConstDistance"])
 
-    result = blender.render(fn_base4, 'AsteroidConstDistance')
+    result = blender.render(fn_base4, "AsteroidConstDistance")
 
     fn_base6 = TEMP_DIR_PATH \
-        + '/%s/%s_calibration_reference_%.4d' % (SERIES_NAME,
+        + "/%s/%s_calibration_reference_%.4d" % (SERIES_NAME,
                                                  SERIES_NAME, frame_index)
-    blender.update(['LightingReference'])
-    result = blender.render(fn_base6, 'LightingReference')
+    blender.update(["LightingReference"])
+    result = blender.render(fn_base6, "LightingReference")
 
     print("Rendering complete")
-    bpy.ops.wm.save_as_mainfile(filepath=fn_base + '.blend')
+    bpy.ops.wm.save_as_mainfile(filepath=fn_base + ".blend")
 
-    metafile = open(fn_base + '.txt', 'wt')
+    metafile = open(fn_base + ".txt", "wt")
 
-    metafile.write('%s time\n' % (a.getDate()))
-    metafile.write('%s distance (m)\n' % (distance))
-    metafile.write('%e %e total_flux (in Mag 0 units)\n' %
+    metafile.write("%s time\n" % (a.getDate()))
+    metafile.write("%s distance (m)\n" % (distance))
+    metafile.write("%e %e total_flux (in Mag 0 units)\n" %
                    (starfield_flux2, flux3))
 
-    metafile.write('%s Didymos (m)\n' % (write_vec_string(asteroid_pos, 17)))
-    metafile.write('%s Satellite (m)\n' % (write_vec_string(sat_pos, 17)))
-    metafile.write('%s Satellite relative \n' %
+    metafile.write("%s Didymos (m)\n" % (write_vec_string(asteroid_pos, 17)))
+    metafile.write("%s Satellite (m)\n" % (write_vec_string(sat_pos, 17)))
+    metafile.write("%s Satellite relative \n" %
                    (write_vec_string(sat_pos_rel, 17)))
-    metafile.write('%s Satellite matrix \n' %
+    metafile.write("%s Satellite matrix \n" %
                    (write_mat_string(satellite_camera.matrix_world, 17)))
-    metafile.write('%s Asteroid matrix \n' %
+    metafile.write("%s Asteroid matrix \n" %
                    (write_mat_string(Asteroid.matrix_world, 17)))
-    metafile.write('%s Sun matrix \n' %
+    metafile.write("%s Sun matrix \n" %
                    (write_mat_string(Sun.matrix_world, 17)))
-    metafile.write('%s Constant distance matrix \n' %
+    metafile.write("%s Constant distance matrix \n" %
                    (write_mat_string(constant_distance_camera.matrix_world, 17)))
-    metafile.write('%s Reference matrix \n' %
+    metafile.write("%s Reference matrix \n" %
                    (write_mat_string(reference_camera.matrix_world, 17)))
-    metafile.write('%s Camera f,w,x,y \n' %
+    metafile.write("%s Camera f,w,x,y \n" %
                    (write_vec_string([f, w, x_res, y_res], 17)))
 
     metafile.close()
 
     metadict = dict()
-    metadict['time'] = a.getDate()
-    metadict['time_t'] = t
-    metadict['distance (m)'] = distance
-    metadict['total_flux (in Mag 0 units)'] = (starfield_flux2, flux3)
+    metadict["time"] = a.getDate()
+    metadict["time_t"] = t
+    metadict["distance (m)"] = distance
+    metadict["total_flux (in Mag 0 units)"] = (starfield_flux2, flux3)
 
-    metadict['Didymos (m)'] = asteroid_pos
-    metadict['Satellite (m)\n'] = sat_pos
-    metadict['Satellite relative'] = sat_pos_rel
-    metadict['Satellite matrix'] = satellite_camera.matrix_world
-    metadict['Asteroid matrix '] = Asteroid.matrix_world
-    metadict['Sun matrix'] = Sun.matrix_world
-    metadict['Constant distance matrix'] = constant_distance_camera.matrix_world
-    metadict['Reference matrix'] = reference_camera.matrix_world
-    metadict['Camera f,w,x,y'] = (f, w, x_res, y_res)
+    metadict["Didymos (m)"] = asteroid_pos
+    metadict["Satellite (m)\n"] = sat_pos
+    metadict["Satellite relative"] = sat_pos_rel
+    metadict["Satellite matrix"] = satellite_camera.matrix_world
+    metadict["Asteroid matrix "] = Asteroid.matrix_world
+    metadict["Sun matrix"] = Sun.matrix_world
+    metadict["Constant distance matrix"] = constant_distance_camera.matrix_world
+    metadict["Reference matrix"] = reference_camera.matrix_world
+    metadict["Camera f,w,x,y"] = (f, w, x_res, y_res)
 
     def serializer(o):
         """."""
         try:
-            return np.asarray(o, dtype='float64').tolist()
+            return np.asarray(o, dtype="float64").tolist()
         except:
             try:
                 return float(o)
             except:
                 return str(o)
-    with open(fn_base + '.json', 'w') as _file:
+    with open(fn_base + ".json", "w") as _file:
         json.dump(metadict, _file, default=serializer)
 
     DISTANCE_HISTORY.append([t, distance])
@@ -766,11 +766,11 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
 
 fig = plt.figure(1)
-SSB_POS_HISTORY = np.asarray(SSB_POS_HISTORY, dtype='float64').transpose()
-SC_POS_HISTORY = np.asarray(SC_POS_HISTORY, dtype='float64').transpose()
-DISTANCE_HISTORY = np.asarray(DISTANCE_HISTORY, dtype='float64').transpose()
+SSB_POS_HISTORY = np.asarray(SSB_POS_HISTORY, dtype="float64").transpose()
+SC_POS_HISTORY = np.asarray(SC_POS_HISTORY, dtype="float64").transpose()
+DISTANCE_HISTORY = np.asarray(DISTANCE_HISTORY, dtype="float64").transpose()
 plt.clf()
-ax = fig.add_subplot(111, projection='3d')
+ax = fig.add_subplot(111, projection="3d")
 ax.plot(SSB_POS_HISTORY[0], SSB_POS_HISTORY[1], SSB_POS_HISTORY[2])
 ax.plot(SC_POS_HISTORY[0], SC_POS_HISTORY[1], SC_POS_HISTORY[2])
 

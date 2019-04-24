@@ -11,7 +11,7 @@ from mathutils import Vector
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, scratchdisk, scene_names=['MainScene']):
+    def __init__(self, scratchdisk, scene_names=["MainScene"]):
         """Initialise blender controller class."""
         self.scene_names = scene_names
         self.scene = scene = bpy.context.scene
@@ -25,41 +25,41 @@ class BlenderController:
 
         if len(scene_names) > 1:
             for scene_name in scene_names[1:]:
-                bpy.ops.scene.new(type='FULL_COPY')
+                bpy.ops.scene.new(type="FULL_COPY")
                 scene = bpy.context.scene
                 scene.name = scene_name
         self.scenes = bpy.data.scenes
         self.scratchdisk = scratchdisk
         self.render_ID = zlib.crc32(struct.pack("!f", time.time()))
 
-    def set_renderer(self, device='Auto', tile=64, tile_GPU=512, scene_names=[]):
+    def set_renderer(self, device="Auto", tile=64, tile_GPU=512, scene_names=[]):
         """Set blender rendering device."""
         print("Render setting %r" % (device))
         if len(scene_names) == 0:
             scene_names = self.scene_names
 
-        if device != 'CPU' and device != 'GPU':
-            if len(bpy.context.preferences.addons['cycles'].preferences.devices) > 0:
-                device = 'GPU'
+        if device not in ("CPU", "GPU"):
+            if len(bpy.context.preferences.addons["cycles"].preferences.devices) > 0:
+                device = "GPU"
                 tile = tile_GPU
             else:
-                device = 'CPU'
+                device = "CPU"
 
-        if device == 'GPU':
-            bpy.context.user_preferences.addons['cycles'].preferences.compute_device_type = 'CUDA'
-            print('Rendering with GPUs:')
-            for gpu in bpy.context.user_preferences.addons['cycles'].preferences.devices:
+        if device == "GPU":
+            bpy.context.user_preferences.addons["cycles"].preferences.compute_device_type = "CUDA"
+            print("Rendering with GPUs:")
+            for gpu in bpy.context.user_preferences.addons["cycles"].preferences.devices:
                 gpu.use = True
                 print(gpu.name)
             tile = tile_GPU
         else:
-            print('Rendering with CPUs')
+            print("Rendering with CPUs")
 
         for scene_name in self.scene_names:
             scene = bpy.data.scenes[scene_name]
-            scene.render.engine = 'CYCLES'
+            scene.render.engine = "CYCLES"
             cycles = scene.cycles
-            cycles.feature_set = 'EXPERIMENTAL'
+            cycles.feature_set = "EXPERIMENTAL"
 
             scene.render.resolution_percentage = 100
             cycles.device = device
@@ -80,8 +80,8 @@ class BlenderController:
             # cycles.use_animated_seed=True
             cycles.seed = time.time()
             cycles.film_transparent = True
-            scene.view_settings.view_transform = 'Raw'
-            scene.view_settings.look = 'None'
+            scene.view_settings.view_transform = "Raw"
+            scene.view_settings.look = "None"
 
     def set_exposure(self, exposure):
         """Set exposure value."""
@@ -90,7 +90,7 @@ class BlenderController:
 
             scene.view_settings.exposure = exposure
 
-    def set_output_format(self, res_x, res_y, file_format='OPEN_EXR', color_depth='32',
+    def set_output_format(self, res_x, res_y, file_format="OPEN_EXR", color_depth="32",
                           use_preview=True, scene_names=[]):
         """Set output file format."""
         if len(scene_names) == 0:
@@ -99,12 +99,12 @@ class BlenderController:
             scene = bpy.data.scenes[scene_name]
             scene.render.image_settings.file_format = file_format
             scene.render.filepath = self.scratchdisk \
-                + 'r%0.8X.exr' % (self.render_ID)
+                + "r%0.8X.exr" % (self.render_ID)
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
             scene.render.resolution_percentage = 100
             scene.render.image_settings.color_depth = color_depth
-            scene.render.image_settings.color_mode = 'RGBA'
+            scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_preview = use_preview
             scene.render.image_settings.use_zbuffer = True
 
@@ -126,10 +126,10 @@ class BlenderController:
             scene.cycles.seed = time.time()
             scene.update()
 
-    def render(self, name='', scene_name='MainScene'):
+    def render(self, name="", scene_name="MainScene"):
         """Render scenes."""
-        if name == '':
-            name = self.scratchdisk + 'r%0.8X.exr' % (self.render_ID)
+        if name == "":
+            name = self.scratchdisk + "r%0.8X.exr" % (self.render_ID)
 
         scene = bpy.data.scenes[scene_name]
         print("Rendering seed: %d" % (scene.cycles.seed))
@@ -157,11 +157,11 @@ class BlenderController:
             return object
         return None
 
-    def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode='PERSP',
-                   ortho_scale=7, camera_name='Camera', scene_names=[]):  # Modes are 'ORTHO' and 'PERSP'
+    def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode="PERSP",
+                   ortho_scale=7, camera_name="Camera", scene_names=[]):  # Modes are "ORTHO" and "PERSP"
         """Set camera configuration values."""
         cam = bpy.data.cameras.new(camera_name)
-        camera = bpy.data.objects.new('Camera', cam)
+        camera = bpy.data.objects.new("Camera", cam)
         camera.name = camera_name
         camera.data.clip_end = clip_end
         camera.data.clip_start = clip_start
@@ -178,15 +178,15 @@ class BlenderController:
             scene.camera = camera
             scene.collection.objects.link(camera)
 
-    def target_camera(self, target, camera_name='Camera'):
+    def target_camera(self, target, camera_name="Camera"):
         """Target camera towards target."""
         camera = bpy.data.objects[camera_name]
-        camera_constr = camera.constraints.new(type='TRACK_TO')
-        camera_constr.track_axis = 'TRACK_NEGATIVE_Z'
-        camera_constr.up_axis = 'UP_Y'
+        camera_constr = camera.constraints.new(type="TRACK_TO")
+        camera_constr.track_axis = "TRACK_NEGATIVE_Z"
+        camera_constr.up_axis = "UP_Y"
         camera_constr.target = target
 
-    def create_empty(self, name='Empty', scene_names=[]):
+    def create_empty(self, name="Empty", scene_names=[]):
         """Create new, empty blender object."""
         e = bpy.data.objects.new(name, None)
         if len(scene_names) == 0:
