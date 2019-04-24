@@ -18,6 +18,11 @@ jobs:
               conda config --append channels conda-forge
 
       - run:
+          name: install required packages
+          command: >
+              conda install pylint openexr simplejson orekit
+
+      - run:
           name: update conda packages
           command: >
               conda update --all
@@ -25,14 +30,6 @@ jobs:
   linting:
     executor: ci-executor
     steps:
-      - run:
-          name: install required packages
-          command: >
-              conda install pylint
-              conda install openexr
-              conda install simplejson
-              conda install orekit
-
       - checkout
 
       - run:
