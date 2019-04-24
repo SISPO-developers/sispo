@@ -43,7 +43,7 @@ class BlenderController:
             scene_names = self.scene_names
 
         if device not in ("CPU", "GPU"):
-            if len(bpy.context.preferences.addons["cycles"].preferences.devices) > 0:
+            if bpy.context.preferences.addons["cycles"].preferences.devices:
                 device = "GPU"
                 tile = tile_GPU
             else:
@@ -150,7 +150,7 @@ class BlenderController:
         with bpy.data.libraries.load(filename) as (data_from, data_to):
             data_to.objects = [
                 name for name in data_from.objects if name == object_name]
-        if len(data_to.objects) > 0:
+        if data_to.objects:
             obj = data_to.objects[0]
             obj.animation_data_clear()
             if scene_names is None:
@@ -162,7 +162,7 @@ class BlenderController:
         return None
 
     def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode="PERSP",
-                   ortho_scale=7, camera_name="Camera", scene_names=None):  # Modes are "ORTHO" and "PERSP"
+                   ortho_scale=7, camera_name="Camera", scene_names=None):  # Modes ORTHO, PERSP
         """Set camera configuration values."""
         cam = bpy.data.cameras.new(camera_name)
         camera = bpy.data.objects.new("Camera", cam)
