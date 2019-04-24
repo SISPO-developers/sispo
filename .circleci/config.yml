@@ -22,6 +22,11 @@ jobs:
           command: |
             sudo pip install pipenv
             pipenv install
+      
+      - run:
+        name: lint
+        command: |
+          sudo pip install pylint
             
       - run:
           name: notify test is finished
