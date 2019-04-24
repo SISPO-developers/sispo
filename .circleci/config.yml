@@ -29,6 +29,9 @@ jobs:
           name: install required packages
           command: >
               conda install pylint
+              conda install openexr
+              conda install simplejson
+              conda install orekit
 
       - checkout
 
