@@ -8,7 +8,7 @@ jobs:
   prepare-conda-env:
     executor: ci-executor
     steps:
-      -run:
+      - run:
           name: update conda
           command: >
               conda update conda
