@@ -11,8 +11,12 @@ from mathutils import Vector
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, scratchdisk, scene_names=["MainScene"]):
+    def __init__(self, scratchdisk, scene_names=None):
         """Initialise blender controller class."""
+
+        if scene_names is None:
+            scene_names = ["MainScene"]
+
         self.scene_names = scene_names
         self.scene = scene = bpy.context.scene
         self.scene.name = scene_names[0]
@@ -32,10 +36,10 @@ class BlenderController:
         self.scratchdisk = scratchdisk
         self.render_ID = zlib.crc32(struct.pack("!f", time.time()))
 
-    def set_renderer(self, device="Auto", tile=64, tile_GPU=512, scene_names=[]):
+    def set_renderer(self, device="Auto", tile=64, tile_GPU=512, scene_names=None):
         """Set blender rendering device."""
         print("Render setting %r" % (device))
-        if len(scene_names) == 0:
+        if scene_names is None:
             scene_names = self.scene_names
 
         if device not in ("CPU", "GPU"):
@@ -91,9 +95,9 @@ class BlenderController:
             scene.view_settings.exposure = exposure
 
     def set_output_format(self, res_x, res_y, file_format="OPEN_EXR", color_depth="32",
-                          use_preview=True, scene_names=[]):
+                          use_preview=True, scene_names=None):
         """Set output file format."""
-        if len(scene_names) == 0:
+        if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
@@ -108,17 +112,17 @@ class BlenderController:
             scene.render.image_settings.use_preview = use_preview
             scene.render.image_settings.use_zbuffer = True
 
-    def set_samples(self, samples=6, scene_names=[]):
+    def set_samples(self, samples=6, scene_names=None):
         """Set number of samples to render for each pixel."""
-        if len(scene_names) == 0:
+        if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
             scene.cycles.samples = samples
 
-    def update(self, scene_names=[]):
+    def update(self, scene_names=None):
         """Update scenes."""
-        if len(scene_names) == 0:
+        if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
@@ -141,7 +145,7 @@ class BlenderController:
         # return cv2.imread(self.scene.render.filepath)
         return 0  # TODO: only dummy, change later
 
-    def load_object(self, filename, object_name, scene_names=[]):
+    def load_object(self, filename, object_name, scene_names=None):
         """Load blender object from file."""
         with bpy.data.libraries.load(filename) as (data_from, data_to):
             data_to.objects = [
@@ -149,7 +153,7 @@ class BlenderController:
         if len(data_to.objects) > 0:
             obj = data_to.objects[0]
             obj.animation_data_clear()
-            if len(scene_names) == 0:
+            if scene_names is None:
                 scene_names = self.scene_names
             for scene_name in scene_names:
                 scene = bpy.data.scenes[scene_name]
@@ -158,7 +162,7 @@ class BlenderController:
         return None
 
     def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode="PERSP",
-                   ortho_scale=7, camera_name="Camera", scene_names=[]):  # Modes are "ORTHO" and "PERSP"
+                   ortho_scale=7, camera_name="Camera", scene_names=None):  # Modes are "ORTHO" and "PERSP"
         """Set camera configuration values."""
         cam = bpy.data.cameras.new(camera_name)
         camera = bpy.data.objects.new("Camera", cam)
@@ -171,7 +175,7 @@ class BlenderController:
         camera.location = (0, 0, 0)
         camera.data.type = mode
         self.cameras = bpy.data.objects
-        if len(scene_names) == 0:
+        if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
@@ -186,10 +190,10 @@ class BlenderController:
         camera_constr.up_axis = "UP_Y"
         camera_constr.target = target
 
-    def create_empty(self, name="Empty", scene_names=[]):
+    def create_empty(self, name="Empty", scene_names=None):
         """Create new, empty blender object."""
         e = bpy.data.objects.new(name, None)
-        if len(scene_names) == 0:
+        if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
