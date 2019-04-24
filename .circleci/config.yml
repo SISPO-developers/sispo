@@ -47,8 +47,8 @@ workflows:
   version: 2.1
   
   test:
-    jobs:
-      - prepare-conda-env
-      - linting
-          requires:
-            - prepare-conda-env
+      jobs:
+          - prepare-conda-env
+          - linting:
+              requires:
+                - prepare-conda-env
