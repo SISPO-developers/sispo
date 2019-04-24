@@ -10,34 +10,34 @@ jobs:
     steps:
       - run:
         name: add channel conda-forge
-        command: |
-          conda config --add channels conda-forge
+        command: >
+            conda config --add channels conda-forge
 
       - run:
         name: update conda
-        command: |
-          conda update --all
+        command: >
+            conda update --all
 
   linting:
     executor: ci-executor
     steps:
       - run:
         name: update pip
-        command: |
-          pip install --upgrade pip
+        command: >
+            pip install --upgrade pip
       
       - run:
         name: install required packages
-        command: |
-          sudo pip install pylint
-          sudo pip install autopep8
+        command: >
+            sudo pip install pylint
+            sudo pip install autopep8
 
       - checkout
 
       - run:
         name: lint
-        command: |
-          pipenv run pylint blender_controller DidymosModelingMoonless_100kmRotDidymoon
+        command: >
+            pipenv run pylint blender_controller DidymosModelingMoonless_100kmRotDidymoon
             
       - run:
         name: notify test is finished
