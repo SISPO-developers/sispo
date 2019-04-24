@@ -35,7 +35,7 @@ jobs:
       - run:
           name: lint
           command: >
-              pipenv run pylint blender_controller DidymosModelingMoonless_100kmRotDidymoon
+              pylint blender_controller DidymosModelingMoonless_100kmRotDidymoon
             
       - run:
           name: notify test is finished
