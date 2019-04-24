@@ -6,27 +6,27 @@ executors:
 
 jobs:
   executor: ci-executor
-  prepare-conda-env:
+      prepare-conda-env:
 
-    steps:
-      - run:
-          name: update conda
-          command: >
-              conda update conda
-      - run:
-          name: add channel conda-forge
-          command: >
-              conda config --append channels conda-forge
+        steps:
+          - run:
+              name: update conda
+              command: >
+                  conda update conda
+          - run:
+              name: add channel conda-forge
+              command: >
+                  conda config --append channels conda-forge
 
-      - run:
-          name: install required packages
-          command: >
-              conda install pylint openexr simplejson orekit
+          - run:
+              name: install required packages
+              command: >
+                  conda install pylint openexr simplejson orekit
 
-      - run:
-          name: update conda packages
-          command: >
-              conda update --all
+          - run:
+              name: update conda packages
+              command: >
+                  conda update --all
 
   linting:
     steps:
