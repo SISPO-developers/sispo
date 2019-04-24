@@ -18,22 +18,22 @@ import skimage.transform
 import simplejson as json
 
 import orekit
-vm = orekit.initVM()
+vm = orekit.initVM() # pylint: disable=no-member
 from orekit.pyhelpers import setup_orekit_curdir
 setup_orekit_curdir()
-import org.orekit.orbits as orbits
-import org.orekit.utils as utils
-from org.orekit.utils import PVCoordinates
-from org.orekit.frames import FramesFactory
-from org.orekit.propagation.analytical import KeplerianPropagator
-from org.hipparchus.geometry.euclidean.threed import Vector3D
-from org.orekit.propagation.events import DateDetector
-from org.orekit.propagation.events.handlers import RecordAndContinue
-from org.orekit.propagation.events.handlers import EventHandler
-from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler
-from org.orekit.time import AbsoluteDate, TimeScalesFactory
-#from org.orekit.data import DataProvidersManager
-#from org.orekit.data import DirectoryCrawler
+import org.orekit.orbits as orbits # pylint: disable=import-error
+import org.orekit.utils as utils # pylint: disable=import-error
+from org.orekit.utils import PVCoordinates # pylint: disable=import-error
+from org.orekit.frames import FramesFactory # pylint: disable=import-error
+from org.orekit.propagation.analytical import KeplerianPropagator # pylint: disable=import-error
+from org.hipparchus.geometry.euclidean.threed import Vector3D # pylint: disable=import-error
+from org.orekit.propagation.events import DateDetector # pylint: disable=import-error
+from org.orekit.propagation.events.handlers import RecordAndContinue # pylint: disable=import-error
+from org.orekit.propagation.events.handlers import EventHandler # pylint: disable=import-error
+from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler # pylint: disable=import-error
+from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=import-error
+#from org.orekit.data import DataProvidersManager # pylint: disable=import-error
+#from org.orekit.data import DirectoryCrawler # pylint: disable=import-error
 from mpl_toolkits.mplot3d import Axes3D
 #import scipy
 #import cv2
@@ -41,7 +41,7 @@ from mpl_toolkits.mplot3d import Axes3D
 
 
 import bpy
-#from mathutils import Matrix, Vector, Quaternion, Euler
+#from mathutils import Matrix, Vector, Quaternion, Euler # pylint: disable=import-error
 import blender_controller
 
 
@@ -662,7 +662,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     w = blender.cameras["SatelliteCamera"].data.sensor_width
 
     fn_base5 = TEMP_DIR_PATH + "/%s/%s_starmap_direct_%.4d.exr" % (SERIES_NAME, SERIES_NAME,
-                                                                frame_index)
+                                                                    frame_index)
     (starfield_flux2, flux3) = star_cache.render_stars_directly(starlist, cam_direction,
                                                                 rightedge_vec,
                                                                 upedge_vec, x_res, y_res, fn_base5)

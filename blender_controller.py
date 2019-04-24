@@ -5,7 +5,7 @@ import zlib
 import struct
 
 import bpy
-from mathutils import Vector
+from mathutils import Vector # pylint: disable=import-error
 
 
 class BlenderController:
