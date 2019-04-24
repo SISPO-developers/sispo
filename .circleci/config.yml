@@ -5,9 +5,8 @@ executors:
         - image: conda/miniconda3
 
 jobs:
-  executor: ci-executor
   prepare-conda-env:
-
+    executor: ci-executor
     steps:
       - run:
           name: update conda
@@ -29,6 +28,7 @@ jobs:
               conda update --all
 
   linting:
+    executor: ci-executor
     steps:
       - checkout
 
