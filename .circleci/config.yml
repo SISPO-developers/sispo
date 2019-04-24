@@ -2,7 +2,7 @@ version: 2.1
 executors:
   ci-executor:
       docker:
-        - image: continuumio/anaconda3
+        - image: conda/miniconda3
 
 jobs:
   prepare-conda-env:
