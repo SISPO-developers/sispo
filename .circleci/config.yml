@@ -26,15 +26,9 @@ jobs:
     executor: ci-executor
     steps:
       - run:
-          name: update pip
-          command: >
-              pip install --upgrade pip
-      
-      - run:
           name: install required packages
           command: >
-              sudo pip install pylint
-              sudo pip install autopep8
+              conda install pylint
 
       - checkout
 
