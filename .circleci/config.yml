@@ -24,7 +24,7 @@ jobs:
             pipenv install
       
       - run:
-          name: lint
+          name: install pylint
           command: |
             sudo pip install pylint
             
