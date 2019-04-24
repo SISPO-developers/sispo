@@ -5,31 +5,25 @@ executors:
         - image: circleci/python:3.6.4
           environment:
             PIPENV_VENV_IN_PROJECT: true  
-
 jobs:
   linting:
     executor: ci-executor
     steps:
       - checkout
-
       -run:
           name: update pip
           command: |
             sudo pip install --upgrade pip
-      
       - run:
           name: create pipenv
           command: |
             sudo pip install pipenv
             pipenv install
-            
       - run:
           name: notify test is finished
           command: echo "Test is completed!"
-
 workflows:
   version: 2.1
-  
   test:
     jobs:
       - linting
