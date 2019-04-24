@@ -2,15 +2,18 @@ version: 2.1
 executors:
   ci-executor:
     docker:
-        - image: circleci/python:3.7.3
-          environment:
-            PIPENV_VENV_IN_PROJECT: true  
+        - image: continuumio/anaconda3
 
 jobs:
   linting:
     executor: ci-executor
     steps:
       - checkout
+
+      - run:
+          name: update conda
+          command: |
+            sudo conda update --all
 
       - run:
           name: update pip
