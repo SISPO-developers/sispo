@@ -32,8 +32,7 @@ jobs:
       - run:
           name: lint
           command: |
-            pylint blender_controller
-            pylint DidymosModelingMoonless_100kmRotDidymoon
+            pylint blender_controller DidymosModelingMoonless_100kmRotDidymoon
             
       - run:
           name: notify test is finished
