@@ -1,8 +1,30 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+executors:
+  ci-executor:
     docker:
-      - image: circleci/python:3.6.4
+        - image: circleci/python:3.6.4
+          environment:
+            PIPENV_VENV_IN_PROJECT: true  
+
+jobs:
+  linting:
+    executor: ci-executor
     steps:
       - checkout
-      - run: echo "A first hello"
+      
+      - run:
+          name: create pipenv
+          command: |
+            sudo pip install pipenv
+            pipenv install
+            
+      - run:
+          name: notify test is finished
+          command: echo "Test is completed!"
+
+workflows:
+  version: 2.1
+  
+  test:
+    jobs:
+      - linting
