@@ -24,9 +24,15 @@ jobs:
             pipenv install
       
       - run:
-          name: install pylint
+          name: install required packages
           command: |
             sudo pip install pylint
+            sudo pip install autopep8
+
+      - run:
+          name: lint
+          command: |
+            pylint DidymosModelingMoonless_100kmRotDidymoon
             
       - run:
           name: notify test is finished
