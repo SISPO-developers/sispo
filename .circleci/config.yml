@@ -15,18 +15,18 @@ jobs:
       - run:
           name: update pip
           command: |
-            sudo pip install --upgrade pip
+            pip install --upgrade pip
       
       - run:
           name: create pipenv
           command: |
-            sudo pip install pipenv
+            pip install pipenv
             pipenv install
       
       - run:
-        name: lint
-        command: |
-          sudo pip install pylint
+          name: lint
+          command: |
+            pip install pylint
             
       - run:
           name: notify test is finished
