@@ -5,32 +5,34 @@ executors:
         - image: continuumio/anaconda3
 
 jobs:
+  prepare-conda-env:
+    executor: ci-executor
+    steps:
+      - run:
+        name: add channel conda-forge
+        command: |
+          conda config --add channels conda-forge
+
+      - run:
+        name: update conda
+        command: |
+          conda update --all
+
   linting:
     executor: ci-executor
     steps:
-      - checkout
-
-      - run:
-          name: update conda
-          command: |
-            conda update --all
-
       - run:
           name: update pip
           command: |
-            sudo pip install --upgrade pip
-      
-      - run:
-          name: create pipenv
-          command: |
-            sudo pip install pipenv
-            pipenv install
+            pip install --upgrade pip
       
       - run:
           name: install required packages
           command: |
             sudo pip install pylint
             sudo pip install autopep8
+
+      - checkout
 
       - run:
           name: lint
@@ -46,4 +48,7 @@ workflows:
   
   test:
     jobs:
+      - prepare-conda-env
       - linting
+        requires:
+          - prepare-conda-env
