@@ -13,13 +13,13 @@ jobs:
       - checkout
 
       -run:
-        name: update pip
-        command: |
+          name: update pip
+          command: |
             sudo pip install --upgrade pip
       
       - run:
-        name: create pipenv
-        command: |
+          name: create pipenv
+          command: |
           sudo pip install pipenv
           pipenv install
             
