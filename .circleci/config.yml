@@ -1,7 +1,7 @@
 version: 2.1
 executors:
   ci-executor:
-    docker:
+      docker:
         - image: continuumio/anaconda3
 
 jobs:
@@ -9,46 +9,46 @@ jobs:
     executor: ci-executor
     steps:
       - run:
-        name: add channel conda-forge
-        command: >
-            conda config --add channels conda-forge
+          name: add channel conda-forge
+          command: >
+              conda config --add channels conda-forge
 
       - run:
-        name: update conda
-        command: >
-            conda update --all
+          name: update conda
+          command: >
+              conda update --all
 
   linting:
     executor: ci-executor
     steps:
       - run:
-        name: update pip
-        command: >
-            pip install --upgrade pip
+          name: update pip
+          command: >
+              pip install --upgrade pip
       
       - run:
-        name: install required packages
-        command: >
-            sudo pip install pylint
-            sudo pip install autopep8
+          name: install required packages
+          command: >
+              sudo pip install pylint
+              sudo pip install autopep8
 
       - checkout
 
       - run:
-        name: lint
-        command: >
-            pipenv run pylint blender_controller DidymosModelingMoonless_100kmRotDidymoon
+          name: lint
+          command: >
+              pipenv run pylint blender_controller DidymosModelingMoonless_100kmRotDidymoon
             
       - run:
-        name: notify test is finished
-        command: echo "Test is completed!"
+          name: notify test is finished
+          command: echo "Test is completed!"
 
 workflows:
   version: 2.1
   
   test:
       jobs:
-          - prepare-conda-env
-          - linting:
-              requires:
-                - prepare-conda-env
+        - prepare-conda-env
+        - linting:
+            requires:
+              - prepare-conda-env
