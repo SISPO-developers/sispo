@@ -212,7 +212,7 @@ SC_PROPAGATOR_LONG.propagate(long_orbit_start.getDate(), long_orbit_end.getDate(
 print("Propagating asteroid")
 kepler_long.propagate(long_orbit_start.getDate(), long_orbit_end.getDate())
 
-with open(TEMP_DIR_PATH + "/%s/%s_long_orbit.txt" % (SERIES_NAME, SERIES_NAME), "wt") as long_orbit_file:
+with open(TEMP_DIR_PATH + "\\%s\\%s_long_orbit.txt" % (SERIES_NAME, SERIES_NAME), "wt") as long_orbit_file:
     for (didymos, sat) in zip(time_sample_handler2_long.data, time_sample_handler_long.data):
         a = didymos
 
@@ -249,7 +249,7 @@ SSB_PROPAGATOR.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagated")
 # print(time_sample_handler.data)
 
-blender = blender_controller.BlenderController(TEMP_DIR_PATH + "/scratch/",
+blender = blender_controller.BlenderController(TEMP_DIR_PATH + "\\scratch\\",
                                                scene_names=["MainScene",
                                                             "BackgroundStars",
                                                             "AsteroidOnly",
@@ -586,7 +586,7 @@ star_cache = StarCache(
 # print(cmd)
 
 # subprocess.call(cmd)
-STAR_CAT_FN = TEMP_DIR_PATH + "/%s/ucac4_%d.txt" % (SERIES_NAME, time.time())
+STAR_CAT_FN = TEMP_DIR_PATH + "\\%s\\ucac4_%d.txt" % (SERIES_NAME, time.time())
 scaler = 1000.
 blender.set_exposure(EXPOSURE)
 for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end_frame:skip_frame],
@@ -657,7 +657,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     f = blender.cameras["SatelliteCamera"].data.lens
     w = blender.cameras["SatelliteCamera"].data.sensor_width
 
-    fn_base5 = TEMP_DIR_PATH + "/%s/%s_starmap_direct_%.4d.exr" % (SERIES_NAME, SERIES_NAME,
+    fn_base5 = TEMP_DIR_PATH + "\\%s\\%s_starmap_direct_%.4d.exr" % (SERIES_NAME, SERIES_NAME,
                                                                     frame_index)
     (starfield_flux2, flux3) = star_cache.render_stars_directly(starlist, cam_direction,
                                                                 rightedge_vec,
@@ -665,7 +665,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
     blender.update()
     fn_base = TEMP_DIR_PATH \
-        + "/%s/%s%.4d" % (SERIES_NAME, SERIES_NAME, frame_index)
+        + "\\%s\\%s%.4d" % (SERIES_NAME, SERIES_NAME, frame_index)
     print("Saving blend file")
     #bpy.ops.wm.save_as_mainfile(filepath = fn_base+".blend")
     print("Rendering")
@@ -677,20 +677,20 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     #result = blender.Render(fn_base2,"BackgroundStars")
 
     fn_base3 = TEMP_DIR_PATH \
-        + "/%s/%s_asteroid_%.4d" % (SERIES_NAME, SERIES_NAME, frame_index)
+        + "\\%s\\%s_asteroid_%.4d" % (SERIES_NAME, SERIES_NAME, frame_index)
     blender.update(["AsteroidOnly"])
 
     result = blender.render(fn_base3, "AsteroidOnly")
 
     fn_base4 = TEMP_DIR_PATH \
-        + "/%s/%s_asteroid_constant_%.4d" % (SERIES_NAME,
+        + "\\%s\\%s_asteroid_constant_%.4d" % (SERIES_NAME,
                                              SERIES_NAME, frame_index)
     blender.update(["AsteroidConstDistance"])
 
     result = blender.render(fn_base4, "AsteroidConstDistance")
 
     fn_base6 = TEMP_DIR_PATH \
-        + "/%s/%s_calibration_reference_%.4d" % (SERIES_NAME,
+        + "\\%s\\%s_calibration_reference_%.4d" % (SERIES_NAME,
                                                  SERIES_NAME, frame_index)
     blender.update(["LightingReference"])
     result = blender.render(fn_base6, "LightingReference")
