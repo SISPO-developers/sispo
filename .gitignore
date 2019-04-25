@@ -1,5 +1,8 @@
 ## Project specific additional gitignores
+# Directories
 temp/
+
+# File types
 *.txt
 *.sln
 *.pyproj
