@@ -32,10 +32,10 @@ jobs:
     steps:
       - checkout
 
-      - run:
-          name: lint
-          command: >
-              pylint blender_controller DidymosModelingMoonless_100kmRotDidymoon
+      #- run:
+      #    name: lint
+      #    command: >
+      #        pylint blender_controller DidymosModelingMoonless_100kmRotDidymoon
             
       - run:
           name: notify test is finished
