@@ -23,8 +23,8 @@ class BlenderController:
         self.cameras = bpy.data.cameras
         scene.world.color = (0, 0, 0)
         # Clear everything on the scene
-        for ob in bpy.data.objects:
-            ob.select_set(True)
+        for obj in bpy.data.objects:
+            obj.select_set(True)
         bpy.ops.object.delete()
 
         if len(scene_names) > 1:
@@ -192,24 +192,24 @@ class BlenderController:
 
     def create_empty(self, name="Empty", scene_names=None):
         """Create new, empty blender object."""
-        e = bpy.data.objects.new(name, None)
+        obj_empty = bpy.data.objects.new(name, None)
         if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
-            scene.collection.objects.link(e)
-        return e
+            scene.collection.objects.link(obj_empty)
+        return obj_empty
 
-    def save_blender_dfile(self, fn):
+    def save_blender_dfile(self, filename):
         """Save a blender d file."""
-        bpy.ops.wm.save_as_mainfile(fn)
+        bpy.ops.wm.save_as_mainfile(filename)
 
     def get_camera_vectors(self, camera_name, scene_name):
         """Get camera position and direction vectors."""
         camera = bpy.data.objects[camera_name]
-        up = camera.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
+        up_vec = camera.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
         cam_direction = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
-        right = cam_direction.cross(up)
+        right_vec = cam_direction.cross(up_vec)
 
         scene = bpy.data.scenes[scene_name]
         res_x = scene.render.resolution_x
@@ -223,9 +223,9 @@ class BlenderController:
             sensor_h = camera.data.sensor_width
             sensor_w = camera.data.sensor_width * res_x / res_y
 
-        rightedge_vec = cam_direction + right * sensor_w * 0.5 / camera.data.lens
-        leftedge_vec = cam_direction - right * sensor_w * 0.5 / camera.data.lens
-        upedge_vec = cam_direction + up * sensor_h * 0.5 / camera.data.lens
-        downedge_vec = cam_direction - up * sensor_h * 0.5 / camera.data.lens
+        rightedge_vec = cam_direction + right_vec * sensor_w * 0.5 / camera.data.lens
+        leftedge_vec = cam_direction - right_vec * sensor_w * 0.5 / camera.data.lens
+        upedge_vec = cam_direction + up_vec * sensor_h * 0.5 / camera.data.lens
+        downedge_vec = cam_direction - up_vec * sensor_h * 0.5 / camera.data.lens
 
-        return cam_direction, up, right, leftedge_vec, rightedge_vec, downedge_vec, upedge_vec
+        return cam_direction, up_vec, right_vec, leftedge_vec, rightedge_vec, downedge_vec, upedge_vec
