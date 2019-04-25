@@ -212,22 +212,19 @@ SC_PROPAGATOR_LONG.propagate(long_orbit_start.getDate(), long_orbit_end.getDate(
 print("Propagating asteroid")
 kepler_long.propagate(long_orbit_start.getDate(), long_orbit_end.getDate())
 
+with open(TEMP_DIR_PATH + "/%s/%s_long_orbit.txt" % (SERIES_NAME, SERIES_NAME), "wt") as long_orbit_file:
+    for (didymos, sat) in zip(time_sample_handler2_long.data, time_sample_handler_long.data):
+        a = didymos
 
-long_orbit_file = open(TEMP_DIR_PATH + "/%s/%s_long_orbit.txt" %
-                       (SERIES_NAME, SERIES_NAME), "wt")
+        b = sat
+        pvc = a.getPVCoordinates(ICRF)
+        pvc2 = b.getPVCoordinates(ICRF)
+        SC_POS = np.asarray(pvc2.getPosition().toArray())
+        asteroid_pos = np.asarray(pvc.getPosition().toArray())
+        # a.getDate()
+        long_orbit_file.write(str(a.getDate()) + " " + str(asteroid_pos).replace(
+            "[", "").replace("]", "") + "," + str(SC_POS).replace("[", "").replace("]", "") + "\n")
 
-for (didymos, sat) in zip(time_sample_handler2_long.data, time_sample_handler_long.data):
-    a = didymos
-
-    b = sat
-    pvc = a.getPVCoordinates(ICRF)
-    pvc2 = b.getPVCoordinates(ICRF)
-    SC_POS = np.asarray(pvc2.getPosition().toArray())
-    asteroid_pos = np.asarray(pvc.getPosition().toArray())
-    # a.getDate()
-    long_orbit_file.write(str(a.getDate()) + " " + str(asteroid_pos).replace(
-        "[", "").replace("]", "") + "," + str(SC_POS).replace("[", "").replace("]", "") + "\n")
-long_orbit_file.close()
 
 detector_start = CLOSEST_ENCOUNTER_DATE.getDate().shiftedBy(-ENCOUNTER_DURATION / 2.)
 detector_end = CLOSEST_ENCOUNTER_DATE.getDate().shiftedBy(ENCOUNTER_DURATION / 2.)
@@ -384,12 +381,12 @@ def get_UCAC4(RA, RA_W, DEC, DEC_W, fn="ucac4.txt"):
         print("Retcode ", retcode)
         if retcode == 0:
             break
-        fout = open(errorlog, "at")
-        fout.write("%f,\'%s\',%d\n" % (time.time(), command, retcode))
-        fout.close()
-    file = open(fn, "rt")
-    lines = file.readlines()
-    print("Lines", len(lines))
+        with open(errorlog, "at") as fout:
+            fout.write("%f,\'%s\',%d\n" % (time.time(), command, retcode))
+
+    with open(fn, "rt") as file:
+        lines = file.readlines()
+        print("Lines", len(lines))
     out = []
     for line in lines[1:]:
 
@@ -701,31 +698,28 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     print("Rendering complete")
     bpy.ops.wm.save_as_mainfile(filepath=fn_base + ".blend")
 
-    metafile = open(fn_base + ".txt", "wt")
+    with open(fn_base + ".txt", "wt") as metafile: 
+        metafile.write("%s time\n" % (a.getDate()))
+        metafile.write("%s distance (m)\n" % (SC_SSB_DISTANCE))
+        metafile.write("%e %e total_flux (in Mag 0 units)\n" %
+                       (starfield_flux2, flux3))
 
-    metafile.write("%s time\n" % (a.getDate()))
-    metafile.write("%s distance (m)\n" % (SC_SSB_DISTANCE))
-    metafile.write("%e %e total_flux (in Mag 0 units)\n" %
-                   (starfield_flux2, flux3))
-
-    metafile.write("%s Didymos (m)\n" % (write_vec_string(asteroid_pos, 17)))
-    metafile.write("%s Satellite (m)\n" % (write_vec_string(SC_POS, 17)))
-    metafile.write("%s Satellite relative \n" %
-                   (write_vec_string(sat_pos_rel, 17)))
-    metafile.write("%s Satellite matrix \n" %
-                   (write_mat_string(satellite_camera.matrix_world, 17)))
-    metafile.write("%s Asteroid matrix \n" %
-                   (write_mat_string(Asteroid.matrix_world, 17)))
-    metafile.write("%s Sun matrix \n" %
-                   (write_mat_string(Sun.matrix_world, 17)))
-    metafile.write("%s Constant distance matrix \n" %
-                   (write_mat_string(constant_distance_camera.matrix_world, 17)))
-    metafile.write("%s Reference matrix \n" %
-                   (write_mat_string(reference_camera.matrix_world, 17)))
-    metafile.write("%s Camera f,w,x,y \n" %
-                   (write_vec_string([f, w, x_res, y_res], 17)))
-
-    metafile.close()
+        metafile.write("%s Didymos (m)\n" % (write_vec_string(asteroid_pos, 17)))
+        metafile.write("%s Satellite (m)\n" % (write_vec_string(SC_POS, 17)))
+        metafile.write("%s Satellite relative \n" %
+                       (write_vec_string(sat_pos_rel, 17)))
+        metafile.write("%s Satellite matrix \n" %
+                       (write_mat_string(satellite_camera.matrix_world, 17)))
+        metafile.write("%s Asteroid matrix \n" %
+                       (write_mat_string(Asteroid.matrix_world, 17)))
+        metafile.write("%s Sun matrix \n" %
+                       (write_mat_string(Sun.matrix_world, 17)))
+        metafile.write("%s Constant distance matrix \n" %
+                       (write_mat_string(constant_distance_camera.matrix_world, 17)))
+        metafile.write("%s Reference matrix \n" %
+                       (write_mat_string(reference_camera.matrix_world, 17)))
+        metafile.write("%s Camera f,w,x,y \n" %
+                       (write_vec_string([f, w, x_res, y_res], 17)))
 
     metadict = dict()
     metadict["time"] = a.getDate()
