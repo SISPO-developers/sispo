@@ -39,7 +39,6 @@ from mpl_toolkits.mplot3d import Axes3D
 #import cv2
 #import Imath
 
-
 import bpy
 #from mathutils import Matrix, Vector, Quaternion, Euler # pylint: disable=import-error
 import blender_controller
@@ -147,21 +146,21 @@ ICRF = FramesFactory.getICRF()
 MU_SUN = 1.32712440018E20
 
 
-SSB_orbit = orbits.KeplerianOrbit(SSB_a, SSB_e, SSB_i, SSB_omega, SSB_Omega, SSB_M,
+SSB_ORBIT = orbits.KeplerianOrbit(SSB_a, SSB_e, SSB_i, SSB_omega, SSB_Omega, SSB_M,
                                       orbits.PositionAngle.MEAN, ICRF, DATE_INITIAL, MU_SUN)
-SSB_PROPAGATOR = KeplerianPropagator(SSB_orbit)
+SSB_PROPAGATOR = KeplerianPropagator(SSB_ORBIT)
 
 
 SSB_POS_HISTORY = []
 SC_POS_HISTORY = []
 
-orbit_start = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, UTC)
+# orbit_start = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, UTC)
 
-minimum_distance_time = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, UTC)
+CLOSEST_ENCOUNTER_DATE = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, UTC)
 
-encounter_prop = SSB_PROPAGATOR.propagate(minimum_distance_time.getDate())
-SSB_POS = encounter_prop.getPVCoordinates(ICRF).getPosition()
-SSB_VEL = encounter_prop.getPVCoordinates(ICRF).getVelocity()
+ENCOUNTER_PROP = SSB_PROPAGATOR.propagate(CLOSEST_ENCOUNTER_DATE.getDate())
+SSB_POS = ENCOUNTER_PROP.getPVCoordinates(ICRF).getPosition()
+SSB_VEL = ENCOUNTER_PROP.getPVCoordinates(ICRF).getVelocity()
 
 
 SSB_DIRECTION_VEC = SSB_POS.normalize()
@@ -172,44 +171,44 @@ if not TERMINATOR:
     if not SUNNYSIDE:
         ENCOUNTER_MINIMUM_DISTANCE *= -1
     SSB_DIRECTION_VEC = SSB_DIRECTION_VEC.scalarMultiply(ENCOUNTER_MINIMUM_DISTANCE)
-    sat_pos = SSB_POS.subtract(SSB_DIRECTION_VEC)  # Minimum distance 1000km approx
+    SC_POS = SSB_POS.subtract(SSB_DIRECTION_VEC)  # Minimum distance 1000km approx
 else:
-    shiftvec = SSB_DIRECTION_VEC.scalarMultiply(-0.15)
-    shiftvec = shiftvec.add(Vector3D(0., 0., 1.))
-    shiftvec = shiftvec.normalize()
-    shiftvec = shiftvec.scalarMultiply(ENCOUNTER_MINIMUM_DISTANCE)
-    sat_pos = SSB_POS.add(shiftvec)
+    SHIFTING_VEC = SSB_DIRECTION_VEC.scalarMultiply(-0.15)
+    SHIFTING_VEC = SHIFTING_VEC.add(Vector3D(0., 0., 1.))
+    SHIFTING_VEC = SHIFTING_VEC.normalize()
+    SHIFTING_VEC = SHIFTING_VEC.scalarMultiply(ENCOUNTER_MINIMUM_DISTANCE)
+    SC_POS = SSB_POS.add(SHIFTING_VEC)
 
-sat_vel = SSB_VEL.scalarMultiply(
+SC_VEL = SSB_VEL.scalarMultiply(
     (SSB_VEL.getNorm() - 10000.) / SSB_VEL.getNorm())  # 0.95)
-print("Relative vel", (SSB_VEL.subtract(sat_vel)), " len ",
-      SSB_VEL.subtract(sat_vel).getNorm())
+print("Relative vel", (SSB_VEL.subtract(SC_VEL)), " len ",
+      SSB_VEL.subtract(SC_VEL).getNorm())
 print("Distance from sun", SSB_POS.getNorm() /
       utils.Constants.IAU_2012_ASTRONOMICAL_UNIT)
 
-sat_orbit = orbits.KeplerianOrbit(PVCoordinates(
-    sat_pos, sat_vel), ICRF, minimum_distance_time, MU_SUN)
-kepler_sat = KeplerianPropagator(sat_orbit)
-kepler_sat_long = KeplerianPropagator(sat_orbit)
-min_timestep = ENCOUNTER_DURATION \
-    * math.sinh(FACTOR / TIME_STEPS) / math.sinh(FACTOR)
-kepler_long = KeplerianPropagator(SSB_orbit)
+SC_TRAJECTORY = orbits.KeplerianOrbit(PVCoordinates(
+    SC_POS, SC_VEL), ICRF, CLOSEST_ENCOUNTER_DATE, MU_SUN)
+SC_PROPAGATOR = KeplerianPropagator(SC_TRAJECTORY)
+SC_PROPAGATOR_LONG = KeplerianPropagator(SC_TRAJECTORY)
+# min_timestep = ENCOUNTER_DURATION \
+#    * math.sinh(FACTOR / TIME_STEPS) / math.sinh(FACTOR)
+kepler_long = KeplerianPropagator(SSB_ORBIT)
 
 time_steps_long = 2000
-long_orbit_start = minimum_distance_time.getDate().shiftedBy(-3600. * 24. * 365 * 2)
-long_orbit_end = minimum_distance_time.getDate().shiftedBy(3600. * 24. * 365 * 2)
+long_orbit_start = CLOSEST_ENCOUNTER_DATE.getDate().shiftedBy(-3600. * 24. * 365 * 2)
+long_orbit_end = CLOSEST_ENCOUNTER_DATE.getDate().shiftedBy(3600. * 24. * 365 * 2)
 
 time_sample_handler_long = TimingEvent().of_(TimeSampler)
 time_sampler_long = TimeSampler(long_orbit_start, long_orbit_end, time_steps_long,
                                 mode=1).withHandler(time_sample_handler_long)
-kepler_sat_long.addEventDetector(time_sampler_long)
+SC_PROPAGATOR_LONG.addEventDetector(time_sampler_long)
 
 time_sample_handler2_long = TimingEvent().of_(TimeSampler)
 time_sampler2_long = TimeSampler(long_orbit_start, long_orbit_end, time_steps_long,
                                  mode=1).withHandler(time_sample_handler2_long)
 kepler_long.addEventDetector(time_sampler2_long)
 
-kepler_sat_long.propagate(long_orbit_start.getDate(), long_orbit_end.getDate())
+SC_PROPAGATOR_LONG.propagate(long_orbit_start.getDate(), long_orbit_end.getDate())
 print("Propagating asteroid")
 kepler_long.propagate(long_orbit_start.getDate(), long_orbit_end.getDate())
 
@@ -223,19 +222,19 @@ for (didymos, sat) in zip(time_sample_handler2_long.data, time_sample_handler_lo
     b = sat
     pvc = a.getPVCoordinates(ICRF)
     pvc2 = b.getPVCoordinates(ICRF)
-    sat_pos = np.asarray(pvc2.getPosition().toArray())
+    SC_POS = np.asarray(pvc2.getPosition().toArray())
     asteroid_pos = np.asarray(pvc.getPosition().toArray())
     # a.getDate()
     long_orbit_file.write(str(a.getDate()) + " " + str(asteroid_pos).replace(
-        "[", "").replace("]", "") + "," + str(sat_pos).replace("[", "").replace("]", "") + "\n")
+        "[", "").replace("]", "") + "," + str(SC_POS).replace("[", "").replace("]", "") + "\n")
 long_orbit_file.close()
 
-detector_start = minimum_distance_time.getDate().shiftedBy(-ENCOUNTER_DURATION / 2.)
-detector_end = minimum_distance_time.getDate().shiftedBy(ENCOUNTER_DURATION / 2.)
+detector_start = CLOSEST_ENCOUNTER_DATE.getDate().shiftedBy(-ENCOUNTER_DURATION / 2.)
+detector_end = CLOSEST_ENCOUNTER_DATE.getDate().shiftedBy(ENCOUNTER_DURATION / 2.)
 time_sample_handler = TimingEvent().of_(TimeSampler)
 time_sampler = TimeSampler(detector_start, detector_end, TIME_STEPS, MODE,
                            factor=FACTOR).withHandler(time_sample_handler)
-kepler_sat.addEventDetector(time_sampler)
+SC_PROPAGATOR.addEventDetector(time_sampler)
 
 time_sample_handler2 = TimingEvent().of_(TimeSampler)
 time_sampler2 = TimeSampler(detector_start, detector_end, TIME_STEPS, MODE,
@@ -247,7 +246,7 @@ DISTANCE_HISTORY = []
 
 print("Starting propagator")
 print("Propagating satellite")
-kepler_sat.propagate(detector_start.getDate(), detector_end.getDate())
+SC_PROPAGATOR.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagating asteroid")
 SSB_PROPAGATOR.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagated")
@@ -607,12 +606,12 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     b = sat
     pvc = a.getPVCoordinates(ICRF)
     pvc2 = b.getPVCoordinates(ICRF)
-    distance = Vector3D.distance(pvc.getPosition(), pvc2.getPosition())
+    SC_SSB_DISTANCE = Vector3D.distance(pvc.getPosition(), pvc2.getPosition())
 
-    sat_pos = np.asarray(pvc2.getPosition().toArray())
+    SC_POS = np.asarray(pvc2.getPosition().toArray())
     asteroid_pos = np.asarray(pvc.getPosition().toArray())
 
-    sat_pos_rel = (sat_pos - asteroid_pos) / scaler
+    sat_pos_rel = (SC_POS - asteroid_pos) / scaler
 
     satellite_camera = blender.cameras["SatelliteCamera"]
     satellite_camera.location = sat_pos_rel
@@ -647,11 +646,11 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
 
     starlist = get_UCAC4(ra_cent, ra_w, dec_cent, dec_w, STAR_CAT_FN)
 
-    #R = 100000000.
+    # R = 100000000.
     # pixelsize_at_R =
     # R*math.radians(ra_w)/blender.scenes["BackgroundStars"].render.resolution_x
-    #print("Pixel size at %f is %f"%(R,pixelsize_at_R))
-    i = 0
+    # print("Pixel size at %f is %f"%(R,pixelsize_at_R))
+    # i = 0
     print("Found %d stars in FOV" % (len(starlist)))
     # starfield_flux =
     # star_cache.SetStars(starlist,cam_direction,sat_pos_rel,R,pixelsize_at_R,star_scenes)
@@ -705,12 +704,12 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     metafile = open(fn_base + ".txt", "wt")
 
     metafile.write("%s time\n" % (a.getDate()))
-    metafile.write("%s distance (m)\n" % (distance))
+    metafile.write("%s distance (m)\n" % (SC_SSB_DISTANCE))
     metafile.write("%e %e total_flux (in Mag 0 units)\n" %
                    (starfield_flux2, flux3))
 
     metafile.write("%s Didymos (m)\n" % (write_vec_string(asteroid_pos, 17)))
-    metafile.write("%s Satellite (m)\n" % (write_vec_string(sat_pos, 17)))
+    metafile.write("%s Satellite (m)\n" % (write_vec_string(SC_POS, 17)))
     metafile.write("%s Satellite relative \n" %
                    (write_vec_string(sat_pos_rel, 17)))
     metafile.write("%s Satellite matrix \n" %
@@ -731,11 +730,11 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     metadict = dict()
     metadict["time"] = a.getDate()
     metadict["time_t"] = t
-    metadict["distance (m)"] = distance
+    metadict["distance (m)"] = SC_SSB_DISTANCE
     metadict["total_flux (in Mag 0 units)"] = (starfield_flux2, flux3)
 
     metadict["Didymos (m)"] = asteroid_pos
-    metadict["Satellite (m)\n"] = sat_pos
+    metadict["Satellite (m)\n"] = SC_POS
     metadict["Satellite relative"] = sat_pos_rel
     metadict["Satellite matrix"] = satellite_camera.matrix_world
     metadict["Asteroid matrix "] = Asteroid.matrix_world
@@ -756,9 +755,9 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[start_frame:end
     with open(fn_base + ".json", "w") as _file:
         json.dump(metadict, _file, default=serializer)
 
-    DISTANCE_HISTORY.append([t, distance])
+    DISTANCE_HISTORY.append([t, SC_SSB_DISTANCE])
     SSB_POS_HISTORY.append(asteroid_pos)
-    SC_POS_HISTORY.append(sat_pos)
+    SC_POS_HISTORY.append(SC_POS)
 
     print("Frame %d complete" % (frame_index))
     # frame_index += 1
