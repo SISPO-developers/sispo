@@ -263,13 +263,13 @@ else:
 if len(sys.argv) < 6:
     START_FRAME_NUM = 0
     END_FRAME_NUM = TIME_STEPS
-    SKIP_FRAME_NUM = 1
+    FRAME_STEP_SIZE = 1
 else:
     START_FRAME_NUM = int(sys.argv[3])
     END_FRAME_NUM = int(sys.argv[4])
-    SKIP_FRAME_NUM = int(sys.argv[5])
+    FRAME_STEP_SIZE = int(sys.argv[5])
 
-print("Start %d end %d skip %d" % (START_FRAME_NUM, END_FRAME_NUM, SKIP_FRAME_NUM))
+print("Start %d end %d skip %d" % (START_FRAME_NUM, END_FRAME_NUM, FRAME_STEP_SIZE))
 
 blender.set_samples(CYCLES_SAMPLES)
 blender.set_output_format(2464, 2056)
@@ -587,9 +587,9 @@ star_cache = StarCache(
 STAR_CAT_FN = TEMP_DIR_PATH + "\\%s\\ucac4_%d.txt" % (SERIES_NAME, time.time())
 SCALER = 1000.
 blender.set_exposure(EXPOSURE)
-for (didymos, sat, frame_index) in zip(time_sample_handler2.data[START_FRAME_NUM:END_FRAME_NUM:SKIP_FRAME_NUM],
-                                       time_sample_handler.data[START_FRAME_NUM:END_FRAME_NUM:SKIP_FRAME_NUM],
-                                       range(0, TIME_STEPS)[START_FRAME_NUM:END_FRAME_NUM:SKIP_FRAME_NUM]):
+for (didymos, sat, frame_index) in zip(time_sample_handler2.data[START_FRAME_NUM:END_FRAME_NUM:FRAME_STEP_SIZE],
+                                       time_sample_handler.data[START_FRAME_NUM:END_FRAME_NUM:FRAME_STEP_SIZE],
+                                       range(0, TIME_STEPS)[START_FRAME_NUM:END_FRAME_NUM:FRAME_STEP_SIZE]):
     # if frame_index<332:
    #     continue
 
