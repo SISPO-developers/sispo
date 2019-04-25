@@ -2,7 +2,7 @@ version: 2.1
 executors:
   ci-executor:
     docker:
-        - image: circleci/python:3.6.4
+        - image: circleci/python:3.7.3
           environment:
             PIPENV_VENV_IN_PROJECT: true  
 
@@ -11,12 +11,28 @@ jobs:
     executor: ci-executor
     steps:
       - checkout
+
+      - run:
+          name: update pip
+          command: |
+            sudo pip install --upgrade pip
       
       - run:
           name: create pipenv
           command: |
             sudo pip install pipenv
             pipenv install
+      
+      - run:
+          name: install required packages
+          command: |
+            sudo pip install pylint
+            sudo pip install autopep8
+
+      - run:
+          name: lint
+          command: |
+            pipenv run pylint blender_controller DidymosModelingMoonless_100kmRotDidymoon
             
       - run:
           name: notify test is finished
