@@ -309,7 +309,6 @@ CalibrationDisk = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\didymos_lowpol
                                       "CalibrationDisk", ["LightingReference"])
 CalibrationDisk.location = (0, 0, 0)
 
-
 frame_index = 0
 
 star_template = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\StarTemplate.blend", "TemplateStar",

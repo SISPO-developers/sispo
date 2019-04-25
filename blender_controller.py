@@ -34,7 +34,7 @@ class BlenderController:
                 scene.name = scene_name
         self.scenes = bpy.data.scenes
         self.scratchdisk = scratchdisk
-        self.render_ID = zlib.crc32(struct.pack("!f", time.time()))
+        self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
     def set_renderer(self, device="Auto", tile=64, tile_GPU=512, scene_names=None):
         """Set blender rendering device."""
@@ -103,7 +103,7 @@ class BlenderController:
             scene = bpy.data.scenes[scene_name]
             scene.render.image_settings.file_format = file_format
             scene.render.filepath = self.scratchdisk \
-                + "r%0.8X.exr" % (self.render_ID)
+                + "r%0.8X.exr" % (self.render_id)
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
             scene.render.resolution_percentage = 100
@@ -133,7 +133,7 @@ class BlenderController:
     def render(self, name="", scene_name="MainScene"):
         """Render scenes."""
         if name == "":
-            name = self.scratchdisk + "r%0.8X.exr" % (self.render_ID)
+            name = self.scratchdisk + "r%0.8X.exr" % (self.render_id)
 
         scene = bpy.data.scenes[scene_name]
         print("Rendering seed: %d" % (scene.cycles.seed))
