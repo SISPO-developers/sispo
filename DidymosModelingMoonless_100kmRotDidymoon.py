@@ -2,19 +2,14 @@
 
 #import io
 import math
-import subprocess
 import sys
 import time
 import os
-import copy
 #from array import array
 #from contextlib import redirect_stdout, redirect_stderr
 
 import numpy as np
 import matplotlib.pyplot as plt
-import OpenEXR
-import skimage.filters
-import skimage.transform
 import simplejson as json
 
 import orekit
