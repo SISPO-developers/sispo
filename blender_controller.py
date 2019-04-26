@@ -233,7 +233,7 @@ def get_camera_vectors(camera_name, scene_name):
     return cam_direction, up_vec, right_vec, leftedge_vec, rightedge_vec, downedge_vec, upedge_vec
 
 
-def get_RA_DEC(vec):
+def get_ra_dec(vec):
     """Calculate Right Ascension (RA) and Declination (DEC)."""
     vec = vec.normalized()
     dec = math.asin(vec.z)
@@ -242,12 +242,12 @@ def get_RA_DEC(vec):
     return (ra + math.pi, dec)
 
 
-def get_FOV(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
+def get_fov(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
     """Calculate centre and size of a camera"s current Field of View (FOV)."""
-    ra_max = max(math.degrees(get_RA_DEC(rightedge_vec)[
-        0]), math.degrees(get_RA_DEC(leftedge_vec)[0]))
-    ra_min = min(math.degrees(get_RA_DEC(rightedge_vec)[
-        0]), math.degrees(get_RA_DEC(leftedge_vec)[0]))
+    ra_max = max(math.degrees(get_ra_dec(rightedge_vec)[
+        0]), math.degrees(get_ra_dec(leftedge_vec)[0]))
+    ra_min = min(math.degrees(get_ra_dec(rightedge_vec)[
+        0]), math.degrees(get_ra_dec(leftedge_vec)[0]))
 
     if math.fabs(ra_max - ra_min) > math.fabs(ra_max - (ra_min + 360)):
         ra_cent = (ra_min + ra_max + 360) / 2
@@ -258,8 +258,8 @@ def get_FOV(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
         ra_cent = (ra_max + ra_min) / 2
         ra_w = (ra_max - ra_min)
 
-    dec_min = math.degrees(get_RA_DEC(downedge_vec)[1])
-    dec_max = math.degrees(get_RA_DEC(upedge_vec)[1])
+    dec_min = math.degrees(get_ra_dec(downedge_vec)[1])
+    dec_max = math.degrees(get_ra_dec(upedge_vec)[1])
     dec_cent = (dec_max + dec_min) / 2
     dec_w = (dec_max - dec_min)
 

@@ -401,10 +401,10 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[START_FRAME_NUM
     (cam_direction, up, right, leftedge_vec, rightedge_vec, downedge_vec,
      upedge_vec) = bc.get_camera_vectors("SatelliteCamera", "MainScene")
 
-    (ra_cent, ra_w, dec_cent, dec_w) = bc.get_FOV(leftedge_vec, rightedge_vec, downedge_vec,
+    (ra_cent, ra_w, dec_cent, dec_w) = bc.get_fov(leftedge_vec, rightedge_vec, downedge_vec,
                                                upedge_vec)
 
-    starlist = starcat.get_UCAC4(ra_cent, ra_w, dec_cent, dec_w, STAR_CAT_FN)
+    starlist = starcat.get_ucac4(ra_cent, ra_w, dec_cent, dec_w, STAR_CAT_FN)
 
     # R = 100000000.
     # pixelsize_at_R =

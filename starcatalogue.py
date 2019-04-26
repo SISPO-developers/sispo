@@ -12,7 +12,7 @@ import OpenEXR
 import skimage.filters
 import skimage.transform
 
-def get_UCAC4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
+def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
     """Retrieve starmap data from UCAC4 catalog."""
     errorlog_fn = "starfield_errorlog%f.txt" % time.time()
 
@@ -181,12 +181,12 @@ class StarCache:
         # for c in range(0,3):
         #    starmap2[:,:,c]*=flux*(1E4)/np.sum(starmap2[:,:,c])
         #starmap2 = np.asarray(starmap2,dtype = "float32")
-        write_OpenEXR(filename, starmap3)
+        write_openexr(filename, starmap3)
 
         return (total_flux, np.sum(starmap3[:, :, 0]))
 
 
-def write_OpenEXR(filename, picture):
+def write_openexr(filename, picture):
     """Save image in OpenEXR file format."""
     h = len(picture)
     w = len(picture[0])
