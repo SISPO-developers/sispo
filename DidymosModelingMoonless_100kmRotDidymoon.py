@@ -41,8 +41,8 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import bpy
 #from mathutils import Matrix, Vector, Quaternion, Euler # pylint: disable=import-error
-import starcatalogue
-import blender_controller
+import starcatalogue as starcat
+import blender_controller as bc
 
 
 ROOT_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
@@ -250,7 +250,7 @@ SSB_PROPAGATOR.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagated")
 # print(time_sample_handler.data)
 
-blender = blender_controller.BlenderController(TEMP_DIR_PATH + "\\scratch\\",
+blender = bc.BlenderController(TEMP_DIR_PATH + "\\scratch\\",
                                                scene_names=["MainScene",
                                                             "BackgroundStars",
                                                             "AsteroidOnly",
@@ -317,194 +317,6 @@ star_template = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\StarTemplate.ble
 star_template.location = (1E20, 1E20, 1E20)
 
 
-def get_RA_DEC(vec):
-    """Calculate Right Ascension (RA) and Declination (DEC)."""
-    vec = vec.normalized()
-    dec = math.asin(vec.z)
-
-    ra = math.acos(vec.x / math.cos(dec))
-    return (ra + math.pi, dec)
-
-
-def get_FOV(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
-    """Calculate centre and size of a camera"s current Field of View (FOV)."""
-    ra_max = max(math.degrees(get_RA_DEC(rightedge_vec)[
-        0]), math.degrees(get_RA_DEC(leftedge_vec)[0]))
-    ra_min = min(math.degrees(get_RA_DEC(rightedge_vec)[
-        0]), math.degrees(get_RA_DEC(leftedge_vec)[0]))
-
-    if math.fabs(ra_max - ra_min) > math.fabs(ra_max - (ra_min + 360)):
-        ra_cent = (ra_min + ra_max + 360) / 2
-        if ra_cent >= 360:
-            ra_cent -= 360
-        ra_w = math.fabs(ra_max - (ra_min + 360))
-    else:
-        ra_cent = (ra_max + ra_min) / 2
-        ra_w = (ra_max - ra_min)
-
-    dec_min = math.degrees(get_RA_DEC(downedge_vec)[1])
-    dec_max = math.degrees(get_RA_DEC(upedge_vec)[1])
-    dec_cent = (dec_max + dec_min) / 2
-    dec_w = (dec_max - dec_min)
-
-    # print(("RA",ra_cent,"+-",ra_w,"DEC",dec_cent,"+-",dec_w))
-    return ra_cent, ra_w, dec_cent, dec_w
-
-
-def write_OpenEXR(fn, picture):
-    """Save image in OpenEXR file format."""
-    h = len(picture)
-    w = len(picture[0])
-    c = len(picture[0][0])
-
-    hdr = OpenEXR.Header(w, h)
-    x = OpenEXR.OutputFile(fn, hdr)
-
-    if c == 4:
-        data_r = picture[:, :, 0].tobytes()
-        data_g = picture[:, :, 1].tobytes()
-        data_b = picture[:, :, 2].tobytes()
-        data_a = picture[:, :, 3].tobytes()
-        x.writePixels({"R": data_r, "G": data_g, "B": data_b, "A": data_a})
-    elif c == 3:
-        data_r = picture[:, :, 0].tobytes()
-        data_g = picture[:, :, 1].tobytes()
-        data_b = picture[:, :, 2].tobytes()
-
-        x.writePixels({"R": data_r, "G": data_g, "B": data_b})
-    x.close()
-
-
-class StarCache:
-    """Handling stars in field of view, for rendering of scene."""
-
-    def __init__(self, template, parent=None):
-        """Initialise StarCache."""
-        self.template = template
-        self.star_array = []
-        self.parent = parent
-
-    def set_stars(self, stardata, cam_direction, sat_position, R, pixelsize_at_R, scene_names):
-        """Set current stars in the field of view."""
-        if len(self.star_array) < len(stardata):
-            for _ in range(0, len(stardata) - len(self.star_array)):
-                new_obj = self.template.copy()
-                new_obj.data = self.template.data.copy()
-                new_obj.animation_data_clear()
-                new_mat = star_template.material_slots[0].material.copy()
-                new_obj.material_slots[0].material = new_mat
-                self.star_array.append(new_obj)
-                if self.parent != None:
-                    new_obj.parent = self.parent
-        total_flux = 0.
-
-        for i in range(0, len(stardata)):
-            star = self.star_array[i]
-            star_data = copy.copy(stardata[i])
-            star_data[0] = math.radians(star_data[0])
-            star_data[1] = math.radians(star_data[1])
-
-            z_star = math.sin(star_data[1])
-            x_star = math.cos(star_data[1]) * math.cos(star_data[0] - math.pi)
-            y_star = -math.cos(star_data[1]) * math.sin(star_data[0] - math.pi)
-            vec = [x_star, y_star, z_star]
-            vec2 = [x_star, -y_star, z_star]
-            if np.dot(vec, cam_direction) < np.dot(vec2, cam_direction):
-                vec = vec2
-
-            pixel_factor = 10
-            # Always keep satellite in center to emulate large distances
-            star.location = np.asarray(vec) * R + sat_pos_rel
-            star.scale = (pixelsize_at_R / pixel_factor, pixelsize_at_R / pixel_factor,
-                          pixelsize_at_R / pixel_factor)
-
-            flux = math.pow(10, -0.4 * (star_data[2] - 10.))
-            flux0 = math.pow(10, -0.4 * (star_data[2]))
-            total_flux += flux0
-
-            star.material_slots[0].material.node_tree.nodes.get(
-                "Emission").inputs[1].default_value = flux * pixel_factor * pixel_factor
-
-            for scene_name in scene_names:
-                scene = bpy.data.scenes[scene_name]
-                if star.name not in scene.objects:
-                    scene.objects.link(star)
-        print("%d stars set, buffer len %d" % (i, len(self.star_array)))
-        if len(self.star_array) > len(stardata):
-            for scene_name in scene_names:
-                scene = bpy.data.scenes[scene_name]
-                for i in range(len(stardata), len(self.star_array)):
-                    if self.star_array[i].name in scene.objects:
-                        scene.objects.unlink(self.star_array[i])
-
-        return total_flux
-
-    def render_stars_directly(self, stardata, cam_direction, right_vec, up_vec, res_x, res_y, filename):
-        """Render given stars."""
-        up_vec -= cam_direction
-        right_vec -= cam_direction
-        total_flux = 0.
-
-        f_over_h_ccd_2 = 1. / np.sqrt(np.dot(up_vec, up_vec))
-        up_norm = up_vec * f_over_h_ccd_2
-        f_over_w_ccd_2 = 1. / np.sqrt(np.dot(right_vec, right_vec))
-        right_norm = right_vec * f_over_w_ccd_2
-
-        print("F_over_w %f f_over_h %f" % (f_over_w_ccd_2, f_over_h_ccd_2))
-        print("Res %d x %d" % (res_x, res_y))
-
-        ss = 2
-        #rx = res_x * ss
-        #ry = res_y * ss
-        starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
-        
-        for star_data in stardata:
-            star_data = copy.copy(star_data)
-            star_data[0] = math.radians(star_data[0])
-            star_data[1] = math.radians(star_data[1])
-
-            z_star = math.sin(star_data[1])
-            x_star = math.cos(star_data[1]) * math.cos(star_data[0] - math.pi)
-            y_star = -math.cos(star_data[1]) * math.sin(star_data[0] - math.pi)
-            vec = [x_star, y_star, z_star]
-            vec2 = [x_star, -y_star, z_star]
-            if np.dot(vec, cam_direction) < np.dot(vec2, cam_direction):
-                vec = vec2
-
-            x_pix = (f_over_w_ccd_2 * np.dot(right_norm, vec) /
-                     np.dot(cam_direction, vec) + 1.) * (res_x - 1) / 2.
-            y_pix = (-f_over_h_ccd_2 * np.dot(up_norm, vec) /
-                     np.dot(cam_direction, vec) + 1.) * (res_y - 1) / 2.
-            x_pix2 = max(0, min(int(round(x_pix * ss)), res_x * ss - 1))
-            y_pix2 = max(0, min(int(round(y_pix * ss)), res_y * ss - 1))
-
-            flux = math.pow(10., -0.4 * (star_data[2]))
-            flux0 = math.pow(10., -0.4 * (star_data[2]))
-
-            pix = starmap[y_pix2, x_pix2]
-            starmap[y_pix2, x_pix2] = [pix[0] + flux,
-                                       pix[1] + flux, pix[2] + flux, 1.]
-
-            total_flux += flux0
-        starmap2 = starmap.copy()
-        starmap2 = skimage.filters.gaussian(
-            starmap, ss / 2., multichannel=True)
-        starmap3 = np.zeros((res_y, res_x, 4), np.float32)
-        for c in range(0, 4):
-
-            starmap3[:, :, c] = skimage.transform.downscale_local_mean(
-                starmap2[:, :, c], (ss, ss)) * (ss * ss)
-
-        # starmap2 = skimage.transform.rescale(starmap2,1./ss,mode =
-        # "constant")#,multichannel = True)
-        # for c in range(0,3):
-        #    starmap2[:,:,c]*=flux*(1E4)/np.sum(starmap2[:,:,c])
-        #starmap2 = np.asarray(starmap2,dtype = "float32")
-        write_OpenEXR(filename, starmap3)
-
-        return (total_flux, np.sum(starmap3[:, :, 0]))
-
-
 def write_vec_string(vec, prec):
     """Write data vector into string."""
     o = "["
@@ -531,7 +343,7 @@ def write_mat_string(vec, prec):
     return o + "]"
 
 
-star_cache = StarCache(
+star_cache = starcat.StarCache(
     star_template, blender.create_empty("StarParent", star_scenes))
 #cmd = "mkdir ""+scratchloc+"/"+series_name+'"'
 # print(cmd)
@@ -587,12 +399,12 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[START_FRAME_NUM
     blender.update()
 
     (cam_direction, up, right, leftedge_vec, rightedge_vec, downedge_vec,
-     upedge_vec) = blender.get_camera_vectors("SatelliteCamera", "MainScene")
+     upedge_vec) = bc.get_camera_vectors("SatelliteCamera", "MainScene")
 
-    (ra_cent, ra_w, dec_cent, dec_w) = get_FOV(leftedge_vec, rightedge_vec, downedge_vec,
+    (ra_cent, ra_w, dec_cent, dec_w) = bc.get_FOV(leftedge_vec, rightedge_vec, downedge_vec,
                                                upedge_vec)
 
-    starlist = starcatalogue.get_UCAC4(ra_cent, ra_w, dec_cent, dec_w, STAR_CAT_FN)
+    starlist = starcat.get_UCAC4(ra_cent, ra_w, dec_cent, dec_w, STAR_CAT_FN)
 
     # R = 100000000.
     # pixelsize_at_R =
