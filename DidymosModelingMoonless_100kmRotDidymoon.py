@@ -1,17 +1,20 @@
 """Main simulation module."""
 
-#import io
-import math
-import sys
-import time
-import os
 #from array import array
 #from contextlib import redirect_stdout, redirect_stderr
+#import io
+import math
+import os
+import time
+import sys
 
-import numpy as np
+import bpy
+#import cv2
+#import Imath
+#from mathutils import Matrix, Vector, Quaternion, Euler # pylint: disable=import-error
 import matplotlib.pyplot as plt
-import simplejson as json
-
+from mpl_toolkits.mplot3d import Axes3D
+import numpy as np
 import orekit
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
 from orekit.pyhelpers import setup_orekit_curdir
@@ -29,13 +32,10 @@ from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler #
 from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=import-error
 #from org.orekit.data import DataProvidersManager # pylint: disable=import-error
 #from org.orekit.data import DirectoryCrawler # pylint: disable=import-error
-from mpl_toolkits.mplot3d import Axes3D
 #import scipy
-#import cv2
-#import Imath
+import simplejson as json
 
-import bpy
-#from mathutils import Matrix, Vector, Quaternion, Euler # pylint: disable=import-error
+
 import starcatalogue as starcat
 import blender_controller as bc
 

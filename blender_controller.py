@@ -1,9 +1,9 @@
 """Module to controll blender python module bpy."""
 
+import math
+import struct
 import time
 import zlib
-import struct
-import math
 
 import bpy
 from mathutils import Vector # pylint: disable=import-error

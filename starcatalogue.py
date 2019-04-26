@@ -1,10 +1,10 @@
 """Interface for handling data from a star catalogue. Retrieve data as well as render and write images."""
 
-import sys
 import copy
 import math
-import time
 import subprocess
+import sys
+import time
 
 import bpy
 import numpy as np
