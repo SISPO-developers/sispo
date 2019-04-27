@@ -140,9 +140,7 @@ class BlenderController:
         scene.render.filepath = name
         bpy.context.window.scene = scene
         bpy.ops.render.render(write_still=True)
-        # get viewer pixels
 
-        # return cv2.imread(self.scene.render.filepath)
         return 0  # TODO: only dummy, change later
 
     def load_object(self, filename, object_name, scene_names=None):
@@ -215,7 +213,6 @@ class BlenderController:
         res_x = scene.render.resolution_x
         res_y = scene.render.resolution_y
 
-        #max_dim = max(res_x, res_y)
         if res_x > res_y:
             sensor_w = camera.data.sensor_width
             sensor_h = camera.data.sensor_width * res_y / res_x
