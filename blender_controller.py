@@ -1,8 +1,9 @@
 """Module to controll blender python module bpy."""
 
+import math
+import struct
 import time
 import zlib
-import struct
 
 import bpy
 from mathutils import Vector # pylint: disable=import-error
@@ -205,32 +206,68 @@ class BlenderController:
         """Save a blender d file."""
         bpy.ops.wm.save_as_mainfile(filename)
 
-    def get_camera_vectors(self, camera_name, scene_name):
-        """Get camera position and direction vectors."""
-        camera = bpy.data.objects[camera_name]
-        up_vec = camera.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
-        cam_direction = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
-        right_vec = cam_direction.cross(up_vec)
 
-        scene = bpy.data.scenes[scene_name]
-        res_x = scene.render.resolution_x
-        res_y = scene.render.resolution_y
+def get_camera_vectors(camera_name, scene_name):
+    """Get camera position and direction vectors."""
+    camera = bpy.data.objects[camera_name]
+    up_vec = camera.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
+    cam_direction = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
+    right_vec = cam_direction.cross(up_vec)
 
-        if res_x > res_y:
-            sensor_w = camera.data.sensor_width
-            sensor_h = camera.data.sensor_width * res_y / res_x
-        else:
-            sensor_h = camera.data.sensor_width
-            sensor_w = camera.data.sensor_width * res_x / res_y
+    scene = bpy.data.scenes[scene_name]
+    res_x = scene.render.resolution_x
+    res_y = scene.render.resolution_y
 
-        rightedge_vec = cam_direction + right_vec * sensor_w * 0.5 / camera.data.lens
-        leftedge_vec = cam_direction - right_vec * sensor_w * 0.5 / camera.data.lens
-        upedge_vec = cam_direction + up_vec * sensor_h * 0.5 / camera.data.lens
-        downedge_vec = cam_direction - up_vec * sensor_h * 0.5 / camera.data.lens
+    #max_dim = max(res_x, res_y)
+    if res_x > res_y:
+        sensor_w = camera.data.sensor_width
+        sensor_h = camera.data.sensor_width * res_y / res_x
+    else:
+        sensor_h = camera.data.sensor_width
+        sensor_w = camera.data.sensor_width * res_x / res_y
 
-        return cam_direction, up_vec, right_vec, leftedge_vec, rightedge_vec, downedge_vec, upedge_vec
+    rightedge_vec = cam_direction + right_vec * sensor_w * 0.5 / camera.data.lens
+    leftedge_vec = cam_direction - right_vec * sensor_w * 0.5 / camera.data.lens
+    upedge_vec = cam_direction + up_vec * sensor_h * 0.5 / camera.data.lens
+    downedge_vec = cam_direction - up_vec * sensor_h * 0.5 / camera.data.lens
 
-def __assert_device_available(device):
+    return cam_direction, up_vec, right_vec, leftedge_vec, rightedge_vec, downedge_vec, upedge_vec
+
+
+def get_ra_dec(vec):
+    """Calculate Right Ascension (RA) and Declination (DEC)."""
+    vec = vec.normalized()
+    dec = math.asin(vec.z)
+
+    ra = math.acos(vec.x / math.cos(dec))
+    return (ra + math.pi, dec)
+
+
+def get_fov(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
+    """Calculate centre and size of a camera"s current Field of View (FOV)."""
+    ra_max = max(math.degrees(get_ra_dec(rightedge_vec)[
+        0]), math.degrees(get_ra_dec(leftedge_vec)[0]))
+    ra_min = min(math.degrees(get_ra_dec(rightedge_vec)[
+        0]), math.degrees(get_ra_dec(leftedge_vec)[0]))
+
+    if math.fabs(ra_max - ra_min) > math.fabs(ra_max - (ra_min + 360)):
+        ra_cent = (ra_min + ra_max + 360) / 2
+        if ra_cent >= 360:
+            ra_cent -= 360
+        ra_w = math.fabs(ra_max - (ra_min + 360))
+    else:
+        ra_cent = (ra_max + ra_min) / 2
+        ra_w = (ra_max - ra_min)
+
+    dec_min = math.degrees(get_ra_dec(downedge_vec)[1])
+    dec_max = math.degrees(get_ra_dec(upedge_vec)[1])
+    dec_cent = (dec_max + dec_min) / 2
+    dec_w = (dec_max - dec_min)
+
+    # print(("RA",ra_cent,"+-",ra_w,"DEC",dec_cent,"+-",dec_w))
+    return ra_cent, ra_w, dec_cent, dec_w
+  
+  def __assert_device_available(device):
     """Assert device is available or switch to CPU. 
     
     Ensure bpy.context.preferences.addons["cycles"].preferences.get_devices()
@@ -246,3 +283,4 @@ def __assert_device_available(device):
             device = "CPU"
 
     return device
+ 
