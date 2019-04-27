@@ -50,7 +50,7 @@ class BlenderController:
         if scene_names is None:
             scene_names = self.scene_names    
 
-        device = __assert_device_available(device)
+        device = _assert_device_available(device)
 
         if device == "GPU":
             bpy.context.preferences.addons["cycles"].preferences.compute_device_type = "CUDA"
@@ -265,7 +265,7 @@ def get_fov(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
 
     return ra_cent, ra_w, dec_cent, dec_w
   
-def __assert_device_available(device):
+def _assert_device_available(device):
     """Assert device is available or switch to CPU. 
     
     Ensure bpy.context.preferences.addons["cycles"].preferences.get_devices()

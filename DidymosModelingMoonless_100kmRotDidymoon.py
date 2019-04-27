@@ -4,6 +4,7 @@ import copy
 import math
 import os
 import sys
+import time
 
 import bpy
 import numpy as np
@@ -35,7 +36,7 @@ import blender_controller as bc
 ROOT_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
 SERIES_NAME = "Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter"
-TIME_STEPS = 2  # 500#1000#1000#50#1000
+TIME_STEPS = 10  # 500#1000#1000#50#1000
 FACTOR = 10  # 15#12#10#5#7#Higher values slow down closest encounter phase
 MODE = 1
 ENCOUNTER_DURATION = 2. * 60  # *2#3600.*24.*30*4*3
