@@ -39,7 +39,7 @@ class BlenderController:
         ".get_devices() required to initialise cycles .devices collection."
         bpy.context.preferences.addons["cycles"].preferences.get_devices()
 
-    def set_renderer(self, device="Auto", tile=64, tile_GPU=512, scene_names=None):
+    def set_renderer(self, device="Auto", tile=64, tile_gpu=512, scene_names=None):
         """Set blender rendering device. 
         
         Fallback is CPU if no GPU available. If device is neither GPU or CPU,
@@ -57,7 +57,7 @@ class BlenderController:
                 if gpu.type == "GPU"
                     gpu.use = True
                     print(gpu.name)
-            tile = tile_GPU
+            tile = tile_gpu
             print("Rendering with GPUs:")
         else:
             print("Rendering with CPUs")
