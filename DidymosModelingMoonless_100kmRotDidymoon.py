@@ -1,8 +1,9 @@
 """Main simulation module."""
 
+import copy
 import math
 import os
-import copy
+import sys
 
 import bpy
 import numpy as np
@@ -29,7 +30,7 @@ from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=im
 from mpl_toolkits.mplot3d import Axes3D
 
 import starcatalogue as starcat
-import blender_controller as bc
+#import blender_controller as bc
 
 ROOT_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 

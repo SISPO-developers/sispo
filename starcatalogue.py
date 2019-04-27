@@ -25,11 +25,6 @@ def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
         import ctypes
         SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
         ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
-        # subprocess_flags = 0x8000000 #win32con.CREATE_NO_WINDOW?
-    # else:
-        #subprocess_flags = 0
-    # command="%s %f %f %f %f -h %s
-    # %s"%(ucac_exe,self.ra_cent,self.dec_cent,self.ra_w,self.dec_w,ucac_data,ucac_out)
 
     command = "E:\\01_MasterThesis\\00_Code\\star_cats\\u4test.exe %f %f %f %f -h E:\\01_MasterThesis\\02_Data\\UCAC4 %s" % (
         ra, dec, ra_w, dec_h, filename)
@@ -52,7 +47,6 @@ def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
         ra_star = float(line[11:23])
         dec_star = float(line[23:36])
         mag_star = float(line[36:43])
-        # print((r,d,m))
         out.append([ra_star, dec_star, mag_star])
     return out
 
@@ -135,8 +129,6 @@ class StarCache:
         print("Res %d x %d" % (res_x, res_y))
 
         ss = 2
-        #rx = res_x * ss
-        #ry = res_y * ss
         starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
         
         for star_data in stardata:
@@ -176,11 +168,6 @@ class StarCache:
             starmap3[:, :, c] = skimage.transform.downscale_local_mean(
                 starmap2[:, :, c], (ss, ss)) * (ss * ss)
 
-        # starmap2 = skimage.transform.rescale(starmap2,1./ss,mode =
-        # "constant")#,multichannel = True)
-        # for c in range(0,3):
-        #    starmap2[:,:,c]*=flux*(1E4)/np.sum(starmap2[:,:,c])
-        #starmap2 = np.asarray(starmap2,dtype = "float32")
         write_openexr(filename, starmap3)
 
         return (total_flux, np.sum(starmap3[:, :, 0]))

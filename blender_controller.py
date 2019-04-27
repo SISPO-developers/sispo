@@ -267,7 +267,7 @@ def get_fov(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
     # print(("RA",ra_cent,"+-",ra_w,"DEC",dec_cent,"+-",dec_w))
     return ra_cent, ra_w, dec_cent, dec_w
   
-  def __assert_device_available(device):
+def __assert_device_available(device):
     """Assert device is available or switch to CPU. 
     
     Ensure bpy.context.preferences.addons["cycles"].preferences.get_devices()
