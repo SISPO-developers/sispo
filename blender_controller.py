@@ -36,26 +36,29 @@ class BlenderController:
         self.scratchdisk = scratchdisk
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
-    def set_renderer(self, device="Auto", tile=64, tile_GPU=512, scene_names=None):
-        """Set blender rendering device."""
+        ".get_devices() required to initialise cycles .devices collection."
+        bpy.context.preferences.addons["cycles"].preferences.get_devices()
+
+    def set_renderer(self, device="Auto", tile=64, tile_gpu=512, scene_names=None):
+        """Set blender rendering device. 
+        
+        Fallback is CPU if no GPU available. If device is neither GPU or CPU,
+        it is attempted to use the GPU first.
+        """
         print("Render setting %r" % (device))
         if scene_names is None:
-            scene_names = self.scene_names
+            scene_names = self.scene_names    
 
-        if device not in ("CPU", "GPU"):
-            if bpy.context.preferences.addons["cycles"].preferences.devices:
-                device = "GPU"
-                tile = tile_GPU
-            else:
-                device = "CPU"
+        device = __assert_device_available(device)
 
         if device == "GPU":
-            bpy.context.user_preferences.addons["cycles"].preferences.compute_device_type = "CUDA"
+            bpy.context.preferences.addons["cycles"].preferences.compute_device_type = "CUDA"
+            for gpu in bpy.context.preferences.addons["cycles"].preferences.devices:
+                if gpu.type == "GPU"
+                    gpu.use = True
+                    print(gpu.name)
+            tile = tile_gpu
             print("Rendering with GPUs:")
-            for gpu in bpy.context.user_preferences.addons["cycles"].preferences.devices:
-                gpu.use = True
-                print(gpu.name)
-            tile = tile_GPU
         else:
             print("Rendering with CPUs")
 
@@ -226,3 +229,20 @@ class BlenderController:
         downedge_vec = cam_direction - up_vec * sensor_h * 0.5 / camera.data.lens
 
         return cam_direction, up_vec, right_vec, leftedge_vec, rightedge_vec, downedge_vec, upedge_vec
+
+def __assert_device_available(device):
+    """Assert device is available or switch to CPU. 
+    
+    Ensure bpy.context.preferences.addons["cycles"].preferences.get_devices()
+    was called before. Otherwise .devices collection is not initialised.
+    """
+    devices = bpy.context.preferences.addons["cycles"].preferences.devices
+    device_types = {device.type for device in devices}
+
+    if device not in device_types:        
+        if "GPU" in device_types:
+            device = "GPU"
+        else:
+            device = "CPU"
+
+    return device
