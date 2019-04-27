@@ -1,20 +1,16 @@
 """Main simulation module."""
 
-#from array import array
-#from contextlib import redirect_stdout, redirect_stderr
-#import io
 import math
 import os
-import time
-import sys
+import copy
 
 import bpy
-#import cv2
-#import Imath
-#from mathutils import Matrix, Vector, Quaternion, Euler # pylint: disable=import-error
-import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
 import numpy as np
+import matplotlib.pyplot as plt
+import OpenEXR
+import skimage.filters
+import skimage.transform
+import simplejson as json
 import orekit
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
 from orekit.pyhelpers import setup_orekit_curdir
@@ -30,15 +26,10 @@ from org.orekit.propagation.events.handlers import RecordAndContinue # pylint: d
 from org.orekit.propagation.events.handlers import EventHandler # pylint: disable=import-error
 from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler # pylint: disable=import-error
 from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=import-error
-#from org.orekit.data import DataProvidersManager # pylint: disable=import-error
-#from org.orekit.data import DirectoryCrawler # pylint: disable=import-error
-#import scipy
-import simplejson as json
-
+from mpl_toolkits.mplot3d import Axes3D
 
 import starcatalogue as starcat
 import blender_controller as bc
-
 
 ROOT_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 
@@ -137,7 +128,6 @@ SSB_M = math.radians(1.967164895190036E+02)
 
 UTC = TimeScalesFactory.getTDB()
 DATE_INITIAL = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, UTC)
-#inertialFrame_ephemeris = FramesFactory.getICRF()
 ICRF = FramesFactory.getICRF()
 MU_SUN = 1.32712440018E20
 
@@ -149,8 +139,6 @@ SSB_PROPAGATOR = KeplerianPropagator(SSB_ORBIT)
 
 SSB_POS_HISTORY = []
 SC_POS_HISTORY = []
-
-# orbit_start = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, UTC)
 
 CLOSEST_ENCOUNTER_DATE = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, UTC)
 
@@ -186,8 +174,6 @@ SC_TRAJECTORY = orbits.KeplerianOrbit(PVCoordinates(
     SC_POS, SC_VEL), ICRF, CLOSEST_ENCOUNTER_DATE, MU_SUN)
 SC_PROPAGATOR = KeplerianPropagator(SC_TRAJECTORY)
 SC_PROPAGATOR_LONG = KeplerianPropagator(SC_TRAJECTORY)
-# min_timestep = ENCOUNTER_DURATION \
-#    * math.sinh(FACTOR / TIME_STEPS) / math.sinh(FACTOR)
 kepler_long = KeplerianPropagator(SSB_ORBIT)
 
 time_steps_long = 2000
@@ -217,7 +203,6 @@ with open(TEMP_DIR_PATH + "\\%s\\%s_long_orbit.txt" % (SERIES_NAME, SERIES_NAME)
         pvc2 = b.getPVCoordinates(ICRF)
         SC_POS = np.asarray(pvc2.getPosition().toArray())
         asteroid_pos = np.asarray(pvc.getPosition().toArray())
-        # a.getDate()
         long_orbit_file.write(str(a.getDate()) + " " + str(asteroid_pos).replace(
             "[", "").replace("]", "") + "," + str(SC_POS).replace("[", "").replace("]", "") + "\n")
 
@@ -243,7 +228,6 @@ SC_PROPAGATOR.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagating asteroid")
 SSB_PROPAGATOR.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagated")
-# print(time_sample_handler.data)
 
 blender = bc.BlenderController(TEMP_DIR_PATH + "\\scratch\\",
                                                scene_names=["MainScene",
@@ -328,8 +312,6 @@ def write_vec_string(vec, prec):
 def write_mat_string(vec, prec):
     """Write data matrix into string."""
     o = "["
-    #fs = "%%.%de"%(prec)
-    #i = 0
     for (n, v) in enumerate(vec):
 
         o += (write_vec_string(v, prec))
@@ -340,18 +322,13 @@ def write_mat_string(vec, prec):
 
 star_cache = starcat.StarCache(
     star_template, blender.create_empty("StarParent", star_scenes))
-#cmd = "mkdir ""+scratchloc+"/"+series_name+'"'
-# print(cmd)
 
-# subprocess.call(cmd)
 STAR_CAT_FN = TEMP_DIR_PATH + "\\%s\\ucac4_%d.txt" % (SERIES_NAME, time.time())
 SCALER = 1000.
 blender.set_exposure(EXPOSURE)
 for (didymos, sat, frame_index) in zip(time_sample_handler2.data[START_FRAME_NUM:END_FRAME_NUM:FRAME_STEP_SIZE],
                                        time_sample_handler.data[START_FRAME_NUM:END_FRAME_NUM:FRAME_STEP_SIZE],
                                        range(0, TIME_STEPS)[START_FRAME_NUM:END_FRAME_NUM:FRAME_STEP_SIZE]):
-    # if frame_index<332:
-   #     continue
 
     a = didymos
     t = a.getDate().durationFrom(detector_start)
@@ -401,14 +378,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[START_FRAME_NUM
 
     starlist = starcat.get_ucac4(ra_cent, ra_w, dec_cent, dec_w, STAR_CAT_FN)
 
-    # R = 100000000.
-    # pixelsize_at_R =
-    # R*math.radians(ra_w)/blender.scenes["BackgroundStars"].render.resolution_x
-    # print("Pixel size at %f is %f"%(R,pixelsize_at_R))
-    # i = 0
     print("Found %d stars in FOV" % (len(starlist)))
-    # starfield_flux =
-    # star_cache.SetStars(starlist,cam_direction,sat_pos_rel,R,pixelsize_at_R,star_scenes)
 
     x_res = blender.scenes["BackgroundStars"].render.resolution_x
     y_res = blender.scenes["BackgroundStars"].render.resolution_y
@@ -425,14 +395,7 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[START_FRAME_NUM
     fn_base = TEMP_DIR_PATH \
         + "\\%s\\%s%.4d" % (SERIES_NAME, SERIES_NAME, frame_index)
     print("Saving blend file")
-    #bpy.ops.wm.save_as_mainfile(filepath = fn_base+".blend")
     print("Rendering")
-
-    #result = blender.Render(fn_base,"MainScene")
-
-    # fn_base2 =
-    # scratchloc+"/%s/%s_stars_%.4d"%(series_name,series_name,frame_index)
-    #result = blender.Render(fn_base2,"BackgroundStars")
 
     fn_base3 = TEMP_DIR_PATH \
         + "\\%s\\%s_asteroid_%.4d" % (SERIES_NAME, SERIES_NAME, frame_index)
@@ -512,8 +475,6 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[START_FRAME_NUM
     SC_POS_HISTORY.append(SC_POS)
 
     print("Frame %d complete" % (frame_index))
-    # frame_index += 1
-    # break
 
 
 fig = plt.figure(1)
@@ -525,10 +486,6 @@ ax = fig.add_subplot(111, projection="3d")
 ax.plot(SSB_POS_HISTORY[0], SSB_POS_HISTORY[1], SSB_POS_HISTORY[2])
 ax.plot(SC_POS_HISTORY[0], SC_POS_HISTORY[1], SC_POS_HISTORY[2])
 
-# au = utils.Constants.IAU_2012_ASTRONOMICAL_UNIT
-# ax.set_xlim(-3*au,3*au)
-# ax.set_ylim(-3*au,3*au)
-# ax.set_zlim(-3*au,3*au)
 plt.figure(2)
 plt.clf()
 plt.plot(DISTANCE_HISTORY[0], DISTANCE_HISTORY[1])
