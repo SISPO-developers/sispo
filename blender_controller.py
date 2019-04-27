@@ -55,7 +55,7 @@ class BlenderController:
         if device == "GPU":
             bpy.context.preferences.addons["cycles"].preferences.compute_device_type = "CUDA"
             for gpu in bpy.context.preferences.addons["cycles"].preferences.devices:
-                if gpu.type == "GPU"
+                if gpu.type == "GPU":
                     gpu.use = True
                     print(gpu.name)
             tile = tile_gpu
@@ -218,7 +218,6 @@ def get_camera_vectors(camera_name, scene_name):
     res_x = scene.render.resolution_x
     res_y = scene.render.resolution_y
 
-    #max_dim = max(res_x, res_y)
     if res_x > res_y:
         sensor_w = camera.data.sensor_width
         sensor_h = camera.data.sensor_width * res_y / res_x
@@ -264,7 +263,6 @@ def get_fov(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
     dec_cent = (dec_max + dec_min) / 2
     dec_w = (dec_max - dec_min)
 
-    # print(("RA",ra_cent,"+-",ra_w,"DEC",dec_cent,"+-",dec_w))
     return ra_cent, ra_w, dec_cent, dec_w
   
 def __assert_device_available(device):
