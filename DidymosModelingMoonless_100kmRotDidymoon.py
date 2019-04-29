@@ -254,7 +254,7 @@ else:
 print("Start %d end %d skip %d" % (START_FRAME_NUM, END_FRAME_NUM, FRAME_STEP_SIZE))
 
 blender.set_samples(CYCLES_SAMPLES)
-blender.set_output_format(2464, 2056)
+blender.set_output_format(2464, 2056) # TODO: Why this specific resolution? -> Prototype
 blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name="SatelliteCamera",
                    scene_names=["MainScene", "BackgroundStars", "AsteroidOnly"])
 blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name="ConstantDistanceCamera",

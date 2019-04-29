@@ -110,7 +110,7 @@ class BlenderController:
                 + "r%0.8X.exr" % (self.render_id)
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
-            scene.render.resolution_percentage = 100
+            scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
             scene.render.image_settings.color_depth = color_depth
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_preview = use_preview
@@ -176,7 +176,7 @@ class BlenderController:
         camera.data.sensor_width = sensor
         camera.location = (0, 0, 0)
         camera.data.type = mode
-        self.cameras = bpy.data.objects
+        self.cameras = bpy.data.objects # TODO: Why objects? why not data.cameras only?
         if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
@@ -234,7 +234,7 @@ def get_camera_vectors(camera_name, scene_name):
 
 
 def get_ra_dec(vec):
-    """Calculate Right Ascension (RA) and Declination (DEC)."""
+    """Calculate Right Ascension (RA) and Declination (DEC) in radians."""
     vec = vec.normalized()
     dec = math.asin(vec.z)
 
@@ -243,11 +243,11 @@ def get_ra_dec(vec):
 
 
 def get_fov(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
-    """Calculate centre and size of a camera"s current Field of View (FOV)."""
-    ra_max = max(math.degrees(get_ra_dec(rightedge_vec)[
-        0]), math.degrees(get_ra_dec(leftedge_vec)[0]))
-    ra_min = min(math.degrees(get_ra_dec(rightedge_vec)[
-        0]), math.degrees(get_ra_dec(leftedge_vec)[0]))
+    """Calculate centre and size of a camera's current Field of View (FOV) in degrees."""
+    ra_max = max(get_ra_dec(rightedge_vec)[0], get_ra_dec(leftedge_vec)[0])
+    ra_max = math.degrees(ra_max)
+    ra_min = min(get_ra_dec(rightedge_vec)[0], get_ra_dec(leftedge_vec)[0])
+    ra_min = math.degrees(ra_min)
 
     if math.fabs(ra_max - ra_min) > math.fabs(ra_max - (ra_min + 360)):
         ra_cent = (ra_min + ra_max + 360) / 2
