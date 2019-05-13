@@ -1,6 +1,8 @@
 ## Project specific additional gitignores
 # Directories
 temp/
+data/
+software/
 
 # File types
 *.txt
