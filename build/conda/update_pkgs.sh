@@ -2,6 +2,6 @@
 
 echo "Updating all conda packages start"
 
-conda update --all
+echo y | conda update --all
 
 echo "Updating all conda packages done"

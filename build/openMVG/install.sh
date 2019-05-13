@@ -14,12 +14,15 @@ cd openMVG
 git clone --recursive https://github.com/openMVG/openMVG.git
 
 # Building
-[[ -d openMVG_build ]] || mkdir openMVG_build
-cd openMVG_build
+[[ -d build_openMVG ]] || mkdir build_openMVG
+cd build_openMVG
 
 cmake \
-	../openMVG/src \
-       -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake
+	-S ../openMVG/src \
+        -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake \
+        -DCMAKE_INSTALL_PREFIX=install/ \
+        -DINCLUDE_INSTALL_DIR=install/include \
+        -DPYTHON_EXECUTABLE=../../conda/envs/py37/bin/python
 
 cmake --build . --target install
 

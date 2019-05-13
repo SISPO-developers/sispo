@@ -22,9 +22,9 @@ make update
 
 ###########################
 # Get stable bpy version
-cd ../../../scripts/blender
-./checkout_stable_bpy.sh
-cd ../../software/blender/blender
+#cd ../../../build/blender
+#./../../../build/blender/checkout_stable_bpy.sh
+#cd ../../software/blender/blender
 ###########################
 
 # Install blender dependenciesn
@@ -40,8 +40,8 @@ cmake \
 	-DWITH_CYCLES_CUDA_BINARIES=ON \
 	-DWITH_IMAGE_OPENEXR=ON \
 	-DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake \
-	-DPYTHON_SITE_PACKAGES=../../conda/envs/py37/lib/python3.7/site-packages
-cmake --build . -j 8
+	-DPYTHON_SITE_PACKAGES=../../conda/lib/python3.7/site-packages
+cmake --build . 
 make install
 
 echo "Installing blender as a python module done"
