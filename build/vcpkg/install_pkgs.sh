@@ -8,6 +8,8 @@ cd ../../software/vcpkg
 # Install packages
 # General packages
 ./vcpkg install \
+	--recurse \
+	--keep-going \
        eigen3 \
        glog \
        gflags \
@@ -15,22 +17,27 @@ cd ../../software/vcpkg
        bzip2 \
        vcglib \
        tbb \
-       #intel-mkl \
-       #boost[mpi] \
-       #breakpad \
-       #ceres[lapack,tools] \
-       #glew \
-       #glfw3 \
-       #ogre \
-       #openexr \
-       #cereal \
-       #cgal \
-       #tiff \
-       #libjpeg-turbo \
-       #libpng \
-       #opencv[contrib,dnn,eigen,ffmpeg,flann,ipp,jasper,jpeg,openexr,opengl,ovis,png,qt,sfm,tbb,tiff]
-       #atlmfc \
+       boost \
+       openblas \
+       clapack \
+       ceres[lapack,tools] \
+       glew \
+       glfw3 \
+       mpir \
+       mpfr \
+       pthreads \
+       openexr \
+       cereal \
+       cgal \
+       tiff \
+       libjpeg-turbo \
+       libpng \
+       sdl2 \
+       ogre \
+       opencv[contrib,dnn,eigen,ffmpeg,flann,ipp,jasper,jpeg,openexr,opengl,png,sfm,tiff]
        #qt5 \
+       #intel-mkl \
+       #breakpad \
 
 
 echo "Installing required packages done"
