@@ -2,7 +2,10 @@
 # Directories
 temp/
 data/
+!data/README.md
 software/
+!software/README.md
+
 
 # File types
 *.txt
