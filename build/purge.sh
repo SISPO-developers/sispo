@@ -7,9 +7,9 @@ conda deactivate
 
 if [ $confirmation = y ]
     then \ 
-	    rm -r ../software & \
-	    rm -r ../data & \
-	    wait \
+	    rm -r ../software & 
+	    #rm -r ../data & \
+	    wait 
 	    echo "Purging software directory: done"
     else echo "Nothing done"
 fi

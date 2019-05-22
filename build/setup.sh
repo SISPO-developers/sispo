@@ -75,8 +75,8 @@ echo "########## openMVS done ##########"
 (
 echo "########## download data start ##########"
 cd data
-./download_orekit.sh
-./download_ucac4.sh
+#./download_orekit.sh
+#./download_ucac4.sh
 
 cd ..
 echo "########## download data done ##########"
