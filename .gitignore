@@ -1,9 +1,9 @@
 ## Project specific additional gitignores
 # Directories
-temp/
-data/
+temp/*
+data/*
 !data/README.md
-software/
+software/*
 !software/README.md
 
 
