@@ -1,6 +1,11 @@
 ## Project specific additional gitignores
 # Directories
-temp/
+temp/*
+data/*
+!data/README.md
+software/*
+!software/README.md
+
 
 # File types
 *.txt

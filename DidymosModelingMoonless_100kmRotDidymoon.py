@@ -265,7 +265,7 @@ blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name="LightingReferen
 asteroid_scenes = ["MainScene", "AsteroidOnly", "AsteroidConstDistance"]
 star_scenes = ["MainScene", "BackgroundStars"]
 
-Asteroid = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\didymos2.blend", "Didymos.001",
+Asteroid = blender.load_object(ROOT_DIR_PATH + "\\data\\Didymos\\didymos2.blend", "Didymos.001",
                                asteroid_scenes)
 AsteroidBC = blender.create_empty("AsteroidBC", asteroid_scenes)
 MoonOrbiter = blender.create_empty("MoonOrbiter", asteroid_scenes)
@@ -280,20 +280,20 @@ MoonBC.location = (1.17, 0, 0)
 
 
 Moon = blender.load_object(
-    ROOT_DIR_PATH + "\\Didymos\\didymos2.blend", "Didymos", asteroid_scenes)
+    ROOT_DIR_PATH + "\\data\\Didymos\\didymos2.blend", "Didymos", asteroid_scenes)
 Moon.location = (0, 0, 0)
 Moon.parent = MoonBC
 
-Sun = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\didymos_lowpoly.blend", "Sun",
+Sun = blender.load_object(ROOT_DIR_PATH + "\\data\\Didymos\\didymos_lowpoly.blend", "Sun",
                           asteroid_scenes + ["LightingReference"])
 
-CalibrationDisk = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\didymos_lowpoly.blend",
+CalibrationDisk = blender.load_object(ROOT_DIR_PATH + "\\data\\Didymos\\didymos_lowpoly.blend",
                                       "CalibrationDisk", ["LightingReference"])
 CalibrationDisk.location = (0, 0, 0)
 
 frame_index = 0
 
-star_template = blender.load_object(ROOT_DIR_PATH + "\\Didymos\\StarTemplate.blend", "TemplateStar",
+star_template = blender.load_object(ROOT_DIR_PATH + "\\data\\Didymos\\StarTemplate.blend", "TemplateStar",
                                     star_scenes)
 star_template.location = (1E20, 1E20, 1E20)
 

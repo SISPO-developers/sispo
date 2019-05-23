@@ -1,0 +1,25 @@
+\usepackage{graphicx}
+%% Graphics path
+\graphicspath{{00_Document/0_figures/}}
+
+%% Math fonts, symbols, and formatting; these are usually needed
+\usepackage{amsfonts,amssymb,amsbsy,amsmath,gensymb}
+
+%% Glossaries and acronyms
+\usepackage[xindy,acronym,nomain,nopostdot,nogroupskip,nonumberlist,acronymlists={acronym,symbolslist,operatorslist}]{glossaries}
+\newglossary[tlg]{symbolslist}{tld}{tdn}{Symbols}
+\newglossary[slg]{operatorslist}{syi}{syg}{Operators}
+\makenoidxglossaries
+\loadglsentries{97_glossary}
+\glsaddall
+\setlength{\glsdescwidth}{0.88\hsize}
+\setglossarysection{subsection}
+
+%% Bibliography
+\usepackage[backend=biber,citestyle=ieee,citestyle=numeric-comp]{biblatex}
+\usepackage{csquotes}
+\addbibresource{99_references.bib}
+
+\usepackage{siunitx}
+\usepackage{float}
+\usepackage{caption}
