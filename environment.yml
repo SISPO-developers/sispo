@@ -1,0 +1,14 @@
+name: pina
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python=3.7.3
+  - pip=19.1.1
+  - setuptools=41.0.1
+  - numpy=1.16.3
+  - numpy-base=1.16.3
+  - matplotlib=3.0.3
+  - scikit-image=0.14.2
+  - orekit=9.3.1
+  - simplejson=3.16.0
