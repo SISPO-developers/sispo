@@ -161,3 +161,86 @@ if 1:
   pRecons = subprocess.Popen( [str(OPENMVS_BIN.joinpath("TextureMesh")), str(reconstruction_dir_scene2.joinpath("scene_dense_mesh_refined.mvs")),"--export-type", "obj"] )
   pRecons.wait()
 
+
+class Reconstructor():
+    """Reconstruction of a 3D object from images."""
+
+    def __init__(self):
+
+        pass
+
+    def analyse_intrinsically(self):
+        """ImageListing step of reconstruction."""
+        print ("1. Intrinsics analysis")
+        pIntrisics = subprocess.Popen([str(OPENMVG_SGM_BIN.joinpath("openMVG_main_SfMInit_ImageListing")),
+                                       "-i", input_dir, "-o", str(matches_dir), "-d",
+                                       str(camera_file_params), "-c", "1", "-f",
+                                       str(fl), "-P", "-W", "1.0;1.0;1.0;"])
+        pIntrisics.wait()
+
+    def compute_features(self):
+        """Compute features in the pictures."""
+        print("2. Compute features")
+        pFeatures = subprocess.Popen([str(OPENMVG_SFM_BIN.joinpath("openMVG_main_ComputeFeatures")),
+                                      "-i", str(matches_dir.joinpath("sfm_data.json")),
+                                      "-o", str(matches_dir), "-m", "SIFT",
+                                      "-f" , "0","-p","ULTRA"])
+        pFeatures.wait()
+
+    def compute_matches(self):
+        """Compute feature matches."""
+        print("2. Compute matches")
+        pMatches = subprocess.Popen([str(OPENMVG_SFM_BIN.joinpath("openMVG_main_ComputeMatches")),
+                                    "-i", str(matches_dir.joinpath("sfm_data.json")),
+                                    "-o", str(matches_dir), "-f", "1", "-n",
+                                    "FASTCASCADEHASHINGL2", "-v", "12"])
+        pMatches.wait()
+
+    def reconstruct_sequentially(self):
+        """Reconstruct 3D models sequentially."""
+        print("3. Do Incremental\\Sequential reconstruction") #set manually the initial pair to avoid the prompt question
+        pRecons = subprocess.Popen([str(OPENMVG_SFM_BIN.joinpath("openMVG_main_IncrementalSfM")),
+                                    "-i", str(matches_dir.joinpath("sfm_data.json")),
+                                    "-m", str(matches_dir), "-o", reconstruction_dir, "-P"])#,"-f","ADJUST_ALL","-c","3"] )
+        pRecons.wait()
+
+    def export_MVG2MVS(self):
+        """Export 3D model to MVS format."""
+        print("5. Exports")
+        pRecons = subprocess.Popen([str(OPENMVG_SFM_BIN.joinpath("openMVG_main_openMVG2openMVS")),
+                                    "-i", str(reconstruction_dir.joinpath("sfm_data.bin")),
+                                    "-o", str(reconstruction_dir_scene.joinpath("scene.mvs")),
+                                    "-d", str(reconstruction_dir_scene.joinpath("undistorted"))])
+        pRecons.wait()
+
+    def densify_pointcloud(self):
+        """Increases number of points to make 3D model smoother."""
+        print("6. Dense")
+        pRecons = subprocess.Popen([str(OPENMVS_BIN.joinpath("DensifyPointCloud")), 
+                                  str(reconstruction_dir_scene.joinpath("scene.mvs")),
+                                  "--estimate-normals", "1", "--number-views",
+                                  "0", "-v", "3"])#,"--number-views-fuse","5"] )
+        pRecons.wait()
+
+    def create_mesh(self):
+        """Create a mesh from a 3D point cloud."""
+        print ("7. Mesh")
+        pRecons = subprocess.Popen([str(OPENMVS_BIN.joinpath("ReconstructMesh")),
+                                    str(reconstruction_dir_scene.joinpath("scene_dense.mvs"))])
+        pRecons.wait()
+
+    def refine_mesh(self):
+        """Refine 3D mesh."""
+        print("8. Refine Mesh")
+        pRecons = subprocess.Popen([str(OPENMVS_BIN.joinpath("RefineMesh")),
+                                    str(reconstruction_dir_scene.joinpath("scene_dense_mesh_refined.mvs")),
+                                    "--use-cuda", "0"])
+        pRecons.wait()
+
+    def texturise_mesh(self):
+        """Put texture on mesh model using pictures."""
+        print("9. Texture")
+        pRecons = subprocess.Popen([str(OPENMVS_BIN.joinpath("TextureMesh")),
+                                    str(reconstruction_dir_scene.joinpath("scene_dense_mesh.mvs")),
+                                    "--export-type", "obj"])
+        pRecons.wait()
