@@ -5,6 +5,7 @@ import math
 import os
 import sys
 import time
+from pathlib import Path
 
 import bpy
 import numpy as np
@@ -34,6 +35,10 @@ import starcatalogue as starcat
 import blender_controller as bc
 
 ROOT_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+print(ROOT_DIR_PATH)
+
+ROOT = Path.cwd()
+print(ROOT)
 
 SERIES_NAME = "Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter"
 TIME_STEPS = 10  # 500#1000#1000#50#1000
