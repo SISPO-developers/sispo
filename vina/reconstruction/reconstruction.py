@@ -13,19 +13,20 @@ from pathlib import Path
 
 SOFTWARE_DIR = Path.cwd().joinpath("software")
 
+
+print("PATH: ", file_dir)
+
 system("title "+'"%s"'%(os.path.abspath(__file__)))
 OPENMVG_SFM_BIN = SOFTWARE_DIR.joinpath("openMVG").joinpath("build").joinpath("Windows-AMD64-").joinpath("Release")
-OPENMVS_BIN = SOFTWARE_DIR.joinpath("openMVS").joinpath("build").joinpath("bin").joinpath("x64").join("Debug")
+OPENMVS_BIN = SOFTWARE_DIR.joinpath("openMVS").joinpath("build").joinpath("bin").joinpath("x64").joinpath("Debug")
 # Indicate the openMVG camera sensor width directory
 CAMERA_SENSOR_WIDTH_DIRECTORY = SOFTWARE_DIR.joinpath("openMVG").joinpath("openMVG").joinpath("src").joinpath("openMVG").joinpath("exif").joinpath("sensor_width_database")
 
 import subprocess
 import sys
 
-def get_parent_dir(directory):
-    return os.path.dirname(directory)
-
-workdir=Path.cwd().joinpath("results")
+file_dir = Path(__file__).parent
+workdir=file_dir.joinpath("results")
 if not workdir.exists():
   Path.mkdir(workdir)
   
@@ -72,47 +73,47 @@ reconstruction_dir_scene2 = reconstruction_dir2.joinpath("scene")
 if not reconstruction_dir_scene2.exists():
   Path.mkdir(reconstruction_dir_scene2)
 
-#if 1:    
-#  print ("1. Intrinsics analysis")
-#  pIntrisics = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_SfMInit_ImageListing"),  "-i", input_dir, "-o", matches_dir, "-d", camera_file_params, "-c", "1","-f",str(fl),"-P","-W","1.0;1.0;1.0;"] )
-#  pIntrisics.wait()
+if 1:    
+  print ("1. Intrinsics analysis")
+  pIntrisics = subprocess.Popen( [str(OPENMVG_SGM_BIN.joinpath("openMVG_main_SfMInit_ImageListing")),  "-i", input_dir, "-o", str(matches_dir), "-d", str(camera_file_params), "-c", "1","-f",str(fl),"-P","-W","1.0;1.0;1.0;"] )
+  pIntrisics.wait()
   
-#  print ("2. Compute features")
-#  pFeatures = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeFeatures"),  "-i", matches_dir+"sfm_data.json", "-o", matches_dir, "-m", "SIFT", "-f" , "0","-p","ULTRA"] )
-#  pFeatures.wait()
-#if 1:  
-#  print ("2. Compute matches")
-#  pMatches = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_ComputeMatches"),  "-i", matches_dir+"sfm_data.json", "-o", matches_dir, "-f", "1", "-n", "FASTCASCADEHASHINGL2","-v","12"] )
-#  pMatches.wait()
+  print ("2. Compute features")
+  pFeatures = subprocess.Popen( [ str(OPENMVG_SFM_BIN.joinpath("openMVG_main_ComputeFeatures")),  "-i", str(matches_dir.joinpath("sfm_data.json")), "-o", str(matches_dir), "-m", "SIFT", "-f" , "0","-p","ULTRA"] )
+  pFeatures.wait()
+if 1:  
+  print ("2. Compute matches")
+  pMatches = subprocess.Popen( [ str(OPENMVG_SFM_BIN.joinpath("openMVG_main_ComputeMatches")),  "-i", str(matches_dir.joinpath("sfm_data.json")), "-o", matches_dir, "-f", "1", "-n", "FASTCASCADEHASHINGL2","-v","12"] )
+  pMatches.wait()
   
-#if 1:  
-#  print ("3. Do Incremental\\Sequential reconstruction") #set manually the initial pair to avoid the prompt question
-#  pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_IncrementalSfM"),  "-i", matches_dir+"sfm_data.json", "-m", matches_dir, "-o",reconstruction_dir,"-P"])#,"-f","ADJUST_ALL","-c","3"] )
-#  pRecons.wait()
+if 1:  
+  print ("3. Do Incremental\\Sequential reconstruction") #set manually the initial pair to avoid the prompt question
+  pRecons = subprocess.Popen( [str(OPENMVG_SFM_BIN.joinpath("openMVG_main_IncrementalSfM")),  "-i", str(matches_dir.joinpath("sfm_data.json")), "-m", matches_dir, "-o",reconstruction_dir,"-P"])#,"-f","ADJUST_ALL","-c","3"] )
+  pRecons.wait()
 
   
-#  print ("3. Do Incremental\\Sequential reconstruction") #set manually the initial pair to avoid the prompt question
-#  pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_IncrementalSfM2"),  "-i", matches_dir+"sfm_data.json", "-m", matches_dir, "-o", reconstruction_dir2,"-P"])#,"-f","ADJUST_ALL","-c","3"] )
-#  pRecons.wait()
-#if 1:   
-#  print ("5. Exports")
-#  pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_openMVG2openMVS"),  "-i", reconstruction_dir+"sfm_data.bin", "-o", os.path.join(reconstruction_dir,"scene\\scene.mvs"), "-d", os.path.join(reconstruction_dir,"scene\\undistorted\\")] )
-#  pRecons.wait()
+  print ("3. Do Incremental\\Sequential reconstruction") #set manually the initial pair to avoid the prompt question
+  pRecons = subprocess.Popen( [ str(OPENMVG_SFM_BIN.joinpath("openMVG_main_IncrementalSfM2")),  "-i", str(matches_dir.joinpath("sfm_data.json")), "-m", matches_dir, "-o", reconstruction_dir2,"-P"])#,"-f","ADJUST_ALL","-c","3"] )
+  pRecons.wait()
+if 1:   
+  print ("5. Exports")
+  pRecons = subprocess.Popen( [ str(OPENMVG_SFM_BIN.joinpath("openMVG_main_openMVG2openMVS")),  "-i", str(reconstruction_dir.joinpath("sfm_data.bin")), "-o", str(reconstruction_dir_scene.joinpath("scene.mvs")), "-d", str(reconstruction_dir_scene.joinpath("undistorted"))] )
+  pRecons.wait()
     
   
-#  print ("5. Exports")
-#  pRecons = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_openMVG2openMVS"),  "-i", reconstruction_dir2+"sfm_data.bin", "-o", os.path.join(reconstruction_dir2,"scene\\scene.mvs"), "-d", os.path.join(reconstruction_dir2,"scene\\undistorted\\")] )
-#  pRecons.wait()
+  print ("5. Exports")
+  pRecons = subprocess.Popen( [ str(OPENMVG_SFM_BIN.joinpath("openMVG_main_openMVG2openMVS")),  "-i", str(reconstruction_dir2.joinpath("sfm_data.bin")), "-o", str(reconstruction_dir_scene2.joinpath("scene.mvs")), "-d", str(reconstruction_dir_scene2.joinpath("undistorted"))] )
+  pRecons.wait()
   
 
 if 1:   
-#  print ("6. Dense")
-#  pRecons = subprocess.Popen( [os.path.join(OPENMVS_BIN, "DensifyPointCloud"),  os.path.join(reconstruction_dir,"scene\\scene.mvs"),"--estimate-normals","1","--number-views","0","-v","3"])#,"--number-views-fuse","5"] )
-#  pRecons.wait()
+  print ("6. Dense")
+  pRecons = subprocess.Popen( [ str(OPENMVS_BIN.joinpath("DensifyPointCloud")), str(reconstruction_dir_scene.joinpath("scene.mvs")), "--estimate-normals","1","--number-views","0","-v","3"])#,"--number-views-fuse","5"] )
+  pRecons.wait()
 
   
-#  pRecons = subprocess.Popen( [os.path.join(OPENMVS_BIN, "DensifyPointCloud"),  os.path.join(reconstruction_dir2,"scene\\scene.mvs"),"--estimate-normals","1","--number-views","0","-v","3"])#,"--number-views-fuse","5"] )
-#  pRecons.wait()
+  pRecons = subprocess.Popen( [ str(OPENMVS_BIN.joinpath("DensifyPointCloud")), str(reconstruction_dir_scene2.joinpath("scene.mvs")), "--estimate-normals","1","--number-views","0","-v","3"])#,"--number-views-fuse","5"] )
+  pRecons.wait()
   
 ##if 0: 
   print ("7. Mesh")
