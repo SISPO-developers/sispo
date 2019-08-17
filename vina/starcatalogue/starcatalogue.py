@@ -1,10 +1,14 @@
-"""Interface for handling data from a star catalogue. Retrieve data as well as render and write images."""
+"""
+Interface for handling data from a star catalogue. Retrieve data as well as
+render and write images.
+"""
 
 import copy
 import math
 import subprocess
 import sys
 import time
+from pathlib import Path
 
 import bpy
 import numpy as np
@@ -26,8 +30,13 @@ def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
         SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
         ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
 
-    command = "E:\\01_MasterThesis\\00_Code\\star_cats\\u4test.exe %f %f %f %f -h E:\\01_MasterThesis\\02_Data\\UCAC4 %s" % (
-        ra, dec, ra_w, dec_h, filename)
+    project_root = Path.cwd()
+    print(project_root)
+    ucac4 = project_root.joinpath("data").joinpath("UCAC4")
+
+    u4test = project_root.joinpath("software").joinpath("star_cats").joinpath("u4test.exe")
+
+    command = str(u4test) + " {} {} {} {}".format(ra, dec, ra_w, dec_h) + " -h " + str(ucac4)+ " {}".format(filename)
     print(command)
 
     for _ in range(0, 5):

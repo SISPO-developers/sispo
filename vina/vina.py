@@ -7,3 +7,5 @@ hese images are used with openMVG and openMVS to reconstruct the 3D model and
 reconstruct the trajectory.
 """
 
+import starcatalogue.starcatalogue as starcatalogue
+import trajectory_simulator.trajectory_simulator as trajectory_simulator
