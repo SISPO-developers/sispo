@@ -25,10 +25,9 @@ import sys
 def get_parent_dir(directory):
     return os.path.dirname(directory)
 
-filedir=os.path.dirname(os.path.abspath(__file__))
-workdir=os.path.join(filedir,"working")
-if not os.path.exists(workdir):
-  os.mkdir(workdir)
+workdir=Path.cwd().joinpath("results")
+if not workdir.exists():
+  Path.mkdir(workdir)
   
 os.chdir(workdir)
 input_eval_dir = Path.cwd().joinpath("data").joinpath("ImageDataset_SceauxCastle-master")
@@ -38,8 +37,11 @@ output_eval_dir = input_eval_dir.joinpath("reconstruction")
 #output_eval_dir = os.path.join(get_parent_dir(input_eval_dir), "asteroid_out")
 
 input_eval_dir = input_eval_dir.joinpath("images")
-if not os.path.exists(output_eval_dir):
-  os.mkdir(output_eval_dir)
+if not input_eval_dir.exists():
+  Path.mkdir(input_eval_dir)
+
+if not output_eval_dir.exists():
+  Path.mkdir(output_eval_dir)
 
 input_dir = input_eval_dir
 output_dir = output_eval_dir
@@ -50,21 +52,25 @@ matches_dir = output_dir.joinpath("matches")
 camera_file_params = CAMERA_SENSOR_WIDTH_DIRECTORY.joinpath("sensor_width_camera_database.txt")
 
 # Create the ouput\\matches folder if not present
-if not os.path.exists(matches_dir):
-  os.mkdir(matches_dir)
+if not matches_dir.exists():
+  Path.mkdir(matches_dir)
+
 fl=65437    
 reconstruction_dir = output_dir.joinpath("reconstruction_sequential")
+if not reconstruction_dir.exists():
+  Path.mkdir(reconstruction_dir)
+
 reconstruction_dir_scene = reconstruction_dir.joinpath("scene")
+if not reconstruction_dir_scene.exists():
+  Path.mkdir(reconstruction_dir_scene)
+
 reconstruction_dir2 = output_dir.joinpath("reconstruction_sequential2")
+if not reconstruction_dir2.exists():
+  Path.mkdir(reconstruction_dir2)
+
 reconstruction_dir_scene2 = reconstruction_dir2.joinpath("scene")
-if not os.path.exists(reconstruction_dir):
-  os.mkdir(reconstruction_dir)
-if not os.path.exists(reconstruction_dir_scene):
-  os.mkdir(reconstruction_dir_scene)
-if not os.path.exists(reconstruction_dir2):
-  os.mkdir(reconstruction_dir2)
-if not os.path.exists(reconstruction_dir_scene2):
-  os.mkdir(reconstruction_dir_scene2)
+if not reconstruction_dir_scene2.exists():
+  Path.mkdir(reconstruction_dir_scene2)
 
 #if 1:    
 #  print ("1. Intrinsics analysis")
@@ -110,10 +116,10 @@ if 1:
   
 ##if 0: 
   print ("7. Mesh")
-  pRecons = subprocess.Popen( [os.path.join(OPENMVS_BIN, "ReconstructMesh"),  os.path.join(reconstruction_dir,"scene\\scene_dense.mvs")] )
+  pRecons = subprocess.Popen( [str(OPENMVS_BIN.joinpath("ReconstructMesh")), str(reconstruction_dir_scene.joinpath("scene_dense.mvs"))] )
   pRecons.wait()
  
-  pRecons = subprocess.Popen( [os.path.join(OPENMVS_BIN, "ReconstructMesh"),  os.path.join(reconstruction_dir2,"scene\\scene_dense.mvs")] )
+  pRecons = subprocess.Popen( [str(OPENMVS_BIN.joinpath("ReconstructMesh")), str(reconstruction_dir2_scene.joinpath("scene_dense.mvs"))] )
   pRecons.wait()
   
 
@@ -122,39 +128,37 @@ if 1:
   
   import shutil
   try:
-    shutil.copyfile(os.path.join(reconstruction_dir,"scene\\scene_dense_mesh.mvs"),os.path.join(reconstruction_dir,"scene\\scene_dense_mesh_refined.mvs"))
+    shutil.copyfile(str(reconstruction_dir_scene.joinpath("scene_dense_mesh.mvs")), str(reconstruction_dir_scene.joinpath("scene_dense_mesh_refined.mvs")))
   except:
     pass
     
   try:
-    shutil.copyfile(os.path.join(reconstruction_dir2,"scene\\scene_dense_mesh.mvs"),os.path.join(reconstruction_dir2,"scene\\scene_dense_mesh_refined.mvs"))
+    shutil.copyfile(str(reconstruction_dir_scene2.joinpath("scene_dense_mesh.mvs")), str(reconstruction_dir_scene2.joinpath("scene_dense_mesh_refined.mvs")))
   except:
     pass
 
   try:
-    shutil.copyfile(os.path.join(reconstruction_dir,"scene\\scene_robust_dense_mesh.mvs"),os.path.join(reconstruction_dir,"scene\\scene_robust_dense_mesh_refined.mvs"))
+    shutil.copyfile(str(reconstruction_dir_scene.joinpath("scene_robust_dense_mesh.mvs")), str(reconstruction_dir_scene.joinpath("scene_robust_dense_mesh_refined.mvs")))
   except:
     pass
 
 if 0:
-  pRecons = subprocess.Popen( [os.path.join(OPENMVS_BIN, "RefineMesh"),  os.path.join(reconstruction_dir,"scene\\scene_dense_mesh_refined.mvs"),"--use-cuda", "0"] )
+  pRecons = subprocess.Popen( [str(OPENMVS_BIN.joinpath("RefineMesh")), str(reconstruction_dir_scene.joinpath("scene_dense_mesh_refined.mvs")),"--use-cuda", "0"] )
   #print(str(pRecons))
   #print("the commandline is {}".format(pRecons.args))
   pRecons.wait()
-  pRecons = subprocess.Popen( [os.path.join(OPENMVS_BIN, "RefineMesh"),  os.path.join(reconstruction_dir2,"scene\\scene_dense_mesh_refined.mvs"),"--use-cuda", "0"] )
+  pRecons = subprocess.Popen( [str(OPENMVS_BIN.joinpath("RefineMesh")), str(reconstruction_dir_scene2.joinpath("scene_dense_mesh_refined.mvs")),"--use-cuda", "0"] )
   #print(str(pRecons))
   #print("the commandline is {}".format(pRecons.args))
   pRecons.wait()
 if 1:  
-
-  
   print ("9. Texture")
-  pRecons = subprocess.Popen( [os.path.join(OPENMVS_BIN, "TextureMesh"),  os.path.join(reconstruction_dir,"scene\\scene_dense_mesh.mvs"),"--export-type", "obj"] )
+  pRecons = subprocess.Popen( [str(OPENMVS_BIN.joinpath("TextureMesh")), str(reconstruction_dir_scene.joinpath("scene_dense_mesh.mvs")),"--export-type", "obj"] )
   pRecons.wait()
-  pRecons = subprocess.Popen( [os.path.join(OPENMVS_BIN, "TextureMesh"),  os.path.join(reconstruction_dir,"scene\\scene_dense_mesh_refined.mvs"),"--export-type", "obj"] )
+  pRecons = subprocess.Popen( [str(OPENMVS_BIN.joinpath("TextureMesh")), str(reconstruction_dir_scene.joinpath("scene_dense_mesh_refined.mvs")),"--export-type", "obj"] )
   pRecons.wait()
-  pRecons = subprocess.Popen( [os.path.join(OPENMVS_BIN, "TextureMesh"),  os.path.join(reconstruction_dir2,"scene\\scene_dense_mesh.mvs"),"--export-type", "obj"] )
+  pRecons = subprocess.Popen( [str(OPENMVS_BIN.joinpath("TextureMesh")), str(reconstruction_dir_scene2.joinpath("scene_dense_mesh.mvs")),"--export-type", "obj"] )
   pRecons.wait()
-  pRecons = subprocess.Popen( [os.path.join(OPENMVS_BIN, "TextureMesh"),  os.path.join(reconstruction_dir2,"scene\\scene_dense_mesh_refined.mvs"),"--export-type", "obj"] )
+  pRecons = subprocess.Popen( [str(OPENMVS_BIN.joinpath("TextureMesh")), str(reconstruction_dir_scene2.joinpath("scene_dense_mesh_refined.mvs")),"--export-type", "obj"] )
   pRecons.wait()
 
