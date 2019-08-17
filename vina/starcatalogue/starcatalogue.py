@@ -16,7 +16,7 @@ import OpenEXR
 import skimage.filters
 import skimage.transform
 
-def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
+def get_ucac4(ra, ra_w, dec, dec_h, filename = "ucac4.txt"):
     """Retrieve starmap data from UCAC4 catalog."""
     errorlog_fn = "starfield_errorlog%f.txt" % time.time()
 
@@ -36,7 +36,7 @@ def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
 
     u4test = project_root.joinpath("software").joinpath("star_cats").joinpath("u4test.exe")
 
-    command = str(u4test) + " {} {} {} {}".format(ra, dec, ra_w, dec_h) + " -h " + str(ucac4)+ " {}".format(filename)
+    command = str(u4test) + " {} {} {} {}".format(ra, dec, ra_w, dec_h) + " -h " + str(ucac4) + " {}".format(filename)
     print(command)
 
     for _ in range(0, 5):
@@ -45,7 +45,7 @@ def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
         if retcode == 0:
             break
         with open(errorlog_fn, "at") as fout:
-            fout.write("%f,\'%s\',%d\n" % (time.time(), command, retcode))
+            fout.write("{},\'{}\',{}\n".format(time.time(), command, retcode))
 
     with open(filename, "rt") as file:
         lines = file.readlines()
@@ -62,7 +62,7 @@ def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
 class StarCache:
     """Handling stars in field of view, for rendering of scene."""
 
-    def __init__(self, template, parent=None):
+    def __init__(self, template, parent = None):
         """Initialise StarCache."""
         self.template = template
         self.star_array = []
@@ -106,14 +106,13 @@ class StarCache:
             flux0 = math.pow(10, -0.4 * (star_data[2]))
             total_flux += flux0
 
-            star.material_slots[0].material.node_tree.nodes.get(
-                "Emission").inputs[1].default_value = flux * pixel_factor * pixel_factor
+            star.material_slots[0].material.node_tree.nodes.get("Emission").inputs[1].default_value = flux * pixel_factor * pixel_factor
 
             for scene_name in scene_names:
                 scene = bpy.data.scenes[scene_name]
                 if star.name not in scene.objects:
                     scene.objects.link(star)
-        print("%d stars set, buffer len %d" % (i, len(self.star_array)))
+        print("{} stars set, buffer len {}".format(i, len(self.star_array)))
         if len(self.star_array) > len(stardata):
             for scene_name in scene_names:
                 scene = bpy.data.scenes[scene_name]
@@ -134,8 +133,8 @@ class StarCache:
         f_over_w_ccd_2 = 1. / np.sqrt(np.dot(right_vec, right_vec))
         right_norm = right_vec * f_over_w_ccd_2
 
-        print("F_over_w %f f_over_h %f" % (f_over_w_ccd_2, f_over_h_ccd_2))
-        print("Res %d x %d" % (res_x, res_y))
+        print("F_over_w {} f_over_h {}".format(f_over_w_ccd_2, f_over_h_ccd_2))
+        print("Res {} x {}".format(res_x, res_y))
 
         ss = 2
         starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
@@ -153,10 +152,8 @@ class StarCache:
             if np.dot(vec, cam_direction) < np.dot(vec2, cam_direction):
                 vec = vec2
 
-            x_pix = (f_over_w_ccd_2 * np.dot(right_norm, vec) /
-                     np.dot(cam_direction, vec) + 1.) * (res_x - 1) / 2.
-            y_pix = (-f_over_h_ccd_2 * np.dot(up_norm, vec) /
-                     np.dot(cam_direction, vec) + 1.) * (res_y - 1) / 2.
+            x_pix = (f_over_w_ccd_2 * np.dot(right_norm, vec) / np.dot(cam_direction, vec) + 1.) * (res_x - 1) / 2.
+            y_pix = (-f_over_h_ccd_2 * np.dot(up_norm, vec) / np.dot(cam_direction, vec) + 1.) * (res_y - 1) / 2.
             x_pix2 = max(0, min(int(round(x_pix * ss)), res_x * ss - 1))
             y_pix2 = max(0, min(int(round(y_pix * ss)), res_y * ss - 1))
 
@@ -169,13 +166,11 @@ class StarCache:
 
             total_flux += flux0
         starmap2 = starmap.copy()
-        starmap2 = skimage.filters.gaussian(
-            starmap, ss / 2., multichannel=True)
+        starmap2 = skimage.filters.gaussian(starmap, ss / 2., multichannel=True)
         starmap3 = np.zeros((res_y, res_x, 4), np.float32)
         for c in range(0, 4):
 
-            starmap3[:, :, c] = skimage.transform.downscale_local_mean(
-                starmap2[:, :, c], (ss, ss)) * (ss * ss)
+            starmap3[:, :, c] = skimage.transform.downscale_local_mean(starmap2[:, :, c], (ss, ss)) * (ss * ss)
 
         write_openexr(filename, starmap3)
 
