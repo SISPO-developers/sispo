@@ -9,11 +9,15 @@
 #
 from os import system
 import os
+from pathlib import Path
+
+SOFTWARE_DIR = Path.cwd().joinpath("software")
+
 system("title "+'"%s"'%(os.path.abspath(__file__)))
-OPENMVG_SFM_BIN = "E:\\01_MasterThesis\\00_Code\\openMVG\\build\\Windows-AMD64-\\Release\\"
-OPENMVS_BIN="E:\\01_MasterThesis\\00_Code\\openMVS\\build\\bin\\x64\\Debug\\"
+OPENMVG_SFM_BIN = SOFTWARE_DIR.joinpath("openMVG").joinpath("build").joinpath("Windows-AMD64-").joinpath("Release")
+OPENMVS_BIN = SOFTWARE_DIR.joinpath("openMVS").joinpath("build").joinpath("bin").joinpath("x64").join("Debug")
 # Indicate the openMVG camera sensor width directory
-CAMERA_SENSOR_WIDTH_DIRECTORY = "E:\\01_MasterThesis\\00_Code\\openMVG\\openMVG\\src\\openMVG\\exif\\sensor_width_database"
+CAMERA_SENSOR_WIDTH_DIRECTORY = SOFTWARE_DIR.joinpath("openMVG").joinpath("openMVG").joinpath("src").joinpath("openMVG").joinpath("exif").joinpath("sensor_width_database")
 
 import subprocess
 import sys
@@ -27,13 +31,13 @@ if not os.path.exists(workdir):
   os.mkdir(workdir)
   
 os.chdir(workdir)
-input_eval_dir = os.path.abspath("E:\\01_MasterThesis\\02_Data\\ImageDataset_SceauxCastle-master\\")
+input_eval_dir = Path.cwd().joinpath("data").joinpath("ImageDataset_SceauxCastle-master")
 # Checkout an OpenMVG image dataset with Git
 
-output_eval_dir = os.path.join(input_eval_dir, "reconstruction\\")
+output_eval_dir = input_eval_dir.joinpath("reconstruction")
 #output_eval_dir = os.path.join(get_parent_dir(input_eval_dir), "asteroid_out")
 
-input_eval_dir = os.path.join(input_eval_dir, "images\\")
+input_eval_dir = input_eval_dir.joinpath("images")
 if not os.path.exists(output_eval_dir):
   os.mkdir(output_eval_dir)
 
@@ -42,17 +46,17 @@ output_dir = output_eval_dir
 print ("Using input dir  : ", input_dir)
 print ("      output_dir : ", output_dir)
 
-matches_dir = os.path.join(output_dir, "matches\\")
-camera_file_params = os.path.join(CAMERA_SENSOR_WIDTH_DIRECTORY, "sensor_width_camera_database.txt")
+matches_dir = output_dir.joinpath("matches")
+camera_file_params = CAMERA_SENSOR_WIDTH_DIRECTORY.joinpath("sensor_width_camera_database.txt")
 
 # Create the ouput\\matches folder if not present
 if not os.path.exists(matches_dir):
   os.mkdir(matches_dir)
 fl=65437    
-reconstruction_dir = os.path.join(output_dir,"reconstruction_sequential\\")
-reconstruction_dir_scene = os.path.join(reconstruction_dir,"scene\\")
-reconstruction_dir2 = os.path.join(output_dir,"reconstruction_sequential2\\")
-reconstruction_dir_scene2 = os.path.join(reconstruction_dir2,"scene\\")
+reconstruction_dir = output_dir.joinpath("reconstruction_sequential")
+reconstruction_dir_scene = reconstruction_dir.joinpath("scene")
+reconstruction_dir2 = output_dir.joinpath("reconstruction_sequential2")
+reconstruction_dir_scene2 = reconstruction_dir2.joinpath("scene")
 if not os.path.exists(reconstruction_dir):
   os.mkdir(reconstruction_dir)
 if not os.path.exists(reconstruction_dir_scene):
@@ -61,6 +65,7 @@ if not os.path.exists(reconstruction_dir2):
   os.mkdir(reconstruction_dir2)
 if not os.path.exists(reconstruction_dir_scene2):
   os.mkdir(reconstruction_dir_scene2)
+
 #if 1:    
 #  print ("1. Intrinsics analysis")
 #  pIntrisics = subprocess.Popen( [os.path.join(OPENMVG_SFM_BIN, "openMVG_main_SfMInit_ImageListing"),  "-i", input_dir, "-o", matches_dir, "-d", camera_file_params, "-c", "1","-f",str(fl),"-P","-W","1.0;1.0;1.0;"] )
