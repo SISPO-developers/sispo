@@ -17,7 +17,7 @@ import simplejson as json
 import orekit
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
 from orekit.pyhelpers import setup_orekit_curdir
-setup_orekit_curdir()
+setup_orekit_curdir("data\\orekit-data.zip")
 import org.orekit.orbits as orbits # pylint: disable=import-error
 import org.orekit.utils as utils # pylint: disable=import-error
 from org.orekit.utils import PVCoordinates # pylint: disable=import-error
@@ -34,11 +34,8 @@ from mpl_toolkits.mplot3d import Axes3D
 import trajectory_simulator.starcatalogue as starcat
 import trajectory_simulator.blender_controller as bc
 
-ROOT_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
+ROOT_DIR_PATH = Path.cwd().joinpath("vina").joinpath("trajectory_simulator")
 print(ROOT_DIR_PATH)
-
-ROOT = Path.cwd()
-print(ROOT)
 
 SERIES_NAME = "Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter"
 TIME_STEPS = 10  # 500#1000#1000#50#1000
@@ -61,11 +58,11 @@ SERIES_NAME += str(TIME_STEPS) + "_"
 
 
 if len(sys.argv) < 2:
-    TEMP_DIR_PATH = ROOT_DIR_PATH + "\\temp\\didymos"
+    TEMP_DIR_PATH = ROOT_DIR_PATH.joinpath("temp").joinpath("didymos")
 else:
     TEMP_DIR_PATH = sys.argv[1]
 
-TEMP_SERIES_DIR_PATH = TEMP_DIR_PATH + "\\" + SERIES_NAME
+TEMP_SERIES_DIR_PATH = TEMP_DIR_PATH.joinpath(SERIES_NAME)
 if not os.path.isdir(TEMP_SERIES_DIR_PATH):
     os.makedirs(TEMP_SERIES_DIR_PATH)
 
@@ -201,7 +198,7 @@ SC_PROPAGATOR_LONG.propagate(long_orbit_start.getDate(), long_orbit_end.getDate(
 print("Propagating asteroid")
 kepler_long.propagate(long_orbit_start.getDate(), long_orbit_end.getDate())
 
-with open(TEMP_DIR_PATH + "\\%s\\%s_long_orbit.txt" % (SERIES_NAME, SERIES_NAME), "wt") as long_orbit_file:
+with open(TEMP_DIR_PATH.joinpath(SERIES_NAME).joinpath("{}_long_orbit.txt".format(SERIES_NAME)), "wt") as long_orbit_file:
     for (didymos, sat) in zip(time_sample_handler2_long.data, time_sample_handler_long.data):
         a = didymos
 
@@ -236,7 +233,7 @@ print("Propagating asteroid")
 SSB_PROPAGATOR.propagate(detector_start.getDate(), detector_end.getDate())
 print("Propagated")
 
-blender = bc.BlenderController(TEMP_DIR_PATH + "\\scratch\\",
+blender = bc.BlenderController(TEMP_DIR_PATH.joinpath("scratch"),
                                                scene_names=["MainScene",
                                                             "BackgroundStars",
                                                             "AsteroidOnly",
@@ -256,7 +253,7 @@ else:
     END_FRAME_NUM = int(sys.argv[4])
     FRAME_STEP_SIZE = int(sys.argv[5])
 
-print("Start %d end %d skip %d" % (START_FRAME_NUM, END_FRAME_NUM, FRAME_STEP_SIZE))
+print("Start {} end {} skip {}".format(START_FRAME_NUM, END_FRAME_NUM, FRAME_STEP_SIZE))
 
 blender.set_samples(CYCLES_SAMPLES)
 blender.set_output_format(2464, 2056) # TODO: Why this specific resolution? -> Prototype
@@ -270,8 +267,9 @@ blender.set_camera(lens=230, sensor=3.45E-3 * 2464, camera_name="LightingReferen
 asteroid_scenes = ["MainScene", "AsteroidOnly", "AsteroidConstDistance"]
 star_scenes = ["MainScene", "BackgroundStars"]
 
-Asteroid = blender.load_object(ROOT_DIR_PATH + "\\data\\Didymos\\didymos2.blend", "Didymos.001",
-                               asteroid_scenes)
+sssb_model_path = ROOT_DIR_PATH.joinpath("data").joinpath("Didymos").joinpath("didymos2.blend")
+
+Asteroid = blender.load_object(sssb_model_path, "Didymos.001", asteroid_scenes)
 AsteroidBC = blender.create_empty("AsteroidBC", asteroid_scenes)
 MoonOrbiter = blender.create_empty("MoonOrbiter", asteroid_scenes)
 Asteroid.parent = AsteroidBC
@@ -284,22 +282,23 @@ MoonBC.parent = MoonOrbiter
 MoonBC.location = (1.17, 0, 0)
 
 
-Moon = blender.load_object(
-    ROOT_DIR_PATH + "\\data\\Didymos\\didymos2.blend", "Didymos", asteroid_scenes)
+Moon = blender.load_object(sssb_model_path, "Didymos", asteroid_scenes)
 Moon.location = (0, 0, 0)
 Moon.parent = MoonBC
 
-Sun = blender.load_object(ROOT_DIR_PATH + "\\data\\Didymos\\didymos_lowpoly.blend", "Sun",
+sssb_model_path = ROOT_DIR_PATH.joinpath("data").joinpath("Didymos").joinpath("didymos_lowpoly.blend")
+
+Sun = blender.load_object(sssb_model_path, "Sun",
                           asteroid_scenes + ["LightingReference"])
 
-CalibrationDisk = blender.load_object(ROOT_DIR_PATH + "\\data\\Didymos\\didymos_lowpoly.blend",
-                                      "CalibrationDisk", ["LightingReference"])
+CalibrationDisk = blender.load_object(sssb_model_path, "CalibrationDisk", ["LightingReference"])
 CalibrationDisk.location = (0, 0, 0)
 
 frame_index = 0
 
-star_template = blender.load_object(ROOT_DIR_PATH + "\\data\\Didymos\\StarTemplate.blend", "TemplateStar",
-                                    star_scenes)
+sssb_model_path = ROOT_DIR_PATH.joinpath("data").joinpath("Didymos").joinpath("StarTemplate.blend")
+
+star_template = blender.load_object(sssb_model_path, "TemplateStar", star_scenes)
 star_template.location = (1E20, 1E20, 1E20)
 
 
@@ -330,7 +329,7 @@ def write_mat_string(vec, prec):
 star_cache = starcat.StarCache(
     star_template, blender.create_empty("StarParent", star_scenes))
 
-STAR_CAT_FN = TEMP_DIR_PATH + "\\%s\\ucac4_%d.txt" % (SERIES_NAME, time.time())
+STAR_CAT_FN = TEMP_DIR_PATH.joinpath(SERIES_NAME).joinpath("ucac4_{}.txt".format(time.time()))
 SCALER = 1000.
 blender.set_exposure(EXPOSURE)
 for (didymos, sat, frame_index) in zip(time_sample_handler2.data[START_FRAME_NUM:END_FRAME_NUM:FRAME_STEP_SIZE],
@@ -392,34 +391,25 @@ for (didymos, sat, frame_index) in zip(time_sample_handler2.data[START_FRAME_NUM
     f = blender.cameras["SatelliteCamera"].data.lens
     w = blender.cameras["SatelliteCamera"].data.sensor_width
 
-    fn_base5 = TEMP_DIR_PATH + "\\%s\\%s_starmap_direct_%.4d.exr" % (SERIES_NAME, SERIES_NAME,
-                                                                    frame_index)
+    fn_base5 = TEMP_DIR_PATH.joinpath(SERIES_NAME).joinpath("{}_starmap_direct_{}.exr".format(SERIES_NAME, frame_index))
     (starfield_flux2, flux3) = star_cache.render_stars_directly(starlist, cam_direction,
                                                                 rightedge_vec,
                                                                 upedge_vec, x_res, y_res, fn_base5)
 
     blender.update()
-    fn_base = TEMP_DIR_PATH \
-        + "\\%s\\%s%.4d" % (SERIES_NAME, SERIES_NAME, frame_index)
+    fn_base = TEMP_DIR_PATH.joinpath(SERIES_NAME).joinpath(SERIES_NAME + frame_index)
     print("Saving blend file")
     print("Rendering")
 
-    fn_base3 = TEMP_DIR_PATH \
-        + "\\%s\\%s_asteroid_%.4d" % (SERIES_NAME, SERIES_NAME, frame_index)
+    fn_base3 = TEMP_DIR_PATH.joinpath(SERIES_NAME).joinpath("{}_asteroid_{}".format(SERIES_NAME, frame_index))
     blender.update(["AsteroidOnly"])
-
     result = blender.render(fn_base3, "AsteroidOnly")
 
-    fn_base4 = TEMP_DIR_PATH \
-        + "\\%s\\%s_asteroid_constant_%.4d" % (SERIES_NAME,
-                                                SERIES_NAME, frame_index)
+    fn_base4 = TEMP_DIR_PATH.joinpath(SERIES_NAME).joinpath("{}_asteroid_constant_{}".format(SERIES_NAME, frame_index))
     blender.update(["AsteroidConstDistance"])
-
     result = blender.render(fn_base4, "AsteroidConstDistance")
 
-    fn_base6 = TEMP_DIR_PATH \
-        + "\\%s\\%s_calibration_reference_%.4d" % (SERIES_NAME,
-                                                 SERIES_NAME, frame_index)
+    fn_base6 = TEMP_DIR_PATH.joinpath(SERIES_NAME).joinpath("{}_calibration_reference_{}".format(SERIES_NAME, frame_index))
     blender.update(["LightingReference"])
     result = blender.render(fn_base6, "LightingReference")
 
