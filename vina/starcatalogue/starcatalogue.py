@@ -31,9 +31,7 @@ def get_ucac4(ra, ra_w, dec, dec_h, filename = "ucac4.txt"):
         ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
 
     project_root = Path.cwd()
-    print(project_root)
     ucac4 = project_root.joinpath("data").joinpath("UCAC4")
-
     u4test = project_root.joinpath("software").joinpath("star_cats").joinpath("u4test.exe")
 
     command = str(u4test) + " {} {} {} {}".format(ra, dec, ra_w, dec_h) + " -h " + str(ucac4) + " {}".format(filename)
