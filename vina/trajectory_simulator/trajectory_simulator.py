@@ -1,4 +1,4 @@
-"""Main simulation module."""
+"""Trajectory simulation and object rendering module."""
 
 import copy
 import math
@@ -31,8 +31,8 @@ from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler #
 from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=import-error
 from mpl_toolkits.mplot3d import Axes3D
 
-import starcatalogue as starcat
-import blender_controller as bc
+import trajectory_simulator.starcatalogue as starcat
+import trajectory_simulator.blender_controller as bc
 
 ROOT_DIR_PATH = os.path.dirname(os.path.realpath(__file__))
 print(ROOT_DIR_PATH)
