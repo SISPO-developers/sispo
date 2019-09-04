@@ -17,7 +17,10 @@ import simplejson as json
 import orekit
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
 from orekit.pyhelpers import setup_orekit_curdir
-setup_orekit_curdir("data\\orekit-data.zip")
+file_dir = Path(__file__)
+root_dir = file_dir / ".." / ".." / ".."
+orekit_data = root_dir / "orekit-data.zip"
+setup_orekit_curdir(str(orekit_data))
 import org.orekit.orbits as orbits # pylint: disable=import-error
 import org.orekit.utils as utils # pylint: disable=import-error
 from org.orekit.utils import PVCoordinates # pylint: disable=import-error
@@ -488,3 +491,6 @@ plt.clf()
 plt.plot(DISTANCE_HISTORY[0], DISTANCE_HISTORY[1])
 
 plt.show()
+
+if __name__ == "__main__":
+    pass

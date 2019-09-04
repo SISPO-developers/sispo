@@ -217,15 +217,15 @@ class Reconstructor():
     def __init__(self):
         """Initialises main directory and file structure."""
         file_dir = Path(__file__)
-        root_dir = file_dir / ".." / ".." / ".."
+        root_dir = Path(file_dir / ".." / ".." / "..").resolve()
         software_dir = root_dir / "software"
         data_dir = root_dir / "data"
 
-        self.openMVG_dir = Path(software_dir / "openMVG" / "build" / "Windows-AMD64-" / "Debug").resolve()
-        self.openMVS_dir = Path(software_dir / "openMVS" / "build" / "bin" / "x64" / "Release").resolve()
-        self.sensor_database_dir = Path(data_dir / "sensor_database").resolve()
+        self.openMVG_dir = software_dir / "openMVG" / "build" / "Windows-AMD64-" / "Debug"
+        self.openMVS_dir = software_dir / "openMVS" / "build" / "bin" / "x64" / "Release"
+        self.sensor_database_dir = data_dir / "sensor_database"
 
-        self.input_dir = Path(data_dir / "ImageDataset_SceauxCastle-master" / "images").resolve()
+        self.input_dir = data_dir / "ImageDataset_SceauxCastle-master" / "images"
         self.output_dir = self._resolve_create_dir(data_dir / "results" / "reconstruction")
 
         self.sensor_database = self.sensor_database_dir / "sensor_width_camera_database.txt"
@@ -246,11 +246,12 @@ class Reconstructor():
         """ImageListing step of reconstruction."""
         print("1. Intrinsics analysis")
 
-        self.features_dir = self._resolve_create_dir(self.output_dir / "features")
+        #self.features_dir = self._resolve_create_dir(self.output_dir / "features")
+        self.matches_dir = self._resolve_create_dir(self.output_dir / "matches")
 
         pIntrisics = Popen([str(self.openMVG_dir / "openMVG_main_SfMInit_ImageListing"),
                             "-i", str(self.input_dir), 
-                            "-o", str(self.features_dir),
+                            "-o", str(self.matches_dir),
                             "-d", str(self.sensor_database),
                             "-c", "1",
                             "-f", str(self.fl), 
@@ -262,11 +263,12 @@ class Reconstructor():
         """Compute features in the pictures."""
         print("2. Compute features")
 
-        self.sfm_data = self.features_dir / "sfm_data.json"
+        
+        self.sfm_data = self.matches_dir / "sfm_data.json"
 
         pFeatures = Popen([str(self.openMVG_dir / "openMVG_main_ComputeFeatures"),
                            "-i", str(self.sfm_data),
-                           "-o", str(self.features_dir), 
+                           "-o", str(self.matches_dir), 
                            "-m", "SIFT",
                            "-f", "0", 
                            "-p", "ULTRA"])
@@ -275,8 +277,6 @@ class Reconstructor():
     def compute_matches(self):
         """Compute feature matches."""
         print("3. Compute matches")
-        
-        self.matches_dir = self._resolve_create_dir(self.output_dir / "matches")
 
         pMatches = Popen([str(self.openMVG_dir / "openMVG_main_ComputeMatches"),
                           "-i", str(self.sfm_data),
@@ -367,9 +367,9 @@ if __name__ == "__main__":
     recon.analyse_intrinsically()
     recon.compute_features()
     recon.compute_matches()
-    recon.reconstruct_sequentially()
-    recon.export_MVG2MVS()
-    recon.ddensify_pointcloud()
-    recon.create_mesh()
-    recon.refine_mesh()
-    recon.texture_mesh()
+    #recon.reconstruct_sequentially()
+    #recon.export_MVG2MVS()
+    #recon.densify_pointcloud()
+    #recon.create_mesh()
+    #recon.refine_mesh()
+    #recon.texture_mesh()
