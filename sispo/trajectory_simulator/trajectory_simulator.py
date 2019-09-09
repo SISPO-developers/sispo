@@ -37,7 +37,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import trajectory_simulator.starcatalogue as starcat
 import trajectory_simulator.blender_controller as bc
 
-ROOT_DIR_PATH = Path.cwd().joinpath("vina").joinpath("trajectory_simulator")
+ROOT_DIR_PATH = Path.cwd().joinpath("sispo").joinpath("trajectory_simulator")
 print(ROOT_DIR_PATH)
 
 SERIES_NAME = "Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter"
