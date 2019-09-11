@@ -22,7 +22,7 @@ cmake \
         -DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake \
         -DCMAKE_INSTALL_PREFIX=install/ \
         -DINCLUDE_INSTALL_DIR=install/include \
-        -DPYTHON_EXECUTABLE=../../conda/envs/py37/bin/python
+        -DPYTHON_EXECUTABLE=../../conda/envs/sispo/bin/python
 
 cmake --build . --target install
 
