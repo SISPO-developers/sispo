@@ -1,4 +1,4 @@
-name: pina
+name: sispo
 channels:
   - defaults
   - conda-forge
