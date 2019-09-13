@@ -25,7 +25,7 @@ def write_vec_string(vec, prec):
     return o + "]"
 
 
-def write_mat_string(vec, prec):
+def write_mat_string(mat, prec):
     """Write data matrix into string."""
     o = "["
     for (n, v) in enumerate(vec):
