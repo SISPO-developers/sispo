@@ -1,11 +1,30 @@
 """Test suite."""
 
 import unittest
+from pathlib import Path
 
 import sispo.utils as utils
 
 
 class TestUtils(unittest.TestCase):
+
+    def test_resolve_create_dir(self):
+        dir_name = "dir_test"
+
+        file_dir = Path(__file__).parent.resolve()
+        test_dir = file_dir / dir_name
+
+        dir = utils.resolve_create_dir(test_dir)
+        self.assertTrue(test_dir == dir)
+        self.assertTrue(test_dir.exists())
+
+        test_dir_relative = test_dir / ".." / dir_name
+        dir = utils.resolve_create_dir(test_dir_relative)
+        self.assertTrue(test_dir == dir)
+        self.assertTrue(test_dir.exists())
+
+        Path.rmdir(test_dir)
+
 
     def test_write_vec_string(self):
         vec = [1.234, 2.345, 3.456]
