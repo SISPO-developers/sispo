@@ -16,13 +16,12 @@ def resolve_create_dir(directory):
 def write_vec_string(vec, prec):
     """Write data vector into string."""
     o = "["
-    fs = "%%.%de" % (prec)
-    #i = 0
-    for (n, v) in enumerate(vec):
 
-        o += fs % (v)
+    for (n, v) in enumerate(vec):
+        o += f"{v:.{prec}f"
         if n < len(vec) - 1:
             o += ","
+
     return o + "]"
 
 
@@ -30,8 +29,8 @@ def write_mat_string(vec, prec):
     """Write data matrix into string."""
     o = "["
     for (n, v) in enumerate(vec):
-
         o += (write_vec_string(v, prec))
         if n < len(vec) - 1:
             o += ","
+
     return o + "]"
