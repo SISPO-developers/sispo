@@ -1,6 +1,6 @@
 """Utils module contains functions possibly used by all modules."""
 
-import pathlib
+from pathlib import Path
 
 
 def resolve_create_dir(directory):
