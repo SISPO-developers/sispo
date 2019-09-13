@@ -221,8 +221,8 @@ class Reconstructor():
         software_dir = root_dir / "software"
         data_dir = root_dir / "data"
 
-        self.openMVG_dir = software_dir / "openMVG" / "build" / "Windows-AMD64-" / "Debug"
-        self.openMVS_dir = software_dir / "openMVS" / "build" / "bin" / "x64" / "Release"
+        self.openMVG_dir = software_dir / "openMVG" / "build_openMVG" / "Windows-AMD64-Release" / "Release"
+        self.openMVS_dir = software_dir / "openMVS" / "build" / "bin" / "x64" / "Debug"
         self.sensor_database_dir = data_dir / "sensor_database"
 
         self.input_dir = data_dir / "ImageDataset_SceauxCastle-master" / "images"
@@ -246,7 +246,8 @@ class Reconstructor():
         """ImageListing step of reconstruction."""
         print("1. Intrinsics analysis")
 
-        #self.features_dir = self._resolve_create_dir(self.output_dir / "features")
+        #self.features_dir = self._resolve_create_dir(self.output_dir /
+        #"features")
         self.matches_dir = self._resolve_create_dir(self.output_dir / "matches")
 
         pIntrisics = Popen([str(self.openMVG_dir / "openMVG_main_SfMInit_ImageListing"),
@@ -277,6 +278,9 @@ class Reconstructor():
     def compute_matches(self):
         """Compute feature matches."""
         print("3. Compute matches")
+
+        print(str(self.sfm_data))
+        print(str(self.matches_dir))
 
         pMatches = Popen([str(self.openMVG_dir / "openMVG_main_ComputeMatches"),
                           "-i", str(self.sfm_data),
@@ -329,7 +333,7 @@ class Reconstructor():
         """Create a mesh from a 3D point cloud."""
         print("7. Mesh")
 
-        self.export_scene_dense = self._resolve_create_dir(self.export_dir / "scene_dense.mvs")
+        self.export_scene_dense = (self.output_dir / "export" / "scene_dense.mvs").resolve()
 
         pMesh = Popen([str(self.openMVS_dir / "ReconstructMesh"),
                        str(self.export_scene_dense)])
@@ -339,7 +343,7 @@ class Reconstructor():
         """Refine 3D mesh."""
         print("8. Refine Mesh")
 
-        self.export_scene_dense_mesh = self._resolve_create_dir(self.export_dir / "scene_dense_mesh.mvs")
+        self.export_scene_dense_mesh = (self.output_dir / "export" / "scene_dense_mesh.mvs").resolve()
 
         pRefineMesh = Popen([str(self.openMVS_dir / "RefineMesh"),
                              str(self.export_scene_dense_mesh),
@@ -350,7 +354,7 @@ class Reconstructor():
         """Put texture on mesh model using pictures."""
         print("9. Texture")
 
-        self.export_scene_dense_mesh_refined = self._resolve_create_dir(self.export_dir / "scene_dense_mesh_refined.mvs")
+        self.export_scene_dense_mesh_refined = (self.output_dir / "export" / "scene_dense_mesh_refined.mvs").resolve()
 
         pTexture1 = Popen([str(self.openMVS_dir / "TextureMesh"),
                            str(self.export_scene_dense_mesh),
@@ -364,12 +368,12 @@ class Reconstructor():
 
 if __name__ == "__main__":
     recon = Reconstructor()
-    recon.analyse_intrinsically()
-    recon.compute_features()
-    recon.compute_matches()
+    #recon.analyse_intrinsically()
+    #recon.compute_features()
+    #recon.compute_matches()
     #recon.reconstruct_sequentially()
     #recon.export_MVG2MVS()
     #recon.densify_pointcloud()
-    #recon.create_mesh()
-    #recon.refine_mesh()
-    #recon.texture_mesh()
+    recon.create_mesh()
+    recon.refine_mesh()
+    recon.texture_mesh()
