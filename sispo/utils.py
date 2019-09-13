@@ -18,7 +18,7 @@ def write_vec_string(vec, prec):
     o = "["
 
     for (n, v) in enumerate(vec):
-        o += f"{v:.{prec}f"
+        o += f"{v:.{prec}f}"
         if n < len(vec) - 1:
             o += ","
 
