@@ -17,14 +17,12 @@ import simplejson as json
 import orekit
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
 from orekit.pyhelpers import setup_orekit_curdir
-file_dir = Path(__file__)
-print(file_dir.resolve())
-root_dir = file_dir / ".." / ".." / ".."
-print(root_dir.resolve())
+file_dir = Path(__file__).parent.resolve()
+root_dir = (file_dir / ".." / "..").resolve()
 orekit_data = root_dir / "data" / "orekit-data.zip"
 setup_orekit_curdir(str(orekit_data))
 import org.orekit.orbits as orbits # pylint: disable=import-error
-import org.orekit.utils as utils # pylint: disable=import-error
+import org.orekit.utils as utils # pylint: disable=imxport-error
 from org.orekit.utils import PVCoordinates # pylint: disable=import-error
 from org.orekit.frames import FramesFactory # pylint: disable=import-error
 from org.orekit.propagation.analytical import KeplerianPropagator # pylint: disable=import-error
@@ -36,11 +34,10 @@ from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler #
 from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=import-error
 from mpl_toolkits.mplot3d import Axes3D
 
-import starcatalogue as starcat
-import blender_controller as bc
+import starcat
+import render as bc
 
-ROOT_DIR_PATH = Path.cwd() / "sispo" / "trajectory_simulator"
-print(ROOT_DIR_PATH)
+ROOT_DIR_PATH = root_dir
 
 SERIES_NAME = "Didymos2OnlyForRec_100kmDepth300kmRotUHSOptLinearDidymoonBetter"
 TIME_STEPS = 10  # 500#1000#1000#50#1000
