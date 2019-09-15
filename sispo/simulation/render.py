@@ -106,7 +106,7 @@ class BlenderController:
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
             scene.render.image_settings.file_format = file_format
-            scene.render.filepath = self.scratchdisk / "r%0.8X.exr" % (self.render_id)
+            scene.render.filepath = str(self.scratchdisk / "r{}.exr".format(self.render_id))
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
             scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
@@ -148,7 +148,7 @@ class BlenderController:
 
     def load_object(self, filename, object_name, scene_names=None):
         """Load blender object from file."""
-        with bpy.data.libraries.load(filename) as (data_from, data_to):
+        with bpy.data.libraries.load(str(filename)) as (data_from, data_to):
             data_to.objects = [
                 name for name in data_from.objects if name == object_name]
         if data_to.objects:
