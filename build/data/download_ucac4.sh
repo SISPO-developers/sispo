@@ -16,8 +16,11 @@ wget -r --no-parent -P . http://casdc.china-vo.org/mirror/UCAC/UCAC4/u4i/
 wait
 
 # Moving files
-mv -r casdc.china-vo.org/mirror/UCAC/UCAC4/u4b u4b
-mv -r casdc.china-vo.org/mirror/UCAC/UCAC4/u4i u4i
+[[ -d u4b ]] || mkdir u4b
+[[ -d u4i ]] || mkdir u4i
+
+mv casdc.china-vo.org/mirror/UCAC/UCAC4/u4b/* u4b
+mv casdc.china-vo.org/mirror/UCAC/UCAC4/u4i/* u4i
 
 rm -r casdc.china-vo.org/
 
