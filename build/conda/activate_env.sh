@@ -1,7 +1,7 @@
 #!/bin/bash
 
-echo "Activating conda env py37 start"
+echo "Activating conda env sispo start"
 
-conda activate py37
+conda activate sispo
 
-echo "Activating conda env py37 done"
+echo "Activating conda env sispo done"

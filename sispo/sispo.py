@@ -1,5 +1,5 @@
 """
-The vina package provides functions to do VIsual NAvigation studies
+The package provides a Space Imaging Simulator for Proximity Operations (SISPO)
 
 The package creates images of a 3D object using blender. The images are render
 in a flyby scenario. UCAC4 star catalogue to create the background. Afterwards

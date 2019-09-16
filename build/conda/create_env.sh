@@ -1,8 +1,8 @@
 #!/bin/bash
 
-echo "Creating conda environment py37 start"
+echo "Creating conda environment sispo start"
 
 # Create
-echo y | conda create --name py37
+echo y | conda create env -f ../../environment.yml
 
-echo "Creating conda environment py37 done"
+echo "Creating conda environment sispo done"

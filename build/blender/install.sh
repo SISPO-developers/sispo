@@ -40,7 +40,7 @@ cmake \
 	-DWITH_CYCLES_CUDA_BINARIES=ON \
 	-DWITH_IMAGE_OPENEXR=ON \
 	-DCMAKE_TOOLCHAIN_FILE=../../vcpkg/scripts/buildsystems/vcpkg.cmake \
-	-DPYTHON_SITE_PACKAGES=../../conda/lib/python3.7/site-packages
+	-DPYTHON_SITE_PACKAGES=../../conda/envs/sispo/lib/python3.7/site-packages
 cmake --build . 
 make install
 
