@@ -30,11 +30,16 @@ class Sssb():
 
         utc = TimeScalesFactory.getTDB()
         date_initial = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, utc)
-        frame = FramesFactory.getICRF()
+        self.frame = FramesFactory.getICRF()
         mu_sun = utils.Constants.IAU_2015_NOMINAL_SUN_GM
 
         self.orbit = orbits.KeplerianOrbit(self.a, self.e, self.i, self.omega, self.Omega, self.M,
-                                  orbits.PositionAngle.MEAN, frame, date_initial, mu_sun)
+                                  orbits.PositionAngle.MEAN, self.frame, date_initial, mu_sun)
         self.propagator = KeplerianPropagator(self.orbit)
 
         self.pos_history = []
+
+        @property
+        def position(self, date):
+            prop = self.propagator.propagate(date)
+            return prop.getPVCoordinates(self.frame).getPosition()
