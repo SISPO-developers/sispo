@@ -3,6 +3,8 @@
 import unittest
 from pathlib import Path
 
+import numpy as np
+
 import sispo.utils as utils
 
 
@@ -47,6 +49,14 @@ class TestUtils(unittest.TestCase):
                          "[[1.234,2.345,3.456],[4.567,5.678,6.789],[7.891,8.912,9.123]]")
         self.assertEqual(utils.write_mat_string(mat, 4), 
                          "[[1.2340,2.3450,3.4560],[4.5670,5.6780,6.7890],[7.8910,8.9120,9.1230]]")
+
+
+    def test_serialise(self):
+        test_array = np.array([0,1,2,3,4,5,6])
+        test_float = "1.234567"
+
+        self.assertEqual(utils.serialise(test_array), [0,1,2,3,4,5,6])
+        self.assertEqual(utils.serialise(test_float), float(test_float))
 
 
 if __name__ == "__main__":
