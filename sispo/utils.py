@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+import numpy as np
+
 
 def resolve_create_dir(directory):
     """Resolves directory and creates it, if it doesn't existing."""
@@ -35,3 +37,14 @@ def write_mat_string(mat, prec):
             o += ","
 
     return o + "]"
+
+
+def serialise(o):
+    """Serialise numpy arrays to json object."""
+    try:
+        return np.asarray(o, dtype="float64").tolist()
+    except TypeError:
+        try:
+            return float(o)
+        except TypeError:
+            return str(o)
