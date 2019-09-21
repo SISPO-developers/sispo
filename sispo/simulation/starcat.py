@@ -170,7 +170,7 @@ class StarCache:
 
             starmap3[:, :, c] = skimage.transform.downscale_local_mean(starmap2[:, :, c], (ss, ss)) * (ss * ss)
 
-        write_openexr(filename, starmap3)
+        write_openexr(str(filename), starmap3)
 
         return (total_flux, np.sum(starmap3[:, :, 0]))
 
