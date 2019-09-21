@@ -37,9 +37,6 @@ class BlenderController:
         self.scratchdisk = scratchdisk
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
-        ".get_devices() required to initialise cycles .devices collection."
-        bpy.context.preferences.addons["cycles"].preferences.get_devices()
-
     def set_renderer(self, device="Auto", tile=64, tile_gpu=512, scene_names=None):
         """Set blender rendering device. 
         
@@ -55,7 +52,7 @@ class BlenderController:
         if device == "GPU":
             bpy.context.preferences.addons["cycles"].preferences.compute_device_type = "CUDA"
             for gpu in bpy.context.preferences.addons["cycles"].preferences.devices:
-                if gpu.type == "GPU":
+                if gpu.type == "CUDA":
                     gpu.use = True
                     print(gpu.name)
             tile = tile_gpu
@@ -131,7 +128,8 @@ class BlenderController:
             scene = bpy.data.scenes[scene_name]
             bpy.context.window.scene = scene
             scene.cycles.seed = time.time()
-            scene.update()
+            vl = scene.view_layers
+            vl.update()
 
     def render(self, name="", scene_name="MainScene"):
         """Render scenes."""
@@ -140,7 +138,7 @@ class BlenderController:
 
         scene = bpy.data.scenes[scene_name]
         print("Rendering seed: %d" % (scene.cycles.seed))
-        scene.render.filepath = name
+        scene.render.filepath = str(name)
         bpy.context.window.scene = scene
         bpy.ops.render.render(write_still=True)
 
@@ -236,8 +234,8 @@ def get_ra_dec(vec):
     """Calculate Right Ascension (RA) and Declination (DEC) in radians."""
     vec = vec.normalized()
     dec = math.asin(vec.z)
-
-    ra = math.acos(vec.x / math.cos(dec))
+    test=vec.x / math.cos(dec)
+    ra = math.acos(test)
     return (ra + math.pi, dec)
 
 
@@ -267,14 +265,15 @@ def get_fov(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
 def _assert_device_available(device):
     """Assert device is available or switch to CPU. 
     
-    Ensure bpy.context.preferences.addons["cycles"].preferences.get_devices()
-    was called before. Otherwise .devices collection is not initialised.
+    bpy.context.preferences.addons["cycles"].preferences.get_devices()
+    needs to be called otherwise .devices collection is not initialised.
     """
+    bpy.context.preferences.addons["cycles"].preferences.get_devices()
     devices = bpy.context.preferences.addons["cycles"].preferences.devices
     device_types = {device.type for device in devices}
 
     if device not in device_types:        
-        if "GPU" in device_types:
+        if "CUDA" in device_types:
             device = "GPU"
         else:
             device = "CPU"
