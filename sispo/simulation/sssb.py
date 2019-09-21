@@ -1,6 +1,7 @@
 """Defining behaviour of the small solar system body (SSSB)."""
 
 import math
+from pathlib import Path
 
 import orekit
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
@@ -11,6 +12,7 @@ orekit_data = root_dir / "data" / "orekit-data.zip"
 setup_orekit_curdir(str(orekit_data))
 import org.orekit.utils as utils # pylint: disable=import-error
 import org.orekit.orbits as orbits # pylint: disable=import-error
+from org.orekit.frames import FramesFactory # pylint: disable=import-error
 from org.orekit.propagation.analytical import KeplerianPropagator # pylint: disable=import-error
 from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=import-error
 
@@ -18,7 +20,7 @@ from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=im
 class Sssb():
     """Handling properties and behaviour of SSSB."""
 
-    def __init__(self):
+    def __init__(self, ROOT_DIR_PATH):
         """Currently hard implemented for Didymos."""
         self.a = 1.644641475071416E+00 * utils.Constants.IAU_2012_ASTRONOMICAL_UNIT
         self.P = 7.703805051391988E+02 * utils.Constants.JULIAN_DAY
@@ -39,7 +41,21 @@ class Sssb():
 
         self.pos_history = []
 
-        @property
-        def position(self, date):
+        self.model_file = ROOT_DIR_PATH / "data" / "Didymos" / "didymos2.blend"
+
+        self.pos = None
+        self.vel = None
+
+    def get_position(self, date=None):
+        """Get position on given date or last calculated."""
+        if date is not None:
             prop = self.propagator.propagate(date)
-            return prop.getPVCoordinates(self.frame).getPosition()
+            self.pos = prop.getPVCoordinates(self.frame).getPosition()
+        return self.pos
+
+    def get_velocity(self, date=None):
+        """Get velocity on given date or last calculated."""
+        if date is not None:
+            prop = self.propagator.propagate(date)
+            self.vel = prop.getPVCoordinates(self.frame).getVelocity()
+        return self.vel
