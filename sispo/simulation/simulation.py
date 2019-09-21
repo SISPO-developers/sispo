@@ -72,6 +72,14 @@ if not os.path.isdir(TEMP_SERIES_DIR_PATH):
     os.makedirs(TEMP_SERIES_DIR_PATH)
 
 
+class Environment():
+    """Simulation environment."""
+
+    def __init__(self):
+        self.tz = TimeScalesFactory.getTDB()
+        self.initial_date = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, self.tz)
+        self.ref_frame = FramesFactory.getICRF()
+
 class TimingEvent(PythonEventHandler):
     """TimingEvent handler."""
 
