@@ -9,3 +9,6 @@ reconstruct the trajectory.
 
 import sispo.simulation.simulation as sim
 import sispo.reconstruction.reconstruction as rc
+
+if __name__ == "__main__":
+    pass
