@@ -6,6 +6,7 @@ import os
 import sys
 import time
 from pathlib import Path
+import logging
 
 import bpy
 import numpy as np
@@ -36,9 +37,20 @@ from mpl_toolkits.mplot3d import Axes3D
 
 import starcat
 import render as bc
-
 import sispo.utils as ut
 import sssb
+import sc
+from cb import TimingEvent, TimeSampler
+
+log_file_dir = ut.resolve_create_dir(root_dir / "data" / "logs")
+log_file = log_file_dir / "sim.log"
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+logger_formatter = logging.Formatter("%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+file_handler = logging.FileHandler(str(log_file))
+file_handler.setLevel(logging.INFO)
+file_handler.setFormatter(logger_formatter)
+logger.addHandler(file_handler)
 
 
 class Environment():
@@ -52,13 +64,17 @@ class Environment():
         
         self.encounter_date = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, self.ts)
         self.duration = 2. * 60
-        self.sim_start_date = self.encounter_date.getDate().shiftedBy(-self.duration / 2.)
-        self.sim_end_date = self.encounter_date.getDate().shiftedBy(self.duration / 2.)
+        self.start_date = self.encounter_date.getDate().shiftedBy(-self.duration / 2.)
+        self.end_date = self.encounter_date.getDate().shiftedBy(self.duration / 2.)
         
         self.frame_settings = dict()
         self.frame_settings["first"] = 0
-        self.frame_settings["last"] = 10
+        self.frame_settings["last"] = 2000
         self.frame_settings["step_size"] = 1   
+
+        logger.info(f"Start {self.frame_settings['first']} "
+                    f"End {self.frame_settings['last']} "
+                    f"Skip {self.frame_settings['step_size']}")
 
         self.ref_frame = FramesFactory.getICRF()
         self.mu_sun = utils.Constants.IAU_2015_NOMINAL_SUN_GM
@@ -69,74 +85,33 @@ class Environment():
         self.timesampler_mode = 1
         self.slowmotion_factor = 10
 
-        self.blender_settings = dict()
-        self.blender_settings["exposure"] = 1.554
-        self.blender_settings["samples"] = 48
+        self.render_settings = dict()
+        self.render_settings["exposure"] = 1.554
+        self.render_settings["samples"] = 48
+        self.render_settings["device"] = "Auto"
+        self.render_settings["tile"] = 512
+        self.render_settings["x_res"] = 2464
+        self.render_settings["y_res"] = 2048
 
-        print(f"Start {self.frame_settings['first']} "
-              f"End {self.frame_settings['last']} "
-              f"Skip {self.frame_settings['step_size']}")
+        self.camera_settings = dict()
+        self.camera_settings["color_depth"] = "32"
+        self.camera_settings["lens"] = 230
+        self.camera_settings["sensor"] = 3.45E-3 * self.render_settings["x_res"]
 
-env = Environment("Didymos")
-
-
-class TimingEvent(PythonEventHandler):
-    """TimingEvent handler."""
-
-    def __init__(self):
-        """Initialise a TimingEvent handler."""
-        PythonEventHandler.__init__(self)
-        self.data = []
-        self.events = 0
-
-    def eventOccurred(self, s, detector, increasing):
-        """Handle occured event."""
-        self.events += 1
-        if self.events % 100 == 0:
-            print(f"{s.getDate()} : event {self.events}")
-
-        self.data.append(s)
-        return EventHandler.Action.CONTINUE
-
-    def resetState(self, detector, oldState):
-        """Reset TimingEvent handler to given state."""
-        return oldState
-
-
-class TimeSampler(DateDetector):
-    """TimeSampler implementation."""
-
-    def __init__(self, start, end, steps, mode = 1, factor = 2):
-        """Initialise TimeSampler.
-        
-        mode=1 linear time, mode=2 double exponential time
-        """
-        
-        duration = end.durationFrom(start)
-        dt = duration / (steps - 1)
-        dtout = dt
-        self.times = []
-        t = 0.
-        self.recorder = RecordAndContinue()
-
-        if mode == 1:
-            for _ in range(0, steps):
-                self.times.append(start.getDate().shiftedBy(t))
-                t += dt
-
-        elif mode == 2:
-            halfdur = duration / 2.
-
-            for _ in range(0, steps):
-                t2 = halfdur + math.sinh((t - halfdur) * factor / halfdur) \
-                        * halfdur / math.sinh(factor)
-                self.times.append(start.getDate().shiftedBy(t2))
-                t += dt
-            dtout = duration * math.sinh(factor / steps) / math.sinh(factor)
-
-        print(dtout)
-        DateDetector.__init__(self, dtout / 2., 1., self.times)
+        logger.info(f"Rendering settings: "
+                    f"Exposure: {self.render_settings['exposure']}; "
+                    f"Samples: {self.render_settings['samples']}")
 
 
 if __name__ == "__main__":
-    pass
+    env = Environment("Didymos")
+    sssb = sssb.Sssb("Didymos", env.ref_frame)
+    spacecraft = sc.Spacecraft("CI", env.ref_frame)
+
+    time_sample_handler2 = TimingEvent().of_(TimeSampler)
+    time_sampler2 = TimeSampler(env.start_date, env.end_date, env.frame_settings["last"], env.timesampler_mode,
+                            factor=env.slowmotion_factor).withHandler(time_sample_handler2)
+    sssb.propagator.addEventDetector(time_sampler2)
+
+    logger.info("Propagating asteroid")
+    sssb.propagator.propagate(env.start_date.getDate(), env.end_date.getDate())
