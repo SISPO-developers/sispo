@@ -1,6 +1,5 @@
 """Module to define common attributes of celestial bodies."""
 
-
 import math
 from pathlib import Path
 
@@ -11,18 +10,22 @@ file_dir = Path(__file__).parent.resolve()
 root_dir = (file_dir / ".." / "..").resolve()
 orekit_data = root_dir / "data" / "orekit-data.zip"
 setup_orekit_curdir(str(orekit_data))
-from org.orekit.propagation.events.handlers import EventHandler, RecordAndContinue  # pylint: disable=import-error
-from org.orekit.python import PythonEventHandler  # pylint: disable=import-error
+from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
+from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.propagation.events import DateDetector  # pylint: disable=import-error
+from org.orekit.python import PythonEventHandler  # pylint: disable=import-error
+from org.orekit.propagation.events.handlers import EventHandler, RecordAndContinue  # pylint: disable=import-error
+
 
 
 class CelestialBody():
 
-    def __init__(self, name, ref_frame):
+    def __init__(self, name):
 
         self.name = name
 
-        self.ref_frame = ref_frame
+        self.timescale = TimeScalesFactory.getTDB()
+        self.ref_frame = FramesFactory.getICRF()
 
         self.trajectory = None
         self.propagator = None
@@ -34,6 +37,8 @@ class CelestialBody():
 
         self.pos = None
         self.vel = None
+
+        self.pos_history = []
 
     def __repr__(self):
         """Objects are represented by their name."""
@@ -52,6 +57,16 @@ class CelestialBody():
             prop = self.propagator.propagate(date)
             self.vel = prop.getPVCoordinates(self.ref_frame).getVelocity()
         return self.vel
+
+    def get_state(self, date=None):
+        """Get spacecraft state (position, velocity)."""
+        return (self.get_position(date), self.get_velocity(date))
+
+    def setup_timesampler(self, start, end, steps, mode=1, factor=2):
+        """Create and attach TimeSampler to propagator."""
+        self.time_sampler = TimeSampler(
+            start, end, steps, mode, factor).withHandler(self.event_handler)
+        self.propagator.addEventDetector(self.time_sampler)
 
 
 class TimingEvent(PythonEventHandler):
