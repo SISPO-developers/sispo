@@ -7,8 +7,9 @@ hese images are used with openMVG and openMVS to reconstruct the 3D model and
 reconstruct the trajectory.
 """
 
-import sispo.simulation.simulation as sim
-import sispo.reconstruction.reconstruction as rc
+import simulation.simulation as sim
+import reconstruction.reconstruction as rc
 
 if __name__ == "__main__":
-    pass
+    env = sim.Environment("Didymos")
+    env.simulate()
