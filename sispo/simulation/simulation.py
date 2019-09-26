@@ -63,8 +63,8 @@ class Environment():
         self.ts = TimeScalesFactory.getTDB()
         self.encounter_date = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, self.ts)
         self.duration = 2. * 60
-        self.start_date = self.encounter_date.getDate().shiftedBy(-self.duration / 2.)
-        self.end_date = self.encounter_date.getDate().shiftedBy(self.duration / 2.)
+        self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
+        self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
 
         self.frame_settings = dict()
         self.frame_settings["first"] = 0
@@ -105,8 +105,8 @@ class Environment():
         self.sssb = sssb.Sssb("Didymos", self.mu_sun, AbsoluteDate(
             2017, 8, 19, 0, 0, 0.000, self.ts))
         self.sssb.setup_timesampler(self.start_date, self.end_date,
-                                    self.frame_settings["last"], 
-                                    self.timesampler_mode, 
+                                    self.frame_settings["last"],
+                                    self.timesampler_mode,
                                     self.slowmotion_factor)
 
         # Setup SC
@@ -114,7 +114,7 @@ class Environment():
         self.spacecraft = sc.Spacecraft(
             "CI", self.mu_sun, state, self.encounter_date)
         self.spacecraft.setup_timesampler(
-            self.start_date, self.end_date, self.frame_settings["last"], 
+            self.start_date, self.end_date, self.frame_settings["last"],
             self.timesampler_mode, self.slowmotion_factor)
 
     def simulate(self):
@@ -122,12 +122,10 @@ class Environment():
         logger.info("Starting simulation")
 
         logger.info("Propagating SSSB")
-        self.sssb.propagator.propagate(
-            self.start_date.getDate(), self.end_date.getDate())
+        self.sssb.propagator.propagate(self.start_date, self.end_date)
 
         logger.info("Propagating Spacecraft")
-        self.spacecraft.propagator.propagate(
-            self.start_date.getDate(), self.end_date.getDate())
+        self.spacecraft.propagator.propagate(self.start_date, self.end_date)
 
         logger.info("Finishing simulation")
 
@@ -153,7 +151,7 @@ class Environment():
 
     def calc_encounter_sc_state(self):
         """Calculate the sc state during encounter relative to SSSB."""
-        pos, vel = self.sssb.get_state(self.encounter_date.getDate())
+        pos, vel = self.sssb.get_state(self.encounter_date)
 
         sssb_direction = pos.normalize()
 

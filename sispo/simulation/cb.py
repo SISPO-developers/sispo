@@ -112,7 +112,7 @@ class TimeSampler(DateDetector):
 
         if mode == 1:
             for _ in range(0, steps):
-                self.times.append(start.getDate().shiftedBy(t))
+                self.times.append(start.shiftedBy(t))
                 t += dt
 
         elif mode == 2:
@@ -121,7 +121,7 @@ class TimeSampler(DateDetector):
             for _ in range(0, steps):
                 t2 = halfdur + math.sinh((t - halfdur) * factor / halfdur) \
                     * halfdur / math.sinh(factor)
-                self.times.append(start.getDate().shiftedBy(t2))
+                self.times.append(start.shiftedBy(t2))
                 t += dt
             dtout = duration * math.sinh(factor / steps) / math.sinh(factor)
 
