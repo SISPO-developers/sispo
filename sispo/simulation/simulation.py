@@ -32,9 +32,10 @@ from simulation.cb import TimingEvent, TimeSampler
 import simulation.sc as sc
 import simulation.sssb as sssb
 import simulation.starcat as starcat
+import utils
 
 log_file_dir = root_dir / "data" / "logs"
-log_file = log_file_dir / "sim.log"
+log_file = log_file_dir / (str(time.time()) + "_sim.log")
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 logger_formatter = logging.Formatter(
@@ -49,13 +50,14 @@ logger.info("\n\n####################  NEW LOG ####################\n")
 class Environment():
     """Simulation environment."""
 
-    def __init__(self, name):
+    def __init__(self, name, duration):
 
         self.name = name
+        self.res_path = utils.resolve_create_dir(root_dir / "data" / "results" / name)
 
         self.ts = TimeScalesFactory.getTDB()
         self.encounter_date = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, self.ts)
-        self.duration = 2. * 60
+        self.duration = duration
         self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
 
@@ -128,7 +130,7 @@ class Environment():
         """Save simulation results to a file."""
         logger.info("Saving propagation results")
 
-        with open(str(root_dir / "data" / "results" / (self.name + ".txt")), "w+") as f:
+        with open(str(self.res_path / "PositionHistory.txt"), "w+") as f:
             for (date, sc_pos, sssb_pos) in zip(self.spacecraft.date_history,
                                                 self.spacecraft.pos_history,
                                                 self.sssb.pos_history):
@@ -172,5 +174,5 @@ class Environment():
 
 
 if __name__ == "__main__":
-    env = Environment("Didymos")
+    env = Environment("Didymos", 2 * 60.)
     env.simulate()
