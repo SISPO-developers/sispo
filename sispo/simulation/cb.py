@@ -5,30 +5,32 @@ from pathlib import Path
 
 import orekit
 OREKIT_VM = orekit.initVM()  # pylint: disable=no-member
-from orekit.pyhelpers import setup_orekit_curdir
 file_dir = Path(__file__).parent.resolve()
 root_dir = (file_dir / ".." / "..").resolve()
 orekit_data = root_dir / "data" / "orekit-data.zip"
+from orekit.pyhelpers import setup_orekit_curdir
 setup_orekit_curdir(str(orekit_data))
-from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
-from org.orekit.frames import FramesFactory  # pylint: disable=import-error
-from org.orekit.propagation.events import DateDetector  # pylint: disable=import-error
-from org.orekit.python import PythonEventHandler  # pylint: disable=import-error
 from org.orekit.propagation.events.handlers import EventHandler, RecordAndContinue  # pylint: disable=import-error
-
+from org.orekit.python import PythonEventHandler  # pylint: disable=import-error
+from org.orekit.propagation.events import DateDetector  # pylint: disable=import-error
+from org.orekit.frames import FramesFactory  # pylint: disable=import-error
+from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
 
 
 class CelestialBody():
+    """Parent class for every celestial body such as satellites or asteroids."""
 
-    def __init__(self, name):
+    def __init__(self, name, trj_date):
 
         self.name = name
 
         self.timescale = TimeScalesFactory.getTDB()
         self.ref_frame = FramesFactory.getICRF()
 
+        self.trj_date = trj_date
         self.trajectory = None
         self.propagator = None
+        self.propgate = None
 
         self.event_handler = TimingEvent().of_(TimeSampler)
         self.time_sampler = None
