@@ -40,7 +40,8 @@ class CelestialBody():
         self.pos = None
         self.vel = None
 
-        self.pos_history = []
+        self.date_history = self.event_handler.date_history
+        self.pos_history = self.event_handler.pos_history
 
     def __repr__(self):
         """Objects are represented by their name."""
@@ -77,7 +78,8 @@ class TimingEvent(PythonEventHandler):
     def __init__(self):
         """Initialise a TimingEvent handler."""
         PythonEventHandler.__init__(self)
-        self.data = []
+        self.date_history = []
+        self.pos_history = []
         self.events = 0
 
     def eventOccurred(self, s, detector, increasing):
@@ -86,7 +88,8 @@ class TimingEvent(PythonEventHandler):
         if self.events % 100 == 0:
             print(f"{s.getDate()} : event {self.events}")
 
-        self.data.append(s)
+        self.date_history.append(s.getDate())
+        self.pos_history.append(s.getPVCoordinates().getPosition())
         return EventHandler.Action.CONTINUE
 
     def resetState(self, detector, oldState):

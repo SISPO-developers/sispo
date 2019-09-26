@@ -129,18 +129,17 @@ class Environment():
         logger.info("Saving propagation results")
 
         with open(str(root_dir / "data" / "results" / (self.name + ".txt")), "w+") as f:
-            for (sc_state, sssb_state) in zip(self.spacecraft.event_handler.data,
-                                              self.sssb.event_handler.data):
+            for (date, sc_pos, sssb_pos) in zip(self.spacecraft.date_history,
+                                                self.spacecraft.pos_history,
+                                                self.sssb.pos_history):
 
-                sc_pos = sc_state.getPVCoordinates(self.spacecraft.ref_frame).getPosition()
-                sssb_pos = sssb_state.getPVCoordinates(self.sssb.ref_frame).getPosition()
                 sc_pos = np.asarray(sc_pos.toArray())
                 sssb_pos = np.asarray(sssb_pos.toArray())
 
-                f.write(str(sc_state.getDate()) + "\t" + str(sssb_pos) + "\t"
+                f.write(str(date) + "\t" + str(sssb_pos) + "\t"
                         + str(sc_pos) + "\n")
 
-        logger.info("Propagation results saved")             
+        logger.info("Propagation results saved")
 
     def calc_encounter_sc_state(self):
         """Calculate the sc state during encounter relative to SSSB."""
