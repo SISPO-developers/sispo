@@ -33,8 +33,6 @@ class Sssb(CelestialBody):
         Omega = math.radians(7.320940216397703E+01)
         M = math.radians(1.967164895190036E+02)
 
-        date_initial = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, self.timescale)
-
         self.trajectory = orbits.KeplerianOrbit(a, e, i, omega, Omega, M,
                                                orbits.PositionAngle.MEAN, 
                                                self.ref_frame, self.trj_date, mu)
