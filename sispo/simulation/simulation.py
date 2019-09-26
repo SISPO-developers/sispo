@@ -66,6 +66,9 @@ class Environment():
         self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
 
+        self.ref_frame = FramesFactory.getICRF()
+        self.mu_sun = utils.Constants.IAU_2015_NOMINAL_SUN_GM
+
         self.frame_settings = dict()
         self.frame_settings["first"] = 0
         self.frame_settings["last"] = 2000
@@ -74,9 +77,6 @@ class Environment():
         logger.info("First frame: %d last frame: %d Step size: %d",
                     self.frame_settings['first'], self.frame_settings['last'],
                     self.frame_settings['step_size'])
-
-        self.ref_frame = FramesFactory.getICRF()
-        self.mu_sun = utils.Constants.IAU_2015_NOMINAL_SUN_GM
 
         self.minimum_distance = 1E5
         self.with_terminator = True
