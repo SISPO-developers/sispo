@@ -28,6 +28,7 @@ import simplejson as json
 from mpl_toolkits.mplot3d import Axes3D
 
 from simulation.cb import TimingEvent, TimeSampler
+import simulation.render as render
 import simulation.sc as sc
 import simulation.sssb as sssb
 import simulation.starcat as starcat
@@ -73,6 +74,11 @@ class Environment():
         self.render_settings["tile"] = 512
         self.render_settings["x_res"] = 2464
         self.render_settings["y_res"] = 2048
+        self.render_settings["scene_names"] = ["MainScene",
+                                               "BackgroundStars",
+                                               "AsteroidOnly",
+                                               "AsteroidConstDistance",
+                                               "LightingReference"]
 
         self.camera_settings = dict()
         self.camera_settings["color_depth"] = "32"
@@ -111,9 +117,20 @@ class Environment():
         self.logger.info("Propagating Spacecraft")
         self.spacecraft.propagator.propagate(self.start_date, self.end_date)
 
-        self.logger.info("Finishing simulation")
+        self.logger.info("Simulation completed")
 
         self.save_results()
+
+    def render(self):
+        """Render simulation scenario."""
+        self.logger.info("Rendering simulation")
+
+        render_dir = utils.resolve_create_dir(self.res_path / "rendering")
+
+        renderer = render.BlenderController(render_dir, self.render_settings["scene_names"])
+        renderer.set_renderer()
+
+        self.logger.info("Rendering completed")
 
     def save_results(self):
         """Save simulation results to a file."""
