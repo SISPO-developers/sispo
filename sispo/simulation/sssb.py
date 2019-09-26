@@ -21,9 +21,9 @@ from simulation.cb import CelestialBody
 class Sssb(CelestialBody):
     """Handling properties and behaviour of SSSB."""
 
-    def __init__(self, name):
+    def __init__(self, name, mu, trj_date):
         """Currently hard implemented for Didymos."""
-        super().__init__(name)
+        super().__init__(name, trj_date)
 
         a = 1.644641475071416E+00 * utils.Constants.IAU_2012_ASTRONOMICAL_UNIT
         P = 7.703805051391988E+02 * utils.Constants.JULIAN_DAY
@@ -34,11 +34,10 @@ class Sssb(CelestialBody):
         M = math.radians(1.967164895190036E+02)
 
         date_initial = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, self.timescale)
-        mu_sun = utils.Constants.IAU_2015_NOMINAL_SUN_GM
 
         self.trajectory = orbits.KeplerianOrbit(a, e, i, omega, Omega, M,
                                                orbits.PositionAngle.MEAN, 
-                                               self.ref_frame, date_initial, mu_sun)
+                                               self.ref_frame, self.trj_date, mu)
         self.propagator = KeplerianPropagator(self.trajectory)
 
         self.model_file = root_dir / "data" / "Didymos" / "didymos2.blend"
