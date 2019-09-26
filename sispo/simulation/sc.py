@@ -28,3 +28,4 @@ class Spacecraft(CelestialBody):
 
         self.trajectory = orbits.KeplerianOrbit(state, self.ref_frame, self.trj_date, mu)
         self.propagator = KeplerianPropagator(self.trajectory)
+        

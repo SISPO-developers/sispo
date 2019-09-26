@@ -39,3 +39,4 @@ class Sssb(CelestialBody):
         self.propagator = KeplerianPropagator(self.trajectory)
 
         self.model_file = root_dir / "data" / "Didymos" / "didymos2.blend"
+        
