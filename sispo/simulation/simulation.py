@@ -7,7 +7,6 @@ from pathlib import Path
 import sys
 import time
 
-import bpy
 import numpy as np
 import matplotlib.pyplot as plt
 import OpenEXR
@@ -27,7 +26,6 @@ import skimage.transform
 import simplejson as json
 from mpl_toolkits.mplot3d import Axes3D
 
-from simulation.cb import TimingEvent, TimeSampler
 import simulation.render as render
 import simulation.sc as sc
 import simulation.sssb as sssb
