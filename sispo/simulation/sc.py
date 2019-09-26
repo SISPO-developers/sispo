@@ -21,14 +21,10 @@ from simulation.cb import CelestialBody
 class Spacecraft(CelestialBody):
     """Handling properties and behaviour of the spacecraft."""
 
-    def __init__(self, name):
+    def __init__(self, name, mu, state, trj_date):
         """Currently hard implemented for SC."""
 
-        super().__init__(name)
+        super().__init__(name, trj_date)
 
-        self.frame = FramesFactory.getICRF()
-        mu_sun = utils.Constants.IAU_2015_NOMINAL_SUN_GM
-
-        self.trajectory = orbits.KeplerianOrbit(self.a, self.e, self.i, self.omega, self.Omega, self.M,
-                                  orbits.PositionAngle.MEAN, self.ref_frame, date_initial, mu_sun)
+        self.trajectory = orbits.KeplerianOrbit(state, self.ref_frame, self.trj_date, mu)
         self.propagator = KeplerianPropagator(self.trajectory)
