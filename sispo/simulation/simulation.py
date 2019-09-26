@@ -2,7 +2,6 @@
 
 import copy
 import math
-import logging
 import os
 from pathlib import Path
 import sys
@@ -34,19 +33,6 @@ import simulation.sssb as sssb
 import simulation.starcat as starcat
 import utils
 
-log_file_dir = root_dir / "data" / "logs"
-log_file = log_file_dir / (str(time.time()) + "_sim.log")
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.INFO)
-logger_formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
-file_handler = logging.FileHandler(str(log_file))
-file_handler.setLevel(logging.INFO)
-file_handler.setFormatter(logger_formatter)
-logger.addHandler(file_handler)
-logger.info("\n\n####################  NEW LOG ####################\n")
-
-
 class Environment():
     """Simulation environment."""
 
@@ -54,6 +40,7 @@ class Environment():
 
         self.name = name
         self.res_path = utils.resolve_create_dir(root_dir / "data" / "results" / name)
+        self.logger = utils.create_logger("simulation", self.res_path)
 
         self.ts = TimeScalesFactory.getTDB()
         self.encounter_date = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, self.ts)
@@ -69,7 +56,7 @@ class Environment():
         self.frame_settings["last"] = 2000
         self.frame_settings["step_size"] = 1
 
-        logger.info("First frame: %d last frame: %d Step size: %d",
+        self.logger.info("First frame: %d last frame: %d Step size: %d",
                     self.frame_settings['first'], self.frame_settings['last'],
                     self.frame_settings['step_size'])
 
@@ -93,7 +80,7 @@ class Environment():
         self.camera_settings["sensor"] = 3.45E-3 * \
             self.render_settings["x_res"]
 
-        logger.info("Rendering settings: Exposure: %d; Samples: %d",
+        self.logger.info("Rendering settings: Exposure: %d; Samples: %d",
                     self.render_settings['exposure'], self.render_settings['samples'])
 
         # Setup SSSB
@@ -114,21 +101,21 @@ class Environment():
 
     def simulate(self):
         """Do simulation."""
-        logger.info("Starting simulation")
+        self.logger.info("Starting simulation")
 
-        logger.info("Propagating SSSB")
+        self.logger.info("Propagating SSSB")
         self.sssb.propagator.propagate(self.start_date, self.end_date)
 
-        logger.info("Propagating Spacecraft")
+        self.logger.info("Propagating Spacecraft")
         self.spacecraft.propagator.propagate(self.start_date, self.end_date)
 
-        logger.info("Finishing simulation")
+        self.logger.info("Finishing simulation")
 
         self.save_results()
 
     def save_results(self):
         """Save simulation results to a file."""
-        logger.info("Saving propagation results")
+        self.logger.info("Saving propagation results")
 
         with open(str(self.res_path / "PositionHistory.txt"), "w+") as f:
             for (date, sc_pos, sssb_pos) in zip(self.spacecraft.date_history,
@@ -141,7 +128,7 @@ class Environment():
                 f.write(str(date) + "\t" + str(sssb_pos) + "\t"
                         + str(sc_pos) + "\n")
 
-        logger.info("Propagation results saved")
+        self.logger.info("Propagation results saved")
 
     def calc_encounter_sc_state(self):
         """Calculate the sc state during encounter relative to SSSB."""
@@ -166,8 +153,8 @@ class Environment():
 
         sc_vel = vel.scalarMultiply((vel.getNorm() - 10000.) / vel.getNorm())
 
-        logger.info("Spacecraft relative velocity: %s", sc_vel)
-        logger.info("Spacecraft distance from sun: %s",
+        self.logger.info("Spacecraft relative velocity: %s", sc_vel)
+        self.logger.info("Spacecraft distance from sun: %s",
                     sc_pos.getNorm()/Constants.IAU_2012_ASTRONOMICAL_UNIT)
 
         return PVCoordinates(sc_pos, sc_vel)
