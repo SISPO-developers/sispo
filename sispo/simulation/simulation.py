@@ -20,16 +20,9 @@ orekit_data = root_dir / "data" / "orekit-data.zip"
 from orekit.pyhelpers import setup_orekit_curdir
 setup_orekit_curdir(str(orekit_data))
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
-from org.orekit.python import PythonEventHandler, PythonOrekitFixedStepHandler  # pylint: disable=import-error
-from org.orekit.propagation.events.handlers import EventHandler  # pylint: disable=import-error
-from org.orekit.propagation.events.handlers import RecordAndContinue  # pylint: disable=import-error
-from org.orekit.propagation.events import DateDetector  # pylint: disable=import-error
 from org.hipparchus.geometry.euclidean.threed import Vector3D  # pylint: disable=import-error
-from org.orekit.propagation.analytical import KeplerianPropagator  # pylint: disable=import-error
 from org.orekit.frames import FramesFactory  # pylint: disable=import-error
-from org.orekit.utils import PVCoordinates  # pylint: disable=import-error
-import org.orekit.utils as utils  # pylint: disable=import-error
-import org.orekit.orbits as orbits  # pylint: disable=import-error
+from org.orekit.utils import Constants, PVCoordinates  # pylint: disable=import-error
 import skimage.filters
 import skimage.transform
 import simplejson as json
@@ -67,7 +60,7 @@ class Environment():
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
 
         self.ref_frame = FramesFactory.getICRF()
-        self.mu_sun = utils.Constants.IAU_2015_NOMINAL_SUN_GM
+        self.mu_sun = Constants.IAU_2015_NOMINAL_SUN_GM
 
         self.frame_settings = dict()
         self.frame_settings["first"] = 0
@@ -174,7 +167,7 @@ class Environment():
 
         logger.info("Spacecraft relative velocity: %s", sc_vel)
         logger.info("Spacecraft distance from sun: %s",
-                    sc_pos.getNorm()/utils.Constants.IAU_2012_ASTRONOMICAL_UNIT)
+                    sc_pos.getNorm()/Constants.IAU_2012_ASTRONOMICAL_UNIT)
 
         return PVCoordinates(sc_pos, sc_vel)
 
