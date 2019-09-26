@@ -86,22 +86,24 @@ class Environment():
         # Setup SSSB
         self.sssb = sssb.Sssb("Didymos", self.mu_sun, AbsoluteDate(
             2017, 8, 19, 0, 0, 0.000, self.ts))
-        self.sssb.setup_timesampler(self.start_date, self.end_date,
-                                    self.frame_settings["last"],
-                                    self.timesampler_mode,
-                                    self.slowmotion_factor)
+
 
         # Setup SC
-        state = self.calc_encounter_sc_state()
+        state = self.calc_sc_encounter_state()
         self.spacecraft = sc.Spacecraft(
             "CI", self.mu_sun, state, self.encounter_date)
-        self.spacecraft.setup_timesampler(
-            self.start_date, self.end_date, self.frame_settings["last"],
-            self.timesampler_mode, self.slowmotion_factor)
+
 
     def simulate(self):
         """Do simulation."""
         self.logger.info("Starting simulation")
+
+        self.sssb.setup_timesampler(
+            self.start_date, self.end_date, self.frame_settings["last"],
+            self.timesampler_mode, self.slowmotion_factor)
+        self.spacecraft.setup_timesampler(
+            self.start_date, self.end_date, self.frame_settings["last"],
+            self.timesampler_mode, self.slowmotion_factor)
 
         self.logger.info("Propagating SSSB")
         self.sssb.propagator.propagate(self.start_date, self.end_date)
@@ -117,7 +119,7 @@ class Environment():
         """Save simulation results to a file."""
         self.logger.info("Saving propagation results")
 
-        with open(str(self.res_path / "PositionHistory.txt"), "w+") as f:
+        with open(str(self.res_path / "PositionHistory.txt"), "w+") as file:
             for (date, sc_pos, sssb_pos) in zip(self.spacecraft.date_history,
                                                 self.spacecraft.pos_history,
                                                 self.sssb.pos_history):
@@ -125,15 +127,27 @@ class Environment():
                 sc_pos = np.asarray(sc_pos.toArray())
                 sssb_pos = np.asarray(sssb_pos.toArray())
 
-                f.write(str(date) + "\t" + str(sssb_pos) + "\t"
-                        + str(sc_pos) + "\n")
+                file.write(str(date) + "\t" + str(sssb_pos) + "\t"
+                           + str(sc_pos) + "\n")
 
         self.logger.info("Propagation results saved")
 
-    def calc_encounter_sc_state(self):
+    def calc_sc_encounter_state(self):
         """Calculate the sc state during encounter relative to SSSB."""
         pos, vel = self.sssb.get_state(self.encounter_date)
 
+        sc_pos = self.calc_sc_encounter_pos(pos)
+
+        sc_vel = vel.scalarMultiply((vel.getNorm() - 10000.) / vel.getNorm())
+
+        self.logger.info("Spacecraft relative velocity: %s", sc_vel)
+        self.logger.info("Spacecraft distance from sun: %s",
+                         sc_pos.getNorm()/Constants.IAU_2012_ASTRONOMICAL_UNIT)
+
+        return PVCoordinates(sc_pos, sc_vel)
+
+    def calc_sc_encounter_pos(self, pos):
+        """Calculate the sc position during encounter relative to SSSB."""
         sssb_direction = pos.normalize()
 
         if not self.with_terminator:
@@ -150,14 +164,7 @@ class Environment():
             shift = shift.normalize()
             shift = shift.scalarMultiply(self.minimum_distance)
             sc_pos = pos.add(shift)
-
-        sc_vel = vel.scalarMultiply((vel.getNorm() - 10000.) / vel.getNorm())
-
-        self.logger.info("Spacecraft relative velocity: %s", sc_vel)
-        self.logger.info("Spacecraft distance from sun: %s",
-                    sc_pos.getNorm()/Constants.IAU_2012_ASTRONOMICAL_UNIT)
-
-        return PVCoordinates(sc_pos, sc_vel)
+        return sc_pos
 
 
 if __name__ == "__main__":
