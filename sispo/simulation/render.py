@@ -66,8 +66,6 @@ class BlenderController:
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
             scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
-            scene.render.tile_x = 512
-            scene.render.tile_y = 512
             scene.view_settings.view_transform = "Raw"
             scene.view_settings.look = "None"
         
@@ -98,12 +96,16 @@ class BlenderController:
 
         self.device = self._determine_device(device)
         self._set_cycles_device()
+        tile_size = self.get_tile_size()
 
         # Sets render device of scenes
         if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
-            bpy.data.scenes[scene_name].cycles.device = self.device
+            scene = bpy.data.scenes[scene_name]
+            scene.cycles.device = self.device
+            scene.render.tile_x = tile_size
+            scene.render.tile_y = tile_size
 
 
     def _determine_device(self, device):
@@ -153,19 +155,37 @@ class BlenderController:
             logger.info("Invalid device: %s", self.device)
             raise BlenderControllerError(f"Invalid device: {self.device}")
 
+    def get_tile_size(self):
+        """Determine size of tiles while rendering based on render device."""
+        if self.device == "GPU":
+            tile_size = 512
+        elif self.device == "CPU":
+            tile_size = 64
+        else:
+            logger.info("Can not get tile size for device %s", self.device)
+            raise BlenderController("Can not get tile size.")
+        
+        return tile_size
+
     def set_samples(self, samples=6, scene_names=None):
         """Set number of samples to render for each pixel."""
+        if scene_names is None:
+            scene_names = self.scene_names
         for scene_name in scene_names:
             bpy.data.scenes[scene_name].cycles.samples = samples
 
     def set_exposure(self, exposure):
         """Set exposure value."""
+        if scene_names is None:
+            scene_names = self.scene_names
         for scene_name in self.scene_names:
             scene = bpy.data.scenes[scene_name]
             scene.view_settings.exposure = exposure
 
     def set_resolution(self, res_x, res_y, scene_names=None):
         """Sets resolution of rendered image."""
+        if scene_names is None:
+            scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
             scene.render.resolution_x = res_x
