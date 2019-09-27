@@ -164,7 +164,7 @@ class BlenderController:
         else:
             logger.info("Can not get tile size for device %s", self.device)
             raise BlenderControllerError("Can not get tile size.")
-        
+
         return tile_size
 
     def set_samples(self, samples=6, scene_names=None):
@@ -174,7 +174,7 @@ class BlenderController:
         for scene_name in scene_names:
             bpy.data.scenes[scene_name].cycles.samples = samples
 
-    def set_exposure(self, exposure):
+    def set_exposure(self, exposure, scene_names=None):
         """Set exposure value."""
         if scene_names is None:
             scene_names = self.scene_names
@@ -191,17 +191,52 @@ class BlenderController:
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
 
-    def set_output_format(self, file_format="OPEN_EXR", color_depth="32",
-                          use_preview=True, scene_names=None):
+    def set_output_format(self,
+                          file_format="OPEN_EXR",
+                          color_depth="32",
+                          use_preview=True,
+                          scene_names=None):
         """Set output file format."""
         if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
             scene.render.image_settings.file_format = file_format
-            scene.render.filepath = str(self.res_path / "r{}.exr".format(self.render_id))
+            scene.render.filepath = str(self.res_path / f"r{self.render_id}.exr")
             scene.render.image_settings.color_depth = color_depth
             scene.render.image_settings.use_preview = use_preview
+
+    def set_camera(self,
+                   camera_name="Camera",
+                   lens=35,
+                   sensor=32,
+                   clip_start=1E-5,
+                   clip_end=1E32,
+                   mode="PERSP", # Modes ORTHO, PERSP
+                   ortho_scale=7):
+        """Set camera configuration values."""
+        camera = self.cameras[camera_name]      
+        camera.clip_end = clip_end
+        camera.clip_start = clip_start
+        camera.lens = lens
+        camera.ortho_scale = ortho_scale
+        camera.sensor_width = sensor
+        camera.type = mode
+
+    def create_camera(self, camera_name="Camera", scene_names=None):
+        """Create new camera and add to relevant scenes."""
+        cam = bpy.data.cameras.new(camera_name)
+        camera = bpy.data.objects.new(camera_name, object_data=cam)
+        camera.name = camera_name
+        camera.location = (0, 0, 0)
+
+        if scene_names is None:
+            scene_names = self.scene_names
+        for scene_name in scene_names:
+            scene = bpy.data.scenes[scene_name]
+            scene.camera = camera
+            scene.collection.objects.link(camera)
+
 
     def update(self, scene_names=None):
         """Update scenes."""
@@ -243,26 +278,7 @@ class BlenderController:
             return obj
         return None
 
-    def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode="PERSP",
-                   ortho_scale=7, camera_name="Camera", scene_names=None):  # Modes ORTHO, PERSP
-        """Set camera configuration values."""
-        cam = bpy.data.cameras.new(camera_name)
-        camera = bpy.data.objects.new("Camera", cam)
-        camera.name = camera_name
-        camera.data.clip_end = clip_end
-        camera.data.clip_start = clip_start
-        camera.data.lens = lens
-        camera.data.ortho_scale = ortho_scale
-        camera.data.sensor_width = sensor
-        camera.location = (0, 0, 0)
-        camera.data.type = mode
-        self.cameras = bpy.data.objects # TODO: Why objects? why not data.cameras only?
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            scene = bpy.data.scenes[scene_name]
-            scene.camera = camera
-            scene.collection.objects.link(camera)
+    
 
     def target_camera(self, target, camera_name="Camera"):
         """Target camera towards target."""
