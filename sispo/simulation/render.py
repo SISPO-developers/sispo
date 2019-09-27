@@ -1,12 +1,21 @@
 """Module to controll blender python module bpy."""
 
 import math
+from pathlib import Path
 import struct
 import time
 import zlib
 
 import bpy
 from mathutils import Vector # pylint: disable=import-error
+
+import utils
+
+
+file_dir = Path(__file__).parent.resolve()
+root_dir = (file_dir / ".." / "..").resolve()
+log_path = utils.resolve_create_dir(root_dir / "data" / "results" / "rendering")
+logger = utils.create_logger("Rendering", log_path)
 
 
 class BlenderControllerError(RuntimeError):
@@ -19,6 +28,8 @@ class BlenderController:
 
     def __init__(self, scratchdisk, scene_names=None):
         """Initialise blender controller class."""
+
+        self.res_path = utils.resolve_create_dir(root_dir / "data" / "results" / "rendering")
 
         if scene_names is None:
             scene_names = ["MainScene"]
@@ -41,11 +52,9 @@ class BlenderController:
                 scene.name = scene_name
 
         self.scenes = bpy.data.scenes
-        self.scratchdisk = scratchdisk
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
         self.device = "CPU"
-
 
         self.cycles = bpy.context.preferences.addons["cycles"]
 
@@ -53,41 +62,70 @@ class BlenderController:
         """Set cycles rendering device for given scenes.
 
         When device="AUTO" it is attempted to use GPU first, otherwise
-        fallback is CPU.
-        bpy.context.preferences.addons["cycles"].preferences.get_devices()
-        needs to be called otherwise .devices collection is not initialised.
+        fallback is CPU. Currently, assumes set_device is only used once.
         """
-        self.cycles.preferences.get_devices()
 
-        if device in ("AUTO", "GPU"):
-            # Check device for avilability
-            devices = self.cycles.preferences.devices
-            device_types = {device.type for device in devices}
+        logger.info("Attempting to set cycle rendering device to: %s", device)
 
-            if "CUDA" in device_types:
-                self.device = "GPU"
-                self.cycles.preferences.compute_device_type = "CUDA"
-                for gpu in devices:
-                    if gpu.type == "CUDA":
-                        gpu.use = True
-                        print(gpu.name)
-                print("Rendering with GPUs")
-            else:
-                self.device = "CPU"
-                print("Rendering with CPUs")
+        self.device = self._determine_render_device(device)
+        self._set_cycles_device()
 
-        elif device == "CPU":
-            self.device = "CPU"
-            print("Rendering with CPUs")
-
-        else:
-            raise BlenderControllerError("Invalid rendering device setting.")
-
+        # Sets render device of scenes
         if scene_names is None:
             scene_names = self.scene_names
 
         for scene_name in scene_names:
             bpy.data.scenes[scene_name].cycles.device = self.device
+
+
+    def _determine_render_device(self, device):
+        """Determines the render device based on availability and input.
+
+        bpy.context.preferences.addons["cycles"].preferences.get_devices()
+        needs to be called otherwise .devices collection is not initialised.
+        """
+        self.cycles.preferences.get_devices()
+        devices = self.cycles.preferences.devices
+        logger.info("Available devices: %s", devices)
+
+        if device in ("AUTO", "GPU"):
+            device_types = {device.type for device in devices}
+
+            if "CUDA" in device_types:
+                used_device = "GPU"
+            else:
+                used_device = "CPU"
+
+        elif device == "CPU":
+            used_device = "CPU"
+
+        else:
+            logger.info("Invalid rendering device setting.")
+            raise BlenderControllerError("Invalid rendering device setting.") 
+
+        return used_device
+
+    def _set_cycles_device(self):
+        """Applies self.device setting to cycles itself."""
+        devices = self.cycles.preferences.devices
+
+        if self.device in ("CPU", "GPU"):
+            if self.device == "GPU":
+                device_type = "CUDA"
+            else:
+                device_type = "CPU"
+
+            self.cycles.preferences.compute_device_type = device_type
+            for device in devices:
+                if device.type == device_type:
+                    device.use = True
+                    logger.info("%s device name: %s", device_type, device.name)
+                else:
+                    device.use = False
+
+        else:
+            logger.info("Invalid device: %s", self.device)
+            raise BlenderControllerError(f"Invalid device: {self.device}")
 
     def set_renderer(self, device="Auto", tile=64, tile_gpu=512, scene_names=None):
         """Set blender rendering device.
@@ -155,7 +193,7 @@ class BlenderController:
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
             scene.render.image_settings.file_format = file_format
-            scene.render.filepath = str(self.scratchdisk / "r{}.exr".format(self.render_id))
+            scene.render.filepath = str(self.res_path / "r{}.exr".format(self.render_id))
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
             scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
@@ -186,7 +224,7 @@ class BlenderController:
     def render(self, name="", scene_name="MainScene"):
         """Render scenes."""
         if name == "":
-            name = self.scratchdisk + "r%0.8X.exr" % (self.render_id)
+            name = self.res_path + "r%0.8X.exr" % (self.render_id)
 
         scene = bpy.data.scenes[scene_name]
         print("Rendering seed: %d" % (scene.cycles.seed))
