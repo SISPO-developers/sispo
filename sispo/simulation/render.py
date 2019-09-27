@@ -160,7 +160,7 @@ class BlenderController:
         if self.device == "GPU":
             tile_size = 512
         elif self.device == "CPU":
-            tile_size = 64
+            tile_size = 128
         else:
             logger.info("Can not get tile size for device %s", self.device)
             raise BlenderController("Can not get tile size.")
