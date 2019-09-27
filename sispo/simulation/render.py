@@ -44,7 +44,52 @@ class BlenderController:
         self.scratchdisk = scratchdisk
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
-    def set_device(self, device="Auto", tile=64, tile_gpu=512, scene_names=None):
+        self.device = "CPU"
+
+
+        self.cycles = bpy.context.preferences.addons["cycles"]
+
+    def set_device(self, device="AUTO", scene_names=None):
+        """Set cycles rendering device for given scenes.
+
+        When device="AUTO" it is attempted to use GPU first, otherwise
+        fallback is CPU.
+        bpy.context.preferences.addons["cycles"].preferences.get_devices()
+        needs to be called otherwise .devices collection is not initialised.
+        """
+        self.cycles.preferences.get_devices()
+
+        if device in ("AUTO", "GPU"):
+            # Check device for avilability
+            devices = self.cycles.preferences.devices
+            device_types = {device.type for device in devices}
+
+            if "CUDA" in device_types:
+                self.device = "GPU"
+                self.cycles.preferences.compute_device_type = "CUDA"
+                for gpu in devices:
+                    if gpu.type == "CUDA":
+                        gpu.use = True
+                        print(gpu.name)
+                print("Rendering with GPUs")
+            else:
+                self.device = "CPU"
+                print("Rendering with CPUs")
+
+        elif device == "CPU":
+            self.device = "CPU"
+            print("Rendering with CPUs")
+
+        else:
+            raise BlenderControllerError("Invalid rendering device setting.")
+
+        if scene_names is None:
+            scene_names = self.scene_names
+
+        for scene_name in scene_names:
+            bpy.data.scenes[scene_name].cycles.device = self.device
+
+    def set_renderer(self, device="Auto", tile=64, tile_gpu=512, scene_names=None):
         """Set blender rendering device.
         
         Fallback is CPU if no GPU available. If device is neither GPU or CPU,
@@ -268,22 +313,4 @@ def get_fov(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
     dec_w = (dec_max - dec_min)
 
     return ra_cent, ra_w, dec_cent, dec_w
-  
-def _assert_device_available(device):
-    """Assert device is available or switch to CPU. 
-    
-    bpy.context.preferences.addons["cycles"].preferences.get_devices()
-    needs to be called otherwise .devices collection is not initialised.
-    """
-    bpy.context.preferences.addons["cycles"].preferences.get_devices()
-    devices = bpy.context.preferences.addons["cycles"].preferences.devices
-    device_types = {device.type for device in devices}
-
-    if device not in device_types:        
-        if "CUDA" in device_types:
-            device = "GPU"
-        else:
-            device = "CPU"
-
-    return device
  
