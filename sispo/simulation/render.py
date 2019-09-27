@@ -9,6 +9,11 @@ import bpy
 from mathutils import Vector # pylint: disable=import-error
 
 
+class BlenderControllerError(RuntimeError):
+    """Generic error for BlenderController."""
+    pass
+
+
 class BlenderController:
     """Class to control blender module behaviour."""
 
@@ -23,6 +28,7 @@ class BlenderController:
         self.scene.name = scene_names[0]
         self.cameras = bpy.data.cameras
         scene.world.color = (0, 0, 0)
+
         # Clear everything on the scene
         for obj in bpy.data.objects:
             obj.select_set(True)
@@ -33,6 +39,7 @@ class BlenderController:
                 bpy.ops.scene.new(type="FULL_COPY")
                 scene = bpy.context.scene
                 scene.name = scene_name
+
         self.scenes = bpy.data.scenes
         self.scratchdisk = scratchdisk
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
