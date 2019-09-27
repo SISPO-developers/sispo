@@ -26,10 +26,11 @@ class BlenderControllerError(RuntimeError):
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, scratchdisk, scene_names=None):
+    def __init__(self, render_settings, scene_names=None):
         """Initialise blender controller class."""
 
         self.res_path = utils.resolve_create_dir(root_dir / "data" / "results" / "rendering")
+        self.cycles = bpy.context.preferences.addons["cycles"]
 
         if scene_names is None:
             scene_names = ["MainScene"]
@@ -51,12 +52,41 @@ class BlenderController:
                 scene = bpy.context.scene
                 scene.name = scene_name
 
-        self.scenes = bpy.data.scenes
+        self.set_scene_defaults()
+        self.set_device()
+
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
-        self.device = "CPU"
-
-        self.cycles = bpy.context.preferences.addons["cycles"]
+    def set_scene_defaults(self, scene_names=None):
+        """Sets default settings to a scene."""
+        if scene_names is None:
+            scene_names = self.scene_names
+        for scene_name in scene_names:
+            scene = bpy.data.scenes[scene_name]
+            scene.render.image_settings.color_mode = "RGBA"
+            scene.render.image_settings.use_zbuffer = True
+            scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
+            scene.render.tile_x = 512
+            scene.render.tile_y = 512
+            scene.view_settings.view_transform = "Raw"
+            scene.view_settings.look = "None"
+        
+            scene.render.engine = "CYCLES"
+            scene.cycles.feature_set = "EXPERIMENTAL"
+            scene.cycles.min_bounces = 3
+            scene.cycles.max_bounces = 128
+            scene.cycles.caustics_reflective = True
+            scene.cycles.caustics_refractive = True
+            scene.cycles.diffuse_bounces = 128
+            scene.cycles.glossy_bounces = 128
+            scene.cycles.transmission_bounces = 128
+            scene.cycles.volume_bounces = 128
+            scene.cycles.transparent_min_bounces = 8
+            scene.cycles.transparent_max_bounces = 128
+            scene.cycles.use_square_samples = True
+            #scene.cycles.use_animated_seed = True
+            scene.cycles.seed = time.time()
+            scene.cycles.film_transparent = True
 
     def set_device(self, device="AUTO", scene_names=None):
         """Set cycles rendering device for given scenes.
@@ -64,21 +94,19 @@ class BlenderController:
         When device="AUTO" it is attempted to use GPU first, otherwise
         fallback is CPU. Currently, assumes set_device is only used once.
         """
-
         logger.info("Attempting to set cycle rendering device to: %s", device)
 
-        self.device = self._determine_render_device(device)
+        self.device = self._determine_device(device)
         self._set_cycles_device()
 
         # Sets render device of scenes
         if scene_names is None:
             scene_names = self.scene_names
-
         for scene_name in scene_names:
             bpy.data.scenes[scene_name].cycles.device = self.device
 
 
-    def _determine_render_device(self, device):
+    def _determine_device(self, device):
         """Determines the render device based on availability and input.
 
         bpy.context.preferences.addons["cycles"].preferences.get_devices()
@@ -101,7 +129,7 @@ class BlenderController:
 
         else:
             logger.info("Invalid rendering device setting.")
-            raise BlenderControllerError("Invalid rendering device setting.") 
+            raise BlenderControllerError("Invalid rendering device setting.")
 
         return used_device
 
@@ -114,7 +142,6 @@ class BlenderController:
                 device_type = "CUDA"
             else:
                 device_type = "CPU"
-
             self.cycles.preferences.compute_device_type = device_type
             for device in devices:
                 if device.type == device_type:
@@ -122,70 +149,29 @@ class BlenderController:
                     logger.info("%s device name: %s", device_type, device.name)
                 else:
                     device.use = False
-
         else:
             logger.info("Invalid device: %s", self.device)
             raise BlenderControllerError(f"Invalid device: {self.device}")
 
-    def set_renderer(self, device="Auto", tile=64, tile_gpu=512, scene_names=None):
-        """Set blender rendering device.
-        
-        Fallback is CPU if no GPU available. If device is neither GPU or CPU,
-        it is attempted to use the GPU first.
-        """
-        print("Render setting %r" % (device))
-        if scene_names is None:
-            scene_names = self.scene_names    
-
-        device = _assert_device_available(device)
-
-        if device == "GPU":
-            bpy.context.preferences.addons["cycles"].preferences.compute_device_type = "CUDA"
-            for gpu in bpy.context.preferences.addons["cycles"].preferences.devices:
-                if gpu.type == "CUDA":
-                    gpu.use = True
-                    print(gpu.name)
-            tile = tile_gpu
-            print("Rendering with GPUs:")
-        else:
-            print("Rendering with CPUs")
-
-        for scene_name in self.scene_names:
-            scene = bpy.data.scenes[scene_name]
-            scene.render.engine = "CYCLES"
-            cycles = scene.cycles
-            cycles.feature_set = "EXPERIMENTAL"
-
-            scene.render.resolution_percentage = 100
-            cycles.device = device
-
-            scene.render.tile_x = tile
-            scene.render.tile_y = tile
-            cycles.max_bounces = 128
-            cycles.min_bounces = 3
-            cycles.caustics_reflective = True
-            cycles.caustics_refractive = True
-            cycles.diffuse_bounces = 128
-            cycles.glossy_bounces = 128
-            cycles.transmission_bounces = 128
-            cycles.volume_bounces = 128
-            cycles.transparent_min_bounces = 8
-            cycles.transparent_max_bounces = 128
-            cycles.use_square_samples = True
-            # cycles.use_animated_seed=True
-            cycles.seed = time.time()
-            cycles.film_transparent = True
-            scene.view_settings.view_transform = "Raw"
-            scene.view_settings.look = "None"
+    def set_samples(self, samples=6, scene_names=None):
+        """Set number of samples to render for each pixel."""
+        for scene_name in scene_names:
+            bpy.data.scenes[scene_name].cycles.samples = samples
 
     def set_exposure(self, exposure):
         """Set exposure value."""
         for scene_name in self.scene_names:
             scene = bpy.data.scenes[scene_name]
-
             scene.view_settings.exposure = exposure
 
-    def set_output_format(self, res_x, res_y, file_format="OPEN_EXR", color_depth="32",
+    def set_resolution(self, res_x, res_y, scene_names=None):
+        """Sets resolution of rendered image."""
+        for scene_name in scene_names:
+            scene = bpy.data.scenes[scene_name]
+            scene.render.resolution_x = res_x
+            scene.render.resolution_y = res_y
+
+    def set_output_format(self, file_format="OPEN_EXR", color_depth="32",
                           use_preview=True, scene_names=None):
         """Set output file format."""
         if scene_names is None:
@@ -194,21 +180,8 @@ class BlenderController:
             scene = bpy.data.scenes[scene_name]
             scene.render.image_settings.file_format = file_format
             scene.render.filepath = str(self.res_path / "r{}.exr".format(self.render_id))
-            scene.render.resolution_x = res_x
-            scene.render.resolution_y = res_y
-            scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
             scene.render.image_settings.color_depth = color_depth
-            scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_preview = use_preview
-            scene.render.image_settings.use_zbuffer = True
-
-    def set_samples(self, samples=6, scene_names=None):
-        """Set number of samples to render for each pixel."""
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            scene = bpy.data.scenes[scene_name]
-            scene.cycles.samples = samples
 
     def update(self, scene_names=None):
         """Update scenes."""
@@ -324,8 +297,7 @@ def get_ra_dec(vec):
     """Calculate Right Ascension (RA) and Declination (DEC) in radians."""
     vec = vec.normalized()
     dec = math.asin(vec.z)
-    test=vec.x / math.cos(dec)
-    ra = math.acos(test)
+    ra = math.acos(vec.x / math.cos(dec))
     return (ra + math.pi, dec)
 
 
