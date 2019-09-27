@@ -163,7 +163,7 @@ class BlenderController:
             tile_size = 128
         else:
             logger.info("Can not get tile size for device %s", self.device)
-            raise BlenderController("Can not get tile size.")
+            raise BlenderControllerError("Can not get tile size.")
         
         return tile_size
 
