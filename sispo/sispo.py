@@ -13,3 +13,4 @@ import reconstruction.reconstruction as rc
 if __name__ == "__main__":
     env = sim.Environment("DidymosLong", 3600. * 24 * 365 * 4)
     env.simulate()
+    env.render()
