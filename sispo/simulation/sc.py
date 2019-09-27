@@ -15,20 +15,17 @@ from org.orekit.frames import FramesFactory # pylint: disable=import-error
 from org.orekit.propagation.analytical import KeplerianPropagator # pylint: disable=import-error
 from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=import-error
 
-class Spacecraft():
+from simulation.cb import CelestialBody
+
+
+class Spacecraft(CelestialBody):
     """Handling properties and behaviour of the spacecraft."""
 
-    def __init__(self, ROOT_DIR_PATH):
+    def __init__(self, name, mu, state, trj_date):
         """Currently hard implemented for SC."""
 
-        self.frame = FramesFactory.getICRF()
-        mu_sun = utils.Constants.IAU_2015_NOMINAL_SUN_GM
+        super().__init__(name, trj_date)
 
-        self.orbit = orbits.KeplerianOrbit(self.a, self.e, self.i, self.omega, self.Omega, self.M,
-                                  orbits.PositionAngle.MEAN, self.frame, date_initial, mu_sun)
-        self.propagator = KeplerianPropagator(self.orbit)
-
-        self.pos_history = []
-
-        self.pos = None
-        self.vel = None
+        self.trajectory = orbits.KeplerianOrbit(state, self.ref_frame, self.trj_date, mu)
+        self.propagator = KeplerianPropagator(self.trajectory)
+        

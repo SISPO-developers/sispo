@@ -37,8 +37,8 @@ class BlenderController:
         self.scratchdisk = scratchdisk
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
-    def set_renderer(self, device="Auto", tile=64, tile_gpu=512, scene_names=None):
-        """Set blender rendering device. 
+    def set_device(self, device="Auto", tile=64, tile_gpu=512, scene_names=None):
+        """Set blender rendering device.
         
         Fallback is CPU if no GPU available. If device is neither GPU or CPU,
         it is attempted to use the GPU first.

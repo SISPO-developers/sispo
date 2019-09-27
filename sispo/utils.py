@@ -1,6 +1,8 @@
 """Utils module contains functions possibly used by all modules."""
 
+import logging
 from pathlib import Path
+from datetime import datetime
 
 import numpy as np
 
@@ -48,3 +50,22 @@ def serialise(o):
             return float(o)
         except TypeError:
             return str(o)
+
+
+def create_logger(name, log_path):
+    """Creates a logger with the common formatting."""
+    now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
+    file_name = (now + "_" + name + ".log")
+    log_file = log_path / file_name
+
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.INFO)
+    logger_formatter = logging.Formatter(
+        "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+    file_handler = logging.FileHandler(str(log_file))
+    file_handler.setLevel(logging.INFO)
+    file_handler.setFormatter(logger_formatter)
+    logger.addHandler(file_handler)
+    logger.info("\n\n#################### NEW LOG ####################\n")
+
+    return logger
