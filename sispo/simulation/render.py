@@ -201,9 +201,9 @@ class BlenderController:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
+            scene.render.image_settings.file_format = file_format
             scene.render.image_settings.color_depth = color_depth
             scene.render.image_settings.use_preview = use_preview
-            scene.render.image_settings.file_format = file_format
             scene.render.filepath = str(self.res_path / f"r{self.render_id}.exr")
 
     def set_camera(self,
@@ -237,7 +237,6 @@ class BlenderController:
             scene.camera = camera
             scene.collection.objects.link(camera)
 
-
     def update(self, scene_names=None):
         """Update scenes."""
         if scene_names is None:
@@ -246,8 +245,7 @@ class BlenderController:
             scene = bpy.data.scenes[scene_name]
             bpy.context.window.scene = scene
             scene.cycles.seed = time.time()
-            vl = scene.view_layers
-            vl.update()
+            scene.view_layers.update()
 
     def render(self, name="", scene_name="MainScene"):
         """Render scenes."""
