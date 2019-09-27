@@ -126,7 +126,9 @@ class Environment():
         render_dir = utils.resolve_create_dir(self.res_path / "rendering")
 
         renderer = render.BlenderController(render_dir, self.render_settings["scene_names"])
-        renderer.set_renderer()
+        renderer.set_device()
+        renderer.set_samples(self.render_settings["samples"])
+        renderer.set_output_format(self.render_settings["x_res"], self.render_settings["y_res"])
 
         self.logger.info("Rendering completed")
 
