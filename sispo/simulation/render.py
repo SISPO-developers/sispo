@@ -201,10 +201,10 @@ class BlenderController:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
-            scene.render.image_settings.file_format = file_format
-            scene.render.filepath = str(self.res_path / f"r{self.render_id}.exr")
             scene.render.image_settings.color_depth = color_depth
             scene.render.image_settings.use_preview = use_preview
+            scene.render.image_settings.file_format = file_format
+            scene.render.filepath = str(self.res_path / f"r{self.render_id}.exr")
 
     def set_camera(self,
                    camera_name="Camera",
