@@ -116,7 +116,7 @@ class BlenderController:
         """
         self.cycles.preferences.get_devices()
         devices = self.cycles.preferences.devices
-        logger.info("Available devices: %s", devices)
+        logger.info("Available devices: %s", [dev.name for dev in devices])
 
         if device in ("AUTO", "GPU"):
             device_types = {device.type for device in devices}
@@ -274,9 +274,14 @@ class BlenderController:
                 scene = bpy.data.scenes[scene_name]
                 scene.collection.objects.link(obj)
             return obj
-        return None
+        else:
+            msg = f"{object_name} not found in {filename}"
+            logger.info(msg)
+            raise BlenderControllerError(msg)
 
-    
+    def set_camera_location(self, camera_name="Camera", location=(0,0,0)):
+        camera = bpy.data.objects[camera_name]
+        camera.location = location
 
     def target_camera(self, target, camera_name="Camera"):
         """Target camera towards target."""
