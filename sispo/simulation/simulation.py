@@ -42,7 +42,7 @@ class Environment():
         self.logger = utils.create_logger("simulation", self.res_path)
 
         self.ts = TimeScalesFactory.getTDB()
-        self.encounter_date = AbsoluteDate(2017, 8, 19, 0, 0, 0.000, self.ts)
+        self.encounter_date = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, self.ts)
         self.duration = duration
         self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
@@ -52,7 +52,7 @@ class Environment():
 
         self.frame_settings = dict()
         self.frame_settings["first"] = 0
-        self.frame_settings["last"] = 2000
+        self.frame_settings["last"] = 10
         self.frame_settings["step_size"] = 1
 
         self.logger.info("First frame: %d last frame: %d Step size: %d",
@@ -68,15 +68,15 @@ class Environment():
         self.render_settings = dict()
         self.render_settings["exposure"] = 1.554
         self.render_settings["samples"] = 48
-        self.render_settings["device"] = "Auto"
+        self.render_settings["device"] = "GPU"
         self.render_settings["tile"] = 512
         self.render_settings["x_res"] = 2464
         self.render_settings["y_res"] = 2048
         self.render_settings["scene_names"] = ["MainScene",
-                                               "BackgroundStars",
-                                               "AsteroidOnly",
-                                               "AsteroidConstDistance",
-                                               "LightingReference"]
+                                               "AsteroidOnly"]#,
+                                               #"BackgroundStars",
+                                               #"AsteroidConstDistance",
+                                               #"LightingReference"]
 
         self.camera_settings = dict()
         self.camera_settings["color_depth"] = "32"
@@ -126,9 +126,62 @@ class Environment():
         render_dir = utils.resolve_create_dir(self.res_path / "rendering")
 
         renderer = render.BlenderController(render_dir, self.render_settings["scene_names"])
-        renderer.set_device()
+        renderer.set_device(self.render_settings["device"])
         renderer.set_samples(self.render_settings["samples"])
-        renderer.set_output_format(self.render_settings["x_res"], self.render_settings["y_res"])
+        renderer.set_exposure(self.render_settings["exposure"])
+        renderer.set_resolution(self.render_settings["x_res"], self.render_settings["y_res"])
+        renderer.set_output_format()
+
+        renderer.create_camera("SatelliteCamera")
+        renderer.set_camera("SatelliteCamera", lens=230, sensor=3.45E-3 * 2464)
+
+        asteroid = renderer.load_object(self.sssb.model_file, "Didymos.001")
+        #AsteroidBC = renderer.create_empty("AsteroidBC")
+        #asteroid.parent = AsteroidBC
+        asteroid.rotation_mode = "AXIS_ANGLE"
+
+        Sun = renderer.load_object(str(self.sssb.model_file.parent / "didymos_lowpoly.blend"), "Sun")
+
+        star_template = renderer.load_object(str(self.sssb.model_file.parent / "StarTemplate.blend"), "TemplateStar")
+        star_template.location = (1E20, 1E20, 1E20)
+        #star_cache = starcat.StarCache(
+        #    star_template, renderer.create_empty("StarParent", ["BackgroundStars"]))
+
+        for (date, sc_pos, sssb_pos) in zip(self.spacecraft.date_history,
+                                            self.spacecraft.pos_history,
+                                            self.sssb.pos_history):
+            t = date.durationFrom(self.start_date)
+
+            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
+            renderer.set_camera_location("SatelliteCamera", sc_pos_rel_sssb)
+
+            asteroid_rotation = 2. * math.pi * t / (2.2593 * 3600)
+            asteroid.rotation_axis_angle = (asteroid_rotation, 0, 0, 1)
+
+            Sun.location = -np.asarray(sssb_pos.toArray()) / 1000.
+
+            renderer.target_camera(asteroid, "SatelliteCamera")
+            renderer.update()
+
+            (cam_direction, up, right, leftedge_vec, rightedge_vec, downedge_vec,
+            upedge_vec) = render.get_camera_vectors("SatelliteCamera", "MainScene")
+
+            (ra_cent, ra_w, dec_cent, dec_w) = render.get_fov(leftedge_vec, rightedge_vec, downedge_vec,
+                                               upedge_vec)
+
+            starlist = starcat.get_ucac4(ra_cent, ra_w, dec_cent, dec_w)
+
+            f = renderer.cameras["SatelliteCamera"].lens
+            w = renderer.cameras["SatelliteCamera"].sensor_width
+
+            #(starfield_flux2, flux3) = star_cache.render_stars_directly(starlist, cam_direction,
+            #                                                    rightedge_vec,
+            #                                                    upedge_vec, self.render_settings["x_res"], self.render_settings["y_res"], str(self.res_path / "star_cache.exr"))
+
+            renderer.update()
+            result = renderer.render(name=str(self.res_path / str(t)), scene_name="AsteroidOnly")
+
+            renderer.save_blender_dfile(str(self.res_path / "res.blender"))
 
         self.logger.info("Rendering completed")
 
