@@ -33,19 +33,21 @@ def get_ucac4(ra, ra_w, dec, dec_h, filename = "ucac4.txt"):
     project_root = Path.cwd()
     ucac4 = project_root.joinpath("data").joinpath("UCAC4")
     u4test = project_root.joinpath("software").joinpath("star_cats").joinpath("u4test.exe")
+    res_file = project_root / "data" / "results" / "DidymosLong" / filename
+    res_file.resolve()
 
-    command = str(u4test) + " {} {} {} {}".format(ra, dec, ra_w, dec_h) + " -h " + str(ucac4) + " {}".format(filename)
+    command = '"' + str(u4test) + '" {} {} {} {}'.format(ra, dec, ra_w, dec_h) + ' -h "' + str(ucac4) + '" "{}"'.format(str(res_file))
     print(command)
 
     for _ in range(0, 5):
         retcode = subprocess.call(command)
         print("Retcode ", retcode)
-        if retcode == 0:
+        if retcode > 0:
             break
         with open(errorlog_fn, "at") as fout:
             fout.write("{},\'{}\',{}\n".format(time.time(), command, retcode))
 
-    with open(filename, "rt") as file:
+    with open(str(res_file), "r") as file:
         lines = file.readlines()
         print("Lines", len(lines))
     out = []
