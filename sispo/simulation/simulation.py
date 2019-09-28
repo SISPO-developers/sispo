@@ -1,6 +1,7 @@
 """Trajectory simulation and object rendering module."""
 
 import copy
+from datetime import datetime
 import math
 import os
 from pathlib import Path
@@ -26,6 +27,7 @@ import skimage.transform
 import simplejson as json
 from mpl_toolkits.mplot3d import Axes3D
 
+from simulation.cb import CelestialBody
 import simulation.render as render
 import simulation.sc as sc
 import simulation.sssb as sssb
@@ -38,7 +40,10 @@ class Environment():
     def __init__(self, name, duration):
 
         self.name = name
+        
         self.res_path = utils.resolve_create_dir(root_dir / "data" / "results" / name)
+        self.model_dir = utils.resolve_create_dir(root_dir / "data" / "models")
+
         self.logger = utils.create_logger("simulation", self.res_path)
 
         self.ts = TimeScalesFactory.getTDB()
@@ -87,16 +92,19 @@ class Environment():
         self.logger.info("Rendering settings: Exposure: %d; Samples: %d",
                     self.render_settings['exposure'], self.render_settings['samples'])
 
-        # Setup SSSB
-        self.sssb = sssb.Sssb("Didymos", self.mu_sun, AbsoluteDate(
-            2017, 8, 19, 0, 0, 0.000, self.ts))
+        # Setup Sun
+        sun_model_file = self.model_dir / "didymos_lowpoly.blend"
+        self.sun = CelestialBody("Sun", model_file=sun_model_file)
 
+        # Setup SSSB
+        sssb_model_file = self.model_dir / "didymos2.blend"
+        self.sssb = sssb.Sssb("Didymos", self.mu_sun, AbsoluteDate(
+            2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
 
         # Setup SC
         state = self.calc_sc_encounter_state()
         self.spacecraft = sc.Spacecraft(
             "CI", self.mu_sun, state, self.encounter_date)
-
 
     def simulate(self):
         """Do simulation."""
@@ -114,6 +122,8 @@ class Environment():
 
         self.logger.info("Propagating Spacecraft")
         self.spacecraft.propagator.propagate(self.start_date, self.end_date)
+
+        attitudes = self.sssb.att_history
 
         self.logger.info("Simulation completed")
 
@@ -136,29 +146,22 @@ class Environment():
         renderer.set_camera("SatelliteCamera", lens=230, sensor=3.45E-3 * 2464)
 
         asteroid = renderer.load_object(self.sssb.model_file, "Didymos.001")
-        #AsteroidBC = renderer.create_empty("AsteroidBC")
-        #asteroid.parent = AsteroidBC
         asteroid.rotation_mode = "AXIS_ANGLE"
 
-        Sun = renderer.load_object(str(self.sssb.model_file.parent / "didymos_lowpoly.blend"), "Sun")
-
-        star_template = renderer.load_object(str(self.sssb.model_file.parent / "StarTemplate.blend"), "TemplateStar")
-        star_template.location = (1E20, 1E20, 1E20)
-        #star_cache = starcat.StarCache(
-        #    star_template, renderer.create_empty("StarParent", ["BackgroundStars"]))
+        sun = renderer.load_object(self.sun.model_file, self.sun.name)
 
         for (date, sc_pos, sssb_pos) in zip(self.spacecraft.date_history,
                                             self.spacecraft.pos_history,
                                             self.sssb.pos_history):
             t = date.durationFrom(self.start_date)
-
-            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
+            
+            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 2000.
             renderer.set_camera_location("SatelliteCamera", sc_pos_rel_sssb)
 
             asteroid_rotation = 2. * math.pi * t / (2.2593 * 3600)
             asteroid.rotation_axis_angle = (asteroid_rotation, 0, 0, 1)
 
-            Sun.location = -np.asarray(sssb_pos.toArray()) / 1000.
+            sun.location = -np.asarray(sssb_pos.toArray()) / 2000.
 
             renderer.target_camera(asteroid, "SatelliteCamera")
             renderer.update()
@@ -179,7 +182,9 @@ class Environment():
             #                                                    upedge_vec, self.render_settings["x_res"], self.render_settings["y_res"], str(self.res_path / "star_cache.exr"))
 
             renderer.update()
-            result = renderer.render(name=str(self.res_path / str(t)), scene_name="AsteroidOnly")
+            date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
+            date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
+            result = renderer.render(name=str(self.res_path / date_str), scene_name="AsteroidOnly")
 
             renderer.save_blender_dfile(str(self.res_path / "res.blender"))
 
