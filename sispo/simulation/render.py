@@ -143,7 +143,7 @@ class BlenderController:
             if self.device == "GPU":
                 device_type = "CUDA"
             else:
-                device_type = "CPU"
+                device_type = "NONE"
             self.cycles.preferences.compute_device_type = device_type
             for device in devices:
                 if device.type == device_type:
@@ -250,11 +250,11 @@ class BlenderController:
     def render(self, name="", scene_name="MainScene"):
         """Render scenes."""
         if name == "":
-            name = self.res_path + "r%0.8X.exr" % (self.render_id)
+            name = str(self.res_path) + "r%0.8X.exr" % (self.render_id)
 
         scene = bpy.data.scenes[scene_name]
         print("Rendering seed: %d" % (scene.cycles.seed))
-        scene.render.filepath = str(name)
+        scene.render.filepath = name
         bpy.context.window.scene = scene
         bpy.ops.render.render(write_still=True)
 
@@ -279,7 +279,7 @@ class BlenderController:
             logger.info(msg)
             raise BlenderControllerError(msg)
 
-    def set_camera_location(self, camera_name="Camera", location=(0,0,0)):
+    def set_camera_location(self, camera_name="Camera", location=(0, 0, 0)):
         camera = bpy.data.objects[camera_name]
         camera.location = location
 
@@ -303,7 +303,7 @@ class BlenderController:
 
     def save_blender_dfile(self, filename):
         """Save a blender d file."""
-        bpy.ops.wm.save_as_mainfile(filename)
+        bpy.ops.wm.save_as_mainfile(filepath=filename)
 
 
 def get_camera_vectors(camera_name, scene_name):
