@@ -20,14 +20,14 @@ from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=i
 class CelestialBody():
     """Parent class for every celestial body such as satellites or asteroids."""
 
-    def __init__(self, name, trj_date):
+    def __init__(self, name, model_file=None):
 
         self.name = name
 
         self.timescale = TimeScalesFactory.getTDB()
         self.ref_frame = FramesFactory.getICRF()
 
-        self.trj_date = trj_date
+        self.trj_date = None
         self.trajectory = None
         self.propagator = None
         self.propgate = None
@@ -35,13 +35,15 @@ class CelestialBody():
         self.event_handler = TimingEvent().of_(TimeSampler)
         self.time_sampler = None
 
-        self.model_file = None
+        self.model_file = model_file
+        self.render_object = None
 
         self.pos = None
         self.vel = None
 
         self.date_history = self.event_handler.date_history
         self.pos_history = self.event_handler.pos_history
+        self.att_history = self.event_handler.att_history
 
     def __repr__(self):
         """Objects are represented by their name."""
@@ -80,6 +82,7 @@ class TimingEvent(PythonEventHandler):
         PythonEventHandler.__init__(self)
         self.date_history = []
         self.pos_history = []
+        self.att_history = []
         self.events = 0
 
     def eventOccurred(self, s, detector, increasing):
@@ -90,6 +93,7 @@ class TimingEvent(PythonEventHandler):
 
         self.date_history.append(s.getDate())
         self.pos_history.append(s.getPVCoordinates().getPosition())
+        self.att_history.append(s.getAttitude())
         return EventHandler.Action.CONTINUE
 
     def resetState(self, detector, oldState):
