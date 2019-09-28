@@ -24,7 +24,9 @@ class Spacecraft(CelestialBody):
     def __init__(self, name, mu, state, trj_date):
         """Currently hard implemented for SC."""
 
-        super().__init__(name, trj_date)
+        super().__init__(name)
+
+        self.trj_date = trj_date
 
         self.trajectory = orbits.KeplerianOrbit(state, self.ref_frame, self.trj_date, mu)
         self.propagator = KeplerianPropagator(self.trajectory)
