@@ -1,31 +1,23 @@
 """Trajectory simulation and object rendering module."""
 
-import copy
 from datetime import datetime
-import math
-import os
 from pathlib import Path
-import sys
-import time
 
 import numpy as np
 import matplotlib.pyplot as plt
-import OpenEXR
 import orekit
-OREKIT_VM = orekit.initVM()  # pylint: disable=no-member
-file_dir = Path(__file__).parent.resolve()
-root_dir = (file_dir / ".." / "..").resolve()
-orekit_data = root_dir / "data" / "orekit-data.zip"
+#################### orekit VM init ####################
+FILE_DIR = Path(__file__).parent.resolve()
+ROOT_DIR = FILE_DIR.parent.parent
+OREKIT_DATA_FILE = ROOT_DIR / "data" / "orekit-data.zip"
+OREKIT_VM = orekit.initVM() # pylint: disable=no-member
 from orekit.pyhelpers import setup_orekit_curdir
-setup_orekit_curdir(str(orekit_data))
+setup_orekit_curdir(str(OREKIT_DATA_FILE))
+#################### orekit VM init ####################
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
 from org.hipparchus.geometry.euclidean.threed import Vector3D  # pylint: disable=import-error
 from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.utils import Constants, PVCoordinates  # pylint: disable=import-error
-import skimage.filters
-import skimage.transform
-import simplejson as json
-from mpl_toolkits.mplot3d import Axes3D
 
 from simulation.cb import CelestialBody
 import simulation.render as render
@@ -98,7 +90,7 @@ class Environment():
 
         # Setup SSSB
         sssb_model_file = self.model_dir / "didymos2.blend"
-        self.sssb = sssb.Sssb("Didymos", self.mu_sun, AbsoluteDate(
+        self.sssb = sssb.SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
             2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
 
         # Setup SC
