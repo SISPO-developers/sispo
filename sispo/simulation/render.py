@@ -232,6 +232,18 @@ class BlenderController:
             scene.camera = camera
             scene.collection.objects.link(camera)
 
+    def set_camera_location(self, camera_name="Camera", location=(0, 0, 0)):
+        camera = bpy.data.objects[camera_name]
+        camera.location = location
+
+    def target_camera(self, target, camera_name="Camera"):
+        """Target camera towards target."""
+        camera = bpy.data.objects[camera_name]
+        camera_constr = camera.constraints.new(type="TRACK_TO")
+        camera_constr.track_axis = "TRACK_NEGATIVE_Z"
+        camera_constr.up_axis = "UP_Y"
+        camera_constr.target = target
+
     def update(self, scene_names=None):
         """Update scenes."""
         if scene_names is None:
@@ -245,7 +257,11 @@ class BlenderController:
     def render(self, name=None, scene_name="MainScene"):
         """Render scenes."""
         if name is None:
-            name = self.res_path / f"r{self.render_id:0.8X}.exr"
+            name = self.res_path / f"r{self.render_id:0.8X}"
+
+        file_extension = ".exr"
+        if name[-4:] != file_extension:
+            name += file_extension
 
         scene = bpy.data.scenes[scene_name]
         print("Rendering seed: %d" % (scene.cycles.seed))
@@ -272,18 +288,6 @@ class BlenderController:
             msg = f"{object_name} not found in {filename}"
             logger.info(msg)
             raise BlenderControllerError(msg)
-
-    def set_camera_location(self, camera_name="Camera", location=(0, 0, 0)):
-        camera = bpy.data.objects[camera_name]
-        camera.location = location
-
-    def target_camera(self, target, camera_name="Camera"):
-        """Target camera towards target."""
-        camera = bpy.data.objects[camera_name]
-        camera_constr = camera.constraints.new(type="TRACK_TO")
-        camera_constr.track_axis = "TRACK_NEGATIVE_Z"
-        camera_constr.up_axis = "UP_Y"
-        camera_constr.target = target
 
     def create_empty(self, name="Empty", scene_names=None):
         """Create new, empty blender object."""
