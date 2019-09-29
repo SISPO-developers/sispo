@@ -33,10 +33,12 @@ class Environment():
 
         self.name = name
         
-        self.res_path = utils.resolve_create_dir(root_dir / "data" / "results" / name)
-        self.model_dir = utils.resolve_create_dir(root_dir / "data" / "models")
+        self.root_dir = Path(__file__).parent.parent.parent
+        self.models_dir = utils.check_dir(self.root_dir / "data" / "models")
 
-        self.logger = utils.create_logger("simulation", self.res_path)
+        self.res_dir = utils.check_dir(self.root_dir / "data" / "results" / name)
+
+        self.logger = utils.create_logger("simulation")
 
         self.ts = TimeScalesFactory.getTDB()
         self.encounter_date = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, self.ts)
@@ -85,11 +87,11 @@ class Environment():
                     self.render_settings['exposure'], self.render_settings['samples'])
 
         # Setup Sun
-        sun_model_file = self.model_dir / "didymos_lowpoly.blend"
+        sun_model_file = self.models_dir / "didymos_lowpoly.blend"
         self.sun = CelestialBody("Sun", model_file=sun_model_file)
 
         # Setup SSSB
-        sssb_model_file = self.model_dir / "didymos2.blend"
+        sssb_model_file = self.models_dir / "didymos2.blend"
         self.sssb = sssb.SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
             2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
 
@@ -123,7 +125,7 @@ class Environment():
         """Render simulation scenario."""
         self.logger.info("Rendering simulation")
 
-        render_dir = utils.resolve_create_dir(self.res_path / "rendering")
+        render_dir = utils.check_dir(self.res_dir / "rendering")
 
         renderer = render.BlenderController(render_dir, self.render_settings["scene_names"])
         renderer.set_device(self.render_settings["device"])
@@ -161,9 +163,9 @@ class Environment():
             renderer.target_camera(asteroid, "SatelliteCamera")
             
             renderer.update()       
-            result = renderer.render(name=str(self.res_path / (date_str + "_AsteroidOnly")), scene_name="AsteroidOnly")
+            renderer.render(name=render_dir / (date_str + "_AsteroidOnly"), scene_name="AsteroidOnly")
 
-            renderer.save_blender_dfile(str(self.res_path / (date_str + "_complete")))
+            renderer.save_blender_dfile(render_dir / (date_str + "_complete"))
 
         self.logger.info("Rendering completed")
 
@@ -171,7 +173,7 @@ class Environment():
         """Save simulation results to a file."""
         self.logger.info("Saving propagation results")
 
-        with open(str(self.res_path / "PositionHistory.txt"), "w+") as file:
+        with open(str(self.res_dir / "PositionHistory.txt"), "w+") as file:
             for (date, sc_pos, sssb_pos) in zip(self.spacecraft.date_history,
                                                 self.spacecraft.pos_history,
                                                 self.sssb.pos_history):
