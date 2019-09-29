@@ -201,6 +201,16 @@ class BlenderController:
             scene.render.image_settings.color_depth = color_depth
             scene.render.image_settings.use_preview = use_preview
 
+    def set_output_file(self, filename, scene_name):
+        """Set output file path to given scenes with prior extension check."""
+        filename = str(filename)
+
+        file_extension = ".exr"
+        if filename[-4:] != file_extension:
+            filename += file_extension
+
+        bpy.data.scenes[scene_name].render.filepath = str(filename)
+
     def set_camera(self,
                    camera_name="Camera",
                    lens=35,
@@ -255,23 +265,19 @@ class BlenderController:
             scene.view_layers.update()
 
     def render(self, name=None, scene_name="MainScene"):
-        """Render scenes."""
+        """Render given scene."""
         if name is None:
             name = self.res_path / f"r{self.render_id:0.8X}"
+        
+        self.set_output_file(name, scene_name)
 
-        file_extension = ".exr"
-        if name[-4:] != file_extension:
-            name += file_extension
-
-        scene = bpy.data.scenes[scene_name]
-        print("Rendering seed: %d" % (scene.cycles.seed))
-        scene.render.filepath = str(name)
-        bpy.context.window.scene = scene
+        bpy.context.window.scene = bpy.data.scenes[scene_name]
         bpy.ops.render.render(write_still=True)
 
     def load_object(self, filename, object_name, scene_names=None):
         """Load blender object from file."""
         filename = str(filename)
+
         with bpy.data.libraries.load(filename) as (data_from, data_to):
             data_to.objects = [
                 name for name in data_from.objects if name == object_name]
