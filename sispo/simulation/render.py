@@ -11,11 +11,7 @@ from mathutils import Vector # pylint: disable=import-error
 
 import utils
 
-
-file_dir = Path(__file__).parent.resolve()
-root_dir = (file_dir / ".." / "..").resolve()
-log_path = utils.resolve_create_dir(root_dir / "data" / "results" / "rendering")
-logger = utils.create_logger("Rendering", log_path)
+logger = utils.create_logger("rendering")
 
 
 class BlenderControllerError(RuntimeError):
@@ -26,10 +22,10 @@ class BlenderControllerError(RuntimeError):
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, render_settings, scene_names=None):
+    def __init__(self, render_dir, scene_names=None):
         """Initialise blender controller class."""
 
-        self.res_path = utils.resolve_create_dir(root_dir / "data" / "results" / "rendering")
+        self.res_path = render_dir
         self.cycles = bpy.context.preferences.addons["cycles"]
 
         if scene_names is None:
@@ -204,7 +200,6 @@ class BlenderController:
             scene.render.image_settings.file_format = file_format
             scene.render.image_settings.color_depth = color_depth
             scene.render.image_settings.use_preview = use_preview
-            scene.render.filepath = str(self.res_path / f"r{self.render_id}.exr")
 
     def set_camera(self,
                    camera_name="Camera",
@@ -247,22 +242,21 @@ class BlenderController:
             scene.cycles.seed = time.time()
             scene.view_layers.update()
 
-    def render(self, name="", scene_name="MainScene"):
+    def render(self, name=None, scene_name="MainScene"):
         """Render scenes."""
-        if name == "":
-            name = str(self.res_path) + "r%0.8X.exr" % (self.render_id)
+        if name is None:
+            name = self.res_path / f"r{self.render_id:0.8X}.exr"
 
         scene = bpy.data.scenes[scene_name]
         print("Rendering seed: %d" % (scene.cycles.seed))
-        scene.render.filepath = name
+        scene.render.filepath = str(name)
         bpy.context.window.scene = scene
         bpy.ops.render.render(write_still=True)
 
-        return 0  # TODO: only dummy, change later
-
     def load_object(self, filename, object_name, scene_names=None):
         """Load blender object from file."""
-        with bpy.data.libraries.load(str(filename)) as (data_from, data_to):
+        filename = str(filename)
+        with bpy.data.libraries.load(filename) as (data_from, data_to):
             data_to.objects = [
                 name for name in data_from.objects if name == object_name]
         if data_to.objects:
@@ -303,6 +297,8 @@ class BlenderController:
 
     def save_blender_dfile(self, filename):
         """Save a blender d file."""
+        filename = str(filename)
+
         file_extension = ".blend"
         if filename[-6:] != file_extension:
             filename += file_extension
