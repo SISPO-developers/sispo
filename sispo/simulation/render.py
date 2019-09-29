@@ -303,6 +303,10 @@ class BlenderController:
 
     def save_blender_dfile(self, filename):
         """Save a blender d file."""
+        file_extension = ".blend"
+        if filename[-6:] != file_extension:
+            filename += file_extension
+
         bpy.ops.wm.save_as_mainfile(filepath=filename)
 
 

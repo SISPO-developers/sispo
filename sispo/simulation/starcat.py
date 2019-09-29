@@ -16,7 +16,7 @@ import OpenEXR
 import skimage.filters
 import skimage.transform
 
-def get_ucac4(ra, ra_w, dec, dec_h, filename = "ucac4.txt"):
+def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
     """Retrieve starmap data from UCAC4 catalog."""
     errorlog_fn = "starfield_errorlog%f.txt" % time.time()
 
@@ -33,7 +33,7 @@ def get_ucac4(ra, ra_w, dec, dec_h, filename = "ucac4.txt"):
     project_root = Path.cwd()
     ucac4 = project_root.joinpath("data").joinpath("UCAC4")
     u4test = project_root.joinpath("software").joinpath("star_cats").joinpath("u4test.exe")
-    res_file = project_root / "data" / "results" / "DidymosLong" / filename
+    res_file = project_root / "data" / "results" / "Didymos" / filename
     res_file.resolve()
 
     command = '"' + str(u4test) + '" {} {} {} {}'.format(ra, dec, ra_w, dec_h) + ' -h "' + str(ucac4) + '" "{}"'.format(str(res_file))
@@ -179,6 +179,10 @@ class StarCache:
 
 def write_openexr(filename, picture):
     """Save image in OpenEXR file format."""
+    file_extension = ".exr"
+    if filename[-4:] != file_extension:
+        filename += file_extension
+
     h = len(picture)
     w = len(picture[0])
     c = len(picture[0][0])
