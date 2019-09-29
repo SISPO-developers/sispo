@@ -15,9 +15,9 @@ from orekit.pyhelpers import setup_orekit_curdir
 setup_orekit_curdir(str(OREKIT_DATA_FILE))
 #################### orekit VM init ####################
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
-from org.hipparchus.geometry.euclidean.threed import Vector3D  # pylint: disable=import-error
 from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.utils import Constants, PVCoordinates  # pylint: disable=import-error
+from org.hipparchus.geometry.euclidean.threed import Vector3D  # pylint: disable=import-error
 
 from simulation.cb import CelestialBody
 from simulation.sc import Spacecraft
@@ -129,8 +129,12 @@ class Environment():
 
     def setup_spacecraft(self):
         """Create Spacecraft and respective blender object."""
-        state = self.calc_sc_encounter_state()
-        self.spacecraft = Spacecraft("CI", self.mu_sun, state, self.encounter_date)
+        sssb_state = self.sssb.get_state(self.encounter_date)
+        sc_state = Spacecraft.calc_encounter_state(sssb_state,
+                                                  self.minimum_distance,
+                                                  self.with_terminator,
+                                                  self.with_sunnyside)
+        self.spacecraft = Spacecraft("CI", self.mu_sun, sc_state, self.encounter_date)
 
     def simulate(self):
         """Do simulation."""
