@@ -93,16 +93,10 @@ class Environment():
         self.setup_sun()
 
         # Setup SSSB
-        sssb_model_file = self.models_dir / "didymos2.blend"
-        self.sssb = SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
-            2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
-        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001")
-        self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
+        self.setup_sssb()
 
         # Setup SC
-        state = self.calc_sc_encounter_state()
-        self.spacecraft = Spacecraft(
-            "CI", self.mu_sun, state, self.encounter_date)
+        self.setup_spacecraft()
 
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
@@ -120,9 +114,23 @@ class Environment():
         self.renderer.set_camera("SatelliteCamera", lens=230, sensor=self.camera_settings["sensor"])
 
     def setup_sun(self):
+        """Create Sun and respective render object."""
         sun_model_file = self.models_dir / "didymos_lowpoly.blend"
         self.sun = CelestialBody("Sun", model_file=sun_model_file)
         self.sun.render_obj = self.renderer.load_object(self.sun.model_file, self.sun.name)
+
+    def setup_sssb(self):
+        """Create SmallSolarSystemBody and respective blender object."""
+        sssb_model_file = self.models_dir / "didymos2.blend"
+        self.sssb = SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
+            2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
+        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001")
+        self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
+
+    def setup_spacecraft(self):
+        """Create Spacecraft and respective blender object."""
+        state = self.calc_sc_encounter_state()
+        self.spacecraft = Spacecraft("CI", self.mu_sun, state, self.encounter_date)
 
     def simulate(self):
         """Do simulation."""
