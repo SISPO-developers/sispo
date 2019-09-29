@@ -4,12 +4,6 @@ import math
 from pathlib import Path
 
 import orekit
-OREKIT_VM = orekit.initVM()  # pylint: disable=no-member
-file_dir = Path(__file__).parent.resolve()
-root_dir = (file_dir / ".." / "..").resolve()
-orekit_data = root_dir / "data" / "orekit-data.zip"
-from orekit.pyhelpers import setup_orekit_curdir
-setup_orekit_curdir(str(orekit_data))
 from org.orekit.propagation.events.handlers import EventHandler, RecordAndContinue  # pylint: disable=import-error
 from org.orekit.python import PythonEventHandler  # pylint: disable=import-error
 from org.orekit.propagation.events import DateDetector  # pylint: disable=import-error
