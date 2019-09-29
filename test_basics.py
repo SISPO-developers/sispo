@@ -21,7 +21,7 @@ class TestUtils(unittest.TestCase):
         self.assertTrue(test_dir.exists())
 
         test_dir_relative = test_dir / ".." / dir_name
-        self.assertTrue(test_dir == utils.resolve_create_dir(test_dir_relative))
+        self.assertTrue(test_dir == utils.check_dir(test_dir_relative))
         self.assertTrue(test_dir.exists())
 
         Path.rmdir(test_dir)
