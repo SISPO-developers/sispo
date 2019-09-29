@@ -1,4 +1,8 @@
-"""Module to controll blender python module bpy."""
+"""
+Module providing an interface to a rendering engine (renderer).
+   
+This implementation uses the blender python module bpy.
+"""
 
 import math
 from pathlib import Path
@@ -25,7 +29,7 @@ class BlenderController:
     def __init__(self, render_dir, scene_names=None):
         """Initialise blender controller class."""
 
-        self.res_path = render_dir
+        self.res_dir = render_dir
         self.cycles = bpy.context.preferences.addons["cycles"]
 
         if scene_names is None:
@@ -267,7 +271,7 @@ class BlenderController:
     def render(self, name=None, scene_name="MainScene"):
         """Render given scene."""
         if name is None:
-            name = self.res_path / f"r{self.render_id:0.8X}"
+            name = self.res_dir / f"r{self.render_id:0.8X}"
         
         self.set_output_file(name, scene_name)
 

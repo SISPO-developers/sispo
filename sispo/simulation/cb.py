@@ -29,7 +29,7 @@ class CelestialBody():
         self.time_sampler = None
 
         self.model_file = model_file
-        self.render_object = None
+        self.render_obj = None
 
         self.pos = None
         self.vel = None

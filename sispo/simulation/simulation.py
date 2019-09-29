@@ -20,9 +20,9 @@ from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.utils import Constants, PVCoordinates  # pylint: disable=import-error
 
 from simulation.cb import CelestialBody
+from simulation.sc import Spacecraft
+from simulation.sssb import SmallSolarSystemBody
 import simulation.render as render
-import simulation.sc as sc
-import simulation.sssb as sssb
 import simulation.starcat as starcat
 import utils
 
@@ -86,19 +86,40 @@ class Environment():
         self.logger.info("Rendering settings: Exposure: %d; Samples: %d",
                     self.render_settings['exposure'], self.render_settings['samples'])
 
+        # Setup rendering engine (renderer)
+        self.setup_renderer()
+
         # Setup Sun
         sun_model_file = self.models_dir / "didymos_lowpoly.blend"
         self.sun = CelestialBody("Sun", model_file=sun_model_file)
+        self.sun.render_obj = self.renderer.load_object(self.sun.model_file, self.sun.name)
 
         # Setup SSSB
         sssb_model_file = self.models_dir / "didymos2.blend"
-        self.sssb = sssb.SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
+        self.sssb = SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
             2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
+        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001")
+        self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
 
         # Setup SC
         state = self.calc_sc_encounter_state()
-        self.spacecraft = sc.Spacecraft(
+        self.spacecraft = Spacecraft(
             "CI", self.mu_sun, state, self.encounter_date)
+
+    def setup_renderer(self):
+        """Create renderer and apply settings."""
+
+        render_dir = utils.check_dir(self.res_dir / "rendering")
+
+        self.renderer = render.BlenderController(render_dir, self.render_settings["scene_names"])
+        self.renderer.set_device(self.render_settings["device"])
+        self.renderer.set_samples(self.render_settings["samples"])
+        self.renderer.set_exposure(self.render_settings["exposure"])
+        self.renderer.set_resolution(self.render_settings["x_res"], self.render_settings["y_res"])
+        self.renderer.set_output_format()
+
+        self.renderer.create_camera("SatelliteCamera")
+        self.renderer.set_camera("SatelliteCamera", lens=230, sensor=3.45E-3 * 2464)
 
     def simulate(self):
         """Do simulation."""
@@ -125,23 +146,6 @@ class Environment():
         """Render simulation scenario."""
         self.logger.info("Rendering simulation")
 
-        render_dir = utils.check_dir(self.res_dir / "rendering")
-
-        renderer = render.BlenderController(render_dir, self.render_settings["scene_names"])
-        renderer.set_device(self.render_settings["device"])
-        renderer.set_samples(self.render_settings["samples"])
-        renderer.set_exposure(self.render_settings["exposure"])
-        renderer.set_resolution(self.render_settings["x_res"], self.render_settings["y_res"])
-        renderer.set_output_format()
-
-        renderer.create_camera("SatelliteCamera")
-        renderer.set_camera("SatelliteCamera", lens=230, sensor=3.45E-3 * 2464)
-
-        asteroid = renderer.load_object(self.sssb.model_file, "Didymos.001")
-        asteroid.rotation_mode = "AXIS_ANGLE"
-
-        sun = renderer.load_object(self.sun.model_file, self.sun.name)
-
         for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
                                                       self.spacecraft.pos_history,
                                                       self.sssb.pos_history,
@@ -150,22 +154,22 @@ class Environment():
             date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
             date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
 
-            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
-            renderer.set_camera_location("SatelliteCamera", sc_pos_rel_sssb)
+            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 100.
+            self.renderer.set_camera_location("SatelliteCamera", sc_pos_rel_sssb)
 
             sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
             sssb_angle = sssb_rot.getAngle()
 
-            asteroid.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)
+            self.sssb.render_obj.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)
 
-            sun.location = -np.asarray(sssb_pos.toArray()) / 1000.
+            self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / 100.
 
-            renderer.target_camera(asteroid, "SatelliteCamera")
+            self.renderer.target_camera(self.sssb.render_obj, "SatelliteCamera")
             
-            renderer.update()       
-            renderer.render(name=render_dir / (date_str + "_AsteroidOnly"), scene_name="AsteroidOnly")
+            self.renderer.update()       
+            self.renderer.render(name=self.renderer.res_dir / (date_str + "_AsteroidOnly"), scene_name="AsteroidOnly")
 
-            renderer.save_blender_dfile(render_dir / (date_str + "_complete"))
+            self.renderer.save_blender_dfile(self.renderer.res_dir / (date_str + "_complete"))
 
         self.logger.info("Rendering completed")
 
