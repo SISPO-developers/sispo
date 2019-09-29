@@ -123,8 +123,6 @@ class Environment():
         self.logger.info("Propagating Spacecraft")
         self.spacecraft.propagator.propagate(self.start_date, self.end_date)
 
-        attitudes = self.sssb.att_history
-
         self.logger.info("Simulation completed")
 
         self.save_results()
@@ -150,21 +148,23 @@ class Environment():
 
         sun = renderer.load_object(self.sun.model_file, self.sun.name)
 
-        for (date, sc_pos, sssb_pos) in zip(self.spacecraft.date_history,
-                                            self.spacecraft.pos_history,
-                                            self.sssb.pos_history):
-            t = date.durationFrom(self.start_date)
-            
+        for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
+                                                      self.spacecraft.pos_history,
+                                                      self.sssb.pos_history,
+                                                      self.sssb.rot_history):
+
             date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
             date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
 
-            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 2000.
+            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
             renderer.set_camera_location("SatelliteCamera", sc_pos_rel_sssb)
 
-            asteroid_rotation = 2. * math.pi * t / (2.2593 * 3600)
-            asteroid.rotation_axis_angle = (asteroid_rotation, 0, 0, 1)
+            sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
+            sssb_angle = sssb_rot.getAngle()
 
-            sun.location = -np.asarray(sssb_pos.toArray()) / 2000.
+            asteroid.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)
+
+            sun.location = -np.asarray(sssb_pos.toArray()) / 1000.
 
             renderer.target_camera(asteroid, "SatelliteCamera")
             
