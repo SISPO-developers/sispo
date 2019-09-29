@@ -4,12 +4,6 @@ import math
 from pathlib import Path
 
 import orekit
-OREKIT_VM = orekit.initVM() # pylint: disable=no-member
-from orekit.pyhelpers import setup_orekit_curdir
-file_dir = Path(__file__)
-root_dir = file_dir / ".." / ".." / ".."
-orekit_data = root_dir / "data" / "orekit-data.zip"
-setup_orekit_curdir(str(orekit_data))
 import org.orekit.utils as utils # pylint: disable=import-error
 import org.orekit.orbits as orbits # pylint: disable=import-error
 from org.orekit.attitudes import Attitude, FixedRate # pylint: disable=import-error
@@ -20,7 +14,7 @@ from org.hipparchus.geometry.euclidean.threed import Rotation, RotationConventio
 from simulation.cb import CelestialBody
 
 
-class Sssb(CelestialBody):
+class SmallSolarSystemBody(CelestialBody):
     """Handling properties and behaviour of SSSB."""
 
     def __init__(self, name, mu, trj_date, model_file=None):
