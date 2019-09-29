@@ -7,12 +7,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 import orekit
 #################### orekit VM init ####################
-file_dir = Path(__file__).parent.resolve()
-root_dir = (file_dir / ".." / "..").resolve()
+FILE_DIR = Path(__file__).parent.resolve()
+ROOT_DIR = FILE_DIR.parent.parent
+OREKIT_DATA_FILE = ROOT_DIR / "data" / "orekit-data.zip"
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
-orekit_data = root_dir / "data" / "orekit-data.zip"
 from orekit.pyhelpers import setup_orekit_curdir
-setup_orekit_curdir(str(orekit_data))
+setup_orekit_curdir(str(OREKIT_DATA_FILE))
 #################### orekit VM init ####################
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
 from org.hipparchus.geometry.euclidean.threed import Vector3D  # pylint: disable=import-error
