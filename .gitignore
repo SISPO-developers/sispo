@@ -13,6 +13,9 @@ software/*
 *.pyproj
 
 
+## Ignore mypy files
+.mypy_cache/*
+
 ## Ignore Visual Stdio Code settings
 .vscode/*
 
