@@ -131,10 +131,11 @@ class Environment():
         """Create Spacecraft and respective blender object."""
         sssb_state = self.sssb.get_state(self.encounter_date)
         sc_state = Spacecraft.calc_encounter_state(sssb_state,
-                                                  self.minimum_distance,
-                                                  self.with_terminator,
-                                                  self.with_sunnyside)
-        self.spacecraft = Spacecraft("CI", self.mu_sun, sc_state, self.encounter_date)
+                                                   self.minimum_distance,
+                                                   self.with_terminator,
+                                                   self.with_sunnyside)
+        self.spacecraft = Spacecraft(
+            "CI", self.mu_sun, sc_state, self.encounter_date)
 
     def simulate(self):
         """Do simulation."""
