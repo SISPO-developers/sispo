@@ -155,6 +155,9 @@ class Environment():
                                             self.sssb.pos_history):
             t = date.durationFrom(self.start_date)
             
+            date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
+            date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
+
             sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 2000.
             renderer.set_camera_location("SatelliteCamera", sc_pos_rel_sssb)
 
@@ -164,29 +167,11 @@ class Environment():
             sun.location = -np.asarray(sssb_pos.toArray()) / 2000.
 
             renderer.target_camera(asteroid, "SatelliteCamera")
-            renderer.update()
+            
+            renderer.update()       
+            result = renderer.render(name=str(self.res_path / (date_str + "_AsteroidOnly")), scene_name="AsteroidOnly")
 
-            (cam_direction, up, right, leftedge_vec, rightedge_vec, downedge_vec,
-            upedge_vec) = render.get_camera_vectors("SatelliteCamera", "MainScene")
-
-            (ra_cent, ra_w, dec_cent, dec_w) = render.get_fov(leftedge_vec, rightedge_vec, downedge_vec,
-                                               upedge_vec)
-
-            starlist = starcat.get_ucac4(ra_cent, ra_w, dec_cent, dec_w)
-
-            f = renderer.cameras["SatelliteCamera"].lens
-            w = renderer.cameras["SatelliteCamera"].sensor_width
-
-            #(starfield_flux2, flux3) = star_cache.render_stars_directly(starlist, cam_direction,
-            #                                                    rightedge_vec,
-            #                                                    upedge_vec, self.render_settings["x_res"], self.render_settings["y_res"], str(self.res_path / "star_cache.exr"))
-
-            renderer.update()
-            date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
-            date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
-            result = renderer.render(name=str(self.res_path / date_str), scene_name="AsteroidOnly")
-
-            renderer.save_blender_dfile(str(self.res_path / "res.blender"))
+            renderer.save_blender_dfile(str(self.res_path / (date_str + "_complete")))
 
         self.logger.info("Rendering completed")
 
