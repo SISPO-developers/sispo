@@ -90,9 +90,7 @@ class Environment():
         self.setup_renderer()
 
         # Setup Sun
-        sun_model_file = self.models_dir / "didymos_lowpoly.blend"
-        self.sun = CelestialBody("Sun", model_file=sun_model_file)
-        self.sun.render_obj = self.renderer.load_object(self.sun.model_file, self.sun.name)
+        self.setup_sun()
 
         # Setup SSSB
         sssb_model_file = self.models_dir / "didymos2.blend"
@@ -119,7 +117,12 @@ class Environment():
         self.renderer.set_output_format()
 
         self.renderer.create_camera("SatelliteCamera")
-        self.renderer.set_camera("SatelliteCamera", lens=230, sensor=3.45E-3 * 2464)
+        self.renderer.set_camera("SatelliteCamera", lens=230, sensor=self.camera_settings["sensor"])
+
+    def setup_sun(self):
+        sun_model_file = self.models_dir / "didymos_lowpoly.blend"
+        self.sun = CelestialBody("Sun", model_file=sun_model_file)
+        self.sun.render_obj = self.renderer.load_object(self.sun.model_file, self.sun.name)
 
     def simulate(self):
         """Do simulation."""
