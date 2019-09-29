@@ -10,13 +10,13 @@ import sispo.utils as utils
 
 class TestUtils(unittest.TestCase):
 
-    def test_resolve_create_dir(self):
+    def test_check_dir(self):
         dir_name = "dir_test"
 
         file_dir = Path(__file__).parent.resolve()
         test_dir = file_dir / dir_name
 
-        dir = utils.resolve_create_dir(test_dir)
+        dir = utils.check_dir(test_dir)
         self.assertTrue(test_dir == dir)
         self.assertTrue(test_dir.exists())
 

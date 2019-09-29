@@ -7,7 +7,7 @@ from datetime import datetime
 import numpy as np
 
 
-def resolve_create_dir(directory):
+def check_dir(directory):
     """Resolves directory and creates it, if it doesn't existing."""
     dir_resolved = directory.resolve()
 
@@ -52,11 +52,13 @@ def serialise(o):
             return str(o)
 
 
-def create_logger(name, log_path):
+def create_logger(name):
     """Creates a logger with the common formatting."""
     now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
     file_name = (now + "_" + name + ".log")
-    log_file = log_path / file_name
+    log_dir = Path(__file__).parent.parent / "data" / "logs"
+    log_dir = check_dir(log_dir)
+    log_file = log_dir / file_name
 
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)
