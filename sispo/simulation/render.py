@@ -1,6 +1,7 @@
 """Module to controll blender python module bpy."""
 
 import math
+from pathlib import Path
 import struct
 import time
 import zlib
@@ -8,12 +9,28 @@ import zlib
 import bpy
 from mathutils import Vector # pylint: disable=import-error
 
+import utils
+
+
+file_dir = Path(__file__).parent.resolve()
+root_dir = (file_dir / ".." / "..").resolve()
+log_path = utils.resolve_create_dir(root_dir / "data" / "results" / "rendering")
+logger = utils.create_logger("Rendering", log_path)
+
+
+class BlenderControllerError(RuntimeError):
+    """Generic error for BlenderController."""
+    pass
+
 
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, scratchdisk, scene_names=None):
+    def __init__(self, render_settings, scene_names=None):
         """Initialise blender controller class."""
+
+        self.res_path = utils.resolve_create_dir(root_dir / "data" / "results" / "rendering")
+        self.cycles = bpy.context.preferences.addons["cycles"]
 
         if scene_names is None:
             scene_names = ["MainScene"]
@@ -23,6 +40,7 @@ class BlenderController:
         self.scene.name = scene_names[0]
         self.cameras = bpy.data.cameras
         scene.world.color = (0, 0, 0)
+
         # Clear everything on the scene
         for obj in bpy.data.objects:
             obj.select_set(True)
@@ -33,92 +51,191 @@ class BlenderController:
                 bpy.ops.scene.new(type="FULL_COPY")
                 scene = bpy.context.scene
                 scene.name = scene_name
-        self.scenes = bpy.data.scenes
-        self.scratchdisk = scratchdisk
+
+        self.set_scene_defaults()
+        self.set_device()
+
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
-    def set_device(self, device="Auto", tile=64, tile_gpu=512, scene_names=None):
-        """Set blender rendering device.
-        
-        Fallback is CPU if no GPU available. If device is neither GPU or CPU,
-        it is attempted to use the GPU first.
-        """
-        print("Render setting %r" % (device))
-        if scene_names is None:
-            scene_names = self.scene_names    
-
-        device = _assert_device_available(device)
-
-        if device == "GPU":
-            bpy.context.preferences.addons["cycles"].preferences.compute_device_type = "CUDA"
-            for gpu in bpy.context.preferences.addons["cycles"].preferences.devices:
-                if gpu.type == "CUDA":
-                    gpu.use = True
-                    print(gpu.name)
-            tile = tile_gpu
-            print("Rendering with GPUs:")
-        else:
-            print("Rendering with CPUs")
-
-        for scene_name in self.scene_names:
-            scene = bpy.data.scenes[scene_name]
-            scene.render.engine = "CYCLES"
-            cycles = scene.cycles
-            cycles.feature_set = "EXPERIMENTAL"
-
-            scene.render.resolution_percentage = 100
-            cycles.device = device
-
-            scene.render.tile_x = tile
-            scene.render.tile_y = tile
-            cycles.max_bounces = 128
-            cycles.min_bounces = 3
-            cycles.caustics_reflective = True
-            cycles.caustics_refractive = True
-            cycles.diffuse_bounces = 128
-            cycles.glossy_bounces = 128
-            cycles.transmission_bounces = 128
-            cycles.volume_bounces = 128
-            cycles.transparent_min_bounces = 8
-            cycles.transparent_max_bounces = 128
-            cycles.use_square_samples = True
-            # cycles.use_animated_seed=True
-            cycles.seed = time.time()
-            cycles.film_transparent = True
-            scene.view_settings.view_transform = "Raw"
-            scene.view_settings.look = "None"
-
-    def set_exposure(self, exposure):
-        """Set exposure value."""
-        for scene_name in self.scene_names:
-            scene = bpy.data.scenes[scene_name]
-
-            scene.view_settings.exposure = exposure
-
-    def set_output_format(self, res_x, res_y, file_format="OPEN_EXR", color_depth="32",
-                          use_preview=True, scene_names=None):
-        """Set output file format."""
+    def set_scene_defaults(self, scene_names=None):
+        """Sets default settings to a scene."""
         if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
             scene = bpy.data.scenes[scene_name]
-            scene.render.image_settings.file_format = file_format
-            scene.render.filepath = str(self.scratchdisk / "r{}.exr".format(self.render_id))
-            scene.render.resolution_x = res_x
-            scene.render.resolution_y = res_y
-            scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
-            scene.render.image_settings.color_depth = color_depth
             scene.render.image_settings.color_mode = "RGBA"
-            scene.render.image_settings.use_preview = use_preview
             scene.render.image_settings.use_zbuffer = True
+            scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
+            scene.view_settings.view_transform = "Raw"
+            scene.view_settings.look = "None"
+        
+            scene.render.engine = "CYCLES"
+            scene.cycles.feature_set = "EXPERIMENTAL"
+            scene.cycles.min_bounces = 3
+            scene.cycles.max_bounces = 128
+            scene.cycles.caustics_reflective = True
+            scene.cycles.caustics_refractive = True
+            scene.cycles.diffuse_bounces = 128
+            scene.cycles.glossy_bounces = 128
+            scene.cycles.transmission_bounces = 128
+            scene.cycles.volume_bounces = 128
+            scene.cycles.transparent_min_bounces = 8
+            scene.cycles.transparent_max_bounces = 128
+            scene.cycles.use_square_samples = True
+            #scene.cycles.use_animated_seed = True
+            scene.cycles.seed = time.time()
+            scene.cycles.film_transparent = True
+
+    def set_device(self, device="AUTO", scene_names=None):
+        """Set cycles rendering device for given scenes.
+
+        When device="AUTO" it is attempted to use GPU first, otherwise
+        fallback is CPU. Currently, assumes set_device is only used once.
+        """
+        logger.info("Attempting to set cycle rendering device to: %s", device)
+
+        self.device = self._determine_device(device)
+        self._set_cycles_device()
+        tile_size = self.get_tile_size()
+
+        # Sets render device of scenes
+        if scene_names is None:
+            scene_names = self.scene_names
+        for scene_name in scene_names:
+            scene = bpy.data.scenes[scene_name]
+            scene.cycles.device = self.device
+            scene.render.tile_x = tile_size
+            scene.render.tile_y = tile_size
+
+
+    def _determine_device(self, device):
+        """Determines the render device based on availability and input.
+
+        bpy.context.preferences.addons["cycles"].preferences.get_devices()
+        needs to be called otherwise .devices collection is not initialised.
+        """
+        self.cycles.preferences.get_devices()
+        devices = self.cycles.preferences.devices
+        logger.info("Available devices: %s", [dev.name for dev in devices])
+
+        if device in ("AUTO", "GPU"):
+            device_types = {device.type for device in devices}
+
+            if "CUDA" in device_types:
+                used_device = "GPU"
+            else:
+                used_device = "CPU"
+
+        elif device == "CPU":
+            used_device = "CPU"
+
+        else:
+            logger.info("Invalid rendering device setting.")
+            raise BlenderControllerError("Invalid rendering device setting.")
+
+        return used_device
+
+    def _set_cycles_device(self):
+        """Applies self.device setting to cycles itself."""
+        devices = self.cycles.preferences.devices
+
+        if self.device in ("CPU", "GPU"):
+            if self.device == "GPU":
+                device_type = "CUDA"
+            else:
+                device_type = "NONE"
+            self.cycles.preferences.compute_device_type = device_type
+            for device in devices:
+                if device.type == device_type:
+                    device.use = True
+                    logger.info("%s device name: %s", device_type, device.name)
+                else:
+                    device.use = False
+        else:
+            logger.info("Invalid device: %s", self.device)
+            raise BlenderControllerError(f"Invalid device: {self.device}")
+
+    def get_tile_size(self):
+        """Determine size of tiles while rendering based on render device."""
+        if self.device == "GPU":
+            tile_size = 512
+        elif self.device == "CPU":
+            tile_size = 128
+        else:
+            logger.info("Can not get tile size for device %s", self.device)
+            raise BlenderControllerError("Can not get tile size.")
+
+        return tile_size
 
     def set_samples(self, samples=6, scene_names=None):
         """Set number of samples to render for each pixel."""
         if scene_names is None:
             scene_names = self.scene_names
         for scene_name in scene_names:
+            bpy.data.scenes[scene_name].cycles.samples = samples
+
+    def set_exposure(self, exposure, scene_names=None):
+        """Set exposure value."""
+        if scene_names is None:
+            scene_names = self.scene_names
+        for scene_name in self.scene_names:
             scene = bpy.data.scenes[scene_name]
-            scene.cycles.samples = samples
+            scene.view_settings.exposure = exposure
+
+    def set_resolution(self, res_x, res_y, scene_names=None):
+        """Sets resolution of rendered image."""
+        if scene_names is None:
+            scene_names = self.scene_names
+        for scene_name in scene_names:
+            scene = bpy.data.scenes[scene_name]
+            scene.render.resolution_x = res_x
+            scene.render.resolution_y = res_y
+
+    def set_output_format(self,
+                          file_format="OPEN_EXR",
+                          color_depth="32",
+                          use_preview=True,
+                          scene_names=None):
+        """Set output file format."""
+        if scene_names is None:
+            scene_names = self.scene_names
+        for scene_name in scene_names:
+            scene = bpy.data.scenes[scene_name]
+            scene.render.image_settings.file_format = file_format
+            scene.render.image_settings.color_depth = color_depth
+            scene.render.image_settings.use_preview = use_preview
+            scene.render.filepath = str(self.res_path / f"r{self.render_id}.exr")
+
+    def set_camera(self,
+                   camera_name="Camera",
+                   lens=35,
+                   sensor=32,
+                   clip_start=1E-5,
+                   clip_end=1E32,
+                   mode="PERSP", # Modes ORTHO, PERSP
+                   ortho_scale=7):
+        """Set camera configuration values."""
+        camera = self.cameras[camera_name]      
+        camera.clip_end = clip_end
+        camera.clip_start = clip_start
+        camera.lens = lens
+        camera.ortho_scale = ortho_scale
+        camera.sensor_width = sensor
+        camera.type = mode
+
+    def create_camera(self, camera_name="Camera", scene_names=None):
+        """Create new camera and add to relevant scenes."""
+        cam = bpy.data.cameras.new(camera_name)
+        camera = bpy.data.objects.new(camera_name, object_data=cam)
+        camera.name = camera_name
+        camera.location = (0, 0, 0)
+
+        if scene_names is None:
+            scene_names = self.scene_names
+        for scene_name in scene_names:
+            scene = bpy.data.scenes[scene_name]
+            scene.camera = camera
+            scene.collection.objects.link(camera)
 
     def update(self, scene_names=None):
         """Update scenes."""
@@ -128,17 +245,16 @@ class BlenderController:
             scene = bpy.data.scenes[scene_name]
             bpy.context.window.scene = scene
             scene.cycles.seed = time.time()
-            vl = scene.view_layers
-            vl.update()
+            scene.view_layers.update()
 
     def render(self, name="", scene_name="MainScene"):
         """Render scenes."""
         if name == "":
-            name = self.scratchdisk + "r%0.8X.exr" % (self.render_id)
+            name = str(self.res_path) + "r%0.8X.exr" % (self.render_id)
 
         scene = bpy.data.scenes[scene_name]
         print("Rendering seed: %d" % (scene.cycles.seed))
-        scene.render.filepath = str(name)
+        scene.render.filepath = name
         bpy.context.window.scene = scene
         bpy.ops.render.render(write_still=True)
 
@@ -158,28 +274,14 @@ class BlenderController:
                 scene = bpy.data.scenes[scene_name]
                 scene.collection.objects.link(obj)
             return obj
-        return None
+        else:
+            msg = f"{object_name} not found in {filename}"
+            logger.info(msg)
+            raise BlenderControllerError(msg)
 
-    def set_camera(self, lens=35, sensor=32, clip_start=1E-5, clip_end=1E32, mode="PERSP",
-                   ortho_scale=7, camera_name="Camera", scene_names=None):  # Modes ORTHO, PERSP
-        """Set camera configuration values."""
-        cam = bpy.data.cameras.new(camera_name)
-        camera = bpy.data.objects.new("Camera", cam)
-        camera.name = camera_name
-        camera.data.clip_end = clip_end
-        camera.data.clip_start = clip_start
-        camera.data.lens = lens
-        camera.data.ortho_scale = ortho_scale
-        camera.data.sensor_width = sensor
-        camera.location = (0, 0, 0)
-        camera.data.type = mode
-        self.cameras = bpy.data.objects # TODO: Why objects? why not data.cameras only?
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            scene = bpy.data.scenes[scene_name]
-            scene.camera = camera
-            scene.collection.objects.link(camera)
+    def set_camera_location(self, camera_name="Camera", location=(0, 0, 0)):
+        camera = bpy.data.objects[camera_name]
+        camera.location = location
 
     def target_camera(self, target, camera_name="Camera"):
         """Target camera towards target."""
@@ -201,7 +303,11 @@ class BlenderController:
 
     def save_blender_dfile(self, filename):
         """Save a blender d file."""
-        bpy.ops.wm.save_as_mainfile(filename)
+        file_extension = ".blend"
+        if filename[-6:] != file_extension:
+            filename += file_extension
+
+        bpy.ops.wm.save_as_mainfile(filepath=filename)
 
 
 def get_camera_vectors(camera_name, scene_name):
@@ -234,8 +340,7 @@ def get_ra_dec(vec):
     """Calculate Right Ascension (RA) and Declination (DEC) in radians."""
     vec = vec.normalized()
     dec = math.asin(vec.z)
-    test=vec.x / math.cos(dec)
-    ra = math.acos(test)
+    ra = math.acos(vec.x / math.cos(dec))
     return (ra + math.pi, dec)
 
 
@@ -261,22 +366,4 @@ def get_fov(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
     dec_w = (dec_max - dec_min)
 
     return ra_cent, ra_w, dec_cent, dec_w
-  
-def _assert_device_available(device):
-    """Assert device is available or switch to CPU. 
-    
-    bpy.context.preferences.addons["cycles"].preferences.get_devices()
-    needs to be called otherwise .devices collection is not initialised.
-    """
-    bpy.context.preferences.addons["cycles"].preferences.get_devices()
-    devices = bpy.context.preferences.addons["cycles"].preferences.devices
-    device_types = {device.type for device in devices}
-
-    if device not in device_types:        
-        if "CUDA" in device_types:
-            device = "GPU"
-        else:
-            device = "CPU"
-
-    return device
  
