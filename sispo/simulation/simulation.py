@@ -107,7 +107,7 @@ class Environment():
             "CI", self.mu_sun, state, self.encounter_date)
 
     def setup_renderer(self):
-        """Create renderer and apply settings."""
+        """Create renderer, apply common settings and create sc cam."""
 
         render_dir = utils.check_dir(self.res_dir / "rendering")
 
