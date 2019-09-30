@@ -5,7 +5,7 @@ from pathlib import Path
 
 import orekit
 import org.orekit.utils as utils # pylint: disable=import-error
-import org.orekit.orbits as orbits # pylint: disable=import-error
+from org.orekit.orbits import KeplerianOrbit, PositionAngle # pylint: disable=import-error
 from org.orekit.attitudes import Attitude, FixedRate # pylint: disable=import-error
 from org.orekit.propagation.analytical import KeplerianPropagator # pylint: disable=import-error
 from org.orekit.time import AbsoluteDate
@@ -33,8 +33,8 @@ class SmallSolarSystemBody(CelestialBody):
         rotation_rate = 2. * math.pi / (2.2593 * 3600)
 
         # Define trajectory/orbit
-        self.trajectory = orbits.KeplerianOrbit(a, e, i, omega, Omega, M,
-                                               orbits.PositionAngle.MEAN, 
+        self.trajectory = KeplerianOrbit(a, e, i, omega, Omega, M,
+                                               PositionAngle.MEAN, 
                                                self.ref_frame, self.trj_date, mu)
 
         # Define attitude
