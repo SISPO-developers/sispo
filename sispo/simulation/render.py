@@ -48,14 +48,19 @@ class BlenderController:
 
         if len(scene_names) > 1:
             for scene_name in scene_names[1:]:
-                bpy.ops.scene.new(type="FULL_COPY")
-                scene = bpy.context.scene
-                scene.name = scene_name
+                self.create_scene(scene_name)
 
-        self.set_scene_defaults()
         self.set_device()
 
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
+
+    def create_scene(self, scene_name):
+        """Add empty scene."""
+        bpy.ops.scene.new(type="FULL_COPY")
+        bpy.context.scene.name = scene_name
+        self.scene_names.append(scene_name)
+
+        self.set_scene_defaults([scene_name])
 
     def set_scene_defaults(self, scene_names=None):
         """Sets default settings to a scene."""
@@ -215,14 +220,28 @@ class BlenderController:
 
         bpy.data.scenes[scene_name].render.filepath = str(filename)
 
-    def set_camera(self,
-                   camera_name="Camera",
-                   lens=35,
-                   sensor=32,
-                   clip_start=1E-5,
-                   clip_end=1E32,
-                   mode="PERSP", # Modes ORTHO, PERSP
-                   ortho_scale=7):
+    def create_camera(self, camera_name="Camera", scene_names=None):
+        """Create new camera and add to relevant scenes."""
+        cam = bpy.data.cameras.new(camera_name)
+        camera = bpy.data.objects.new(camera_name, object_data=cam)
+        camera.name = camera_name
+        self.set_camera_location(camera_name, (0, 0, 0))
+
+        if scene_names is None:
+            scene_names = self.scene_names
+        for scene_name in scene_names:
+            scene = bpy.data.scenes[scene_name]
+            scene.camera = camera
+            scene.collection.objects.link(camera)
+
+    def configure_camera(self,
+                         camera_name="Camera",
+                         lens=35,
+                         sensor=32,
+                         clip_start=1E-5,
+                         clip_end=1E32,
+                         mode="PERSP", # Modes ORTHO, PERSP
+                         ortho_scale=7):
         """Set camera configuration values."""
         camera = self.cameras[camera_name]      
         camera.clip_end = clip_end
@@ -231,20 +250,6 @@ class BlenderController:
         camera.ortho_scale = ortho_scale
         camera.sensor_width = sensor
         camera.type = mode
-
-    def create_camera(self, camera_name="Camera", scene_names=None):
-        """Create new camera and add to relevant scenes."""
-        cam = bpy.data.cameras.new(camera_name)
-        camera = bpy.data.objects.new(camera_name, object_data=cam)
-        camera.name = camera_name
-        camera.location = (0, 0, 0)
-
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            scene = bpy.data.scenes[scene_name]
-            scene.camera = camera
-            scene.collection.objects.link(camera)
 
     def set_camera_location(self, camera_name="Camera", location=(0, 0, 0)):
         camera = bpy.data.objects[camera_name]
