@@ -64,6 +64,11 @@ class Environment():
         self.timesampler_mode = 1
         self.slowmotion_factor = 10
 
+        self.with_backgroundstars = False
+        self.with_sssbonly = True
+        self.with_sssbconstdist = False
+        self.with_lightingref = False
+
         self.render_settings = dict()
         self.render_settings["exposure"] = 1.554
         self.render_settings["samples"] = 48
@@ -71,11 +76,6 @@ class Environment():
         self.render_settings["tile"] = 512
         self.render_settings["x_res"] = 2464
         self.render_settings["y_res"] = 2048
-        self.render_settings["scene_names"] = ["MainScene",
-                                               "AsteroidOnly"]#,
-                                               #"BackgroundStars",
-                                               #"AsteroidConstDistance",
-                                               #"LightingReference"]
 
         self.camera_settings = dict()
         self.camera_settings["color_depth"] = "32"
@@ -103,15 +103,32 @@ class Environment():
 
         render_dir = utils.check_dir(self.res_dir / "rendering")
 
-        self.renderer = render.BlenderController(render_dir, self.render_settings["scene_names"])
+        self.renderer = render.BlenderController(render_dir)
+
+        if self.with_backgroundstars:
+            self.renderer.create_scene("BackgroundStars")
+
+        if self.with_sssbonly:
+            self.renderer.create_scene("SssbOnly")
+
+        self.renderer.create_camera("ScCam")
+        self.renderer.configure_camera("ScCam", lens=230, sensor=self.camera_settings["sensor"])
+
+        if self.with_sssbconstdist:
+            self.renderer.create_scene("SssbConstDist")
+            self.renderer.create_camera("SssbConstDistCam", scene_names=["SssbConstDist"])
+            self.renderer.configure_camera("SssbConstDistCam", lens=230, sensor=self.camera_settings["sensor"])
+
+        if self.with_lightingref:
+            self.renderer.create_scene("LightingRef")
+            self.renderer.create_camera("LightingRefCam", scene_names=["LightingRef"])
+            self.renderer.configure_camera("LightingRefCam", lens=230, sensor=self.camera_settings["sensor"])
+
         self.renderer.set_device(self.render_settings["device"])
         self.renderer.set_samples(self.render_settings["samples"])
         self.renderer.set_exposure(self.render_settings["exposure"])
         self.renderer.set_resolution(self.render_settings["x_res"], self.render_settings["y_res"])
         self.renderer.set_output_format()
-
-        self.renderer.create_camera("SatelliteCamera")
-        self.renderer.set_camera("SatelliteCamera", lens=230, sensor=self.camera_settings["sensor"])
 
     def setup_sun(self):
         """Create Sun and respective render object."""
@@ -170,20 +187,20 @@ class Environment():
             date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
             date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
 
-            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 100.
-            self.renderer.set_camera_location("SatelliteCamera", sc_pos_rel_sssb)
+            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
+            self.renderer.set_camera_location("ScCam", sc_pos_rel_sssb)
 
             sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
             sssb_angle = sssb_rot.getAngle()
-
             self.sssb.render_obj.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)
 
-            self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / 100.
+            self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / 1000.
 
-            self.renderer.target_camera(self.sssb.render_obj, "SatelliteCamera")
+            self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             
-            self.renderer.update()       
-            self.renderer.render(name=self.renderer.res_dir / (date_str + "_AsteroidOnly"), scene_name="AsteroidOnly")
+            self.renderer.update()
+            #self.renderer.render(name=self.renderer.res_dir / (date_str + "_MainScene"), scene_name="MainScene")
+            self.renderer.render(name=self.renderer.res_dir / (date_str + "_SssbOnly"), scene_name="SssbOnly")
 
             self.renderer.save_blender_dfile(self.renderer.res_dir / (date_str + "_complete"))
 
