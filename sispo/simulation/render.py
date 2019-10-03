@@ -32,6 +32,7 @@ class BlenderController:
         self.res_dir = render_dir
         self.cycles = bpy.context.preferences.addons["cycles"]
 
+        self.default_scene = bpy.context.scene
         self.scenes = bpy.data.scenes
         self.cameras = bpy.data.cameras
 
@@ -52,7 +53,7 @@ class BlenderController:
 
         self.set_scene_defaults([scene_name])
 
-        bpy.context.window.scene = bpy.data.scenes["MainScene"]
+        bpy.context.window.scene = self.default_scene
 
     def set_scene_defaults(self, scenes=None):
         """Sets default settings to a scene."""
