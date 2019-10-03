@@ -77,9 +77,9 @@ class Environment():
         self.render_settings["tile"] = 512
         self.render_settings["x_res"] = 2464
         self.render_settings["y_res"] = 2048
+        self.render_settings["color_depth"] = "32"
 
         self.camera_settings = dict()
-        self.camera_settings["color_depth"] = "32"
         self.camera_settings["lens"] = 230
         self.camera_settings["sensor"] = 3.45E-3 * \
             self.render_settings["x_res"]
@@ -115,23 +115,24 @@ class Environment():
             self.asteroid_scenes.append("SssbOnly")
 
         self.renderer.create_camera("ScCam")
-        self.renderer.configure_camera("ScCam", lens=230, sensor=self.camera_settings["sensor"])
+        self.renderer.configure_camera("ScCam", **self.camera_settings)
 
         if self.with_sssbconstdist:
             self.renderer.create_scene("SssbConstDist")
             self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
-            self.renderer.configure_camera("SssbConstDistCam", lens=230, sensor=self.camera_settings["sensor"])
+            self.renderer.configure_camera("SssbConstDistCam", **self.camera_settings)
             self.asteroid_scenes.append("SssbConstDist")
 
         if self.with_lightingref:
-            self.renderer.create_scene("LightingRef")
-            self.renderer.create_camera("LightingRefCam", scene_names=["LightingRef"])
-            self.renderer.configure_camera("LightingRefCam", lens=230, sensor=self.camera_settings["sensor"])
+            self.renderer.create_scene("LightRef")
+            self.renderer.create_camera("LightRefCam", scene_names="LightRef")
+            self.renderer.configure_camera("LightRefCam", **self.camera_settings)
 
         self.renderer.set_device(self.render_settings["device"])
         self.renderer.set_samples(self.render_settings["samples"])
         self.renderer.set_exposure(self.render_settings["exposure"])
-        self.renderer.set_resolution(self.render_settings["x_res"], self.render_settings["y_res"])
+        self.renderer.set_resolution(self.render_settings["x_res"], 
+                                     self.render_settings["y_res"])
         self.renderer.set_output_format()
 
     def setup_sun(self):
