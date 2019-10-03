@@ -36,11 +36,11 @@ class BlenderController:
         self.scenes = bpy.data.scenes
         self.cameras = bpy.data.cameras
 
-        # Set scene name to MainScene and clear everything
-        bpy.context.scene.name = "MainScene"
+        # Initial scene is MainScene, clear from objects, and set defaults
+        self.default_scene.name = "MainScene"
         for obj in bpy.data.objects:
-            obj.select_set(True)
-        bpy.ops.object.delete()
+            bpy.data.objects.remove(obj)
+        self.set_scene_defaults(self.default_scene)
 
         self.set_device()
 
@@ -51,7 +51,7 @@ class BlenderController:
         bpy.ops.scene.new(type="FULL_COPY")
         bpy.context.scene.name = scene_name
 
-        self.set_scene_defaults([scene_name])
+        self.set_scene_defaults(scene_name)
 
         bpy.context.window.scene = self.default_scene
 
@@ -60,7 +60,7 @@ class BlenderController:
         for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
-            scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
+            scene.render.resolution_percentage = 5 # TODO: change, 5 is debug setting
             scene.view_settings.view_transform = "Raw"
             scene.view_settings.look = "None"
         
@@ -186,15 +186,16 @@ class BlenderController:
             scene.render.image_settings.color_depth = color_depth
             scene.render.image_settings.use_preview = use_preview
 
-    def set_output_file(self, filename, scene_name):
+    def set_output_file(self, name_suffix=None, scene=bpy.context.scene):
         """Set output file path to given scenes with prior extension check."""
+        filename = self.res_dir / (scene.name + "_" + str(name_suffix))
         filename = str(filename)
 
         file_extension = ".exr"
         if filename[-4:] != file_extension:
             filename += file_extension
 
-        bpy.data.scenes[scene_name].render.filepath = str(filename)
+        scene.render.filepath = str(filename)
 
     def create_camera(self, camera_name="Camera", scenes=None):
         """Create new camera and add to relevant scenes."""
@@ -242,15 +243,16 @@ class BlenderController:
             scene.cycles.seed = time.time()
             scene.view_layers.update()
 
-    def render(self, name=None, scene_name="MainScene"):
+    def render(self, name_suffix=None, scenes=None):
         """Render given scene."""
-        if name is None:
+        if name_suffix is None:
             name = self.res_dir / f"r{self.render_id:0.8X}"
-        
-        self.set_output_file(name, scene_name)
 
-        bpy.context.window.scene = bpy.data.scenes[scene_name]
-        bpy.ops.render.render(write_still=True)
+        for scene in self._get_scenes_iter(scenes):
+            self.update(scene)
+            self.set_output_file(name_suffix, scene)
+            bpy.ops.render.render(write_still=True, scene=scene.name)
+            self.save_blender_dfile(name_suffix, scene)
 
     def load_object(self, filename, object_name, scenes=None):
         """Load blender object from file."""
@@ -263,8 +265,8 @@ class BlenderController:
             obj = data_to.objects[0]
             obj.animation_data_clear()
             
-            for scene_name in self._get_scenes_iter(scenes):
-                bpy.data.scenes[scene_name].collection.objects.link(obj)
+            for scene in self._get_scenes_iter(scenes):
+                scene.collection.objects.link(obj)
             return obj
         else:
             msg = f"{object_name} not found in {filename}"
@@ -274,13 +276,13 @@ class BlenderController:
     def create_empty(self, name="Empty", scenes=None):
         """Create new, empty blender object."""
         obj_empty = bpy.data.objects.new(name, None)
-        for scene_name in self._get_scenes_iter(scenes):
-            scene = bpy.data.scenes[scene_name]
+        for scene in self._get_scenes_iter(scenes):
             scene.collection.objects.link(obj_empty)
         return obj_empty
 
-    def save_blender_dfile(self, filename):
+    def save_blender_dfile(self, name_suffix=None, scene=bpy.context.scene):
         """Save a blender d file."""
+        filename = self.res_dir / (scene.name + "_" + str(name_suffix))
         filename = str(filename)
 
         file_extension = ".blend"
@@ -299,7 +301,7 @@ class BlenderController:
         if scenes is None:
             output = self.scenes
         elif isinstance(scenes, str):
-            output = self.scenes[scenes]
+            output = [self.scenes[scenes]]
         elif isinstance(scenes, bpy.types.Scene):
             output = [scenes]
         elif isinstance(scenes, list):
