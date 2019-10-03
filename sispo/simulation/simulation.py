@@ -16,8 +16,7 @@ setup_orekit_curdir(str(OREKIT_DATA_FILE))
 #################### orekit VM init ####################
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
 from org.orekit.frames import FramesFactory  # pylint: disable=import-error
-from org.orekit.utils import Constants, PVCoordinates  # pylint: disable=import-error
-from org.hipparchus.geometry.euclidean.threed import Vector3D  # pylint: disable=import-error
+from org.orekit.utils import Constants  # pylint: disable=import-error
 
 from simulation.cb import CelestialBody
 from simulation.sc import Spacecraft
@@ -230,41 +229,6 @@ class Environment():
                            + str(sc_pos) + "\n")
 
         self.logger.info("Propagation results saved")
-
-    def calc_sc_encounter_state(self):
-        """Calculate the sc state during encounter relative to SSSB."""
-        pos, vel = self.sssb.get_state(self.encounter_date)
-
-        sc_pos = self.calc_sc_encounter_pos(pos)
-
-        sc_vel = vel.scalarMultiply((vel.getNorm() - 10000.) / vel.getNorm())
-
-        self.logger.info("Spacecraft relative velocity: %s", sc_vel)
-        self.logger.info("Spacecraft distance from sun: %s",
-                         sc_pos.getNorm()/Constants.IAU_2012_ASTRONOMICAL_UNIT)
-
-        return PVCoordinates(sc_pos, sc_vel)
-
-    def calc_sc_encounter_pos(self, pos):
-        """Calculate the sc position during encounter relative to SSSB."""
-        sssb_direction = pos.normalize()
-
-        if not self.with_terminator:
-            if not self.with_sunnyside:
-                self.minimum_distance *= -1
-
-            sssb_direction = sssb_direction.scalarMultiply(
-                self.minimum_distance)
-            sc_pos = pos.subtract(sssb_direction)
-
-        else:
-            shift = sssb_direction.scalarMultiply(-0.15)
-            shift = shift.add(Vector3D(0., 0., 1.))
-            shift = shift.normalize()
-            shift = shift.scalarMultiply(self.minimum_distance)
-            sc_pos = pos.add(shift)
-        return sc_pos
-
 
 if __name__ == "__main__":
     env = Environment("Didymos", 2 * 60.)
