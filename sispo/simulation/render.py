@@ -26,29 +26,20 @@ class BlenderControllerError(RuntimeError):
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, render_dir, scene_names=None):
+    def __init__(self, render_dir):
         """Initialise blender controller class."""
 
         self.res_dir = render_dir
         self.cycles = bpy.context.preferences.addons["cycles"]
 
-        if scene_names is None:
-            scene_names = ["MainScene"]
-
-        self.scene_names = scene_names
-        self.scene = scene = bpy.context.scene
-        self.scene.name = scene_names[0]
+        self.scenes = bpy.data.scenes
         self.cameras = bpy.data.cameras
-        scene.world.color = (0, 0, 0)
 
-        # Clear everything on the scene
+        # Set scene name to MainScene and clear everything
+        bpy.context.scene.name = "MainScene"
         for obj in bpy.data.objects:
             obj.select_set(True)
         bpy.ops.object.delete()
-
-        if len(scene_names) > 1:
-            for scene_name in scene_names[1:]:
-                self.create_scene(scene_name)
 
         self.set_device()
 
@@ -58,16 +49,15 @@ class BlenderController:
         """Add empty scene."""
         bpy.ops.scene.new(type="FULL_COPY")
         bpy.context.scene.name = scene_name
-        self.scene_names.append(scene_name)
 
         self.set_scene_defaults([scene_name])
 
-    def set_scene_defaults(self, scene_names=None):
+        bpy.context.window.scene = bpy.data.scenes["MainScene"]
+
+    def set_scene_defaults(self, scenes=None):
         """Sets default settings to a scene."""
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            scene = bpy.data.scenes[scene_name]
+        scenes = self._get_scenes_iter(scenes)
+        for scene in scenes:
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
             scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
@@ -91,7 +81,7 @@ class BlenderController:
             scene.cycles.seed = time.time()
             scene.cycles.film_transparent = True
 
-    def set_device(self, device="AUTO", scene_names=None):
+    def set_device(self, device="AUTO", scenes=None):
         """Set cycles rendering device for given scenes.
 
         When device="AUTO" it is attempted to use GPU first, otherwise
@@ -104,10 +94,23 @@ class BlenderController:
         tile_size = self.get_tile_size()
 
         # Sets render device of scenes
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            scene = bpy.data.scenes[scene_name]
+        if scenes is None:
+            scenes = self.scenes
+
+        elif isinstance(scenes, str):
+            scenes = self.scenes[scenes]
+        
+        elif isinstance(scenes, list):
+            if isinstance(scenes[0], str):
+                scenes_tmp = []
+                for scene_name in scenes:
+                    scenes_tmp.append(self.scenes[scene_name])
+                scenes = scenes_tmp
+        else:
+            logger.info("Invalid scenes input %s", scenes)
+            raise BlenderControllerError(f"Invalid scenes input {scenes}")
+
+        for scene in scenes:
             scene.cycles.device = self.device
             scene.render.tile_x = tile_size
             scene.render.tile_y = tile_size
@@ -172,27 +175,23 @@ class BlenderController:
 
         return tile_size
 
-    def set_samples(self, samples=6, scene_names=None):
+    def set_samples(self, samples=6, scenes=None):
         """Set number of samples to render for each pixel."""
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            bpy.data.scenes[scene_name].cycles.samples = samples
+        for scene in self._get_scenes_iter(scenes):
+            scene.cycles.samples = samples
 
-    def set_exposure(self, exposure, scene_names=None):
+    def set_exposure(self, exposure, scenes=None):
         """Set exposure value."""
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in self.scene_names:
-            scene = bpy.data.scenes[scene_name]
+        if scenes is None:
+            scenes = self.scenes
+        for scene in scenes:
             scene.view_settings.exposure = exposure
 
-    def set_resolution(self, res_x, res_y, scene_names=None):
+    def set_resolution(self, res_x, res_y, scenes=None):
         """Sets resolution of rendered image."""
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            scene = bpy.data.scenes[scene_name]
+        if scenes is None:
+            scenes = self.scenes
+        for scene in scenes:
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
 
@@ -200,12 +199,11 @@ class BlenderController:
                           file_format="OPEN_EXR",
                           color_depth="32",
                           use_preview=True,
-                          scene_names=None):
+                          scenes=None):
         """Set output file format."""
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            scene = bpy.data.scenes[scene_name]
+        if scenes is None:
+            scenes = self.scenes
+        for scene in scenes:
             scene.render.image_settings.file_format = file_format
             scene.render.image_settings.color_depth = color_depth
             scene.render.image_settings.use_preview = use_preview
@@ -220,17 +218,16 @@ class BlenderController:
 
         bpy.data.scenes[scene_name].render.filepath = str(filename)
 
-    def create_camera(self, camera_name="Camera", scene_names=None):
+    def create_camera(self, camera_name="Camera", scenes=None):
         """Create new camera and add to relevant scenes."""
         cam = bpy.data.cameras.new(camera_name)
         camera = bpy.data.objects.new(camera_name, object_data=cam)
         camera.name = camera_name
         self.set_camera_location(camera_name, (0, 0, 0))
 
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            scene = bpy.data.scenes[scene_name]
+        if scenes is None:
+            scenes = self.scenes
+        for scene in scenes:
             scene.camera = camera
             scene.collection.objects.link(camera)
 
@@ -263,12 +260,13 @@ class BlenderController:
         camera_constr.up_axis = "UP_Y"
         camera_constr.target = target
 
-    def update(self, scene_names=None):
+    def update(self, scenes=None):
         """Update scenes."""
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
-            scene = bpy.data.scenes[scene_name]
+        if scenes is None:
+            scenes = self.scenes
+        elif isinstance(scenes, str):
+            scenes = [self.scenes[scenes]]
+        for scene in scenes:
             bpy.context.window.scene = scene
             scene.cycles.seed = time.time()
             scene.view_layers.update()
@@ -296,8 +294,7 @@ class BlenderController:
             if scene_names is None:
                 scene_names = self.scene_names
             for scene_name in scene_names:
-                scene = bpy.data.scenes[scene_name]
-                scene.collection.objects.link(obj)
+                bpy.data.scenes[scene_name].collection.objects.link(obj)
             return obj
         else:
             msg = f"{object_name} not found in {filename}"
@@ -323,6 +320,35 @@ class BlenderController:
             filename += file_extension
 
         bpy.ops.wm.save_as_mainfile(filepath=filename)
+
+    def _get_scenes_iter(self, scenes):
+        """Checks scenes input to allow different types and create iterator.
+        
+        Input can either be None, a scene name (str), a list of scene names,
+        a single scene, or a list of scenes.
+        Output is an iterator which can be used for looping through scenes.
+        """
+        if scenes is None:
+            output = self.scenes
+        elif isinstance(scenes, str):
+            output = self.scenes[scenes]
+        elif isinstance(scenes, bpy.types.Scene):
+            output = [scenes]
+        elif isinstance(scenes, list):
+            if isinstance(scenes[0], str):
+                output = []
+                for scene_name in scenes:
+                    output.append(self.scenes[scene_name])
+            elif isinstance(scenes[0], bpy.types.Scene):
+                output = scenes
+            else:
+                logger.info("Invalid scenes input %s", scenes)
+                raise BlenderControllerError(f"Invalid scenes input {scenes}")
+        else:
+            logger.info("Invalid scenes input %s", scenes)
+            raise BlenderControllerError(f"Invalid scenes input {scenes}")
+
+        return iter(output)
 
 
 def get_camera_vectors(camera_name, scene_name):
