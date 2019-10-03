@@ -57,8 +57,7 @@ class BlenderController:
 
     def set_scene_defaults(self, scenes=None):
         """Sets default settings to a scene."""
-        scenes = self._get_scenes_iter(scenes)
-        for scene in scenes:
+        for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
             scene.render.resolution_percentage = 100 # TODO: why 100? int in [1, 32767], default 0
@@ -95,23 +94,7 @@ class BlenderController:
         tile_size = self.get_tile_size()
 
         # Sets render device of scenes
-        if scenes is None:
-            scenes = self.scenes
-
-        elif isinstance(scenes, str):
-            scenes = self.scenes[scenes]
-        
-        elif isinstance(scenes, list):
-            if isinstance(scenes[0], str):
-                scenes_tmp = []
-                for scene_name in scenes:
-                    scenes_tmp.append(self.scenes[scene_name])
-                scenes = scenes_tmp
-        else:
-            logger.info("Invalid scenes input %s", scenes)
-            raise BlenderControllerError(f"Invalid scenes input {scenes}")
-
-        for scene in scenes:
+        for scene in self._get_scenes_iter(scenes):
             scene.cycles.device = self.device
             scene.render.tile_x = tile_size
             scene.render.tile_y = tile_size
@@ -183,16 +166,12 @@ class BlenderController:
 
     def set_exposure(self, exposure, scenes=None):
         """Set exposure value."""
-        if scenes is None:
-            scenes = self.scenes
-        for scene in scenes:
+        for scene in self._get_scenes_iter(scenes):
             scene.view_settings.exposure = exposure
 
     def set_resolution(self, res_x, res_y, scenes=None):
         """Sets resolution of rendered image."""
-        if scenes is None:
-            scenes = self.scenes
-        for scene in scenes:
+        for scene in self._get_scenes_iter(scenes):
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
 
@@ -202,9 +181,7 @@ class BlenderController:
                           use_preview=True,
                           scenes=None):
         """Set output file format."""
-        if scenes is None:
-            scenes = self.scenes
-        for scene in scenes:
+        for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.file_format = file_format
             scene.render.image_settings.color_depth = color_depth
             scene.render.image_settings.use_preview = use_preview
@@ -226,9 +203,7 @@ class BlenderController:
         camera.name = camera_name
         self.set_camera_location(camera_name, (0, 0, 0))
 
-        if scenes is None:
-            scenes = self.scenes
-        for scene in scenes:
+        for scene in self._get_scenes_iter(scenes):
             scene.camera = camera
             scene.collection.objects.link(camera)
 
@@ -263,12 +238,7 @@ class BlenderController:
 
     def update(self, scenes=None):
         """Update scenes."""
-        if scenes is None:
-            scenes = self.scenes
-        elif isinstance(scenes, str):
-            scenes = [self.scenes[scenes]]
-        for scene in scenes:
-            bpy.context.window.scene = scene
+        for scene in self._get_scenes_iter(scenes):
             scene.cycles.seed = time.time()
             scene.view_layers.update()
 
@@ -282,7 +252,7 @@ class BlenderController:
         bpy.context.window.scene = bpy.data.scenes[scene_name]
         bpy.ops.render.render(write_still=True)
 
-    def load_object(self, filename, object_name, scene_names=None):
+    def load_object(self, filename, object_name, scenes=None):
         """Load blender object from file."""
         filename = str(filename)
 
@@ -292,9 +262,8 @@ class BlenderController:
         if data_to.objects:
             obj = data_to.objects[0]
             obj.animation_data_clear()
-            if scene_names is None:
-                scene_names = self.scene_names
-            for scene_name in scene_names:
+            
+            for scene_name in self._get_scenes_iter(scenes):
                 bpy.data.scenes[scene_name].collection.objects.link(obj)
             return obj
         else:
@@ -302,12 +271,10 @@ class BlenderController:
             logger.info(msg)
             raise BlenderControllerError(msg)
 
-    def create_empty(self, name="Empty", scene_names=None):
+    def create_empty(self, name="Empty", scenes=None):
         """Create new, empty blender object."""
         obj_empty = bpy.data.objects.new(name, None)
-        if scene_names is None:
-            scene_names = self.scene_names
-        for scene_name in scene_names:
+        for scene_name in self._get_scenes_iter(scenes):
             scene = bpy.data.scenes[scene_name]
             scene.collection.objects.link(obj_empty)
         return obj_empty
