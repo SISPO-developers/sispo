@@ -41,7 +41,7 @@ class Environment():
         self.logger = utils.create_logger("simulation")
 
         self.ts = TimeScalesFactory.getTDB()
-        self.encounter_date = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, self.ts)
+        self.encounter_date = AbsoluteDate(2017, 8, 15, 11, 57, 50.000, self.ts)
         self.duration = duration
         self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
@@ -66,8 +66,10 @@ class Environment():
 
         self.with_backgroundstars = False
         self.with_sssbonly = True
-        self.with_sssbconstdist = False
+        self.with_sssbconstdist = True
         self.with_lightingref = False
+
+        self.asteroid_scenes = []
 
         self.render_settings = dict()
         self.render_settings["exposure"] = 1.554
@@ -104,20 +106,23 @@ class Environment():
         render_dir = utils.check_dir(self.res_dir / "rendering")
 
         self.renderer = render.BlenderController(render_dir)
+        self.asteroid_scenes.append("MainScene")
 
         if self.with_backgroundstars:
             self.renderer.create_scene("BackgroundStars")
 
         if self.with_sssbonly:
             self.renderer.create_scene("SssbOnly")
+            self.asteroid_scenes.append("SssbOnly")
 
         self.renderer.create_camera("ScCam")
         self.renderer.configure_camera("ScCam", lens=230, sensor=self.camera_settings["sensor"])
 
         if self.with_sssbconstdist:
             self.renderer.create_scene("SssbConstDist")
-            self.renderer.create_camera("SssbConstDistCam", scene_names=["SssbConstDist"])
+            self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
             self.renderer.configure_camera("SssbConstDistCam", lens=230, sensor=self.camera_settings["sensor"])
+            self.asteroid_scenes.append("SssbConstDist")
 
         if self.with_lightingref:
             self.renderer.create_scene("LightingRef")
@@ -141,7 +146,7 @@ class Environment():
         sssb_model_file = self.models_dir / "didymos2.blend"
         self.sssb = SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
             2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
-        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001")
+        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001", self.asteroid_scenes)
         self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
 
     def setup_spacecraft(self):
@@ -187,8 +192,12 @@ class Environment():
             date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
             date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
 
-            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
-            self.renderer.set_camera_location("ScCam", sc_pos_rel_sssb)
+            pos_sc_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
+            self.renderer.set_camera_location("ScCam", pos_sc_rel_sssb)
+
+            if self.with_sssbconstdist:
+                pos_cam_const_dist = pos_sc_rel_sssb * 1E3 / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
+                self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
 
             sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
             sssb_angle = sssb_rot.getAngle()
@@ -198,11 +207,10 @@ class Environment():
 
             self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             
-            self.renderer.update()
-            #self.renderer.render(name=self.renderer.res_dir / (date_str + "_MainScene"), scene_name="MainScene")
-            self.renderer.render(name=self.renderer.res_dir / (date_str + "_SssbOnly"), scene_name="SssbOnly")
-
-            self.renderer.save_blender_dfile(self.renderer.res_dir / (date_str + "_complete"))
+            if self.with_sssbconstdist:
+                self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
+            
+            self.renderer.render(date_str)
 
         self.logger.info("Rendering completed")
 
