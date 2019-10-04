@@ -6,12 +6,12 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import orekit
+from orekit.pyhelpers import setup_orekit_curdir
 #################### orekit VM init ####################
 FILE_DIR = Path(__file__).parent.resolve()
 ROOT_DIR = FILE_DIR.parent.parent
 OREKIT_DATA_FILE = ROOT_DIR / "data" / "orekit-data.zip"
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
-from orekit.pyhelpers import setup_orekit_curdir
 setup_orekit_curdir(str(OREKIT_DATA_FILE))
 #################### orekit VM init ####################
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
@@ -58,8 +58,8 @@ class Environment():
                     self.frame_settings['step_size'])
 
         self.minimum_distance = 1E5
-        self.with_terminator = True
-        self.with_sunnyside = False
+        self.with_terminator = False
+        self.with_sunnyside = True
         self.timesampler_mode = 1
         self.slowmotion_factor = 10
 
@@ -196,7 +196,7 @@ class Environment():
             self.renderer.set_camera_location("ScCam", pos_sc_rel_sssb)
 
             if self.with_sssbconstdist:
-                pos_cam_const_dist = pos_sc_rel_sssb * 1E3 / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
+                pos_cam_const_dist = pos_sc_rel_sssb * 1000. / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
                 self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
 
             sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
