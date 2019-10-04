@@ -59,14 +59,14 @@ class Environment():
 
         self.minimum_distance = 1E5
         self.with_terminator = False
-        self.with_sunnyside = True
+        self.with_sunnyside = False
         self.timesampler_mode = 1
         self.slowmotion_factor = 10
 
         self.with_backgroundstars = False
-        self.with_sssbonly = True
-        self.with_sssbconstdist = True
-        self.with_lightingref = False
+        self.with_sssbonly = False
+        self.with_sssbconstdist = False
+        self.with_lightingref = True
 
         self.asteroid_scenes = []
 
@@ -99,6 +99,10 @@ class Environment():
         # Setup SC
         self.setup_spacecraft()
 
+        # Setup Lightref
+        if self.with_lightingref:
+            self.setup_lightref()
+
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
 
@@ -125,7 +129,7 @@ class Environment():
 
         if self.with_lightingref:
             self.renderer.create_scene("LightRef")
-            self.renderer.create_camera("LightRefCam", scene_names="LightRef")
+            self.renderer.create_camera("LightRefCam", scenes="LightRef")
             self.renderer.configure_camera("LightRefCam", **self.camera_settings)
 
         self.renderer.set_device(self.render_settings["device"])
@@ -158,6 +162,12 @@ class Environment():
                                                    self.with_sunnyside)
         self.spacecraft = Spacecraft(
             "CI", self.mu_sun, sc_state, self.encounter_date)
+
+    def setup_lightref(self):
+        """Create lightreference blender object."""
+        lightref_model_file = self.models_dir / "didymos_lowpoly.blend"
+        self.lightref = self.renderer.load_object(lightref_model_file, "CalibrationDisk", scenes="LightRef")
+        self.lightref.location = (0, 0, 0)
 
     def simulate(self):
         """Do simulation."""
@@ -209,6 +219,11 @@ class Environment():
             
             if self.with_sssbconstdist:
                 self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
+
+            if self.with_lightingref:
+                self.renderer.set_camera_location("LightRefCam" ,-np.asarray(sssb_pos.toArray()) * 1000. /np.sqrt(np.dot(np.asarray(sssb_pos.toArray()),np.asarray(sssb_pos.toArray()))))
+                self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
+                self.renderer.target_camera(self.lightref, "LightRefCam")
             
             self.renderer.render(date_str)
 
