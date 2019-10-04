@@ -6,23 +6,22 @@ from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 import orekit
+from orekit.pyhelpers import setup_orekit_curdir
 #################### orekit VM init ####################
 FILE_DIR = Path(__file__).parent.resolve()
 ROOT_DIR = FILE_DIR.parent.parent
 OREKIT_DATA_FILE = ROOT_DIR / "data" / "orekit-data.zip"
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
-from orekit.pyhelpers import setup_orekit_curdir
 setup_orekit_curdir(str(OREKIT_DATA_FILE))
 #################### orekit VM init ####################
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
-from org.hipparchus.geometry.euclidean.threed import Vector3D  # pylint: disable=import-error
 from org.orekit.frames import FramesFactory  # pylint: disable=import-error
-from org.orekit.utils import Constants, PVCoordinates  # pylint: disable=import-error
+from org.orekit.utils import Constants  # pylint: disable=import-error
 
 from simulation.cb import CelestialBody
+from simulation.sc import Spacecraft
+from simulation.sssb import SmallSolarSystemBody
 import simulation.render as render
-import simulation.sc as sc
-import simulation.sssb as sssb
 import simulation.starcat as starcat
 import utils
 
@@ -41,7 +40,7 @@ class Environment():
         self.logger = utils.create_logger("simulation")
 
         self.ts = TimeScalesFactory.getTDB()
-        self.encounter_date = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, self.ts)
+        self.encounter_date = AbsoluteDate(2017, 8, 15, 11, 57, 50.000, self.ts)
         self.duration = duration
         self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
@@ -59,10 +58,17 @@ class Environment():
                     self.frame_settings['step_size'])
 
         self.minimum_distance = 1E5
-        self.with_terminator = True
-        self.with_sunnyside = False
+        self.with_terminator = False
+        self.with_sunnyside = True
         self.timesampler_mode = 1
         self.slowmotion_factor = 10
+
+        self.with_backgroundstars = False
+        self.with_sssbonly = True
+        self.with_sssbconstdist = True
+        self.with_lightingref = False
+
+        self.asteroid_scenes = []
 
         self.render_settings = dict()
         self.render_settings["exposure"] = 1.554
@@ -71,14 +77,9 @@ class Environment():
         self.render_settings["tile"] = 512
         self.render_settings["x_res"] = 2464
         self.render_settings["y_res"] = 2048
-        self.render_settings["scene_names"] = ["MainScene",
-                                               "AsteroidOnly"]#,
-                                               #"BackgroundStars",
-                                               #"AsteroidConstDistance",
-                                               #"LightingReference"]
+        self.render_settings["color_depth"] = "32"
 
         self.camera_settings = dict()
-        self.camera_settings["color_depth"] = "32"
         self.camera_settings["lens"] = 230
         self.camera_settings["sensor"] = 3.45E-3 * \
             self.render_settings["x_res"]
@@ -86,19 +87,77 @@ class Environment():
         self.logger.info("Rendering settings: Exposure: %d; Samples: %d",
                     self.render_settings['exposure'], self.render_settings['samples'])
 
+        # Setup rendering engine (renderer)
+        self.setup_renderer()
+
         # Setup Sun
-        sun_model_file = self.models_dir / "didymos_lowpoly.blend"
-        self.sun = CelestialBody("Sun", model_file=sun_model_file)
+        self.setup_sun()
 
         # Setup SSSB
-        sssb_model_file = self.models_dir / "didymos2.blend"
-        self.sssb = sssb.SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
-            2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
+        self.setup_sssb()
 
         # Setup SC
-        state = self.calc_sc_encounter_state()
-        self.spacecraft = sc.Spacecraft(
-            "CI", self.mu_sun, state, self.encounter_date)
+        self.setup_spacecraft()
+
+    def setup_renderer(self):
+        """Create renderer, apply common settings and create sc cam."""
+
+        render_dir = utils.check_dir(self.res_dir / "rendering")
+
+        self.renderer = render.BlenderController(render_dir)
+        self.asteroid_scenes.append("MainScene")
+
+        if self.with_backgroundstars:
+            self.renderer.create_scene("BackgroundStars")
+
+        if self.with_sssbonly:
+            self.renderer.create_scene("SssbOnly")
+            self.asteroid_scenes.append("SssbOnly")
+
+        self.renderer.create_camera("ScCam")
+        self.renderer.configure_camera("ScCam", **self.camera_settings)
+
+        if self.with_sssbconstdist:
+            self.renderer.create_scene("SssbConstDist")
+            self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
+            self.renderer.configure_camera("SssbConstDistCam", **self.camera_settings)
+            self.asteroid_scenes.append("SssbConstDist")
+
+        if self.with_lightingref:
+            self.renderer.create_scene("LightRef")
+            self.renderer.create_camera("LightRefCam", scene_names="LightRef")
+            self.renderer.configure_camera("LightRefCam", **self.camera_settings)
+
+        self.renderer.set_device(self.render_settings["device"])
+        self.renderer.set_samples(self.render_settings["samples"])
+        self.renderer.set_exposure(self.render_settings["exposure"])
+        self.renderer.set_resolution(self.render_settings["x_res"], 
+                                     self.render_settings["y_res"])
+        self.renderer.set_output_format()
+
+    def setup_sun(self):
+        """Create Sun and respective render object."""
+        sun_model_file = self.models_dir / "didymos_lowpoly.blend"
+        self.sun = CelestialBody("Sun", model_file=sun_model_file)
+        self.sun.render_obj = self.renderer.load_object(self.sun.model_file, self.sun.name)
+
+    def setup_sssb(self):
+        """Create SmallSolarSystemBody and respective blender object."""
+        sssb_model_file = self.models_dir / "didymos2.blend"
+        self.sssb = SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
+            2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
+        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001", self.asteroid_scenes)
+        self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
+
+    def setup_spacecraft(self):
+        """Create Spacecraft and respective blender object."""
+        sssb_state = self.sssb.get_state(self.encounter_date)
+        sc_state = Spacecraft.calc_encounter_state(sssb_state,
+                                                   self.minimum_distance,
+                                                   self.with_terminator,
+                                                   self.with_sunnyside)
+        self.spacecraft = Spacecraft(
+            "CI", self.mu_sun, sc_state, self.encounter_date)
 
     def simulate(self):
         """Do simulation."""
@@ -125,23 +184,6 @@ class Environment():
         """Render simulation scenario."""
         self.logger.info("Rendering simulation")
 
-        render_dir = utils.check_dir(self.res_dir / "rendering")
-
-        renderer = render.BlenderController(render_dir, self.render_settings["scene_names"])
-        renderer.set_device(self.render_settings["device"])
-        renderer.set_samples(self.render_settings["samples"])
-        renderer.set_exposure(self.render_settings["exposure"])
-        renderer.set_resolution(self.render_settings["x_res"], self.render_settings["y_res"])
-        renderer.set_output_format()
-
-        renderer.create_camera("SatelliteCamera")
-        renderer.set_camera("SatelliteCamera", lens=230, sensor=3.45E-3 * 2464)
-
-        asteroid = renderer.load_object(self.sssb.model_file, "Didymos.001")
-        asteroid.rotation_mode = "AXIS_ANGLE"
-
-        sun = renderer.load_object(self.sun.model_file, self.sun.name)
-
         for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
                                                       self.spacecraft.pos_history,
                                                       self.sssb.pos_history,
@@ -150,22 +192,25 @@ class Environment():
             date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
             date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
 
-            sc_pos_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
-            renderer.set_camera_location("SatelliteCamera", sc_pos_rel_sssb)
+            pos_sc_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
+            self.renderer.set_camera_location("ScCam", pos_sc_rel_sssb)
+
+            if self.with_sssbconstdist:
+                pos_cam_const_dist = pos_sc_rel_sssb * 1000. / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
+                self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
 
             sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
             sssb_angle = sssb_rot.getAngle()
+            self.sssb.render_obj.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)
 
-            asteroid.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)
+            self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / 1000.
 
-            sun.location = -np.asarray(sssb_pos.toArray()) / 1000.
-
-            renderer.target_camera(asteroid, "SatelliteCamera")
+            self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             
-            renderer.update()       
-            renderer.render(name=render_dir / (date_str + "_AsteroidOnly"), scene_name="AsteroidOnly")
-
-            renderer.save_blender_dfile(render_dir / (date_str + "_complete"))
+            if self.with_sssbconstdist:
+                self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
+            
+            self.renderer.render(date_str)
 
         self.logger.info("Rendering completed")
 
@@ -185,41 +230,6 @@ class Environment():
                            + str(sc_pos) + "\n")
 
         self.logger.info("Propagation results saved")
-
-    def calc_sc_encounter_state(self):
-        """Calculate the sc state during encounter relative to SSSB."""
-        pos, vel = self.sssb.get_state(self.encounter_date)
-
-        sc_pos = self.calc_sc_encounter_pos(pos)
-
-        sc_vel = vel.scalarMultiply((vel.getNorm() - 10000.) / vel.getNorm())
-
-        self.logger.info("Spacecraft relative velocity: %s", sc_vel)
-        self.logger.info("Spacecraft distance from sun: %s",
-                         sc_pos.getNorm()/Constants.IAU_2012_ASTRONOMICAL_UNIT)
-
-        return PVCoordinates(sc_pos, sc_vel)
-
-    def calc_sc_encounter_pos(self, pos):
-        """Calculate the sc position during encounter relative to SSSB."""
-        sssb_direction = pos.normalize()
-
-        if not self.with_terminator:
-            if not self.with_sunnyside:
-                self.minimum_distance *= -1
-
-            sssb_direction = sssb_direction.scalarMultiply(
-                self.minimum_distance)
-            sc_pos = pos.subtract(sssb_direction)
-
-        else:
-            shift = sssb_direction.scalarMultiply(-0.15)
-            shift = shift.add(Vector3D(0., 0., 1.))
-            shift = shift.normalize()
-            shift = shift.scalarMultiply(self.minimum_distance)
-            sc_pos = pos.add(shift)
-        return sc_pos
-
 
 if __name__ == "__main__":
     env = Environment("Didymos", 2 * 60.)
