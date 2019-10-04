@@ -55,17 +55,18 @@ class Spacecraft(CelestialBody):
         """Calculate the pos of a Spacecraft at closest distance to SSSB."""
         sssb_direction = sssb_pos.normalize()
 
-        if not terminator:
-            if sunnyside:
-                min_dist *= -1
-
-            sssb_direction = sssb_direction.scalarMultiply(min_dist)
-            sc_pos = sssb_pos.subtract(sssb_direction)
-        else:
+        if terminator:
             shift = sssb_direction.scalarMultiply(-0.15)
             shift = shift.add(Vector3D(0., 0., 1.))
             shift = shift.normalize()
             shift = shift.scalarMultiply(min_dist)
             sc_pos = sssb_pos.add(shift)
+        else:
+            if not sunnyside:
+                min_dist *= -1
+
+            sssb_direction = sssb_direction.scalarMultiply(min_dist)
+            sc_pos = sssb_pos.subtract(sssb_direction)
+
         return sc_pos
         
