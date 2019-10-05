@@ -74,7 +74,7 @@ class CelestialBody():
         if end is None:
             self.propagator.propagate(start)
         
-        elif start is not None and end is not None:
+        elif None not in (start, end):
             shifted_start = start.shiftedBy(-60.)
             shifted_end = end.shiftedBy(60.)
 
