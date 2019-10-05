@@ -221,7 +221,8 @@ class Environment():
                 self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
 
             if self.with_lightingref:
-                self.renderer.set_camera_location("LightRefCam", -np.asarray(sssb_pos.toArray()) * 1000. /np.sqrt(np.dot(np.asarray(sssb_pos.toArray()),np.asarray(sssb_pos.toArray()))))
+                lightrefcam_pos = -np.asarray(sssb_pos.toArray()) * 1000. /np.sqrt(np.dot(np.asarray(sssb_pos.toArray()),np.asarray(sssb_pos.toArray())))
+                self.renderer.set_camera_location("LightRefCam", lightrefcam_pos)
                 self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
                 self.renderer.target_camera(self.lightref, "LightRefCam")
             
