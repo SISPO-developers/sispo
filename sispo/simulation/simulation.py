@@ -77,14 +77,13 @@ class Environment():
         self.render_settings["samples"] = 48
         self.render_settings["device"] = "GPU"
         self.render_settings["tile"] = 512
-        self.render_settings["x_res"] = 2464
-        self.render_settings["y_res"] = 2048
+        self.render_settings["res"] = (2464, 2048)
         self.render_settings["color_depth"] = "32"
 
         self.camera_settings = dict()
         self.camera_settings["lens"] = 230
         self.camera_settings["sensor"] = 3.45E-3 * \
-            self.render_settings["x_res"]
+            self.render_settings["res"][0]
 
         self.logger.info("Rendering settings: Exposure: %d; Samples: %d",
                     self.render_settings['exposure'], self.render_settings['samples'])
@@ -137,8 +136,7 @@ class Environment():
         self.renderer.set_device(self.render_settings["device"])
         self.renderer.set_samples(self.render_settings["samples"])
         self.renderer.set_exposure(self.render_settings["exposure"])
-        self.renderer.set_resolution(self.render_settings["x_res"], 
-                                     self.render_settings["y_res"])
+        self.renderer.set_resolution(self.render_settings["res"])
         self.renderer.set_output_format()
 
     def setup_sun(self):
@@ -230,10 +228,10 @@ class Environment():
             self.renderer.render(date_str)
 
             if self.with_backgroundstars:
-                cam_direction, up, right_v, left, right, lower, upper = render.get_camera_vectors("ScCam", "MainScene")
-                ra_c, ra_w, dec_c, dec_w = render.get_fov(left, right, lower, upper)
-                starlist = self.sta.get_stardata(ra_c, dec_c, ra_w, dec_w)
-                fluxes = self.sta.create_starmap(starlist, cam_direction, right, upper, self.render_settings["x_res"], self.render_settings["y_res"], self.res_dir / (date_str + "_stars"))
+                fov_vecs = render.get_fov_vecs("ScCam", "MainScene")
+                ra, dec, width, height = render.get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
+                starlist = self.sta.get_stardata(ra, dec, width, height)
+                fluxes = render.render_starmap(starlist, fov_vecs, self.render_settings["res"], self.res_dir / (date_str + "_stars"))
 
         self.logger.info("Rendering completed")
 
