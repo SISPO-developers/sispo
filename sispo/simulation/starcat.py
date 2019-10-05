@@ -62,7 +62,7 @@ def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
 class StarCache:
     """Handling stars in field of view, for rendering of scene."""
 
-    def __init__(self, template, parent = None):
+    def __init__(self, template=None, parent=None):
         """Initialise StarCache."""
         self.template = template
         self.star_array = []
@@ -122,7 +122,8 @@ class StarCache:
 
         return total_flux
 
-    def render_stars_directly(self, stardata, cam_direction, right_vec, up_vec, res_x, res_y, filename):
+    @staticmethod
+    def render_stars_directly(stardata, cam_direction, right_vec, up_vec, res_x, res_y, filename):
         """Render given stars."""
         up_vec -= cam_direction
         right_vec -= cam_direction
@@ -170,7 +171,7 @@ class StarCache:
         starmap3 = np.zeros((res_y, res_x, 4), np.float32)
         for c in range(0, 4):
 
-            starmap3[:, :, c] = skimage.transform.downscale_local_mean(starmap2[:, :, c], (ss, ss)) * (ss * ss)
+            starmap3[:, :, c] = skimage.transform.downscale_local_mean(starmap2[:, :, c], (ss, ss)) * (ss * ss) * 1000
 
         write_openexr(str(filename), starmap3)
 
