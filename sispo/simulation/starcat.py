@@ -3,18 +3,14 @@ Interface for handling data from a star catalogue. Retrieve data as well as
 render and write images.
 """
 
-import copy
-import math
 import subprocess
 import sys
-import time
 from pathlib import Path
 
-import bpy
 import numpy as np
 import OpenEXR
-import skimage.filters
-import skimage.transform
+from skimage.filters import gaussian
+from skimage.transform import downscale_local_mean
 
 
 class StarCatalogError(RuntimeError):
@@ -92,15 +88,13 @@ class StarCatalog():
         # Add alpha channel
         starmap[:,:,3] = 1.
         
-        for star_data in stardata:
-            star_data = copy.copy(star_data)
-            
-            mag_star = star_data[2]
+        for star in stardata:
+            mag_star = star[2]
             flux = np.power(10., -0.4 * mag_star)
             total_flux += flux
 
-            ra_star = np.radians(star_data[0])
-            dec_star = np.radians(star_data[1])
+            ra_star = np.radians(star[0])
+            dec_star = np.radians(star[1])
             
             z_star = np.sin(dec_star)
             x_star = np.cos(dec_star) * np.cos(ra_star - np.pi)
@@ -124,14 +118,17 @@ class StarCatalog():
             # Add flux to color channels
             starmap[y_pix, x_pix, 0:3] += flux
         
-        starmap_gaussian = skimage.filters.gaussian(starmap, ss / 2., multichannel=True)
-        starmap_downscaled = np.zeros((res_y, res_x, 4), np.float32)
+        sm_gauss = gaussian(starmap, ss / 2., multichannel=True)
+        
+        sm_scale = np.zeros((res_y, res_x, 4), np.float32)
+        factors = (ss, ss)
+
         for c in range(4):
-                starmap_downscaled[:, :, c] = skimage.transform.downscale_local_mean(starmap_gaussian[:, :, c], (ss, ss)) * (ss * ss)
+            sm_scale[:, :, c] = downscale_local_mean(sm_gauss[:, :, c], factors) * (ss * ss)
+
+        cls.write_openexr_image(filename, sm_scale)
     
-        cls.write_openexr_image(filename, starmap_downscaled)
-    
-        return (total_flux, np.sum(starmap_downscaled[:, :, 0]))
+        return (total_flux, np.sum(sm_scale[:, :, 0]))
     
     @staticmethod
     def write_openexr_image(filename, picture):
