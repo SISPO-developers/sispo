@@ -7,11 +7,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-import numpy as np
-import OpenEXR
-from skimage.filters import gaussian
-from skimage.transform import downscale_local_mean
-
 
 class StarCatalogError(RuntimeError):
     """Generic error for star catalog module."""
@@ -68,102 +63,6 @@ class StarCatalog():
             star_data.append((ra_star, dec_star, mag_star))
 
         return star_data
-
-    @classmethod
-    def create_starmap(cls, stardata, fov_vecs, img_size, filename):
-        """Create a starmap from given data and field of view."""
-        (direction, right_edge, _, upper_edge, _) = fov_vecs
-        (res_x, res_y) = img_size
-        
-        upper_edge -= direction
-        right_edge -= direction
-        total_flux = 0.
-
-        up_norm = upper_edge.normalized()
-        right_norm = right_edge.normalized()
-
-        f_over_h_ccd_2 = 1. / upper_edge.length
-        f_over_w_ccd_2 = 1. / right_edge.length
-
-        ss = 2
-        starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
-
-        # Add alpha channel
-        starmap[:,:,3] = 1.
-        
-        for star in stardata:
-            mag_star = star[2]
-            flux = np.power(10., -0.4 * mag_star)
-            total_flux += flux
-
-            ra_star = np.radians(star[0])
-            dec_star = np.radians(star[1])
-            
-            z_star = np.sin(dec_star)
-            x_star = np.cos(dec_star) * np.cos(ra_star - np.pi)
-            y_star = -np.cos(dec_star) * np.sin(ra_star - np.pi)
-
-            vec = [x_star, y_star, z_star]
-            vec2 = [x_star, -y_star, z_star]
-            if np.dot(vec, direction) < np.dot(vec2, direction):
-                vec = vec2
-
-            x_pix = ss * (f_over_w_ccd_2 * np.dot(right_norm, vec) \
-                    / np.dot(direction, vec) + 1.) * (res_x - 1) / 2.
-            x_pix = min(round(x_pix), res_x * ss - 1)
-            x_pix = max(0, int(x_pix))
-
-            y_pix = ss * (-f_over_h_ccd_2 * np.dot(up_norm, vec) \
-                    / np.dot(direction, vec) + 1.) * (res_y - 1) / 2.
-            y_pix = min(round(y_pix), res_y * ss - 1)
-            y_pix = max(0, int(y_pix))
-
-            # Add flux to color channels
-            starmap[y_pix, x_pix, 0:3] += flux
-        
-        sm_gauss = gaussian(starmap, ss / 2., multichannel=True)
-        
-        sm_scale = np.zeros((res_y, res_x, 4), np.float32)
-        factors = (ss, ss)
-
-        for c in range(4):
-            sm_scale[:, :, c] = downscale_local_mean(sm_gauss[:, :, c], factors) * (ss * ss)
-
-        cls.write_openexr_image(filename, sm_scale)
-    
-        return (total_flux, np.sum(sm_scale[:, :, 0]))
-    
-    @staticmethod
-    def write_openexr_image(filename, picture):
-        """Save image in OpenEXR file format."""
-        filename = str(filename)
-    
-        file_extension = ".exr"
-        if filename[-4:] != file_extension:
-            filename += file_extension
-    
-        height = len(picture)
-        width = len(picture[0])
-        channels = len(picture[0][0])
-    
-        if channels == 4:
-            data_r = picture[:, :, 0].tobytes()
-            data_g = picture[:, :, 1].tobytes()
-            data_b = picture[:, :, 2].tobytes()
-            data_a = picture[:, :, 3].tobytes()
-            image_data = {"R": data_r, "G": data_g, "B": data_b, "A": data_a}
-        elif channels == 3:
-            data_r = picture[:, :, 0].tobytes()
-            data_g = picture[:, :, 1].tobytes()
-            data_b = picture[:, :, 2].tobytes()
-            image_data = {"R": data_r, "G": data_g, "B": data_b}
-        else:
-            raise StarCatalogError("Invalid number of channels of starmap image.")
-        
-        hdr = OpenEXR.Header(width, height)
-        file_handler = OpenEXR.OutputFile(filename, hdr)
-        file_handler.writePixels(image_data)
-        file_handler.close()
 
 
 #class StarCache:
