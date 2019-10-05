@@ -11,8 +11,13 @@ from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
 
 
+class CelestialBodyError(RuntimeError):
+    """Generic error for CelestialBody and child classes."""
+    pass
+
+
 class CelestialBody():
-    """Parent class for every celestial body such as satellites or asteroids."""
+    """Parent class for celestial bodies such as satellites or asteroids."""
 
     def __init__(self, name, model_file=None):
 
@@ -69,11 +74,15 @@ class CelestialBody():
         if end is None:
             self.propagator.propagate(start)
         
-        else:
+        elif start is not None and end is not None:
             shifted_start = start.shiftedBy(-60.)
             shifted_end = end.shiftedBy(60.)
 
             self.propagator.propagate(shifted_start, shifted_end)
+
+        else:
+            raise CelestialBodyError("Invalid arguments for propagation.")
+
 
     def setup_timesampler(self, start, end, steps, mode=1, factor=2):
         """Create and attach TimeSampler to propagator."""
