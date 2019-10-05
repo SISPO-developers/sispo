@@ -221,7 +221,7 @@ class Environment():
                 self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
 
             if self.with_lightingref:
-                self.renderer.set_camera_location("LightRefCam" ,-np.asarray(sssb_pos.toArray()) * 1000. /np.sqrt(np.dot(np.asarray(sssb_pos.toArray()),np.asarray(sssb_pos.toArray()))))
+                self.renderer.set_camera_location("LightRefCam", -np.asarray(sssb_pos.toArray()) * 1000. /np.sqrt(np.dot(np.asarray(sssb_pos.toArray()),np.asarray(sssb_pos.toArray()))))
                 self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
                 self.renderer.target_camera(self.lightref, "LightRefCam")
             
@@ -231,7 +231,7 @@ class Environment():
                 fov_vecs = render.get_fov_vecs("ScCam", "MainScene")
                 ra, dec, width, height = render.get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
                 starlist = self.sta.get_stardata(ra, dec, width, height)
-                fluxes = render.render_starmap(starlist, fov_vecs, self.render_settings["res"], self.res_dir / (date_str + "_stars"))
+                fluxes = self.renderer.render_starmap(starlist, fov_vecs, self.render_settings["res"], date_str)
 
         self.logger.info("Rendering completed")
 
