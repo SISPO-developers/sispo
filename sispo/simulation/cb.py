@@ -75,6 +75,7 @@ class CelestialBody():
             self.propagator.propagate(start)
         
         elif None not in (start, end):
+            # TODO: check value of shift, technically 1s should be enough
             shifted_start = start.shiftedBy(-60.)
             shifted_end = end.shiftedBy(60.)
 
