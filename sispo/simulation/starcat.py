@@ -70,17 +70,20 @@ class StarCatalog():
         return star_data
 
     @classmethod
-    def create_starmap(cls, stardata, cam_direction, right_vec, up_vec, res_x, res_y, filename):
+    def create_starmap(cls, stardata, fov_vecs, img_size, filename):
         """Create a starmap from given data and field of view."""
-        up_vec -= cam_direction
-        right_vec -= cam_direction
+        (direction, right_edge, _, upper_edge, _) = fov_vecs
+        (res_x, res_y) = img_size
+        
+        upper_edge -= direction
+        right_edge -= direction
         total_flux = 0.
 
-        up_norm = up_vec.normalized()
-        right_norm = right_vec.normalized()
+        up_norm = upper_edge.normalized()
+        right_norm = right_edge.normalized()
 
-        f_over_h_ccd_2 = 1. / up_vec.length
-        f_over_w_ccd_2 = 1. / right_vec.length
+        f_over_h_ccd_2 = 1. / upper_edge.length
+        f_over_w_ccd_2 = 1. / right_edge.length
 
         ss = 2
         starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
@@ -102,16 +105,16 @@ class StarCatalog():
 
             vec = [x_star, y_star, z_star]
             vec2 = [x_star, -y_star, z_star]
-            if np.dot(vec, cam_direction) < np.dot(vec2, cam_direction):
+            if np.dot(vec, direction) < np.dot(vec2, direction):
                 vec = vec2
 
             x_pix = ss * (f_over_w_ccd_2 * np.dot(right_norm, vec) \
-                    / np.dot(cam_direction, vec) + 1.) * (res_x - 1) / 2.
+                    / np.dot(direction, vec) + 1.) * (res_x - 1) / 2.
             x_pix = min(round(x_pix), res_x * ss - 1)
             x_pix = max(0, int(x_pix))
 
             y_pix = ss * (-f_over_h_ccd_2 * np.dot(up_norm, vec) \
-                    / np.dot(cam_direction, vec) + 1.) * (res_y - 1) / 2.
+                    / np.dot(direction, vec) + 1.) * (res_y - 1) / 2.
             y_pix = min(round(y_pix), res_y * ss - 1)
             y_pix = max(0, int(y_pix))
 
