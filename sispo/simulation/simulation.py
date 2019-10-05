@@ -37,6 +37,8 @@ class Environment():
 
         self.res_dir = utils.check_dir(self.root_dir / "data" / "results" / name)
 
+        self.sta = starcat.StarCatalog(self.res_dir)
+
         self.logger = utils.create_logger("simulation")
 
         self.ts = TimeScalesFactory.getTDB()
@@ -63,7 +65,7 @@ class Environment():
         self.timesampler_mode = 1
         self.slowmotion_factor = 10
 
-        self.with_backgroundstars = False
+        self.with_backgroundstars = True
         self.with_sssbonly = False
         self.with_sssbconstdist = False
         self.with_lightingref = False
@@ -226,6 +228,12 @@ class Environment():
                 self.renderer.target_camera(self.lightref, "LightRefCam")
             
             self.renderer.render(date_str)
+
+            if self.with_backgroundstars:
+                cam_direction, up, right_v, left, right, lower, upper = render.get_camera_vectors("ScCam", "MainScene")
+                ra_c, ra_w, dec_c, dec_w = render.get_fov(left, right, lower, upper)
+                starlist = self.sta.get_stardata(ra_c, dec_c, ra_w, dec_w)
+                fluxes = self.sta.create_starmap(starlist, cam_direction, right, upper, self.render_settings["x_res"], self.render_settings["y_res"], self.res_dir / (date_str + "_stars"))
 
         self.logger.info("Rendering completed")
 
