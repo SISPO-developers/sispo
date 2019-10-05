@@ -22,48 +22,56 @@ class StarCatalogError(RuntimeError):
     pass
 
 
-def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
-    """Retrieve starmap data from UCAC4 catalog."""
-    errorlog_fn = "starfield_errorlog%f.txt" % time.time()
+class StarCatalog():
+    """Class to access star catalogs and render stars."""
 
-    if sys.platform.startswith("win"):
+    def __init__(self, res_dir):
+        """."""
+
+        self.root_dir = Path(__file__).parent.parent.parent
+        self.starcat_dir = self.root_dir / "data" / "UCAC4"
+        self.res_dir = res_dir
+
+        self.exe = self.root_dir / "software" / "star_cats" / "u4test.exe"
+
+        self.cmd = f'"{str(self.exe)}" {{0}} {{1}} {{2}} {{3}} -h "{str(self.starcat_dir)}" "{{4}}"'
+
         # Don't display the Windows GPF dialog if the invoked program dies.
         # See comp.os.ms-windows.programmer.win32
         # How to suppress crash notification dialog?, Jan 14,2004 -
         # Raymond Chen"s response [1]
+        if sys.platform.startswith("win"):
+            import ctypes
+            SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
+            ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
 
-        import ctypes
-        SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
-        ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
+    def get_stardata(self, ra, dec, width, height, filename="ucac4.txt"):
+        """Retrieve star data from given field of view using UCAC4 catalog."""
+        res_file = self.res_dir / filename
 
-    project_root = Path.cwd()
-    ucac4 = project_root.joinpath("data").joinpath("UCAC4")
-    u4test = project_root.joinpath("software").joinpath("star_cats").joinpath("u4test.exe")
-    res_file = project_root / "data" / "results" / "Didymos" / filename
-    res_file.resolve()
+        command = self.cmd.format(ra, dec, width, height, str(res_file))
 
-    command = '"' + str(u4test) + '" {} {} {} {}'.format(ra, dec, ra_w, dec_h) + ' -h "' + str(ucac4) + '" "{}"'.format(str(res_file))
-    print(command)
+        for _ in range(5):
+            retcode = subprocess.call(command)
 
-    for _ in range(0, 5):
-        retcode = subprocess.call(command)
-        print("Retcode ", retcode)
-        if retcode > 0:
-            break
-        with open(errorlog_fn, "at") as fout:
-            fout.write("{},\'{}\',{}\n".format(time.time(), command, retcode))
+            if retcode > 0:
+                break
 
-    with open(str(res_file), "r") as file:
-        lines = file.readlines()
-        print("Lines", len(lines))
-    out = []
-    for line in lines[1:]:
+        with open(str(res_file), "r") as rfile:
+            complete_data = rfile.readlines()
 
-        ra_star = float(line[11:23])
-        dec_star = float(line[23:36])
-        mag_star = float(line[36:43])
-        out.append([ra_star, dec_star, mag_star])
-    return out
+        star_data = []
+        for line in complete_data[1:]:
+            line_data = line.split()
+
+            ra_star = float(line_data[1])
+            dec_star = float(line_data[2])
+            mag_star = float(line_data[3])
+
+            star_data.append((ra_star, dec_star, mag_star))
+
+        return star_data
+        
 
 class StarCache:
     """Handling stars in field of view, for rendering of scene."""
@@ -148,12 +156,12 @@ class StarCache:
         
         for star_data in stardata:
             star_data = copy.copy(star_data)
-            star_data[0] = math.radians(star_data[0])
-            star_data[1] = math.radians(star_data[1])
+            ra_star = math.radians(star_data[0])
+            dec_star = math.radians(star_data[1])
 
-            z_star = math.sin(star_data[1])
-            x_star = math.cos(star_data[1]) * math.cos(star_data[0] - math.pi)
-            y_star = -math.cos(star_data[1]) * math.sin(star_data[0] - math.pi)
+            z_star = math.sin(dec_star)
+            x_star = math.cos(dec_star) * math.cos(ra_star - math.pi)
+            y_star = -math.cos(dec_star) * math.sin(ra_star - math.pi)
             vec = [x_star, y_star, z_star]
             vec2 = [x_star, -y_star, z_star]
             if np.dot(vec, cam_direction) < np.dot(vec2, cam_direction):
@@ -173,15 +181,17 @@ class StarCache:
 
             total_flux += flux0
         starmap2 = starmap.copy()
-        starmap2 = skimage.filters.gaussian(starmap, ss / 2., multichannel=True)
-        starmap3 = np.zeros((res_y, res_x, 4), np.float32)
+        starmap2[:,:,3] = starmap2[:,:,3] * 2000
+
+        starmap3 = skimage.filters.gaussian(starmap2, ss / 2., multichannel=True)
+        starmap4 = np.zeros((res_y, res_x, 4), np.float32)
         for c in range(0, 4):
 
-            starmap3[:, :, c] = skimage.transform.downscale_local_mean(starmap2[:, :, c], (ss, ss)) * (ss * ss) * 1000
+            starmap4[:, :, c] = skimage.transform.downscale_local_mean(starmap2[:, :, c], (ss, ss)) * (ss * ss)
 
-        write_openexr(str(filename), starmap3)
+        write_openexr(str(filename), starmap4)
 
-        return (total_flux, np.sum(starmap3[:, :, 0]))
+        return (total_flux, np.sum(starmap4[:, :, 0]))
 
 
 def write_openexr(filename, picture):
