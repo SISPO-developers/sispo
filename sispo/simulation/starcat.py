@@ -7,6 +7,10 @@ import subprocess
 import sys
 from pathlib import Path
 
+import utils
+
+logger = utils.create_logger("starcat")
+
 
 class StarCatalogError(RuntimeError):
     """Generic error for star catalog module."""
@@ -33,6 +37,7 @@ class StarCatalog():
         # How to suppress crash notification dialog?, Jan 14,2004 -
         # Raymond Chen"s response [1]
         if sys.platform.startswith("win"):
+            logger.info("Windows system, surrpressing GPF dialog.")
             import ctypes
             SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
             ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
@@ -47,7 +52,10 @@ class StarCatalog():
             retcode = subprocess.call(command)
 
             if retcode > 0:
+                logger.info("Found %d stars in catalog", retcode)
                 break
+
+            logger.info("Error code from star catalog %d", retcode)
 
         with open(str(res_file), "r") as rfile:
             complete_data = rfile.readlines()
