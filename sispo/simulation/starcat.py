@@ -80,43 +80,49 @@ class StarCatalog():
         right_vec -= cam_direction
         total_flux = 0.
 
-        f_over_h_ccd_2 = 1. / np.sqrt(np.dot(up_vec, up_vec))
-        up_norm = up_vec * f_over_h_ccd_2
-        f_over_w_ccd_2 = 1. / np.sqrt(np.dot(right_vec, right_vec))
-        right_norm = right_vec * f_over_w_ccd_2
+        up_norm = up_vec.normalized()
+        right_norm = right_vec.normalized()
 
-        print("F_over_w {} f_over_h {}".format(f_over_w_ccd_2, f_over_h_ccd_2))
-        print("Res {} x {}".format(res_x, res_y))
+        f_over_h_ccd_2 = 1. / up_vec.length
+        f_over_w_ccd_2 = 1. / right_vec.length
 
         ss = 2
         starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
+
+        # Add alpha channel
+        starmap[:,:,3] = 1.
         
         for star_data in stardata:
             star_data = copy.copy(star_data)
-            ra_star = math.radians(star_data[0])
-            dec_star = math.radians(star_data[1])
+            
+            mag_star = star_data[2]
+            flux = np.power(10., -0.4 * mag_star)
+            total_flux += flux
 
-            z_star = math.sin(dec_star)
-            x_star = math.cos(dec_star) * math.cos(ra_star - math.pi)
-            y_star = -math.cos(dec_star) * math.sin(ra_star - math.pi)
+            ra_star = np.radians(star_data[0])
+            dec_star = np.radians(star_data[1])
+            
+            z_star = np.sin(dec_star)
+            x_star = np.cos(dec_star) * np.cos(ra_star - np.pi)
+            y_star = -np.cos(dec_star) * np.sin(ra_star - np.pi)
+
             vec = [x_star, y_star, z_star]
             vec2 = [x_star, -y_star, z_star]
             if np.dot(vec, cam_direction) < np.dot(vec2, cam_direction):
                 vec = vec2
 
-            x_pix = (f_over_w_ccd_2 * np.dot(right_norm, vec) / np.dot(cam_direction, vec) + 1.) * (res_x - 1) / 2.
-            y_pix = (-f_over_h_ccd_2 * np.dot(up_norm, vec) / np.dot(cam_direction, vec) + 1.) * (res_y - 1) / 2.
-            x_pix2 = max(0, min(int(round(x_pix * ss)), res_x * ss - 1))
-            y_pix2 = max(0, min(int(round(y_pix * ss)), res_y * ss - 1))
+            x_pix = ss * (f_over_w_ccd_2 * np.dot(right_norm, vec) \
+                    / np.dot(cam_direction, vec) + 1.) * (res_x - 1) / 2.
+            x_pix = min(round(x_pix), res_x * ss - 1)
+            x_pix = max(0, int(x_pix))
 
-            flux = math.pow(10., -0.4 * (star_data[2]))
-            flux0 = math.pow(10., -0.4 * (star_data[2]))
+            y_pix = ss * (-f_over_h_ccd_2 * np.dot(up_norm, vec) \
+                    / np.dot(cam_direction, vec) + 1.) * (res_y - 1) / 2.
+            y_pix = min(round(y_pix), res_y * ss - 1)
+            y_pix = max(0, int(y_pix))
 
-            pix = starmap[y_pix2, x_pix2]
-            starmap[y_pix2, x_pix2] = [pix[0] + flux,
-                                       pix[1] + flux, pix[2] + flux, 1.]
-
-            total_flux += flux0
+            # Add flux to color channels
+            starmap[y_pix, x_pix, 0:3] += flux
         
         starmap_gaussian = skimage.filters.gaussian(starmap, ss / 2., multichannel=True)
         starmap_downscaled = np.zeros((res_y, res_x, 4), np.float32)
