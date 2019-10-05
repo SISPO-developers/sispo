@@ -40,7 +40,7 @@ class Environment():
         self.logger = utils.create_logger("simulation")
 
         self.ts = TimeScalesFactory.getTDB()
-        self.encounter_date = AbsoluteDate(2017, 8, 15, 11, 57, 50.000, self.ts)
+        self.encounter_date = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, self.ts)
         self.duration = duration
         self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
@@ -59,14 +59,14 @@ class Environment():
 
         self.minimum_distance = 1E5
         self.with_terminator = False
-        self.with_sunnyside = False
+        self.with_sunnyside = True
         self.timesampler_mode = 1
         self.slowmotion_factor = 10
 
         self.with_backgroundstars = False
         self.with_sssbonly = False
         self.with_sssbconstdist = False
-        self.with_lightingref = True
+        self.with_lightingref = False
 
         self.asteroid_scenes = []
 
@@ -181,10 +181,10 @@ class Environment():
             self.timesampler_mode, self.slowmotion_factor)
 
         self.logger.info("Propagating SSSB")
-        self.sssb.propagator.propagate(self.start_date, self.end_date)
+        self.sssb.propagate(self.start_date, self.end_date)
 
         self.logger.info("Propagating Spacecraft")
-        self.spacecraft.propagator.propagate(self.start_date, self.end_date)
+        self.spacecraft.propagate(self.start_date, self.end_date)
 
         self.logger.info("Simulation completed")
 

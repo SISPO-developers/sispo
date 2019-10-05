@@ -60,6 +60,21 @@ class CelestialBody():
         """Get spacecraft state (position, velocity)."""
         return (self.get_position(date), self.get_velocity(date))
 
+    def propagate(self, start, end=None):
+        """Propagates CB either at given start time or from start to end.
+        
+        If start and end are given start is shifted a bit earlier to detect
+        event at start. end is shifted a bit later to detect event at end.
+        """
+        if end is None:
+            self.propagator.propagate(start)
+        
+        else:
+            shifted_start = start.shiftedBy(-60.)
+            shifted_end = end.shiftedBy(60.)
+
+            self.propagator.propagate(shifted_start, shifted_end)
+
     def setup_timesampler(self, start, end, steps, mode=1, factor=2):
         """Create and attach TimeSampler to propagator."""
         self.time_sampler = TimeSampler(
@@ -81,7 +96,7 @@ class TimingEvent(PythonEventHandler):
     def eventOccurred(self, s, detector, increasing):
         """Handle occured event."""
         self.events += 1
-        if self.events % 100 == 0:
+        if self.events % 1 == 0:
             print(f"{s.getDate()} : event {self.events}")
 
         self.date_history.append(s.getDate())
