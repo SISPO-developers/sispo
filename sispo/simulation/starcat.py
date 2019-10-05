@@ -34,7 +34,8 @@ class StarCatalog():
 
         self.exe = self.root_dir / "software" / "star_cats" / "u4test.exe"
 
-        self.cmd = f'"{str(self.exe)}" {{0}} {{1}} {{2}} {{3}} -h "{str(self.starcat_dir)}" "{{4}}"'
+        self.cmd = f'"{str(self.exe)}" {{0}} {{1}} {{2}} {{3}} -h ' \
+                   f'"{str(self.starcat_dir)}" "{{4}}"'
 
         # Don't display the Windows GPF dialog if the invoked program dies.
         # See comp.os.ms-windows.programmer.win32
@@ -74,7 +75,7 @@ class StarCatalog():
 
     @classmethod
     def create_starmap(cls, stardata, cam_direction, right_vec, up_vec, res_x, res_y, filename):
-        """Render given stars."""
+        """Create a starmap from given data and field of view."""
         up_vec -= cam_direction
         right_vec -= cam_direction
         total_flux = 0.
