@@ -332,6 +332,61 @@ class BlenderController:
         return iter(output)
 
 
+    def render_starmap(self, stardata, fov_vecs, img_size, name_suffix):
+        """Render a starmap from given data and field of view."""
+        (direction, right_edge, _, upper_edge, _) = fov_vecs
+        (res_x, res_y) = img_size
+
+        upper_edge -= direction
+        right_edge -= direction
+        total_flux = 0.
+        up_norm = upper_edge.normalized()
+        right_norm = right_edge.normalized()
+        f_over_h_ccd_2 = 1. / upper_edge.length
+        f_over_w_ccd_2 = 1. / right_edge.length
+        ss = 2
+        starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
+        # Add alpha channel
+        starmap[:,:,3] = 1.
+
+        for star in stardata:
+            mag_star = star[2]
+            flux = np.power(10., -0.4 * mag_star)
+            total_flux += flux
+            ra_star = np.radians(star[0])
+            dec_star = np.radians(star[1])
+
+            z_star = np.sin(dec_star)
+            x_star = np.cos(dec_star) * np.cos(ra_star - np.pi)
+            y_star = -np.cos(dec_star) * np.sin(ra_star - np.pi)
+            vec = [x_star, y_star, z_star]
+            vec2 = [x_star, -y_star, z_star]
+            if np.dot(vec, direction) < np.dot(vec2, direction):
+                vec = vec2
+            x_pix = ss * (f_over_w_ccd_2 * np.dot(right_norm, vec) \
+                    / np.dot(direction, vec) + 1.) * (res_x - 1) / 2.
+            x_pix = min(round(x_pix), res_x * ss - 1)
+            x_pix = max(0, int(x_pix))
+            y_pix = ss * (-f_over_h_ccd_2 * np.dot(up_norm, vec) \
+                    / np.dot(direction, vec) + 1.) * (res_y - 1) / 2.
+            y_pix = min(round(y_pix), res_y * ss - 1)
+            y_pix = max(0, int(y_pix))
+            # Add flux to color channels
+            starmap[y_pix, x_pix, 0:3] += flux
+
+        sm_gauss = gaussian(starmap, ss / 2., multichannel=True)
+
+        sm_scale = np.zeros((res_y, res_x, 4), np.float32)
+        factors = (ss, ss)
+        for c in range(4):
+            sm_scale[:, :, c] = downscale_local_mean(sm_gauss[:, :, c], factors) * (ss * ss)
+
+        filename = self.res_dir / ("Stars_" + name_suffix)
+        write_openexr_image(filename, sm_scale)
+
+        return (total_flux, np.sum(sm_scale[:, :, 0]))
+
+
 def get_fov_vecs(camera_name, scene_name):
     """Get camera position and direction vectors."""
     camera = bpy.data.objects[camera_name]
@@ -356,58 +411,6 @@ def get_fov_vecs(camera_name, scene_name):
     lower_edge = direction - up_vec * sensor_h * 0.5 / camera.data.lens
 
     return (direction, right_edge, left_edge, upper_edge, lower_edge)
-
-def render_starmap(stardata, fov_vecs, img_size, filename):
-    """Render a starmap from given data and field of view."""
-    (direction, right_edge, _, upper_edge, _) = fov_vecs
-    (res_x, res_y) = img_size
-    
-    upper_edge -= direction
-    right_edge -= direction
-    total_flux = 0.
-    up_norm = upper_edge.normalized()
-    right_norm = right_edge.normalized()
-    f_over_h_ccd_2 = 1. / upper_edge.length
-    f_over_w_ccd_2 = 1. / right_edge.length
-    ss = 2
-    starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
-    # Add alpha channel
-    starmap[:,:,3] = 1.
-    
-    for star in stardata:
-        mag_star = star[2]
-        flux = np.power(10., -0.4 * mag_star)
-        total_flux += flux
-        ra_star = np.radians(star[0])
-        dec_star = np.radians(star[1])
-        
-        z_star = np.sin(dec_star)
-        x_star = np.cos(dec_star) * np.cos(ra_star - np.pi)
-        y_star = -np.cos(dec_star) * np.sin(ra_star - np.pi)
-        vec = [x_star, y_star, z_star]
-        vec2 = [x_star, -y_star, z_star]
-        if np.dot(vec, direction) < np.dot(vec2, direction):
-            vec = vec2
-        x_pix = ss * (f_over_w_ccd_2 * np.dot(right_norm, vec) \
-                / np.dot(direction, vec) + 1.) * (res_x - 1) / 2.
-        x_pix = min(round(x_pix), res_x * ss - 1)
-        x_pix = max(0, int(x_pix))
-        y_pix = ss * (-f_over_h_ccd_2 * np.dot(up_norm, vec) \
-                / np.dot(direction, vec) + 1.) * (res_y - 1) / 2.
-        y_pix = min(round(y_pix), res_y * ss - 1)
-        y_pix = max(0, int(y_pix))
-        # Add flux to color channels
-        starmap[y_pix, x_pix, 0:3] += flux
-    
-    sm_gauss = gaussian(starmap, ss / 2., multichannel=True)
-    
-    sm_scale = np.zeros((res_y, res_x, 4), np.float32)
-    factors = (ss, ss)
-    for c in range(4):
-        sm_scale[:, :, c] = downscale_local_mean(sm_gauss[:, :, c], factors) * (ss * ss)
-    write_openexr_image(filename, sm_scale)
-
-    return (total_flux, np.sum(sm_scale[:, :, 0]))
     
 
 def write_openexr_image(filename, picture):
