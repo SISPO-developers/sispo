@@ -16,6 +16,12 @@ import OpenEXR
 import skimage.filters
 import skimage.transform
 
+
+class StarCatalogError(RuntimeError):
+    """Generic error for star catalog module."""
+    pass
+
+
 def get_ucac4(ra, ra_w, dec, dec_h, filename="ucac4.txt"):
     """Retrieve starmap data from UCAC4 catalog."""
     errorlog_fn = "starfield_errorlog%f.txt" % time.time()
