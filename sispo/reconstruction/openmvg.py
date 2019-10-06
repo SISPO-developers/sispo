@@ -47,3 +47,19 @@ class OpenMVGController():
                               "-P", 
                               "-W", "1.0;1.0;1.0;"])
         logger.info("Image analysis returned: %s", str(ret))
+
+    def compute_features(self):
+        """Compute features in the pictures."""
+        logger.info("Compute features of listed images")
+ 
+        self.sfm_data = self.matches_dir / "sfm_data.json"
+
+        exe = str(self.openMVG_dir / "openMVG_main_ComputeFeatures")
+
+        ret = subprocess.run([exe,
+                              "-i", str(self.sfm_data),
+                              "-o", str(self.matches_dir), 
+                              "-m", "SIFT",
+                              "-f", "0", 
+                              "-p", "ULTRA"])
+        logger.info("Feature computation returned: %s", str(ret))
