@@ -44,12 +44,12 @@ class OpenMVGController():
                               "-d", str(self.sensor_database),
                               "-c", "1",
                               "-f", str(self.focal), 
-                              "-P", 
+                              "-P",
                               "-W", "1.0;1.0;1.0;"])
         logger.info("Image analysis returned: %s", str(ret))
 
     def compute_features(self):
-        """Compute features in the pictures."""
+        """Compute features in images."""
         logger.info("Compute features of listed images")
  
         self.sfm_data = self.matches_dir / "sfm_data.json"
@@ -63,3 +63,17 @@ class OpenMVGController():
                               "-f", "0", 
                               "-p", "ULTRA"])
         logger.info("Feature computation returned: %s", str(ret))
+
+    def match_features(self):
+        """Match computed features of images."""
+        logger.info("Match features of images")
+
+        exe = str(self.openMVG_dir / "openMVG_main_ComputeMatches")
+
+        ret = subprocess.run([exe,
+                              "-i", str(self.sfm_data),
+                              "-o", str(self.matches_dir), 
+                              "-f", "0", 
+                              "-n", "FASTCASCADEHASHINGL2",
+                              "-v", "3"])
+        logger.info("Feature matching returned: %s", str(ret))
