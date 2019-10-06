@@ -68,7 +68,7 @@ class BlenderController:
         for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
-            scene.render.resolution_percentage = 5 # TODO: change, 5 is debug setting
+            scene.render.resolution_percentage = 100 # TODO: change, 5 is debug setting
             scene.view_settings.view_transform = "Raw"
             scene.view_settings.look = "None"
         
