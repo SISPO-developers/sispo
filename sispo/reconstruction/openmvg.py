@@ -5,7 +5,7 @@ import subprocess
 
 import utils
 
-logger = utils.logger("openmvg")
+logger = utils.create_logger("openmvg")
 
 class OpenMVGControllerError(RuntimeError):
     """Generic openMVG error."""
@@ -24,7 +24,8 @@ class OpenMVGController():
 
         logger.info("openMVG executables dir %s", str(self.openMVG_dir))
 
-        self.input_dir = self.root_dir / "data" / "ImageDataset_SceauxCastle-master" / "images"
+        #self.input_dir = self.root_dir / "data" / "ImageDataset_SceauxCastle-master" / "images"
+        self.input_dir = res_dir / "rendering"
         self.res_dir = res_dir
 
         self.focal = 65437
@@ -33,7 +34,7 @@ class OpenMVGController():
         """ImageListing step of reconstruction."""
         logger.info("Start Imagelisting")
 
-        self.matches_dir = self._resolve_create_dir(self.res_dir / "matches")
+        self.matches_dir = self.res_dir / "matches"
         self.matches_dir = utils.check_dir(self.matches_dir)
 
         exe = str(self.openMVG_dir / "openMVG_main_SfMInit_ImageListing")
@@ -94,3 +95,16 @@ class OpenMVGController():
                               "-o", str(self.reconstruction_dir),
                               "-P"])#,"-f","ADJUST_ALL","-c","3"] )
         logger.info("Incremental reconstruction returned: %s", str(ret))
+
+    def export_MVS(self):
+        """Export 3D model to MVS format."""
+        print("5. Exports")
+
+        self.export_dir = utils.check_dir(self.res_dir / "export")
+        self.export_scene = self.export_dir / "scene.mvs"
+        self.export_undistorted_dir = utils.check_dir(self.export_dir / "undistorted")
+
+        ret = subprocess.run([str(self.openMVG_dir / "openMVG_main_openMVG2openMVS"),
+                         "-i", str(self.reconstruction_dir / "sfm_data.bin"),
+                         "-o", str(self.export_scene),
+                         "-d", str(self.export_undistorted_dir)])

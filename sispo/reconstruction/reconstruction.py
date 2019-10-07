@@ -8,6 +8,8 @@
 # usage : python tutorial_demo.py
 #
 
+import reconstruction.openmvg as openmvg
+
 #from os import system
 import os
 #import sys
@@ -216,21 +218,30 @@ class Reconstructor():
 
     def __init__(self):
         """Initialises main directory and file structure."""
-        file_dir = Path(__file__)
-        root_dir = Path(file_dir / ".." / ".." / "..").resolve()
-        software_dir = root_dir / "software"
-        data_dir = root_dir / "data"
+        root_dir = Path(__file__).parent.parent.parent
+        res_dir = root_dir / "data" / "results" / "Didymos"
+        oMVG = openmvg.OpenMVGController(res_dir)
+        oMVG.analyse_images()
+        oMVG.compute_features()
+        oMVG.match_features()
+        oMVG.reconstruct_seq()
+        oMVG.export_MVS()
 
-        self.openMVG_dir = software_dir / "openMVG" / "build_openMVG" / "Windows-AMD64-Release" / "Release"
-        self.openMVS_dir = software_dir / "openMVS" / "build" / "bin" / "x64" / "Debug"
-        self.sensor_database_dir = data_dir / "sensor_database"
-
-        self.input_dir = data_dir / "ImageDataset_SceauxCastle-master" / "images"
-        self.output_dir = self._resolve_create_dir(data_dir / "results" / "reconstruction")
-
-        self.sensor_database = self.sensor_database_dir / "sensor_width_camera_database.txt"
-
-        self.fl = 65437
+        #file_dir = Path(__file__)
+        #root_dir = Path(file_dir / ".." / ".." / "..").resolve()
+        #software_dir = root_dir / "software"
+        #data_dir = root_dir / "data"
+#
+        #self.openMVG_dir = software_dir / "openMVG" / "build_openMVG" / "Windows-AMD64-Release" / "Release"
+        #self.openMVS_dir = software_dir / "openMVS" / "build" / "bin" / "x64" / "Debug"
+        #self.sensor_database_dir = data_dir / "sensor_database"
+#
+        #self.input_dir = data_dir / "ImageDataset_SceauxCastle-master" / "images"
+        #self.output_dir = self._resolve_create_dir(data_dir / "results" / "reconstruction")
+#
+        #self.sensor_database = self.sensor_database_dir / "sensor_width_camera_database.txt"
+#
+        #self.fl = 65437
 
     @staticmethod
     def _resolve_create_dir(directory):
