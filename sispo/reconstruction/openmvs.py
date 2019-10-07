@@ -59,16 +59,40 @@ class OpenMVSController():
         logger.info("Point cloud densification returned: %s", str(ret))
 
 
-    def create_mesh(self):
+    def create_mesh(self,
+                    p_prio=-1,
+                    max_threads=0,
+                    const_weight=1,
+                    free_space=0,
+                    thickness=1,
+                    quality=1,
+                    decimate=1,
+                    spurious=20,
+                    spikes=True,
+                    holes=30,
+                    smooth=2):
         """Create a mesh from a 3D point cloud."""
         logger.info("Create mesh from point cloud")
 
-        self.export_scene_dense = self.export_dir / "scene_dense.mvs"
+        self.export_mesh = self.export_dir / "mesh.mvs"
 
-        exe = str(self.openMVS_dir / "ReconstructMesh")
+        args = [str(self.openMVS_dir / "ReconstructMesh")]
+        args.extend("-i", str(self.export_dense))
+        args.extend("-o", str(self.export_mesh))
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.export_scene_dense)])
+        args.extend(["--process-priority", str(p_prio)])
+        args.extend(["--max-threads", str(max_threads)])
+        args.extend(["--constant-weight", str(const_weight)])
+        args.extend(["-f", str(free_space)])
+        args.extend(["-thickness-factor", str(thickness)])
+        args.extend(["--quality-factor", str(quality)])
+        args.extend(["--decimate", str(decimate)])
+        args.extend(["--remove-spurious", str(spurious)])
+        args.extend(["--remove-spikes", str(int(spikes))])
+        args.extend(["--close-holes", str(holes)])
+        args.extend(["--smooth", str(smooth)])
+
+        ret = subprocess.run(args)
         logger.info("Mesh creation returned: %s", str(ret))
 
     def refine_mesh(self):
