@@ -145,15 +145,42 @@ class OpenMVSController():
         ret = subprocess.run(args)
         logger.info("Mesh refinement returned: %s", str(ret))
 
-    def texture_mesh(self):
+    def texture_mesh(self,
+                     export_type="obj",
+                     p_prio=-1,
+                     max_threads=0,
+                     res_lvl=0,
+                     res_min=640,
+                     outlier_thres=0.6,
+                     cost_smooth_r=0.1,
+                     seam_level_global=1,
+                     seam_level_local=1,
+                     texture_size_multiple=0,
+                     patch_heuristic=3,
+                     empty_color=16744231,
+                     orthographic_res=0):
         """Add texture to mesh using images."""
         logger.info("Add texture to mesh using images")
 
-        self.export_scene_dense_mesh_refined = self.export_dir / "scene_dense_mesh_refined.mvs"
+        self.export_obj = self.export_dir / "textured_model.obj"
 
-        exe = str(self.openMVS_dir / "TextureMesh")
+        args = [str(self.openMVS_dir / "TextureMesh")]
+        args.extend(["-i", str(self.export_refine)])
+        args.extend(["-o", str(self.export_obj)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.export_scene_dense_mesh),
-                              "--export-type", "obj"])
+        args.extend(["--export-type", str(export_type)])
+        args.extend(["--process-priority", str(p_prio)])
+        args.extend(["--max-threads", str(max_threads)])
+        args.extend(["--resolution-level", str(res_lvl)])
+        args.extend(["--min-resolution", str(res_min)])
+        args.extend(["--outlier-threshold", str(outlier_thres)])
+        args.extend(["--cost-smoothness-ratio", str(cost_smooth_r)])
+        args.extend(["--global-seam-leveling", str(seam_level_global)])
+        args.extend(["--local-seam-leveling", str(seam_level_local)])
+        args.extend(["--texture-size-multiple", str(texture_size_multiple)])
+        args.extend(["--patch-packing-heuristic", str(patch_heuristic)])
+        args.extend(["--empty-color", str(empty_color)])
+        args.extend(["--orthographic-image-resolution", str(orthographic_res)])
+
+        ret = subprocess.run(args)
         logger.info("Adding texture returned: %s", str(ret))
