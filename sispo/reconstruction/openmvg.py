@@ -28,9 +28,12 @@ class OpenMVGController():
         self.input_dir = res_dir / "rendering"
         self.res_dir = res_dir
 
-        self.focal = 65437
-
-    def analyse_images(self):
+    def analyse_images(self,
+                       focal=65437,
+                       intrinsics=None,
+                       cam_model=1,
+                       prior=True,
+                       p_weights=(1.0,1.0,1.0)):
         """ImageListing step of reconstruction."""
         logger.info("Start Imagelisting")
 
@@ -38,15 +41,19 @@ class OpenMVGController():
         self.matches_dir = utils.check_dir(self.matches_dir)
 
         exe = str(self.openMVG_dir / "openMVG_main_SfMInit_ImageListing")
+        args = [exe]
+        args.extend(["-i", str(self.input_dir)])
+        args.extend(["-d", str(self.sensor_database)])
+        args.extend(["-o", str(self.matches_dir)])
+        args.extend(["-f", str(focal)])
+        if intrinsics is not None:
+            args.extend(["-k", intrinsics])
+        args.extend(["-c", str(cam_model)])
+        if prior:
+            args.extend(["-P"])
+            args.extend(["-W", ";".join([str(value) for value in p_weights])])
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.input_dir), 
-                              "-o", str(self.matches_dir),
-                              "-d", str(self.sensor_database),
-                              "-c", "1",
-                              "-f", str(self.focal), 
-                              "-P",
-                              "-W", "1.0;1.0;1.0;"])
+        ret = subprocess.run(args)
         logger.info("Image analysis returned: %s", str(ret))
 
     def compute_features(self):
