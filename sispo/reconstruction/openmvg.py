@@ -34,7 +34,7 @@ class OpenMVGController():
         logger.info("Start Imagelisting")
 
         self.matches_dir = self._resolve_create_dir(self.res_dir / "matches")
-        utils.check_dir(self.matches_dir)
+        self.matches_dir = utils.check_dir(self.matches_dir)
 
         exe = str(self.openMVG_dir / "openMVG_main_SfMInit_ImageListing")
 
@@ -77,3 +77,20 @@ class OpenMVGController():
                               "-n", "FASTCASCADEHASHINGL2",
                               "-v", "3"])
         logger.info("Feature matching returned: %s", str(ret))
+
+    def reconstruct_seq(self):
+        """Reconstruct 3D models sequentially."""
+        #set manually the initial pair to avoid the prompt question
+        logger.info("Do incremental/sequential reconstructions")
+
+        self.reconstruction_dir = self.res_dir / "sequential"
+        self.reconstruction_dir = utils.check_dir(self.reconstruction_dir)
+
+        exe = str(self.openMVG_dir / "openMVG_main_IncrementalSfM")
+
+        ret = subprocess.run([exe,
+                              "-i", str(self.sfm_data),
+                              "-m", str(self.matches_dir), 
+                              "-o", str(self.reconstruction_dir),
+                              "-P"])#,"-f","ADJUST_ALL","-c","3"] )
+        logger.info("Incremental reconstruction returned: %s", str(ret))
