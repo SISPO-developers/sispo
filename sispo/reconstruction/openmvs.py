@@ -40,3 +40,16 @@ class OpenMVSController():
                               "--number-views", "0",
                               "-v", "3"])#,"--number-views-fuse","5"] )
         logger.info("Point cloud densification returned: %s", str(ret))
+
+
+    def create_mesh(self):
+        """Create a mesh from a 3D point cloud."""
+        logger.info("Create mesh from point cloud")
+
+        self.export_scene_dense = self.export_dir / "scene_dense.mvs"
+
+        exe = str(self.openMVS_dir / "ReconstructMesh")
+
+        ret = subprocess.run([exe,
+                              "-i", str(self.export_scene_dense)])
+        logger.info("Mesh creation returned: %s", str(ret))
