@@ -53,3 +53,16 @@ class OpenMVSController():
         ret = subprocess.run([exe,
                               "-i", str(self.export_scene_dense)])
         logger.info("Mesh creation returned: %s", str(ret))
+
+    def refine_mesh(self):
+        """Refine 3D mesh."""
+        logger.info("Refine 3D mesh")
+
+        self.export_scene_dense_mesh = self.export_dir / "scene_dense_mesh.mvs"
+
+        exe = str(self.openMVS_dir / "RefineMesh")
+
+        ret = subprocess.run([exe,
+                             "-i", str(self.export_scene_dense_mesh),
+                             "--use-cuda", "0"])
+        logger.info("Mesh refinement returned: %s", str(ret))
