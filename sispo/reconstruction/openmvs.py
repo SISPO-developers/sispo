@@ -24,21 +24,38 @@ class OpenMVSController():
 
         self.res_dir = res_dir
 
-    def densify_pointcloud(self):
+    def densify_pointcloud(self,
+                           p_prio=-1,
+                           max_threads=0,
+                           res_lvl=1,
+                           res_min=640,
+                           num_views=0,
+                           num_views_fuse=3,
+                           est_colors=False,
+                           est_normals=False,
+                           sample_mesh=0):
         """Increases number of points to make 3D model smoother."""
         logger.info("Densify point cloud to make model smoother")
 
         self.export_dir = utils.check_dir(self.res_dir / "export")
         self.export_scene = self.export_dir / "scene.mvs"
+        self.export_dense = self.export_dir / "scene_densified.mvs"
 
-        exe = str(self.openMVS_dir / "DensifyPointCloud")
+        args = [str(self.openMVS_dir / "DensifyPointCloud")]
+        args.extend(["-i", str(self.export_scene)])
+        args.extend(["-o", str(self.export_dense)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.export_scene),
-                              "--max-threads", "0",
-                              "--estimate-normals", "1",
-                              "--number-views", "0",
-                              "-v", "3"])#,"--number-views-fuse","5"] )
+        args.extend(["--process-priority", str(p_prio)])
+        args.extend(["--max-threads", str(max_threads)])
+        args.extend(["--resolution-level", str(res_lvl)])
+        args.extend(["--min-resolution", str(res_min)])
+        args.extend(["--number-views", str(num_views)])
+        args.extend(["--number-views-fuse", str(num_views_fuse)])
+        args.extend(["--estimate-colors", str(int(est_colors))])
+        args.extend(["--estimate-normals", str(int(est_normals))])
+        args.extend(["--sample-mesh", str(sample_mesh)])
+
+        ret = subprocess.run(args)
         logger.info("Point cloud densification returned: %s", str(ret))
 
 
