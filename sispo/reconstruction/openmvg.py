@@ -98,13 +98,17 @@ class OpenMVGController():
 
     def export_MVS(self):
         """Export 3D model to MVS format."""
-        print("5. Exports")
+        logger.info("Exporting MVG result to MVS format")
 
+        input_file = self.reconstruction_dir / "sfm_data.bin"
         self.export_dir = utils.check_dir(self.res_dir / "export")
         self.export_scene = self.export_dir / "scene.mvs"
-        self.export_undistorted_dir = utils.check_dir(self.export_dir / "undistorted")
+        self.undistorted_dir = utils.check_dir(self.export_dir / "undistorted")
 
-        ret = subprocess.run([str(self.openMVG_dir / "openMVG_main_openMVG2openMVS"),
-                         "-i", str(self.reconstruction_dir / "sfm_data.bin"),
-                         "-o", str(self.export_scene),
-                         "-d", str(self.export_undistorted_dir)])
+        exe = str(self.openMVG_dir / "openMVG_main_openMVG2openMVS")
+
+        ret = subprocess.run([exe,
+                              "-i", str(input_file),
+                              "-o", str(self.export_scene),
+                              "-d", str(self.undistorted_dir)])
+        logger.info("Exporting to MVS returned: %s", str(ret))
