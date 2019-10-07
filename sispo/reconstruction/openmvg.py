@@ -28,58 +28,95 @@ class OpenMVGController():
         self.input_dir = res_dir / "rendering"
         self.res_dir = res_dir
 
-        self.focal = 65437
-
-    def analyse_images(self):
+    def analyse_images(self,
+                       focal=65437,
+                       intrinsics=None,
+                       cam_model=1,
+                       prior=True,
+                       p_weights=(1.0,1.0,1.0)):
         """ImageListing step of reconstruction."""
         logger.info("Start Imagelisting")
 
         self.matches_dir = self.res_dir / "matches"
         self.matches_dir = utils.check_dir(self.matches_dir)
 
-        exe = str(self.openMVG_dir / "openMVG_main_SfMInit_ImageListing")
+        args = [str(self.openMVG_dir / "openMVG_main_SfMInit_ImageListing")]
+        args.extend(["-i", str(self.input_dir)])
+        args.extend(["-d", str(self.sensor_database)])
+        args.extend(["-o", str(self.matches_dir)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.input_dir), 
-                              "-o", str(self.matches_dir),
-                              "-d", str(self.sensor_database),
-                              "-c", "1",
-                              "-f", str(self.focal), 
-                              "-P",
-                              "-W", "1.0;1.0;1.0;"])
+        args.extend(["-f", str(focal)])
+        if intrinsics is not None:
+            args.extend(["-k", intrinsics])
+        args.extend(["-c", str(cam_model)])
+        if prior:
+            args.extend(["-P"])
+            args.extend(["-W", ";".join([str(value) for value in p_weights])])
+
+        ret = subprocess.run(args)
         logger.info("Image analysis returned: %s", str(ret))
 
-    def compute_features(self):
+    def compute_features(self,
+                         force_compute=False,
+                         descriptor="SIFT",
+                         use_upright=True,
+                         d_preset="ULTRA",
+                         num_threads=0):
         """Compute features in images."""
         logger.info("Compute features of listed images")
  
         self.sfm_data = self.matches_dir / "sfm_data.json"
 
-        exe = str(self.openMVG_dir / "openMVG_main_ComputeFeatures")
+        args = [str(self.openMVG_dir / "openMVG_main_ComputeFeatures")]
+        args.extend(["-i", str(self.sfm_data)])
+        args.extend(["-o", str(self.matches_dir)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.sfm_data),
-                              "-o", str(self.matches_dir), 
-                              "-m", "SIFT",
-                              "-f", "0", 
-                              "-p", "ULTRA"])
+        args.extend(["-f", str(int(force_compute))])
+        args.extend(["-m", str(descriptor)])
+        args.extend(["-u", str(int(use_upright))])
+        args.extend(["-p", str(d_preset)])
+        args.extend(["-n", str(num_threads)])
+
+        ret = subprocess.run(args)
         logger.info("Feature computation returned: %s", str(ret))
 
-    def match_features(self):
+    def match_features(self,
+                       force_compute=False,
+                       ratio=0.8,
+                       geo_model="f",
+                       num_overlaps=3,
+                       pairlist_file=None,
+                       method="FASTCASCADEHASHINGL2",
+                       guided=False,
+                       cache_size=None):
         """Match computed features of images."""
         logger.info("Match features of images")
 
-        exe = str(self.openMVG_dir / "openMVG_main_ComputeMatches")
+        args = [str(self.openMVG_dir / "openMVG_main_ComputeMatches")]
+        args.extend(["-i", str(self.sfm_data)])
+        args.extend(["-o", str(self.matches_dir)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.sfm_data),
-                              "-o", str(self.matches_dir), 
-                              "-f", "0", 
-                              "-n", "FASTCASCADEHASHINGL2",
-                              "-v", "3"])
+        args.extend(["-f", str(int(force_compute))])
+        args.extend(["-r", str(ratio)])
+        args.extend(["-g", str(geo_model)])
+        args.extend(["-v", str(num_overlaps)])
+        if pairlist_file is not None:
+            args.extend(["-l", str(pairlist_file)])
+        args.extend(["-n", str(method)])
+        args.extend(["-m", str(int(guided))])
+        if cache_size is not None:
+            args.extend(["-c", str(cache_size)])
+
+        ret = subprocess.run(args)
         logger.info("Feature matching returned: %s", str(ret))
 
-    def reconstruct_seq(self):
+    def reconstruct_seq(self,
+                        first_image=None,
+                        second_image=None,
+                        cam_model=3,
+                        refine_options="ADJUST_ALL",
+                        prior=False,
+                        match_file=None):
         """Reconstruct 3D models sequentially."""
         #set manually the initial pair to avoid the prompt question
         logger.info("Do incremental/sequential reconstructions")
@@ -87,16 +124,25 @@ class OpenMVGController():
         self.reconstruction_dir = self.res_dir / "sequential"
         self.reconstruction_dir = utils.check_dir(self.reconstruction_dir)
 
-        exe = str(self.openMVG_dir / "openMVG_main_IncrementalSfM")
+        args = [str(self.openMVG_dir / "openMVG_main_IncrementalSfM")]
+        args.extend(["-i", str(self.sfm_data)])
+        args.extend(["-m", str(self.matches_dir)])
+        args.extend(["-o", str(self.reconstruction_dir)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.sfm_data),
-                              "-m", str(self.matches_dir), 
-                              "-o", str(self.reconstruction_dir),
-                              "-P"])#,"-f","ADJUST_ALL","-c","3"] )
+        if first_image is not None:
+            args.extend(["-a", str(first_image)])
+        if second_image is not None:
+            args.extend(["-a", str(second_image)])
+        args.extend(["-c", str(cam_model)])
+        args.extend(["-f", str(refine_options)])
+        args.extend(["-P", str(int(prior))])
+        if match_file is not None:
+            args.extend(["-M", str(match_file)])
+        
+        ret = subprocess.run(args)
         logger.info("Incremental reconstruction returned: %s", str(ret))
 
-    def export_MVS(self):
+    def export_MVS(self, num_threads=0):
         """Export 3D model to MVS format."""
         logger.info("Exporting MVG result to MVS format")
 
@@ -105,10 +151,12 @@ class OpenMVGController():
         self.export_scene = self.export_dir / "scene.mvs"
         self.undistorted_dir = utils.check_dir(self.export_dir / "undistorted")
 
-        exe = str(self.openMVG_dir / "openMVG_main_openMVG2openMVS")
+        args = [str(self.openMVG_dir / "openMVG_main_openMVG2openMVS")]
+        args.extend(["-i", str(input_file)])
+        args.extend(["-o", str(self.export_scene)])
+        args.extend(["-d", str(self.undistorted_dir)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(input_file),
-                              "-o", str(self.export_scene),
-                              "-d", str(self.undistorted_dir)])
+        args.extend(["-n", str(num_threads)])
+
+        ret = subprocess.run(args)
         logger.info("Exporting to MVS returned: %s", str(ret))
