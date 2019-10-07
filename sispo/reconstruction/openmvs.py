@@ -71,7 +71,7 @@ class OpenMVSController():
         """Add texture to mesh using images."""
         logger.info("Add texture to mesh using images")
 
-        self.export_scene_dense_mesh_refined = (self.output_dir / "export" / "scene_dense_mesh_refined.mvs").resolve()
+        self.export_scene_dense_mesh_refined = self.export_dir / "scene_dense_mesh_refined.mvs"
 
         exe = str(self.openMVS_dir / "TextureMesh")
 
