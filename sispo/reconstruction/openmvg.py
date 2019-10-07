@@ -44,7 +44,7 @@ class OpenMVGController():
         args.extend(["-i", str(self.input_dir)])
         args.extend(["-d", str(self.sensor_database)])
         args.extend(["-o", str(self.matches_dir)])
-        
+
         args.extend(["-f", str(focal)])
         if intrinsics is not None:
             args.extend(["-k", intrinsics])
@@ -80,18 +80,34 @@ class OpenMVGController():
         ret = subprocess.run(args)
         logger.info("Feature computation returned: %s", str(ret))
 
-    def match_features(self):
+    def match_features(self,
+                       force_compute=False,
+                       ratio=0.8,
+                       geo_model="f",
+                       num_overlaps=3,
+                       pairlist_file=None,
+                       method="FASTCASCADEHASHINGL2",
+                       guided=False,
+                       cache_size=None):
         """Match computed features of images."""
         logger.info("Match features of images")
 
-        exe = str(self.openMVG_dir / "openMVG_main_ComputeMatches")
+        args = [str(self.openMVG_dir / "openMVG_main_ComputeMatches")]
+        args.extend(["-i", str(self.sfm_data)])
+        args.extend(["-o", str(self.matches_dir)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.sfm_data),
-                              "-o", str(self.matches_dir), 
-                              "-f", "0", 
-                              "-n", "FASTCASCADEHASHINGL2",
-                              "-v", "3"])
+        args.extend(["-f", str(int(force_compute))])
+        args.extend(["-r", str(ratio)])
+        args.extend(["-g", str(geo_model)])
+        args.extend(["-v", str(num_overlaps)])
+        if pairlist_file is not None:
+            args.extend(["-l", str(pairlist_file)])
+        args.extend(["-n", str(method)])
+        args.extend(["-m", str(int(guided))])
+        if cache_size is not None:
+            args.extend(["-c", str(cache_size)])
+
+        ret = subprocess.run(args)
         logger.info("Feature matching returned: %s", str(ret))
 
     def reconstruct_seq(self):
