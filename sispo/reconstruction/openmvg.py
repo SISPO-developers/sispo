@@ -142,7 +142,7 @@ class OpenMVGController():
         ret = subprocess.run(args)
         logger.info("Incremental reconstruction returned: %s", str(ret))
 
-    def export_MVS(self):
+    def export_MVS(self, num_threads=0):
         """Export 3D model to MVS format."""
         logger.info("Exporting MVG result to MVS format")
 
@@ -151,10 +151,12 @@ class OpenMVGController():
         self.export_scene = self.export_dir / "scene.mvs"
         self.undistorted_dir = utils.check_dir(self.export_dir / "undistorted")
 
-        exe = str(self.openMVG_dir / "openMVG_main_openMVG2openMVS")
+        args = [str(self.openMVG_dir / "openMVG_main_openMVG2openMVS")]
+        args.extend(["-i", str(input_file)])
+        args.extend(["-o", str(self.export_scene)])
+        args.extend(["-d", str(self.undistorted_dir)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(input_file),
-                              "-o", str(self.export_scene),
-                              "-d", str(self.undistorted_dir)])
+        args.extend(["-n", str(num_threads)])
+
+        ret = subprocess.run(args)
         logger.info("Exporting to MVS returned: %s", str(ret))
