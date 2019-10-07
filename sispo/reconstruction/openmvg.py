@@ -40,11 +40,11 @@ class OpenMVGController():
         self.matches_dir = self.res_dir / "matches"
         self.matches_dir = utils.check_dir(self.matches_dir)
 
-        exe = str(self.openMVG_dir / "openMVG_main_SfMInit_ImageListing")
-        args = [exe]
+        args = [str(self.openMVG_dir / "openMVG_main_SfMInit_ImageListing")]
         args.extend(["-i", str(self.input_dir)])
         args.extend(["-d", str(self.sensor_database)])
         args.extend(["-o", str(self.matches_dir)])
+        
         args.extend(["-f", str(focal)])
         if intrinsics is not None:
             args.extend(["-k", intrinsics])
@@ -56,20 +56,28 @@ class OpenMVGController():
         ret = subprocess.run(args)
         logger.info("Image analysis returned: %s", str(ret))
 
-    def compute_features(self):
+    def compute_features(self,
+                         force_compute=False,
+                         descriptor="SIFT",
+                         use_upright=True,
+                         d_preset="ULTRA",
+                         num_threads=0):
         """Compute features in images."""
         logger.info("Compute features of listed images")
  
         self.sfm_data = self.matches_dir / "sfm_data.json"
 
-        exe = str(self.openMVG_dir / "openMVG_main_ComputeFeatures")
+        args = [str(self.openMVG_dir / "openMVG_main_ComputeFeatures")]
+        args.extend(["-i", str(self.sfm_data)])
+        args.extend(["-o", str(self.matches_dir)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.sfm_data),
-                              "-o", str(self.matches_dir), 
-                              "-m", "SIFT",
-                              "-f", "0", 
-                              "-p", "ULTRA"])
+        args.extend(["-f", str(int(force_compute))])
+        args.extend(["-m", str(descriptor)])
+        args.extend(["-u", str(int(use_upright))])
+        args.extend(["-p", str(d_preset)])
+        args.extend(["-n", str(num_threads)])
+
+        ret = subprocess.run(args)
         logger.info("Feature computation returned: %s", str(ret))
 
     def match_features(self):
