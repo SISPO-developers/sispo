@@ -66,3 +66,16 @@ class OpenMVSController():
                              "-i", str(self.export_scene_dense_mesh),
                              "--use-cuda", "0"])
         logger.info("Mesh refinement returned: %s", str(ret))
+
+    def texture_mesh(self):
+        """Add texture to mesh using images."""
+        logger.info("Add texture to mesh using images")
+
+        self.export_scene_dense_mesh_refined = (self.output_dir / "export" / "scene_dense_mesh_refined.mvs").resolve()
+
+        exe = str(self.openMVS_dir / "TextureMesh")
+
+        ret = subprocess.run([exe,
+                              "-i", str(self.export_scene_dense_mesh),
+                              "--export-type", "obj"])
+        logger.info("Adding texture returned: %s", str(ret))
