@@ -110,7 +110,13 @@ class OpenMVGController():
         ret = subprocess.run(args)
         logger.info("Feature matching returned: %s", str(ret))
 
-    def reconstruct_seq(self):
+    def reconstruct_seq(self,
+                        first_image=None,
+                        second_image=None,
+                        cam_model=3,
+                        refine_options="ADJUST_ALL",
+                        prior=False,
+                        match_file=None):
         """Reconstruct 3D models sequentially."""
         #set manually the initial pair to avoid the prompt question
         logger.info("Do incremental/sequential reconstructions")
@@ -118,13 +124,22 @@ class OpenMVGController():
         self.reconstruction_dir = self.res_dir / "sequential"
         self.reconstruction_dir = utils.check_dir(self.reconstruction_dir)
 
-        exe = str(self.openMVG_dir / "openMVG_main_IncrementalSfM")
+        args = [str(self.openMVG_dir / "openMVG_main_IncrementalSfM")]
+        args.extend(["-i", str(self.sfm_data)])
+        args.extend(["-m", str(self.matches_dir)])
+        args.extend(["-o", str(self.reconstruction_dir)])
 
-        ret = subprocess.run([exe,
-                              "-i", str(self.sfm_data),
-                              "-m", str(self.matches_dir), 
-                              "-o", str(self.reconstruction_dir),
-                              "-P"])#,"-f","ADJUST_ALL","-c","3"] )
+        if first_image is not None:
+            args.extend(["-a", str(first_image)])
+        if second_image is not None:
+            args.extend(["-a", str(second_image)])
+        args.extend(["-c", str(cam_model)])
+        args.extend(["-f", str(refine_options)])
+        args.extend(["-P", str(int(prior))])
+        if match_file is not None:
+            args.extend(["-M", str(match_file)])
+        
+        ret = subprocess.run(args)
         logger.info("Incremental reconstruction returned: %s", str(ret))
 
     def export_MVS(self):
