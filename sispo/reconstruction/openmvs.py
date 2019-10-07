@@ -77,14 +77,14 @@ class OpenMVSController():
         self.export_mesh = self.export_dir / "mesh.mvs"
 
         args = [str(self.openMVS_dir / "ReconstructMesh")]
-        args.extend("-i", str(self.export_dense))
-        args.extend("-o", str(self.export_mesh))
+        args.extend(["-i", str(self.export_dense)])
+        args.extend(["-o", str(self.export_mesh)])
 
         args.extend(["--process-priority", str(p_prio)])
         args.extend(["--max-threads", str(max_threads)])
         args.extend(["--constant-weight", str(const_weight)])
         args.extend(["-f", str(free_space)])
-        args.extend(["-thickness-factor", str(thickness)])
+        args.extend(["--thickness-factor", str(thickness)])
         args.extend(["--quality-factor", str(quality)])
         args.extend(["--decimate", str(decimate)])
         args.extend(["--remove-spurious", str(spurious)])
@@ -95,17 +95,54 @@ class OpenMVSController():
         ret = subprocess.run(args)
         logger.info("Mesh creation returned: %s", str(ret))
 
-    def refine_mesh(self):
+    def refine_mesh(self,
+                    p_prio=-1,
+                    max_threads=0,
+                    res_lvl=0,
+                    res_min=640,
+                    max_views=8,
+                    decimate=1,
+                    holes=30,
+                    ensure_edge_size=1,
+                    max_face_area=64,
+                    scales=3,
+                    scale_step=0.5,
+                    reduce_memory=True,
+                    alt_pair=0,
+                    reg_weight=0.2,
+                    rig_ela_r=0.9,
+                    grad_step=45.05,
+                    vertex_ratio=0,
+                    cuda=True):
         """Refine 3D mesh."""
         logger.info("Refine 3D mesh")
 
-        self.export_scene_dense_mesh = self.export_dir / "scene_dense_mesh.mvs"
+        self.export_refine = self.export_dir / "mesh_refined.mvs"
 
-        exe = str(self.openMVS_dir / "RefineMesh")
+        args =[str(self.openMVS_dir / "RefineMesh")]
+        args.extend(["-i", str(self.export_mesh)])
+        args.extend(["-o", str(self.export_refine)])
 
-        ret = subprocess.run([exe,
-                             "-i", str(self.export_scene_dense_mesh),
-                             "--use-cuda", "0"])
+        args.extend(["--process-priority", str(p_prio)])
+        args.extend(["--max-threads", str(max_threads)])
+        args.extend(["--resolution-level", str(res_lvl)])
+        args.extend(["--min-resolution", str(res_min)])
+        args.extend(["--max-views", str(max_views)])
+        args.extend(["--decimate", str(decimate)])
+        args.extend(["--close-holes", str(holes)])
+        args.extend(["--ensure-edge-size", str(ensure_edge_size)])
+        args.extend(["--max-face-area", str(max_face_area)])
+        args.extend(["--scales", str(scales)])
+        args.extend(["--scale-step", str(scale_step)])
+        args.extend(["--reduce-memory", str(int(reduce_memory))])
+        args.extend(["--alternate-pair", str(alt_pair)])
+        args.extend(["--regularity-weight", str(reg_weight)])
+        args.extend(["--rigidity-elasticity-ratio", str(rig_ela_r)])
+        args.extend(["--gradient-step", str(grad_step)])
+        args.extend(["--planar-vertex-ratio", str(vertex_ratio)])
+        args.extend(["--use-cuda", str(int(cuda))])
+
+        ret = subprocess.run(args)
         logger.info("Mesh refinement returned: %s", str(ret))
 
     def texture_mesh(self):
