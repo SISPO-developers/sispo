@@ -20,7 +20,7 @@ class OpenMVSController():
         """."""
         self.root_dir = Path(__file__).parent.parent.parent
         self.openMVS_dir = self.root_dir / "software" / "openMVS" / "build_openMVS"
-        self.openMVS_dir = self.openMVS_dir / "bin" / "x64" / "Debug"
+        self.openMVS_dir = self.openMVS_dir / "bin" / "x64" / "Release"
 
         self.res_dir = res_dir
 
