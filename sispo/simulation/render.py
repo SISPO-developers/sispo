@@ -12,10 +12,18 @@ import zlib
 
 import bpy
 from mathutils import Vector # pylint: disable=import-error
+import numpy as np
+import OpenEXR
+from skimage.filters import gaussian
+from skimage.transform import downscale_local_mean
 
 import utils
 
 logger = utils.create_logger("rendering")
+
+class RenderingError(RuntimeError):
+    """Generic error for rendering process."""
+    pass
 
 
 class BlenderControllerError(RuntimeError):
@@ -60,7 +68,7 @@ class BlenderController:
         for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
-            scene.render.resolution_percentage = 5 # TODO: change, 5 is debug setting
+            scene.render.resolution_percentage = 100 # TODO: change, 5 is debug setting
             scene.view_settings.view_transform = "Raw"
             scene.view_settings.look = "None"
         
@@ -169,8 +177,11 @@ class BlenderController:
         for scene in self._get_scenes_iter(scenes):
             scene.view_settings.exposure = exposure
 
-    def set_resolution(self, res_x, res_y, scenes=None):
+    def set_resolution(self, res, scenes=None):
         """Sets resolution of rendered image."""
+        res_x = res[0]
+        res_y = res[1]
+
         for scene in self._get_scenes_iter(scenes):
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
@@ -321,12 +332,67 @@ class BlenderController:
         return iter(output)
 
 
-def get_camera_vectors(camera_name, scene_name):
+    def render_starmap(self, stardata, fov_vecs, img_size, name_suffix):
+        """Render a starmap from given data and field of view."""
+        (direction, right_edge, _, upper_edge, _) = fov_vecs
+        (res_x, res_y) = img_size
+
+        upper_edge -= direction
+        right_edge -= direction
+        total_flux = 0.
+        up_norm = upper_edge.normalized()
+        right_norm = right_edge.normalized()
+        f_over_h_ccd_2 = 1. / upper_edge.length
+        f_over_w_ccd_2 = 1. / right_edge.length
+        ss = 2
+        starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
+        # Add alpha channel
+        starmap[:,:,3] = 1.
+
+        for star in stardata:
+            mag_star = star[2]
+            flux = np.power(10., -0.4 * mag_star)
+            total_flux += flux
+            ra_star = np.radians(star[0])
+            dec_star = np.radians(star[1])
+
+            z_star = np.sin(dec_star)
+            x_star = np.cos(dec_star) * np.cos(ra_star - np.pi)
+            y_star = -np.cos(dec_star) * np.sin(ra_star - np.pi)
+            vec = [x_star, y_star, z_star]
+            vec2 = [x_star, -y_star, z_star]
+            if np.dot(vec, direction) < np.dot(vec2, direction):
+                vec = vec2
+            x_pix = ss * (f_over_w_ccd_2 * np.dot(right_norm, vec) \
+                    / np.dot(direction, vec) + 1.) * (res_x - 1) / 2.
+            x_pix = min(round(x_pix), res_x * ss - 1)
+            x_pix = max(0, int(x_pix))
+            y_pix = ss * (-f_over_h_ccd_2 * np.dot(up_norm, vec) \
+                    / np.dot(direction, vec) + 1.) * (res_y - 1) / 2.
+            y_pix = min(round(y_pix), res_y * ss - 1)
+            y_pix = max(0, int(y_pix))
+            # Add flux to color channels
+            starmap[y_pix, x_pix, 0:3] += flux
+
+        sm_gauss = gaussian(starmap, ss / 2., multichannel=True)
+
+        sm_scale = np.zeros((res_y, res_x, 4), np.float32)
+        factors = (ss, ss)
+        for c in range(4):
+            sm_scale[:, :, c] = downscale_local_mean(sm_gauss[:, :, c], factors) * (ss * ss)
+
+        filename = self.res_dir / ("Stars_" + name_suffix)
+        write_openexr_image(filename, sm_scale)
+
+        return (total_flux, np.sum(sm_scale[:, :, 0]))
+
+
+def get_fov_vecs(camera_name, scene_name):
     """Get camera position and direction vectors."""
     camera = bpy.data.objects[camera_name]
     up_vec = camera.matrix_world.to_quaternion() @ Vector((0.0, 1.0, 0.0))
-    cam_direction = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
-    right_vec = cam_direction.cross(up_vec)
+    direction = camera.matrix_world.to_quaternion() @ Vector((0.0, 0.0, -1.0))
+    right_vec = direction.cross(up_vec)
 
     scene = bpy.data.scenes[scene_name]
     res_x = scene.render.resolution_x
@@ -339,13 +405,44 @@ def get_camera_vectors(camera_name, scene_name):
         sensor_h = camera.data.sensor_width
         sensor_w = camera.data.sensor_width * res_x / res_y
 
-    rightedge_vec = cam_direction + right_vec * sensor_w * 0.5 / camera.data.lens
-    leftedge_vec = cam_direction - right_vec * sensor_w * 0.5 / camera.data.lens
-    upedge_vec = cam_direction + up_vec * sensor_h * 0.5 / camera.data.lens
-    downedge_vec = cam_direction - up_vec * sensor_h * 0.5 / camera.data.lens
+    right_edge = direction + right_vec * sensor_w * 0.5 / camera.data.lens
+    left_edge = direction - right_vec * sensor_w * 0.5 / camera.data.lens
+    upper_edge = direction + up_vec * sensor_h * 0.5 / camera.data.lens
+    lower_edge = direction - up_vec * sensor_h * 0.5 / camera.data.lens
 
-    return cam_direction, up_vec, right_vec, leftedge_vec, rightedge_vec, downedge_vec, upedge_vec
+    return (direction, right_edge, left_edge, upper_edge, lower_edge)
+    
 
+def write_openexr_image(filename, picture):
+    """Save image in OpenEXR file format."""
+    filename = str(filename)
+
+    file_extension = ".exr"
+    if filename[-4:] != file_extension:
+        filename += file_extension
+
+    height = len(picture)
+    width = len(picture[0])
+    channels = len(picture[0][0])
+
+    if channels == 4:
+        data_r = picture[:, :, 0].tobytes()
+        data_g = picture[:, :, 1].tobytes()
+        data_b = picture[:, :, 2].tobytes()
+        data_a = picture[:, :, 3].tobytes()
+        image_data = {"R": data_r, "G": data_g, "B": data_b, "A": data_a}
+    elif channels == 3:
+        data_r = picture[:, :, 0].tobytes()
+        data_g = picture[:, :, 1].tobytes()
+        data_b = picture[:, :, 2].tobytes()
+        image_data = {"R": data_r, "G": data_g, "B": data_b}
+    else:
+        raise RenderingError("Invalid number of channels of starmap image.")
+    
+    hdr = OpenEXR.Header(width, height)
+    file_handler = OpenEXR.OutputFile(filename, hdr)
+    file_handler.writePixels(image_data)
+    file_handler.close()
 
 def get_ra_dec(vec):
     """Calculate Right Ascension (RA) and Declination (DEC) in radians."""
@@ -355,26 +452,28 @@ def get_ra_dec(vec):
     return (ra + math.pi, dec)
 
 
-def get_fov(leftedge_vec, rightedge_vec, downedge_vec, upedge_vec):
-    """Calculate centre and size of a camera's current Field of View (FOV) in degrees."""
-    ra_max = max(get_ra_dec(rightedge_vec)[0], get_ra_dec(leftedge_vec)[0])
+def get_fov(right_edge, left_edge, upper_edge, lower_edge):
+    """Calculate centre and size of current Field of View (FOV) in degrees."""
+    ra_max = max(get_ra_dec(right_edge)[0], get_ra_dec(left_edge)[0])
     ra_max = math.degrees(ra_max)
-    ra_min = min(get_ra_dec(rightedge_vec)[0], get_ra_dec(leftedge_vec)[0])
+    ra_min = min(get_ra_dec(right_edge)[0], get_ra_dec(left_edge)[0])
     ra_min = math.degrees(ra_min)
 
     if math.fabs(ra_max - ra_min) > math.fabs(ra_max - (ra_min + 360)):
-        ra_cent = (ra_min + ra_max + 360) / 2
-        if ra_cent >= 360:
-            ra_cent -= 360
-        ra_w = math.fabs(ra_max - (ra_min + 360))
+        ra = (ra_min + ra_max + 360) / 2
+        if ra >= 360:
+            ra -= 360
+        width = math.fabs(ra_max - (ra_min + 360))
     else:
-        ra_cent = (ra_max + ra_min) / 2
-        ra_w = (ra_max - ra_min)
+        ra = (ra_max + ra_min) / 2
+        width = (ra_max - ra_min)
 
-    dec_min = math.degrees(get_ra_dec(downedge_vec)[1])
-    dec_max = math.degrees(get_ra_dec(upedge_vec)[1])
-    dec_cent = (dec_max + dec_min) / 2
-    dec_w = (dec_max - dec_min)
+    dec_min = math.degrees(get_ra_dec(lower_edge)[1])
+    dec_max = math.degrees(get_ra_dec(upper_edge)[1])
+    dec = (dec_max + dec_min) / 2
+    height = (dec_max - dec_min)
 
-    return ra_cent, ra_w, dec_cent, dec_w
+    return (ra, dec, width, height)
+
+
  

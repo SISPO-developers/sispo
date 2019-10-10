@@ -37,6 +37,8 @@ class Environment():
 
         self.res_dir = utils.check_dir(self.root_dir / "data" / "results" / name)
 
+        self.sta = starcat.StarCatalog(self.res_dir)
+
         self.logger = utils.create_logger("simulation")
 
         self.ts = TimeScalesFactory.getTDB()
@@ -75,14 +77,13 @@ class Environment():
         self.render_settings["samples"] = 48
         self.render_settings["device"] = "GPU"
         self.render_settings["tile"] = 512
-        self.render_settings["x_res"] = 2464
-        self.render_settings["y_res"] = 2048
+        self.render_settings["res"] = (2464, 2048)
         self.render_settings["color_depth"] = "32"
 
         self.camera_settings = dict()
         self.camera_settings["lens"] = 230
         self.camera_settings["sensor"] = 3.45E-3 * \
-            self.render_settings["x_res"]
+            self.render_settings["res"][0]
 
         self.logger.info("Rendering settings: Exposure: %d; Samples: %d",
                     self.render_settings['exposure'], self.render_settings['samples'])
@@ -135,8 +136,7 @@ class Environment():
         self.renderer.set_device(self.render_settings["device"])
         self.renderer.set_samples(self.render_settings["samples"])
         self.renderer.set_exposure(self.render_settings["exposure"])
-        self.renderer.set_resolution(self.render_settings["x_res"], 
-                                     self.render_settings["y_res"])
+        self.renderer.set_resolution(self.render_settings["res"])
         self.renderer.set_output_format()
 
     def setup_sun(self):
@@ -194,6 +194,7 @@ class Environment():
         """Render simulation scenario."""
         self.logger.info("Rendering simulation")
 
+        # Render frame by frame
         for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
                                                       self.spacecraft.pos_history,
                                                       self.sssb.pos_history,
@@ -202,30 +203,40 @@ class Environment():
             date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
             date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
 
-            pos_sc_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
-            self.renderer.set_camera_location("ScCam", pos_sc_rel_sssb)
+            # Update environment
+            self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / 1000.
 
-            if self.with_sssbconstdist:
-                pos_cam_const_dist = pos_sc_rel_sssb * 1000. / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
-                self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
+            # Update sssb and spacecraft
+            pos_sc_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
+            self.renderer.set_camera_location("ScCam", pos_sc_rel_sssb)            
 
             sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
             sssb_angle = sssb_rot.getAngle()
-            self.sssb.render_obj.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)
-
-            self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / 1000.
+            self.sssb.render_obj.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)          
 
             self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             
+            # Update optional scenes/cameras
             if self.with_sssbconstdist:
+                pos_cam_const_dist = pos_sc_rel_sssb * 1000. / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
+                self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
                 self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
 
             if self.with_lightingref:
-                self.renderer.set_camera_location("LightRefCam" ,-np.asarray(sssb_pos.toArray()) * 1000. /np.sqrt(np.dot(np.asarray(sssb_pos.toArray()),np.asarray(sssb_pos.toArray()))))
+                lightrefcam_pos = -np.asarray(sssb_pos.toArray()) * 1000. /np.sqrt(np.dot(np.asarray(sssb_pos.toArray()),np.asarray(sssb_pos.toArray())))
+                self.renderer.set_camera_location("LightRefCam", lightrefcam_pos)
                 self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
                 self.renderer.target_camera(self.lightref, "LightRefCam")
             
+            # Render blender scenes
             self.renderer.render(date_str)
+
+            # Render star background
+            if self.with_backgroundstars:
+                fov_vecs = render.get_fov_vecs("ScCam", "MainScene")
+                ra, dec, width, height = render.get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
+                starlist = self.sta.get_stardata(ra, dec, width, height)
+                fluxes = self.renderer.render_starmap(starlist, fov_vecs, self.render_settings["res"], date_str)
 
         self.logger.info("Rendering completed")
 
