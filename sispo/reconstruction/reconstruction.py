@@ -39,6 +39,26 @@ class Reconstructor():
         self.oMVS.refine_mesh()
         self.oMVS.texture_mesh()
 
+    def create_export_pointcloud(self):
+        """Creates and exports pointcloud to openMVS format.
+
+        Includes all reconstruction steps of the openMVG tool.
+        """
+        self.oMVG.analyse_images()
+        self.oMVG.compute_features()
+        self.oMVG.match_features()
+        self.oMVG.reconstruct_seq()
+
+    def densify_mesh_texture_model(self):
+        """Densifies pointcloud, creates and refines mesh and testures it.
+
+        Includes all reconstruction steps of the openMVS tool.
+        """
+        self.oMVS.densify_pointcloud()
+        self.oMVS.create_mesh()
+        self.oMVS.refine_mesh()
+        self.oMVS.texture_mesh()
+
     def reconstruct(self):
         """
         Applies entire reconstruction pipeline
