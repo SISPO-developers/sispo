@@ -19,7 +19,7 @@ class OpenMVSController():
     def __init__(self, res_dir):
         """."""
         self.root_dir = Path(__file__).parent.parent.parent
-        self.openMVS_dir = self.root_dir / "software" / "openMVS" / "build"
+        self.openMVS_dir = self.root_dir / "software" / "openMVS" / "build_openMVS"
         self.openMVS_dir = self.openMVS_dir / "bin" / "x64" / "Debug"
 
         self.res_dir = res_dir
@@ -39,11 +39,14 @@ class OpenMVSController():
 
         self.export_dir = utils.check_dir(self.res_dir / "export")
         self.export_scene = self.export_dir / "scene.mvs"
-        self.export_dense = self.export_dir / "scene_densified.mvs"
+
+        working_dir = utils.check_dir(self.res_dir / "dense")
+        self.dense_scene = working_dir / "scene_densified.mvs"
 
         args = [str(self.openMVS_dir / "DensifyPointCloud")]
         args.extend(["-i", str(self.export_scene)])
-        args.extend(["-o", str(self.export_dense)])
+        args.extend(["-o", str(self.dense_scene)])
+        args.extend(["-w", str(working_dir)])
 
         args.extend(["--process-priority", str(p_prio)])
         args.extend(["--max-threads", str(max_threads)])
@@ -74,11 +77,13 @@ class OpenMVSController():
         """Create a mesh from a 3D point cloud."""
         logger.info("Create mesh from point cloud")
 
-        self.export_mesh = self.export_dir / "mesh.mvs"
+        working_dir = utils.check_dir(self.res_dir / "mesh")
+        self.mesh_scene = working_dir / "mesh.mvs"
 
         args = [str(self.openMVS_dir / "ReconstructMesh")]
-        args.extend(["-i", str(self.export_dense)])
-        args.extend(["-o", str(self.export_mesh)])
+        args.extend(["-i", str(self.dense_scene)])
+        args.extend(["-o", str(self.mesh_scene)])
+        args.extend(["-w", str(working_dir)])
 
         args.extend(["--process-priority", str(p_prio)])
         args.extend(["--max-threads", str(max_threads)])
@@ -117,11 +122,13 @@ class OpenMVSController():
         """Refine 3D mesh."""
         logger.info("Refine 3D mesh")
 
-        self.export_refine = self.export_dir / "mesh_refined.mvs"
+        working_dir = utils.check_dir(self.res_dir / "refined_mesh")
+        self.refined_mesh = working_dir / "mesh_refined.mvs"
 
         args =[str(self.openMVS_dir / "RefineMesh")]
-        args.extend(["-i", str(self.export_mesh)])
-        args.extend(["-o", str(self.export_refine)])
+        args.extend(["-i", str(self.mesh_scene)])
+        args.extend(["-o", str(self.refined_mesh)])
+        args.extend(["-w", str(working_dir)])
 
         args.extend(["--process-priority", str(p_prio)])
         args.extend(["--max-threads", str(max_threads)])
@@ -162,11 +169,13 @@ class OpenMVSController():
         """Add texture to mesh using images."""
         logger.info("Add texture to mesh using images")
 
-        self.export_obj = self.export_dir / "textured_model.obj"
+        working_dir = utils.check_dir(self.res_dir / "textured_mesh")
+        self.textured_obj = working_dir / "textured_model.obj"
 
         args = [str(self.openMVS_dir / "TextureMesh")]
-        args.extend(["-i", str(self.export_refine)])
-        args.extend(["-o", str(self.export_obj)])
+        args.extend(["-i", str(self.refined_mesh)])
+        args.extend(["-o", str(self.textured_obj)])
+        args.extend(["-w", str(working_dir)])
 
         args.extend(["--export-type", str(export_type)])
         args.extend(["--process-priority", str(p_prio)])
