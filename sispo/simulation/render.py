@@ -411,38 +411,7 @@ def get_fov_vecs(camera_name, scene_name):
     lower_edge = direction - up_vec * sensor_h * 0.5 / camera.data.lens
 
     return (direction, right_edge, left_edge, upper_edge, lower_edge)
-    
 
-def write_openexr_image(filename, picture):
-    """Save image in OpenEXR file format."""
-    filename = str(filename)
-
-    file_extension = ".exr"
-    if filename[-4:] != file_extension:
-        filename += file_extension
-
-    height = len(picture)
-    width = len(picture[0])
-    channels = len(picture[0][0])
-
-    if channels == 4:
-        data_r = picture[:, :, 0].tobytes()
-        data_g = picture[:, :, 1].tobytes()
-        data_b = picture[:, :, 2].tobytes()
-        data_a = picture[:, :, 3].tobytes()
-        image_data = {"R": data_r, "G": data_g, "B": data_b, "A": data_a}
-    elif channels == 3:
-        data_r = picture[:, :, 0].tobytes()
-        data_g = picture[:, :, 1].tobytes()
-        data_b = picture[:, :, 2].tobytes()
-        image_data = {"R": data_r, "G": data_g, "B": data_b}
-    else:
-        raise RenderingError("Invalid number of channels of starmap image.")
-    
-    hdr = OpenEXR.Header(width, height)
-    file_handler = OpenEXR.OutputFile(filename, hdr)
-    file_handler.writePixels(image_data)
-    file_handler.close()
 
 def get_ra_dec(vec):
     """Calculate Right Ascension (RA) and Declination (DEC) in radians."""
