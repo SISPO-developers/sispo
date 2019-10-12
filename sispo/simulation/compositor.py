@@ -6,13 +6,13 @@ and because the intensity of the blender rendered images are not constant, the
 compositor is required to fix the intensity issue and add the star background.
 """
 
-import glob
+
 import numpy as np
 from pathlib import Path
 
 import utils
 
-logger = create_logger("compositor")
+logger = utils.create_logger("compositor")
 
 
 class ImageCompositorError(RuntimeError):
@@ -30,16 +30,28 @@ class Frame():
     light_ref = None
 
     def __init__(self,
+                 frame_id,
+                 image_dir=None,
                  main=None,
                  stars=None,
                  sssb_only=None,
                  sssb_const_dist=None,
                  light_ref=None):
-        self.main_scene = main
-        self.stars = stars
-        self.sssb_only = sssb_only
-        self.sssb_const_dist = sssb_const_dist
-        self.light_ref = light_ref
+
+        self.id = frame_id
+
+        if None not in (main, stars, sssb_only, sssb_const_dist, light_ref):
+            self.main_scene = main
+            self.stars = stars
+            self.sssb_only = sssb_only
+            self.sssb_const_dist = sssb_const_dist
+            self.light_ref = light_ref
+
+        elif image_dir is not None:
+            self.read_complete_frame(self.id, image_dir)
+
+        else:
+            raise ImageCompositorError("Unable to create frame.")
 
     def calc_ref_intensity(self):
         """Calculates reference intensitiy using the light reference scene."""
@@ -81,6 +93,29 @@ class Frame():
 
         return (sssb_max, sssb_sum)
 
+    def read_complete_frame(self, frame_id, image_dir):
+        """Reads all images for a given frame id.
+
+        This includes MainScene, Stars, SssbOnly, SssbConstDist, and LightRef.
+        """
+        frame_fmt_str = image_dir / ("{}_" + frame_id + ".exr")
+        frame_fmt_str = str(frame_fmt_str)
+
+        file_name = frame_fmt_str.format("MainScene")
+        self.main = utils.read_openexr_image(file_name)
+
+        file_name = frame_fmt_str.format("Stars")
+        self.stars = utils.read_openexr_image(file_name)
+
+        file_name = frame_fmt_str.format("SssbOnly")
+        self.sssb_only = utils.read_openexr_image(file_name)
+        
+        file_name = frame_fmt_str.format("SssbConstDist")
+        self.sssb_const_dist = utils.read_openexr_image(file_name)
+        
+        file_name = frame_fmt_str.format("LightRef")
+        self.light_ref = utils.read_openexr_image(file_name)
+
 
 class ImageCompositor():
     """This class provides functions to combine the final simulation images."""
@@ -92,30 +127,38 @@ class ImageCompositor():
 
         self.image_extension = ".exr"
 
-        self.file_names = dict()
-        scene_names = ["MainScene", "BackgroundStars",
-                       "SssbOnly", "SssbConstDist", "LightRef"]
-                       
-        for name in scene_names:
-            image_names = name + "*." + self.image_extension
-            self.file_names[name] = glob.glob(
-                str(self.image_dir / image_names))
+        self.frame_ids = self.get_frame_ids()
+        self.frames = []
 
-        logger.info("Number of files: %d", len(self.file_names["MainScene"]))
+        star_stats = []
+        sssbonly_stats = []
+        sssbconstdist_stats = []
+        intensity_stats = []
+        
+        for frame_id in self.frame_ids:
+            new_frame = Frame(frame_id, self.image_dir)
+            self.frames.append(new_frame)
 
-    def read_complete_frame(self, scene):
-        """Reads all images for a given single scene.
+            star_stats.append(new_frame.calc_stars_stats())
+            sssbonly_stats.append(new_frame.calc_sssb_stats())
+            sssbconstdist_stats.append(new_frame.calc_sssb_stats(True))
+            intensity_stats.append(new_frame.calc_ref_intensity())
 
-        This includes MainScene, BackgroundStars, SssbOnly, SssbConstDist,
-        and LightRef.
-        """
-        frame = Frame()
+        logger.info("Number of files: %d", len(self.frames))
 
-        frame.main = utils.read_openexr_image(scene)
-        frame.stars = utils.read_openexr_image(scene)
-        frame.sssb_only = utils.read_openexr_image(scene)
-        frame.sssb_const_dist = utils.read_openexr_image(scene)
-        frame.light_ref = utils.read_openexr_image(scene)
+    def get_frame_ids(self):
+        """Extract list of frame ids from file names of SssbOnly scenes."""
+        scene_name = "SssbOnly"
+        image_names = scene_name + "*" + self.image_extension
+        file_names = self.image_dir.glob(image_names)
+
+        ids = []
+        for file_name in file_names:
+            file_name = str(file_name.name).strip(self.image_extension)
+            file_name = file_name.strip(scene_name)
+            ids.append(file_name.strip("_"))
+
+        return ids
 
 
 if __name__ == "__main__":
