@@ -68,7 +68,7 @@ class BlenderController:
         for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
-            scene.render.resolution_percentage = 100 # TODO: change, 5 is debug setting
+            scene.render.resolution_percentage = 10 # TODO: change, 5 is debug setting
             scene.view_settings.view_transform = "Raw"
             scene.view_settings.look = "None"
         
@@ -382,7 +382,7 @@ class BlenderController:
             sm_scale[:, :, c] = downscale_local_mean(sm_gauss[:, :, c], factors) * (ss * ss)
 
         filename = self.res_dir / ("Stars_" + name_suffix)
-        write_openexr_image(filename, sm_scale)
+        utils.write_openexr_image(filename, sm_scale)
 
         return (total_flux, np.sum(sm_scale[:, :, 0]))
 
