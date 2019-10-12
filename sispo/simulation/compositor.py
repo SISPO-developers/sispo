@@ -52,6 +52,17 @@ class Frame():
         intensities = np.mean(area)
         return intensities
 
+    def calc_stars_params(self):
+        """Calculate star scene parameters."""
+        star_c_max = []
+        star_c_sum = []
+
+        for i in range(3):
+            star_c_max.append(np.max(stars[:,:,i]))
+            star_c_sum.append(np.max(stars[:,:,i]))
+
+        return (star_c_max, star_c_sum)
+
 class ImageCompositor():
     """This class provides functions to combine the final simulation images."""
 
