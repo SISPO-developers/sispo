@@ -17,6 +17,11 @@ def check_dir(directory):
     return dir_resolved
 
 
+def read_vec_string(string):
+    """Converts vector string into numpy array."""
+    raise NotImplementedError()
+
+
 def write_vec_string(vec, prec):
     """Write data vector into string."""
     o = "["
@@ -28,6 +33,10 @@ def write_vec_string(vec, prec):
 
     return o + "]"
 
+
+def read_mat_string(string):
+    """Converts matrix string into numpy array."""
+    raise NotImplementedError()
 
 def write_mat_string(mat, prec):
     """Write data matrix into string."""
