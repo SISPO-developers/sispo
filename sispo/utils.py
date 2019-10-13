@@ -19,7 +19,11 @@ def check_dir(directory):
 
 def read_vec_string(string):
     """Converts vector string into numpy array."""
-    raise NotImplementedError()
+    string = string.strip("[]")
+    string = string.split(",")
+    vec = np.asarray(string, dtype=np.float64)
+
+    return vec
 
 
 def write_vec_string(vec, prec):
@@ -36,7 +40,16 @@ def write_vec_string(vec, prec):
 
 def read_mat_string(string):
     """Converts matrix string into numpy array."""
-    raise NotImplementedError()
+    string = string.strip("[]")
+    string = string.split("],[")
+
+    mat = []
+    for elem in string:
+        mat.append(read_vec_string(elem))
+
+    mat = np.asarray(mat, dtype=np.float64)
+
+    return mat
 
 def write_mat_string(mat, prec):
     """Write data matrix into string."""
