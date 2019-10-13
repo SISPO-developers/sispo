@@ -6,6 +6,7 @@ and because the intensity of the blender rendered images are not constant, the
 compositor is required to fix the intensity issue and add the star background.
 """
 
+from datetime import datetime
 
 import numpy as np
 from pathlib import Path
@@ -115,6 +116,22 @@ class Frame():
         
         file_name = frame_fmt_str.format("LightRef")
         self.light_ref = utils.read_openexr_image(file_name)
+
+    def read_meta_file(self, frame_id, image_dir):
+        """Reads metafile of a frame."""
+        file_name = "Metadata_" + frame_id + ".txt"
+
+        with open(file_name, "r") as metafile:
+            line = metafile.readline().split("\t")
+
+            date = datetime.strptime(line[0], "%Y-%m-%dT%H:%M:%S.%f")
+            distance = float(line[1])
+            flux = float(line[2])
+
+            sc_pos = utils.read_vec_string(line[3])
+            sssb_pos = utils.read_vec_string(line[4])
+
+            return (date, distance, flux, sc_pos, sssb_pos)
 
 
 class ImageCompositor():
