@@ -129,20 +129,10 @@ class ImageCompositor():
 
         self.frame_ids = self.get_frame_ids()
         self.frames = []
-
-        star_stats = []
-        sssbonly_stats = []
-        sssbconstdist_stats = []
-        intensity_stats = []
         
         for frame_id in self.frame_ids:
             new_frame = Frame(frame_id, self.image_dir)
             self.frames.append(new_frame)
-
-            star_stats.append(new_frame.calc_stars_stats())
-            sssbonly_stats.append(new_frame.calc_sssb_stats())
-            sssbconstdist_stats.append(new_frame.calc_sssb_stats(True))
-            intensity_stats.append(new_frame.calc_ref_intensity())
 
         logger.info("Number of files: %d", len(self.frames))
 
@@ -159,6 +149,22 @@ class ImageCompositor():
             ids.append(file_name.strip("_"))
 
         return ids
+
+    def calc_relative_intensity_curve(self):
+        """Calculates the relative intensity curve for all sssb frames."""
+        only_stats = []
+        const_dist_stats = []
+
+        for frame in self.frames:
+            only_stats.append(frame.calc_sssb_stats())
+            const_dist_stats.append(frame.calc_sssb_stats(True))
+
+        only_stats = np.asarray(only_stats).transpose()
+        const_dist_stats = np.asarray(const_dist_stats).transpose()
+
+        rel_intensity_curve = only_stats[2] / const_dist_stats[2]
+
+        return rel_intensity_curve
 
 
 if __name__ == "__main__":
