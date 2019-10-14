@@ -16,6 +16,12 @@ import utils
 
 logger = utils.create_logger("compositor")
 
+#Astrometric calibrations 
+#https://www.cfa.harvard.edu/~dfabricant/huchra/ay145/mags.html
+FLUX0_VBAND = 3640 * 1.51E7 * 0.16 # Photons per m^2
+SUN_MAG_VBAND = -26.74 # 1 AU distance
+SUN_FLUX_VBAND_1AU = np.power(10., -0.4 * SUN_MAG_VBAND) * FLUX0_VBAND
+
 
 class ImageCompositorError(RuntimeError):
     """This is a generic error for the compositor."""
@@ -202,6 +208,37 @@ class ImageCompositor():
 
         return rel_intensity
 
+    def compose(self):
+        """Composes raw images and adjusts light intensities."""
+
+        # Camera
+        focal_length = 230
+        pixel_w = 3.45E-6 
+        pixel_area = pixel_w ** 2
+        aperture_area = (0.02 ** 2 - 0.0128 ** 2) * np.pi / 4
+
+        # Sssb
+        albedo=0.15
+
+        for frame in self.frames:
+
+            # Asteroid photometry
+            sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"])
+            light_reference_photons_per_pixel = (SUN_FLUX_VBAND_1AU * pow(sc_sun_dist, -2) * aperture_area * pixel_area / ((focal_length ** 2) * np.pi))
+            starmap_photons = FLUX0_VBAND * aperture_area * frame.metadata["total_flux"]
+
+            # Calibrate asteriod images
+            ref_intensity = frame.calc_ref_intensity()
+            frame.sssb_only[:,:,0:2] *= light_reference_photons_per_pixel * albedo / ref_intensity
+            frame.sssb_const_dist[:,:,0:2] *= light_reference_photons_per_pixel * albedo / ref_intensity
+
+            max_dimension = 512
+            visible_dim = max_dimension * pow(1E6 / frame.metadata["distance"], 2.)
+
+            if visible_dim < 0.1:
+                raise NotImplementedError()
+            else:
+                raise NotImplementedError()
 
 if __name__ == "__main__":
     pass
