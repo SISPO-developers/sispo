@@ -11,6 +11,8 @@ import json
 
 import numpy as np
 from pathlib import Path
+from skimage.filters import gaussian
+from skimage.transform import downscale_local_mean
 
 import utils
 
@@ -219,6 +221,7 @@ class ImageCompositor():
 
         # Sssb
         albedo=0.15
+        sssb_ref_img = self.create_sssb_ref
 
         for frame in self.frames:
 
@@ -227,10 +230,13 @@ class ImageCompositor():
             light_reference_photons_per_pixel = (SUN_FLUX_VBAND_1AU * pow(sc_sun_dist, -2) * aperture_area * pixel_area / ((focal_length ** 2) * np.pi))
             starmap_photons = FLUX0_VBAND * aperture_area * frame.metadata["total_flux"]
 
-            # Calibrate asteriod images
+            # Calibrate asteroid images
             ref_intensity = frame.calc_ref_intensity()
             frame.sssb_only[:,:,0:2] *= light_reference_photons_per_pixel * albedo / ref_intensity
             frame.sssb_const_dist[:,:,0:2] *= light_reference_photons_per_pixel * albedo / ref_intensity
+
+            sssb_ref = sssb_ref_img.copy()
+            sssb_ref_image[:, :, 0:2] *= np.sum(sssb_ref[:, :, 0] * sssb_ref[:, :, 3]) * pow(1E6 / frame.metadata["distance"], 2.)
 
             max_dimension = 512
             visible_dim = max_dimension * pow(1E6 / frame.metadata["distance"], 2.)
@@ -239,6 +245,27 @@ class ImageCompositor():
                 raise NotImplementedError()
             else:
                 raise NotImplementedError()
+
+    def create_sssb_ref(self, res_x, res_y):
+        """Creates a reference sssb image for calibration."""
+        ss = 5
+        rx = res_x * ss
+        ry = res_y * ss
+        
+        sssb_point = np.zeros((res_y*ss, res_x*ss, 4), np.float32)
+        sssb_point[ry//2, rx//2, :] = [1., 1., 1., 1.]
+        
+        sssb = np.zeros((res_y, res_x, 4), np.float32)
+
+        sssb_point = gaussian(sssb_point, ss/2., multichannel=False)
+
+        for c in range(0, 4):
+            sssb[:, :, c] = downscale_local_mean(sssb_point[:, :, c], (ss, ss))
+            sssb[:, :, c] *= (ss * ss)
+            if c < 4:
+                sssb[:, :, c] /= np.sum(sssb[:, :, c])
+            
+        return sssb
 
 if __name__ == "__main__":
     pass
