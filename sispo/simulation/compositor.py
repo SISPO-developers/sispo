@@ -7,6 +7,7 @@ compositor is required to fix the intensity issue and add the star background.
 """
 
 from datetime import datetime
+import json
 
 import numpy as np
 from pathlib import Path
@@ -24,6 +25,7 @@ class ImageCompositorError(RuntimeError):
 class Frame():
     """Class to wrap all data of a single frame."""
 
+    metadata = None
     main_scene = None
     stars = None
     sssb_only = None
@@ -102,6 +104,8 @@ class Frame():
         frame_fmt_str = image_dir / ("{}_" + frame_id + ".exr")
         frame_fmt_str = str(frame_fmt_str)
 
+        self.metadata = self.read_meta_file(frame_id, image_dir)
+
         file_name = frame_fmt_str.format("MainScene")
         self.main = utils.read_openexr_image(file_name)
 
@@ -119,19 +123,21 @@ class Frame():
 
     def read_meta_file(self, frame_id, image_dir):
         """Reads metafile of a frame."""
-        file_name = "Metadata_" + frame_id + ".txt"
+        file_name = image_dir / ("Metadata_" + frame_id + ".json")
 
-        with open(file_name, "r") as metafile:
-            line = metafile.readline().split("\t")
+        with open(str(file_name), "r") as metafile:
+            metadata = json.load(metafile)
 
-            date = datetime.strptime(line[0], "%Y-%m-%dT%H:%M:%S.%f")
-            distance = float(line[1])
-            flux = float(line[2])
+            date = datetime.strptime(metadata["date"], "%Y-%m-%dT%H%M%S-%f")
+            metadata["date"] = date
+            distance = metadata["distance"]
+            total_flux = metadata["total_flux"]
 
-            sc_pos = utils.read_vec_string(line[3])
-            sssb_pos = utils.read_vec_string(line[4])
+            metadata["sc_pos"] = np.asarray(metadata["sc_pos"])
+            metadata["sc_rel_pos"] = np.asarray(metadata["sc_rel_pos"])
+            metadata["sssb_pos"] = np.asarray(metadata["sssb_pos"])
 
-            return (date, distance, flux, sc_pos, sssb_pos)
+        return metadata
 
 
 class ImageCompositor():
@@ -153,6 +159,8 @@ class ImageCompositor():
 
         logger.info("Number of files: %d", len(self.frames))
 
+        self.calc_relative_intensity_curve()
+
     def get_frame_ids(self):
         """Extract list of frame ids from file names of SssbOnly scenes."""
         scene_name = "SssbOnly"
@@ -169,19 +177,30 @@ class ImageCompositor():
 
     def calc_relative_intensity_curve(self):
         """Calculates the relative intensity curve for all sssb frames."""
-        only_stats = []
-        const_dist_stats = []
+        only_stats = np.zeros(len(self.frames))
+        const_dist_stats = np.zeros(len(self.frames))
+        distances = np.zeros(len(self.frames))
 
-        for frame in self.frames:
-            only_stats.append(frame.calc_sssb_stats())
-            const_dist_stats.append(frame.calc_sssb_stats(True))
+        for i, frame in enumerate(self.frames):
+            only_stats[i] = frame.calc_sssb_stats()[1]
+            const_dist_stats[i] = frame.calc_sssb_stats(True)[1]
+            distances[i] = frame.metadata["distance"]
 
-        only_stats = np.asarray(only_stats).transpose()
-        const_dist_stats = np.asarray(const_dist_stats).transpose()
+        rel_intensity = only_stats / const_dist_stats
 
-        rel_intensity_curve = only_stats[2] / const_dist_stats[2]
+        ind_sorted = distances.argsort()
+        distances = distances[ind_sorted]
+        rel_intensity = rel_intensity[ind_sorted]
 
-        return rel_intensity_curve
+
+        for last in range(len(distances)):
+            if rel_intensity[last] == 0:
+                break
+        #last -= 1
+
+        rel_intensity = rel_intensity[:last]
+
+        return rel_intensity
 
 
 if __name__ == "__main__":
