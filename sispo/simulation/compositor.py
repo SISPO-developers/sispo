@@ -218,6 +218,12 @@ class ImageCompositor():
         pixel_w = 3.45E-6 
         pixel_area = pixel_w ** 2
         aperture_area = (0.02 ** 2 - 0.0128 ** 2) * np.pi / 4
+        wl = 550 * 1E-9
+        dlmult = 2
+        D = 0.04 # Aperture diameter
+        
+        # Calculate Gaussian standard deviation for approximating diffraction pattern
+        sigma = dlmult * 0.45 * wl * focal_length / (D * pixel_w)
 
         # Sssb
         albedo=0.15
@@ -237,6 +243,14 @@ class ImageCompositor():
 
             sssb_ref = sssb_ref_img.copy()
             sssb_ref_image[:, :, 0:2] *= np.sum(sssb_ref[:, :, 0] * sssb_ref[:, :, 3]) * pow(1E6 / frame.metadata["distance"], 2.)
+
+            # Calibrate starmap
+            (_, stars_sums) = frame.calc_stars_stats()
+            frame.stars[:, :, 0:2] *= starmap_photons / stars_sums[0]
+
+            #Use point source sssb
+            kernelw = (int(sigma) * 8) + 1 # Calculate kernel size
+            kernelw = max(kernelw, 5) # Don't use smaller than 5  
 
             max_dimension = 512
             visible_dim = max_dimension * pow(1E6 / frame.metadata["distance"], 2.)
