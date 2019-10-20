@@ -6,6 +6,7 @@ from datetime import datetime
 
 import numpy as np
 import OpenEXR
+import Imath
 
 def check_dir(directory):
     """Resolves directory and creates it, if it doesn't existing."""
@@ -73,6 +74,7 @@ def serialise(o):
         except TypeError:
             return str(o)
 
+
 def read_openexr_image(filename):
     """Read image in OpenEXR file format."""
     filename = str(filename)
@@ -81,8 +83,14 @@ def read_openexr_image(filename):
     if filename[-len(file_extension):] != file_extension:
         filename += file_extension
 
+    if not OpenEXR.isOpenExrFile(filename):
+        return None
 
     image = OpenEXR.InputFile(filename)
+
+    if not image.isComplete():
+        return None
+
     header = image.header()
     
     size = header["displayWindow"]
@@ -98,12 +106,16 @@ def read_openexr_image(filename):
         return None
     
     image_o = np.zeros((resolution[1],resolution[0],channels), np.float32)
-    ch = ["R","G","B","A"]
+    
+    ch = ["R","G","B", "A"]
+    pt = Imath.PixelType(Imath.PixelType.FLOAT)
 
-    for c in range(0,channels):
-        image_channel = np.frombuffer(image.channel(ch[c]), dtype=np.float32)
+    for c in range(0, channels):
+        image_channel = np.fromstring(image.channel(ch[c], pt), dtype=np.float32)
         image_o[:, :, c] = image_channel.reshape(resolution[1], resolution[0])
     
+    image.close()
+
     return image_o
 
 
@@ -158,3 +170,38 @@ def create_logger(name):
     logger.info("\n\n#################### NEW LOG ####################\n")
 
     return logger
+
+
+if __name__ == "__main__":
+    print("Starting opencv vs skimage benchmarking")
+    
+    import timeit
+
+    setup = "#gc.enable()"
+    setup += "\n" + "import utils"
+    setup += "\n" + "from pathlib import Path"
+    setup += "\n" + "file = Path('.').resolve()"
+    setup += "\n" + "file = file / '..' / 'data' / 'results' / 'Didymos' / 'rendering'"
+    setup += "\n" + "file = file / 'SssbOnly_2017-08-15T115845-120000.exr'"
+    setup += "\n" + "file = file.resolve()"
+    setup += "\n" + "img=utils.read_openexr_image(str(file))"
+    setup += "\n" + "sigma=5"
+    setup += "\n" + "kernel=5"
+
+    setup_skimage = setup + "\n" + "truncation = (kernel - 1) / 2 / sigma" \
+                    + "\n" + "from skimage.filters import gaussian"
+    cmd_skimage = "img_filtered = gaussian(img, sigma, truncate=truncation, multichannel=False)"
+
+    setup_cv2 = setup + "\n" + "from cv2 import GaussianBlur"
+    cmd_cv2 = "img_filtered = GaussianBlur(img,(kernel,kernel),sigma,sigma)"
+
+    iterations = 10
+    times_sk = timeit.timeit(cmd_skimage, number=iterations, setup=setup_skimage)
+    times_cv2 = timeit.timeit(cmd_cv2, number=iterations, setup=setup_cv2)
+    
+    print(f"skimage: {times_sk / iterations}")
+    print(f"opencv: {times_cv2 / iterations}")
+    print(f"Ratio Skimage/opencv: {times_sk / times_cv2}")
+
+    exec(setup_skimage + "\n" + cmd_skimage + "\n" + "utils.write_openexr_image(str(file) + '_sk', img_filtered)")
+    exec(setup_cv2 + "\n" + cmd_cv2 + "\n" + "utils.write_openexr_image(str(file) + '_cv', img_filtered)")
