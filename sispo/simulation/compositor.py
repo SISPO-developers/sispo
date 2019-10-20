@@ -9,10 +9,14 @@ compositor is required to fix the intensity issue and add the star background.
 from datetime import datetime
 import json
 
+from astropy import constants as const
+from astropy import units as u
+import cv2
 import numpy as np
 from pathlib import Path
 from skimage.filters import gaussian
 from skimage.transform import downscale_local_mean
+import matplotlib.pyplot as plt
 
 import utils
 
@@ -20,10 +24,9 @@ logger = utils.create_logger("compositor")
 
 #Astrometric calibrations 
 #https://www.cfa.harvard.edu/~dfabricant/huchra/ay145/mags.html
-FLUX0_VBAND = 3640 * 1.51E7 * 0.16 # Photons per m^2
-SUN_MAG_VBAND = -26.74 # 1 AU distance
-SUN_FLUX_VBAND_1AU = np.power(10., -0.4 * SUN_MAG_VBAND) * FLUX0_VBAND
-
+FLUX0_VBAND = 3640 * 1.51E7 * 0.16 * u.ph / (u.s * u.m ** 2) # Photons per m^2
+SUN_MAG_VBAND = -26.74 * u.mag # 1 AU distance
+SUN_FLUX_VBAND_1AU = np.power(10., -0.4 * SUN_MAG_VBAND.value) * FLUX0_VBAND
 
 class ImageCompositorError(RuntimeError):
     """This is a generic error for the compositor."""
@@ -82,7 +85,7 @@ class Frame():
 
         for i in range(3):
             star_c_max.append(np.max(self.stars[:, :, i]))
-            star_c_sum.append(np.max(self.stars[:, :, i]))
+            star_c_sum.append(np.sum(self.stars[:, :, i]))
 
         return (star_c_max, star_c_sum)
 
@@ -138,12 +141,11 @@ class Frame():
 
             date = datetime.strptime(metadata["date"], "%Y-%m-%dT%H%M%S-%f")
             metadata["date"] = date
-            distance = metadata["distance"]
-            total_flux = metadata["total_flux"]
+            metadata["distance"] = metadata["distance"] * u.m
 
-            metadata["sc_pos"] = np.asarray(metadata["sc_pos"])
-            metadata["sc_rel_pos"] = np.asarray(metadata["sc_rel_pos"])
-            metadata["sssb_pos"] = np.asarray(metadata["sssb_pos"])
+            metadata["sc_pos"] = np.asarray(metadata["sc_pos"]) * u.m
+            metadata["sc_rel_pos"] = np.asarray(metadata["sc_rel_pos"]) * u.m
+            metadata["sssb_pos"] = np.asarray(metadata["sssb_pos"]) * u.m
 
         return metadata
 
@@ -167,7 +169,7 @@ class ImageCompositor():
 
         logger.info("Number of files: %d", len(self.frames))
 
-        self.calc_relative_intensity_curve()
+        self.compose()
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of SssbOnly scenes."""
@@ -214,51 +216,93 @@ class ImageCompositor():
         """Composes raw images and adjusts light intensities."""
 
         # Camera
-        focal_length = 230
-        pixel_w = 3.45E-6 
-        pixel_area = pixel_w ** 2
-        aperture_area = (0.02 ** 2 - 0.0128 ** 2) * np.pi / 4
-        wl = 550 * 1E-9
+        focal_length = 230 * u.mm
+        pixel_w = 3.45 * u.micron
+        pixel_area = pixel_w ** 2 * (1 / u.pix)
+        aperture_area = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) * np.pi / 4
+        wl = 550 * u.nm
         dlmult = 2
-        D = 0.04 # Aperture diameter
+        D = 4 * u.cm # Aperture diameter
+
+        chip_noise = 10
+        qe = 0.25
         
         # Calculate Gaussian standard deviation for approximating diffraction pattern
         sigma = dlmult * 0.45 * wl * focal_length / (D * pixel_w)
 
-        # Sssb
+        # SSSB
         albedo=0.15
-        sssb_ref_img = self.create_sssb_ref
+        sssb_ref_img = self.create_sssb_ref(self.frames[0].sssb_only.shape[0], self.frames[0].sssb_only.shape[1])
 
         for frame in self.frames:
 
-            # Asteroid photometry
-            sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"])
-            light_reference_photons_per_pixel = (SUN_FLUX_VBAND_1AU * pow(sc_sun_dist, -2) * aperture_area * pixel_area / ((focal_length ** 2) * np.pi))
+            # SSSB photometry
+            sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"]) * u.m
+            ref_photons_per_pixel = SUN_FLUX_VBAND_1AU * ((const.au / sc_sun_dist) ** 2) * aperture_area * pixel_area / ((focal_length ** 2) * np.pi)
+            ref_photons_per_pixel = ref_photons_per_pixel.decompose()
+
+            # Star photometry
             starmap_photons = FLUX0_VBAND * aperture_area * frame.metadata["total_flux"]
+            starmap_photons = starmap_photons.decompose()
 
-            # Calibrate asteroid images
+            # Calibrate sssb images
             ref_intensity = frame.calc_ref_intensity()
-            frame.sssb_only[:,:,0:2] *= light_reference_photons_per_pixel * albedo / ref_intensity
-            frame.sssb_const_dist[:,:,0:2] *= light_reference_photons_per_pixel * albedo / ref_intensity
-
+            sssb_cal_factor = ref_photons_per_pixel * albedo / ref_intensity
+            sssb_cal_factor = sssb_cal_factor.decompose().value
+            frame.sssb_only[:, :, 0:3] *= sssb_cal_factor
+            frame.sssb_const_dist[:, :, 0:3] *= sssb_cal_factor
             sssb_ref = sssb_ref_img.copy()
-            sssb_ref_image[:, :, 0:2] *= np.sum(sssb_ref[:, :, 0] * sssb_ref[:, :, 3]) * pow(1E6 / frame.metadata["distance"], 2.)
+            sssb_ref[:, :, 0:3] *= np.sum(frame.sssb_const_dist[:, :, 0] * frame.sssb_const_dist[:, :, 3]) * pow(1E6 / frame.metadata["distance"].value, 2.)
 
             # Calibrate starmap
             (_, stars_sums) = frame.calc_stars_stats()
-            frame.stars[:, :, 0:2] *= starmap_photons / stars_sums[0]
+            frame.stars[:, :, 0:3] *= starmap_photons.value / stars_sums[0]
+
+            #for i in range(3):
+            #    plt.hist(frame.stars[:, :, i].reshape(frame.stars.shape[0]*frame.stars.shape[1],1), log=True)
+            #    plt.show()
+            #    plt.hist(test[:, :, i].reshape(test.shape[0]*test.shape[1]), log=True)
+            #    plt.show()
 
             #Use point source sssb
             kernelw = (int(sigma) * 8) + 1 # Calculate kernel size
             kernelw = max(kernelw, 5) # Don't use smaller than 5  
 
             max_dimension = 512
-            visible_dim = max_dimension * pow(1E6 / frame.metadata["distance"], 2.)
+            visible_dim = max_dimension * pow(1E6 / frame.metadata["distance"].value, 2.)
+
+            # Composition
+            composed_img = np.zeros(frame.stars.shape, dtype=np.float32)
 
             if visible_dim < 0.1:
-                raise NotImplementedError()
+                composed_img[:, :, :] = (sssb_ref[:, : , 0:3] + frame.stars[: ,:, :]) * qe
+                composed_img = cv2.GaussianBlur(composed_img, (kernelw, kernelw), sigma, sigma)
+                composed_img += np.random.poisson(composed_img)
+                composed_max = np.max(composed_img)
+                sssb_max = np.max(sssb_ref[:, :, 0:3])
+
+                if composed_max > sssb_max * 5:
+                    composed_max = sssb_max * 5
+
             else:
-                raise NotImplementedError()
+                for c in range(3):
+                    sssb = frame.sssb_only[:, :, c]
+                    stars = frame.stars[:, :, c]
+                    composed_img[:, :, c] = (sssb + stars) * qe
+
+                composed_img = cv2.GaussianBlur(composed_img, (kernelw, kernelw), sigma, sigma)
+                composed_img += np.random.poisson(composed_img)
+                composed_max = np.max(composed_img)
+
+            composed_img[:, :, :] /= composed_max
+
+            file_name = self.image_dir / ("Composition_" + str(frame.id) + ".exr")
+            cv2.imwrite(str(file_name), composed_img, (cv2.IMWRITE_EXR_TYPE, cv2.IMWRITE_EXR_TYPE_FLOAT))
+
+            composed_img[:, :, :] *= 255
+            composed_img = composed_img.astype(np.uint8)
+            file_name = self.image_dir / ("Composition_" + str(frame.id) + ".png")
+            cv2.imwrite(str(file_name), composed_img)
 
     def create_sssb_ref(self, res_x, res_y):
         """Creates a reference sssb image for calibration."""
@@ -266,17 +310,17 @@ class ImageCompositor():
         rx = res_x * ss
         ry = res_y * ss
         
-        sssb_point = np.zeros((res_y*ss, res_x*ss, 4), np.float32)
-        sssb_point[ry//2, rx//2, :] = [1., 1., 1., 1.]
+        sssb_point = np.zeros((res_x*ss, res_y*ss, 4), np.float32)
+        sssb_point[rx//2, ry//2, :] = [1., 1., 1., 1.]
         
-        sssb = np.zeros((res_y, res_x, 4), np.float32)
-
-        sssb_point = gaussian(sssb_point, ss/2., multichannel=False)
+        sssb = np.zeros((res_x, res_y, 4), np.float32)
 
         for c in range(0, 4):
+            sssb_point[:, :, c] = gaussian(sssb_point[:, :, c], ss/2., multichannel=False)
             sssb[:, :, c] = downscale_local_mean(sssb_point[:, :, c], (ss, ss))
             sssb[:, :, c] *= (ss * ss)
-            if c < 4:
+            
+            if c < 3:
                 sssb[:, :, c] /= np.sum(sssb[:, :, c])
             
         return sssb
