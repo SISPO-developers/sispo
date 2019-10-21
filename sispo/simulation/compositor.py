@@ -236,6 +236,10 @@ class ImageCompositor():
 
         for frame in self.frames:
 
+            #for i in range(3):
+            #    plt.hist(frame.sssb_only[:, :, i].reshape(frame.sssb_only.shape[0]*frame.sssb_only.shape[1],1), log=True)
+            #    plt.show()
+
             # SSSB photometry
             sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"]) * u.m
             ref_photons_per_pixel = SUN_FLUX_VBAND_1AU * ((const.au / sc_sun_dist) ** 2) * aperture_area * pixel_area / ((focal_length ** 2) * np.pi)
@@ -258,12 +262,6 @@ class ImageCompositor():
             (_, stars_sums) = frame.calc_stars_stats()
             frame.stars[:, :, 0:3] *= starmap_photons.value / stars_sums[0]
 
-            #for i in range(3):
-            #    plt.hist(frame.stars[:, :, i].reshape(frame.stars.shape[0]*frame.stars.shape[1],1), log=True)
-            #    plt.show()
-            #    plt.hist(test[:, :, i].reshape(test.shape[0]*test.shape[1]), log=True)
-            #    plt.show()
-
             #Use point source sssb
             kernelw = (int(sigma) * 8) + 1 # Calculate kernel size
             kernelw = max(kernelw, 5) # Don't use smaller than 5  
@@ -285,10 +283,11 @@ class ImageCompositor():
                     composed_max = sssb_max * 5
 
             else:
+                alphas = frame.sssb_only[:, :, 3]
                 for c in range(3):
                     sssb = frame.sssb_only[:, :, c]
                     stars = frame.stars[:, :, c]
-                    composed_img[:, :, c] = (sssb + stars) * qe
+                    composed_img[:, :, c] = (alphas * sssb + (1 - alphas) * stars) * qe
 
                 composed_img = cv2.GaussianBlur(composed_img, (kernelw, kernelw), sigma, sigma)
                 composed_img += np.random.poisson(composed_img)
