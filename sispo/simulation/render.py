@@ -52,6 +52,12 @@ class BlenderController:
 
         self.set_device()
 
+        # Setting background color to black, seems easiest approach
+        bpy.data.worlds[0].color = (0, 0, 0)
+        bpy.data.worlds[0].use_nodes = True
+        background = bpy.data.worlds[0].node_tree.nodes["Background"]
+        background.inputs[0].default_value = (0, 0, 0, 1.0)
+
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
     def create_scene(self, scene_name):
@@ -68,7 +74,7 @@ class BlenderController:
         for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
-            scene.render.resolution_percentage = 10 # TODO: change, 5 is debug setting
+            scene.render.resolution_percentage = 20 # TODO: change, 5 is debug setting
             scene.view_settings.view_transform = "Raw"
             scene.view_settings.look = "None"
         
@@ -336,6 +342,10 @@ class BlenderController:
         """Render a starmap from given data and field of view."""
         (direction, right_edge, _, upper_edge, _) = fov_vecs
         (res_x, res_y) = img_size
+
+        scale = self.default_scene.render.resolution_percentage
+        res_x = int(res_x * scale / 100)
+        res_y = int(res_y * scale / 100)
 
         upper_edge -= direction
         right_edge -= direction
