@@ -178,30 +178,43 @@ if __name__ == "__main__":
     import timeit
 
     setup = "#gc.enable()"
+    setup += "\n" + "import numpy as np"
     setup += "\n" + "import utils"
     setup += "\n" + "from pathlib import Path"
-    setup += "\n" + "file = Path('.').resolve()"
-    setup += "\n" + "file = file / '..' / 'data' / 'results' / 'Didymos' / 'rendering'"
-    setup += "\n" + "file = file / 'SssbOnly_2017-08-15T115845-120000.exr'"
+    setup += "\n" + "path = Path('.').resolve()"
+    setup += "\n" + "path = path / '..' / 'data' / 'results' / 'Didymos' / 'rendering'"
+    setup += "\n" + "file = path / 'Composition_2017-08-15T115840-817000.exr'"
     setup += "\n" + "file = file.resolve()"
-    setup += "\n" + "img=utils.read_openexr_image(str(file))"
-    setup += "\n" + "sigma=5"
-    setup += "\n" + "kernel=5"
+    setup += "\n" + "img = utils.read_openexr_image(str(file))"
+    setup += "\n" + "sigma = 5"
+    setup += "\n" + "kernel = 5"
 
     setup_skimage = setup + "\n" + "truncation = (kernel - 1) / 2 / sigma" \
                     + "\n" + "from skimage.filters import gaussian"
-    cmd_skimage = "img_filtered = gaussian(img, sigma, truncate=truncation, multichannel=False)"
+    cmd_skimage = "sk_image = np.zeros(img.shape, dtype=np.float32)"
+    cmd_skimage += "\n" + "sk_image = gaussian(img, sigma, truncate=truncation, multichannel=True)"
 
     setup_cv2 = setup + "\n" + "from cv2 import GaussianBlur"
-    cmd_cv2 = "img_filtered = GaussianBlur(img,(kernel,kernel),sigma,sigma)"
+    cmd_cv2 = "cv_image = np.zeros(img.shape, dtype=np.float32)"
+    cmd_cv2 += "\n" + "cv_image = GaussianBlur(img,(kernel,kernel),sigma,sigma)"
 
-    iterations = 10
+    iterations = 10000
     times_sk = timeit.timeit(cmd_skimage, number=iterations, setup=setup_skimage)
     times_cv2 = timeit.timeit(cmd_cv2, number=iterations, setup=setup_cv2)
     
-    print(f"skimage: {times_sk / iterations}")
-    print(f"opencv: {times_cv2 / iterations}")
+    print(f"skimage: {times_sk / iterations} s")
+    print(f"opencv: {times_cv2 / iterations} s")
     print(f"Ratio Skimage/opencv: {times_sk / times_cv2}")
 
-    exec(setup_skimage + "\n" + cmd_skimage + "\n" + "utils.write_openexr_image(str(file) + '_sk', img_filtered)")
-    exec(setup_cv2 + "\n" + cmd_cv2 + "\n" + "utils.write_openexr_image(str(file) + '_cv', img_filtered)")
+    cmd_skimage += "\n" + "print('SK type: ', sk_image.dtype)"
+    cmd_cv2 += "\n" + "print('CV2 type: ', cv_image.dtype)"
+
+    exec(setup_skimage + "\n" + cmd_skimage + "\n" + "utils.write_openexr_image(str(file) + '_sk', sk_image)")
+    exec(setup_cv2 + "\n" + cmd_cv2 + "\n" + "utils.write_openexr_image(str(file) + '_cv', cv_image)")
+
+
+    statistics = setup_skimage + "\n" + setup_cv2 + "\n" + cmd_skimage + "\n" + cmd_cv2
+    statistics += "\n" + "diff = sk_image - cv_image"
+    statistics += "\n" + "print('Diff min, max: ', np.min(diff), np.max(diff))"
+    statistics += "\n" + "print('Alpha min sk, cv; max, sk, cv: ', np.min(sk_image[:,:,3]), np.min(cv_image[:,:,3]), np.max(sk_image[:,:,3]), np.max(cv_image[:,:,3]))"
+    exec(statistics)
