@@ -160,6 +160,18 @@ class ImageCompositor():
 
         self.image_extension = ".exr"
 
+        self.inst = {}
+        self.inst["chip_noise"] = 10
+        self.inst["pixel_l"] = 3.45 * u.micron
+        self.inst["pixel_a"] = self.inst["pixel_l"] ** 2 * (1 / u.pix)
+        self.inst["quantum_eff"] = 0.25
+        self.inst["focal_l"] = 230 * u.mm
+        self.inst["aperture_d"] = 4 * u.cm
+        self.inst["aperture_a"] = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) * np.pi / 4
+        self.inst["wavelength"] = 550 * u.nm
+
+        self.dlmult = 2
+
         self.frame_ids = self.get_frame_ids()
         self.frames = []
         
@@ -214,53 +226,33 @@ class ImageCompositor():
 
     def compose(self):
         """Composes raw images and adjusts light intensities."""
-
-        # Camera
-        focal_length = 230 * u.mm
-        pixel_w = 3.45 * u.micron
-        pixel_area = pixel_w ** 2 * (1 / u.pix)
-        aperture_area = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) * np.pi / 4
-        wl = 550 * u.nm
-        dlmult = 2
-        D = 4 * u.cm # Aperture diameter
-
-        chip_noise = 10
-        qe = 0.25
         
         # Calculate Gaussian standard deviation for approximating diffraction pattern
-        sigma = dlmult * 0.45 * wl * focal_length / (D * pixel_w)
+        sigma = self.dlmult * 0.45 * self.inst["wavelength"] \
+                * self.inst["focal_l"] / (self.inst["aperture_d"] \
+                * self.inst["pixel_l"])
 
         # SSSB
         albedo=0.15
-        sssb_ref_img = self.create_sssb_ref(self.frames[0].sssb_only.shape[0], self.frames[0].sssb_only.shape[1])
+        sssb_ref_img = self.create_sssb_ref(self.frames[0].sssb_only.shape[0:2])
 
         for frame in self.frames:
 
-            #for i in range(3):
-            #    plt.hist(frame.sssb_only[:, :, i].reshape(frame.sssb_only.shape[0]*frame.sssb_only.shape[1],1), log=True)
-            #    plt.show()
-
             # SSSB photometry
             sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"]) * u.m
-            ref_photons_per_pixel = SUN_FLUX_VBAND_1AU * ((const.au / sc_sun_dist) ** 2) * aperture_area * pixel_area / ((focal_length ** 2) * np.pi)
+            ref_photons_per_pixel = SUN_FLUX_VBAND_1AU * ((const.au / sc_sun_dist) ** 2) * self.inst["aperture_a"] * self.inst["pixel_a"] / ((self.inst["focal_l"] ** 2) * np.pi)
             ref_photons_per_pixel = ref_photons_per_pixel.decompose()
 
             # Star photometry
-            starmap_photons = FLUX0_VBAND * aperture_area * frame.metadata["total_flux"]
+            starmap_photons = FLUX0_VBAND * self.inst["aperture_a"] * frame.metadata["total_flux"]
             starmap_photons = starmap_photons.decompose()
-
-            # Calibrate sssb images
-            ref_intensity = frame.calc_ref_intensity()
-            sssb_cal_factor = ref_photons_per_pixel * albedo / ref_intensity
-            sssb_cal_factor = sssb_cal_factor.decompose().value
-            frame.sssb_only[:, :, 0:3] *= sssb_cal_factor
-            frame.sssb_const_dist[:, :, 0:3] *= sssb_cal_factor
-            sssb_ref = sssb_ref_img.copy()
-            sssb_ref[:, :, 0:3] *= np.sum(frame.sssb_const_dist[:, :, 0] * frame.sssb_const_dist[:, :, 3]) * pow(1E6 / frame.metadata["distance"].value, 2.)
-
+            
             # Calibrate starmap
             (_, stars_sums) = frame.calc_stars_stats()
             frame.stars[:, :, 0:3] *= starmap_photons.value / stars_sums[0]
+
+            # Create composition image array
+            composed_img = np.zeros(frame.stars.shape, dtype=np.float32)
 
             #Use point source sssb
             kernelw = (int(sigma) * 8) + 1 # Calculate kernel size
@@ -269,10 +261,12 @@ class ImageCompositor():
             max_dimension = 512
             visible_dim = max_dimension * pow(1E6 / frame.metadata["distance"].value, 2.)
 
-            # Composition
-            composed_img = np.zeros(frame.stars.shape, dtype=np.float32)
-
             if visible_dim < 0.1:
+                # Use point source sssb
+                # Generate point source reference image
+                sssb_ref = sssb_ref_img.copy()
+                sssb_ref[:, :, 0:3] *= np.sum(frame.sssb_const_dist[:, :, 0] * frame.sssb_const_dist[:, :, 3]) * pow(1E6 / frame.metadata["distance"].value, 2.)
+
                 composed_img[:, :, :] = (sssb_ref[:, : , 0:3] + frame.stars[: ,:, :]) * qe
                 composed_img = cv2.GaussianBlur(composed_img, (kernelw, kernelw), sigma, sigma)
                 composed_img += np.random.poisson(composed_img)
@@ -283,11 +277,18 @@ class ImageCompositor():
                     composed_max = sssb_max * 5
 
             else:
+                # Calibrate sssb images
+                ref_intensity = frame.calc_ref_intensity()
+                sssb_cal_factor = ref_photons_per_pixel * albedo / ref_intensity
+                sssb_cal_factor = sssb_cal_factor.decompose().value
+                frame.sssb_only[:, :, 0:3] *= sssb_cal_factor
+                frame.sssb_const_dist[:, :, 0:3] *= sssb_cal_factor
+
                 alphas = frame.sssb_only[:, :, 3]
                 for c in range(3):
                     sssb = frame.sssb_only[:, :, c]
                     stars = frame.stars[:, :, c]
-                    composed_img[:, :, c] = (alphas * sssb + (1 - alphas) * stars) * qe
+                    composed_img[:, :, c] = (alphas * sssb + (1 - alphas) * stars) * self.inst["quantum_eff"]
 
                 composed_img = cv2.GaussianBlur(composed_img, (kernelw, kernelw), sigma, sigma)
                 composed_img += np.random.poisson(composed_img)
@@ -303,11 +304,11 @@ class ImageCompositor():
             file_name = self.image_dir / ("Composition_" + str(frame.id) + ".png")
             cv2.imwrite(str(file_name), composed_img)
 
-    def create_sssb_ref(self, res_x, res_y):
+    def create_sssb_ref(self, resolution):
         """Creates a reference sssb image for calibration."""
         ss = 5
-        rx = res_x * ss
-        ry = res_y * ss
+        rx = resolution[0] * ss
+        ry = resolution[1] * ss
         
         sssb_point = np.zeros((res_x*ss, res_y*ss, 4), np.float32)
         sssb_point[rx//2, ry//2, :] = [1., 1., 1., 1.]
