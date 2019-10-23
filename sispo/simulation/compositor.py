@@ -253,7 +253,10 @@ class ImageCompositor():
             composed_img = np.zeros(frame.stars.shape, dtype=np.float32)
 
             #Use point source sssb
-            kernelw = (int(sigma) * 8) + 1 # Calculate kernel size
+            # Kernel size calculated to equal skimage.filters.gaussian
+            # Reference:
+            # https://github.com/scipy/scipy/blob/4bfc152f6ee1ca48c73c06e27f7ef021d729f496/scipy/ndimage/filters.py#L214
+            kernelw = int((4 * sigma + 0.5) * 2)
             kernelw = max(kernelw, 5) # Don't use smaller than 5  
 
             max_dimension = 512
