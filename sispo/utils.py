@@ -107,7 +107,7 @@ def read_openexr_image(filename):
     
     image_o = np.zeros((resolution[1],resolution[0],channels), np.float32)
     
-    ch = ["R","G","B", "A"]
+    ch = ["R", "G", "B", "A"]
     pt = Imath.PixelType(Imath.PixelType.FLOAT)
 
     for c in range(0, channels):
@@ -131,12 +131,19 @@ def write_openexr_image(filename, image):
     width = len(image[0])
     channels = len(image[0][0])
 
+    # Default header only has RGB channels
+    hdr = OpenEXR.Header(width, height)
+
     if channels == 4:
         data_r = image[:, :, 0].tobytes()
         data_g = image[:, :, 1].tobytes()
         data_b = image[:, :, 2].tobytes()
         data_a = image[:, :, 3].tobytes()
         image_data = {"R": data_r, "G": data_g, "B": data_b, "A": data_a}
+        # Add alpha channel to header
+        alpha_channel = {"A": Imath.Channel(Imath.PixelType(OpenEXR.FLOAT))}
+        hdr["channels"].update(alpha_channel)
+
     elif channels == 3:
         data_r = image[:, :, 0].tobytes()
         data_g = image[:, :, 1].tobytes()
@@ -144,8 +151,7 @@ def write_openexr_image(filename, image):
         image_data = {"R": data_r, "G": data_g, "B": data_b}
     else:
         raise RuntimeError("Invalid number of channels of starmap image.")
-    
-    hdr = OpenEXR.Header(width, height)
+
     file_handler = OpenEXR.OutputFile(filename, hdr)
     file_handler.writePixels(image_data)
     file_handler.close()
