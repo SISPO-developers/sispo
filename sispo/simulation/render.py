@@ -11,11 +11,10 @@ import time
 import zlib
 
 import bpy
+import cv2
 from mathutils import Vector # pylint: disable=import-error
 import numpy as np
 import OpenEXR
-from skimage.filters import gaussian
-from skimage.transform import downscale_local_mean
 
 import utils
 
@@ -74,7 +73,7 @@ class BlenderController:
         for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
-            scene.render.resolution_percentage = 20 # TODO: change, 5 is debug setting
+            scene.render.resolution_percentage = 100 # TODO: change, 5 is debug setting
             scene.view_settings.view_transform = "Raw"
             scene.view_settings.look = "None"
         
@@ -356,8 +355,9 @@ class BlenderController:
         f_over_w_ccd_2 = 1. / right_edge.length
         ss = 2
         starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
+        
         # Add alpha channel
-        starmap[:,:,3] = 1.
+        starmap[:, :, 3] = 1.
 
         for star in stardata:
             mag_star = star[2]
@@ -384,12 +384,21 @@ class BlenderController:
             # Add flux to color channels
             starmap[y_pix, x_pix, 0:3] += flux
 
-        sm_gauss = gaussian(starmap, ss / 2., multichannel=True)
+        # Kernel size calculated to equal skimage.filters.gaussian
+        # Reference:
+        # https://github.com/scipy/scipy/blob/4bfc152f6ee1ca48c73c06e27f7ef021d729f496/scipy/ndimage/filters.py#L214
+        sig = ss / 2.
+        kernel = int((4 * sig + 0.5) * 2)
+        ksize = (kernel, kernel)
+
+        # Border type replicate is equal to skimage.filters.gaussian nearest
+        sm_gauss = cv2.GaussianBlur(starmap, ksize, sig, 
+                                        borderType=cv2.BORDER_REPLICATE)
 
         sm_scale = np.zeros((res_y, res_x, 4), np.float32)
-        factors = (ss, ss)
-        for c in range(4):
-            sm_scale[:, :, c] = downscale_local_mean(sm_gauss[:, :, c], factors) * (ss * ss)
+        sm_scale = cv2.resize(sm_gauss, None, fx=1/ss, fy=1/ss,
+                                interpolation=cv2.INTER_AREA)
+        sm_scale *= (ss * ss)
 
         filename = self.res_dir / ("Stars_" + name_suffix)
         utils.write_openexr_image(filename, sm_scale)

@@ -14,8 +14,6 @@ from astropy import units as u
 import cv2
 import numpy as np
 from pathlib import Path
-from skimage.filters import gaussian
-from skimage.transform import downscale_local_mean
 import matplotlib.pyplot as plt
 
 import utils
@@ -267,8 +265,8 @@ class ImageCompositor():
                 sssb_ref = sssb_ref_img.copy()
                 sssb_ref[:, :, 0:3] *= np.sum(frame.sssb_const_dist[:, :, 0] * frame.sssb_const_dist[:, :, 3]) * pow(1E6 / frame.metadata["distance"].value, 2.)
 
-                composed_img[:, :, :] = (sssb_ref[:, : , 0:3] + frame.stars[: ,:, :]) * qe
-                composed_img = cv2.GaussianBlur(composed_img, (kernelw, kernelw), sigma, sigma)
+                composed_img[:, :, :] = (sssb_ref[:, : , 0:3] + frame.stars[: ,:, :]) * self.inst["quantum_eff"]
+                composed_img = cv2.GaussianBlur(composed_img, (kernelw, kernelw), sigma)
                 composed_img += np.random.poisson(composed_img)
                 composed_max = np.max(composed_img)
                 sssb_max = np.max(sssb_ref[:, :, 0:3])
@@ -304,24 +302,33 @@ class ImageCompositor():
             file_name = self.image_dir / ("Composition_" + str(frame.id) + ".png")
             cv2.imwrite(str(file_name), composed_img)
 
-    def create_sssb_ref(self, resolution):
-        """Creates a reference sssb image for calibration."""
-        ss = 5
-        rx = resolution[0] * ss
-        ry = resolution[1] * ss
+    def create_sssb_ref(self, res, scale=5):
+        """Creates a reference sssb image for calibration.
         
-        sssb_point = np.zeros((res_x*ss, res_y*ss, 4), np.float32)
-        sssb_point[rx//2, ry//2, :] = [1., 1., 1., 1.]
-        
-        sssb = np.zeros((res_x, res_y, 4), np.float32)
+        Sort of natural look by using image increased by factor of scale,
+        gaussian blur the result and decimate to match size of other images.
+        opencv resize algorithm needs integer divisable number of pixels
+        to have the same behaviour as skimage.transform.downscale_local_mean.
+        Zero-padding of skimage.transform.downscale_local_mean would be 
+        necessary without scaling.
+        """
+        res_x, res_y = res
 
-        for c in range(0, 4):
-            sssb_point[:, :, c] = gaussian(sssb_point[:, :, c], ss/2., multichannel=False)
-            sssb[:, :, c] = downscale_local_mean(sssb_point[:, :, c], (ss, ss))
-            sssb[:, :, c] *= (ss * ss)
-            
-            if c < 3:
-                sssb[:, :, c] /= np.sum(sssb[:, :, c])
+        # Rescale
+        res_x_sc = res_x * scale
+        res_y_sc = res_y * scale
+        sssb_point = np.zeros((res_x_sc, res_y_sc, 4), np.float32)
+        
+        # Create point source and blur
+        sssb_point[res_x_sc//2, res_y_sc//2, :] = [1., 1., 1., 1.]
+        sssb_point = cv2.GaussianBlur(sssb_point, (scale, scale), scale / 2.)
+
+        sssb = np.zeros((res_x, res_y, 4), np.float32)
+        sssb = cv2.resize(sssb_point, None, fx=1/scale, fy=1/scale, 
+                            interpolation=cv2.INTER_AREA)
+
+        sssb *= (scale * scale)
+        sssb[:, :, 0:3] /= np.sum(sssb[:, :, 0:3])
             
         return sssb
 
