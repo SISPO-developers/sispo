@@ -7,5 +7,8 @@ hese images are used with openMVG and openMVS to reconstruct the 3D model and
 reconstruct the trajectory.
 """
 
-import trajectory_simulator.trajectory_simulator as ts
+import simulation.simulation as sim
 import reconstruction.reconstruction as rc
+
+if __name__ == "__main__":
+    rec = rc.Reconstructor()
