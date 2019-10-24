@@ -174,6 +174,8 @@ class ImageCompositor():
         self.sssb["albedo"] = 0.15
         self.sssb["max_dim"] = 512
 
+        self.with_infobox = True
+
         self.frame_ids = self.get_frame_ids()
         self.frames = []
         
@@ -234,7 +236,7 @@ class ImageCompositor():
                 * self.inst["focal_l"] / (self.inst["aperture_d"] \
                 * self.inst["pixel_l"])
 
-        # SSSB
+        # SSSB reference when SSSB is too small
         resolution = self.frames[0].sssb_only.shape[0:2]
         sssb_ref_img = self.create_sssb_ref(resolution)
 
@@ -315,6 +317,10 @@ class ImageCompositor():
 
             composed_img[:, :, :] *= 255
             composed_img = composed_img.astype(np.uint8)
+            
+            if self.with_infobox:
+                self.add_infobox(composed_img, frame.metadata)
+            
             file_name = self.image_dir / ("Comp_" + str(frame.id) + ".png")
             cv2.imwrite(str(file_name), composed_img)
 
@@ -351,6 +357,41 @@ class ImageCompositor():
         sssb[:, :, 0:3] /= np.sum(sssb[:, :, 0:3])
             
         return sssb
+
+    def add_infobox(self, img, metadata, tb_height=100, tb_width=400):
+        """Overlays an infobox to a given image in the lower right corner."""
+        sig = 3
+        textbox = np.zeros((tb_height * sig, tb_width * sig, 4), np.float32)
+
+        pt1 = (0, 0)
+        pt2 = (tb_width * sig, tb_height * sig)
+        color = (128, 128, 128, 128)
+        cv2.rectangle(textbox, pt1, pt2, color, cv2.FILLED)
+
+        org_date = (10 * sig, 40 * sig)
+        org_dist = (10 * sig, 70 * sig)
+        font = cv2.FONT_HERSHEY_COMPLEX_SMALL
+        font_size = 1.0 * sig
+        color = (255, 255, 255, 255)
+        date = str(metadata["date"])
+        dist = str(metadata["distance"])
+        cv2.putText(textbox, date, org_date, font, font_size, color, sig)
+        cv2.putText(textbox, dist, org_dist, font, font_size, color, sig)
+
+        # See link above for explanation
+        sigma = sig / 2.
+        kernel = int((4 * sigma + 0.5) * 2)
+        ksize = (kernel, kernel)
+        textbox = cv2.GaussianBlur(textbox, ksize, sigma)
+        textbox = cv2.resize(textbox, (tb_width, tb_height), 
+                                interpolation=cv2.INTER_AREA)
+        alpha_s = textbox[:, :, 3] / 255.0
+        alpha_l = 1. - alpha_s
+
+        for c in range(3):
+            img[1800:1800+tb_height, 2000:2000+tb_width, c] = (alpha_s * textbox[:, :, c] + alpha_l * img[1800:1800+tb_height, 2000:2000+tb_width, c])
+        
+        return img
 
 if __name__ == "__main__":
     pass
