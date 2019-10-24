@@ -11,11 +11,10 @@ import time
 import zlib
 
 import bpy
+import cv2
 from mathutils import Vector # pylint: disable=import-error
 import numpy as np
 import OpenEXR
-from skimage.filters import gaussian
-from skimage.transform import downscale_local_mean
 
 import utils
 
@@ -51,6 +50,12 @@ class BlenderController:
         self.set_scene_defaults(self.default_scene)
 
         self.set_device()
+
+        # Setting background color to black, seems easiest approach
+        bpy.data.worlds[0].color = (0, 0, 0)
+        bpy.data.worlds[0].use_nodes = True
+        background = bpy.data.worlds[0].node_tree.nodes["Background"]
+        background.inputs[0].default_value = (0, 0, 0, 1.0)
 
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
@@ -337,6 +342,10 @@ class BlenderController:
         (direction, right_edge, _, upper_edge, _) = fov_vecs
         (res_x, res_y) = img_size
 
+        scale = self.default_scene.render.resolution_percentage
+        res_x = int(res_x * scale / 100)
+        res_y = int(res_y * scale / 100)
+
         upper_edge -= direction
         right_edge -= direction
         total_flux = 0.
@@ -346,8 +355,9 @@ class BlenderController:
         f_over_w_ccd_2 = 1. / right_edge.length
         ss = 2
         starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
+        
         # Add alpha channel
-        starmap[:,:,3] = 1.
+        starmap[:, :, 3] = 1.
 
         for star in stardata:
             mag_star = star[2]
@@ -374,15 +384,24 @@ class BlenderController:
             # Add flux to color channels
             starmap[y_pix, x_pix, 0:3] += flux
 
-        sm_gauss = gaussian(starmap, ss / 2., multichannel=True)
+        # Kernel size calculated to equal skimage.filters.gaussian
+        # Reference:
+        # https://github.com/scipy/scipy/blob/4bfc152f6ee1ca48c73c06e27f7ef021d729f496/scipy/ndimage/filters.py#L214
+        sig = ss / 2.
+        kernel = int((4 * sig + 0.5) * 2)
+        ksize = (kernel, kernel)
+
+        # Border type replicate is equal to skimage.filters.gaussian nearest
+        sm_gauss = cv2.GaussianBlur(starmap, ksize, sig, 
+                                        borderType=cv2.BORDER_REPLICATE)
 
         sm_scale = np.zeros((res_y, res_x, 4), np.float32)
-        factors = (ss, ss)
-        for c in range(4):
-            sm_scale[:, :, c] = downscale_local_mean(sm_gauss[:, :, c], factors) * (ss * ss)
+        sm_scale = cv2.resize(sm_gauss, None, fx=1/ss, fy=1/ss,
+                                interpolation=cv2.INTER_AREA)
+        sm_scale *= (ss * ss)
 
         filename = self.res_dir / ("Stars_" + name_suffix)
-        write_openexr_image(filename, sm_scale)
+        utils.write_openexr_image(filename, sm_scale)
 
         return (total_flux, np.sum(sm_scale[:, :, 0]))
 
@@ -411,38 +430,7 @@ def get_fov_vecs(camera_name, scene_name):
     lower_edge = direction - up_vec * sensor_h * 0.5 / camera.data.lens
 
     return (direction, right_edge, left_edge, upper_edge, lower_edge)
-    
 
-def write_openexr_image(filename, picture):
-    """Save image in OpenEXR file format."""
-    filename = str(filename)
-
-    file_extension = ".exr"
-    if filename[-4:] != file_extension:
-        filename += file_extension
-
-    height = len(picture)
-    width = len(picture[0])
-    channels = len(picture[0][0])
-
-    if channels == 4:
-        data_r = picture[:, :, 0].tobytes()
-        data_g = picture[:, :, 1].tobytes()
-        data_b = picture[:, :, 2].tobytes()
-        data_a = picture[:, :, 3].tobytes()
-        image_data = {"R": data_r, "G": data_g, "B": data_b, "A": data_a}
-    elif channels == 3:
-        data_r = picture[:, :, 0].tobytes()
-        data_g = picture[:, :, 1].tobytes()
-        data_b = picture[:, :, 2].tobytes()
-        image_data = {"R": data_r, "G": data_g, "B": data_b}
-    else:
-        raise RenderingError("Invalid number of channels of starmap image.")
-    
-    hdr = OpenEXR.Header(width, height)
-    file_handler = OpenEXR.OutputFile(filename, hdr)
-    file_handler.writePixels(image_data)
-    file_handler.close()
 
 def get_ra_dec(vec):
     """Calculate Right Ascension (RA) and Declination (DEC) in radians."""

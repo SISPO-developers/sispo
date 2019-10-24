@@ -1,6 +1,7 @@
 """Trajectory simulation and object rendering module."""
 
 from datetime import datetime
+import json
 from pathlib import Path
 
 import numpy as np
@@ -23,6 +24,7 @@ from simulation.sc import Spacecraft
 from simulation.sssb import SmallSolarSystemBody
 import simulation.render as render
 import simulation.starcat as starcat
+import simulation.compositor as compositor
 import utils
 
 class Environment():
@@ -36,6 +38,8 @@ class Environment():
         self.models_dir = utils.check_dir(self.root_dir / "data" / "models")
 
         self.res_dir = utils.check_dir(self.root_dir / "data" / "results" / name)
+
+        comp = compositor.ImageCompositor(self.res_dir)
 
         self.sta = starcat.StarCatalog(self.res_dir)
 
@@ -65,10 +69,10 @@ class Environment():
         self.timesampler_mode = 1
         self.slowmotion_factor = 10
 
-        self.with_backgroundstars = False
-        self.with_sssbonly = False
-        self.with_sssbconstdist = False
-        self.with_lightingref = False
+        self.with_backgroundstars = True
+        self.with_sssbonly = True
+        self.with_sssbconstdist = True
+        self.with_lightingref = True
 
         self.asteroid_scenes = []
 
@@ -107,13 +111,13 @@ class Environment():
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
 
-        render_dir = utils.check_dir(self.res_dir / "rendering")
+        self.render_dir = utils.check_dir(self.res_dir / "rendering")
 
-        self.renderer = render.BlenderController(render_dir)
+        self.renderer = render.BlenderController(self.render_dir)
         self.asteroid_scenes.append("MainScene")
 
-        if self.with_backgroundstars:
-            self.renderer.create_scene("BackgroundStars")
+        #if self.with_backgroundstars:
+        #    self.renderer.create_scene("BackgroundStars")
 
         if self.with_sssbonly:
             self.renderer.create_scene("SssbOnly")
@@ -238,6 +242,16 @@ class Environment():
                 starlist = self.sta.get_stardata(ra, dec, width, height)
                 fluxes = self.renderer.render_starmap(starlist, fov_vecs, self.render_settings["res"], date_str)
 
+            metadict = dict()
+            metadict["sssb_pos"] = np.asarray(sssb_pos.toArray())
+            metadict["sc_pos"] = np.asarray(sc_pos.toArray())
+            metadict["distance"] = sc_pos.distance(sssb_pos)
+            metadict["date"] = date_str
+            metadict["sc_rel_pos"] = pos_sc_rel_sssb
+            metadict["total_flux"] = fluxes[0]
+
+            self.write_meta_file(date_str, metadict)
+
         self.logger.info("Rendering completed")
 
     def save_results(self):
@@ -256,6 +270,19 @@ class Environment():
                            + str(sc_pos) + "\n")
 
         self.logger.info("Propagation results saved")
+
+    def write_meta_file(self, suffix, metadict):
+        """Writes metafile for a frame."""
+
+        file_name = self.render_dir / ("Metadata_" + str(suffix))
+        file_name = str(file_name)
+
+        file_extension = ".json"
+        if file_name[-len(file_extension):] != file_extension:
+            file_name += file_extension
+
+        with open(file_name, "w+") as metafile:
+            json.dump(metadict, metafile, default=utils.serialise)
 
 if __name__ == "__main__":
     env = Environment("Didymos", 2 * 60.)
