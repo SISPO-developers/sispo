@@ -6,6 +6,8 @@ This module is the main contribution of my master thesis.
 
 from pathlib import Path
 
+import utils
+
 class CompressionError(RuntimeError):
     """Generic error class for compression errors."""
     pass
