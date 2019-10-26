@@ -1,6 +1,17 @@
 \section{\Acrlong{sispo}}
 
-\gls{sispo} is a software package developed in python. It is separated in different submodules. The two main submodules are the 'simulation' and the 'reconstruction' module.
+\gls{sispo} is a software package developed in python. It is separated in different sub-modules. The two main sub-modules are the 'simulation' and the 'reconstruction' module.
+
+The software package is hosted on GitHub using a git version control system. Furthermore, the GitHub project management tools are used, including automated KanBan based projects and issue tracking.
+
+The most important python dependencies of \gls{sispo} are:
+\begin{itemize}
+    \item astropy: Astronomy package developed by \cite{robitaille2013astropy} and \cite{price2018astropy}
+    \item numpy: Scientific computing for python
+    \item opencv: Computer vision library used for image processing
+    \item OpenEXR: \gls{hdr} image reading and writing
+    \item orekit: Space dynamics library
+\end{itemize}
 
 \subsection{simulation module}
 The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system.
