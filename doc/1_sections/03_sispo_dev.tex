@@ -15,9 +15,9 @@ The most important python dependencies of \gls{sispo} are:
 \end{itemize}
 
 \subsection{simulation module}
-The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system.
+The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system \cite{bessel1979ubvri}.
 
-All images during the rendering and calibration process use \gls{hdr} images to minimise the loss of information during these processes.
+All images during the rendering and calibration process use \gls{hdr} images to minimise the loss of information in intermediate steps.
 
 \subsection{compression module}
 The compression module provides compression and decompression algorithms. These can be tested against different mission scenarios and image series to investigate the impact of compression and decompression on the science quality.
