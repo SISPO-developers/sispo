@@ -1,3 +1,20 @@
-\section{\gls{sispo}}
+\section{\Acrlong{sispo}}
 
-\gls{sispo} is a software package developed with python.
+\gls{sispo} is a software package developed in python. It is separated in different submodules. The two main submodules are the 'simulation' and the 'reconstruction' module.
+
+\subsection{simulation module}
+
+\subsection{reconstruction}
+The reconstruction module can be used to generate a 3D model of an object using a series of images. It provides a full Multi-View Stereo reconstruction data process pipeline. To achieve this, two libraries are used and combined and called using python. The first library is \gls{omvg} by \cite{openMVG}. The second library is \gls{omvs}. 
+The common steps for the complete pipeline is comprised of the following steps:
+\begin{enumerate}
+    \item Read in images [ImageListing in \gls{omvg}]
+    \item Compute visual features [ComputeFeatures in \gls{omvg}]
+    \item Match computed features between different images [MatchFeatures in \gls{omvg}]
+    \item Generate point cloud from matched features [IncrementalSfM in \gls{omvg}]
+    \item Export to \gls{omvs} format [openMVG2openMVS in \gls{omvg}]
+    \item Increase number of points in point cloud [DensifyPointCloud in \gls{omvs}]
+    \item Create a mesh from the point cloud [ReconstructMesh in \gls{omvs}]
+    \item Refine the generated mesh [RefineMesh in \gls{omvs}]
+    \item Apply texture to mesh to create final 3D model [TextureMesh in \gls{omvs}]
+\end{enumerate}
