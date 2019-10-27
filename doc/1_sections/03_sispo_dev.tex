@@ -22,6 +22,8 @@ All images during the rendering and calibration process use \gls{hdr} images to 
 \subsection{compression module}
 The compression module provides compression and decompression algorithms. These can be tested against different mission scenarios and image series to investigate the impact of compression and decompression on the science quality.
 
+The following set of compression algorithms 
+
 \subsection{reconstruction module}
 The reconstruction module can be used to generate a 3D model of an object using a series of images. It provides a full Multi-View Stereo reconstruction data process pipeline. To achieve this, two libraries are used and combined and called using python. The first library is \gls{omvg} by \cite{openMVG}. The second library is \gls{omvs}. 
 The common steps for the complete pipeline is comprised of the following steps:
