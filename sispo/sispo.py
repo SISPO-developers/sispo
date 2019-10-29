@@ -11,4 +11,6 @@ import simulation.simulation as sim
 import reconstruction.reconstruction as rc
 
 if __name__ == "__main__":
-    rec = rc.Reconstructor()
+    env = sim.Environment("Didymos", 20)
+    env.simulate()
+    env.render()
