@@ -44,9 +44,12 @@ class Compressor():
 
         return ids
 
-    def load_images(self):
-        """Load all composition images for compression."""
-        self.img_ids = self.get_frame_ids()
+    def load_images(self, img_ids=None):
+        """Load composition images using ids."""
+        if img_ids is None:
+            self.img_ids = self.get_frame_ids()
+        else:
+            self.img_ids = img_ids
 
         for id in self.img_ids:
             img_path = self.image_dir / ("Comp_" + id + self.image_extension)
