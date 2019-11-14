@@ -22,13 +22,21 @@ class CompressionError(RuntimeError):
 class Compressor():
     """Main class to interface compression module."""
 
-    def __init__(self, res_dir):
+    def __init__(self, res_dir, algo=None, settings=None):
         self.res_dir = res_dir
         self.image_dir = res_dir / "rendering"
 
         self.image_extension = ".exr"
 
         self.imgs = []
+
+        if algo is None:
+            algo = "lzma"
+        if settings is None:
+            settings = {"level": 9}
+
+        self.select_algo(algo, settings)
+
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of Composition images."""
@@ -58,24 +66,64 @@ class Compressor():
             self.imgs.append(img)
 
     def compress(self):
-        """Compresses images."""
+        """
+        Compresses images using given algorithm or file format.
+        
+        :param algo: string to describe algorithm or file format to use for
+            image compression. Default is: 'lzma'
+        :returns: A list containing the compressed images.
+        """
         compressed = []
         for img in self.imgs:
-            img_cmp = lzma.compress(img, preset=9)
+            img_cmp = self._comp_met(img, **self._settings)
             compressed.append(img_cmp)
 
-            with open(str(self.image_dir / self.img_ids[0]), "wb") as fp:
-                fp.write(img_cmp)
+            with open(str(self.image_dir / self.img_ids[0]), "wb") as file:
+                file.write(img_cmp)
 
-        return compressed
-
-    def decompress(self, compressed):
+    def decompress(self):
         """Decompresses images."""
         decompressed = []
-        for img in compressed:
-            img_cmp = lzma.decompress(img)
+        for id in self.img_ids:
+            with open(str(self.image_dir / id), "rb") as file:
+                img = file.read()
+            img_cmp = self._decomp_met(img)
             img_cmp = np.frombuffer(img_cmp, dtype=np.float32)
             img_cmp = img_cmp.reshape((2048,2464,3))
             decompressed.append(img_cmp)
 
         return decompressed
+
+    def select_algo(self, algo, settings):
+        """
+        Select compression and decompression algorithm or file format.
+
+        :param algo: string to describe algorithm or file format to use for
+            image compression.
+        :param settings: dictionary to describe settings for the compression
+            algorithm. Default is {"level": 9}, i.e. highest compression.
+        """
+        if algo == "bz2":
+            comp = bz2.compress
+            settings["compresslevel"] = settings["level"]
+            settings.pop("level")
+            decomp = bz2.decompress
+        elif algo == "gzip":
+            comp = gzip.compress
+            settings["compresslevel"] = settings["level"]
+            settings.pop("level")
+            decomp = gzip.decompress
+        elif algo == "lzma":
+            comp = lzma.compress
+            settings["preset"] = settings["level"]
+            settings.pop("level")
+            decomp = lzma.decompress
+        elif algo == "zlib":
+            comp = zlib.compress
+            decomp = zlib.decompress
+        else:
+            raise CompressionError("Unknown compression algorithm.")
+
+        self._comp_met = comp
+        self._decomp_met = decomp
+        self._settings = settings
