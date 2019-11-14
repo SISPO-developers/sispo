@@ -4,7 +4,13 @@ Module for compression and decompression investigations.
 This module is the main contribution of my master thesis.
 """
 
+import bz2
+import gzip
+import lzma
 from pathlib import Path
+import zlib
+
+import numpy as np
 
 import utils
 
@@ -47,3 +53,26 @@ class Compressor():
 
             img = utils.read_openexr_image(img_path)
             self.imgs.append(img)
+
+    def compress(self):
+        """Compresses images."""
+        compressed = []
+        for img in self.imgs:
+            img_cmp = lzma.compress(img, preset=9)
+            compressed.append(img_cmp)
+
+            with open(str(self.image_dir / self.img_ids[0]), "wb") as fp:
+                fp.write(img_cmp)
+
+        return compressed
+
+    def decompress(self, compressed):
+        """Decompresses images."""
+        decompressed = []
+        for img in compressed:
+            img_cmp = lzma.decompress(img)
+            img_cmp = np.frombuffer(img_cmp, dtype=np.float32)
+            img_cmp = img_cmp.reshape((2048,2464,3))
+            decompressed.append(img_cmp)
+
+        return decompressed
