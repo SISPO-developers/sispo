@@ -65,34 +65,41 @@ class Compressor():
             img = utils.read_openexr_image(img_path)
             self.imgs.append(img)
 
-    def compress(self):
+    def compress_series(self):
         """
-        Compresses images using given algorithm or file format.
-        
-        :param algo: string to describe algorithm or file format to use for
-            image compression. Default is: 'lzma'
-        :returns: A list containing the compressed images.
+        Compresses multiple images using :py:meth: `.compress`
         """
         compressed = []
         for img in self.imgs:
-            img_cmp = self._comp_met(img, **self._settings)
-            compressed.append(img_cmp)
+            self.compress(img)
 
-            with open(str(self.image_dir / self.img_ids[0]), "wb") as file:
-                file.write(img_cmp)
+    def compress(self, img):
+        """
+        Compresses images using predefined algorithm or file format.
+        
+        :param img: Image to be compressed.
+        :returns: A the compressed images.
+        """
+        img_cmp = self._comp_met(img, **self._settings)
+        with open(str(self.image_dir / self.img_ids[0]), "wb") as file:
+            file.write(img_cmp)
+
+        return img_cmp
 
     def decompress(self):
-        """Decompresses images."""
-        decompressed = []
-        for id in self.img_ids:
-            with open(str(self.image_dir / id), "rb") as file:
-                img = file.read()
-            img_cmp = self._decomp_met(img)
-            img_cmp = np.frombuffer(img_cmp, dtype=np.float32)
-            img_cmp = img_cmp.reshape((2048,2464,3))
-            decompressed.append(img_cmp)
+        """
+        Decompresses images using predefined algorithm or file format.
 
-        return decompressed
+        :returns: Decompressed image.
+        """
+        with open(str(self.image_dir / id), "rb") as file:
+            img = file.read()
+
+        img_dcmp = self._decomp_met(img)
+        img_dcmp = np.frombuffer(img_dcmp, dtype=np.float32)
+        img_dcmp = img_dcmp.reshape((2048,2464,3))
+
+        return img_dcmp
 
     def select_algo(self, algo, settings):
         """
