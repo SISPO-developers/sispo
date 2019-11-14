@@ -115,26 +115,26 @@ class Frame():
 
         self.metadata = self.read_meta_file(frame_id, image_dir)
 
-        file_name = frame_fmt_str.format("MainScene")
-        self.main = utils.read_openexr_image(file_name)
+        filename = frame_fmt_str.format("MainScene")
+        self.main = utils.read_openexr_image(filename)
 
-        file_name = frame_fmt_str.format("Stars")
-        self.stars = utils.read_openexr_image(file_name)
+        filename = frame_fmt_str.format("Stars")
+        self.stars = utils.read_openexr_image(filename)
 
-        file_name = frame_fmt_str.format("SssbOnly")
-        self.sssb_only = utils.read_openexr_image(file_name)
+        filename = frame_fmt_str.format("SssbOnly")
+        self.sssb_only = utils.read_openexr_image(filename)
         
-        file_name = frame_fmt_str.format("SssbConstDist")
-        self.sssb_const_dist = utils.read_openexr_image(file_name)
+        filename = frame_fmt_str.format("SssbConstDist")
+        self.sssb_const_dist = utils.read_openexr_image(filename)
         
-        file_name = frame_fmt_str.format("LightRef")
-        self.light_ref = utils.read_openexr_image(file_name)
+        filename = frame_fmt_str.format("LightRef")
+        self.light_ref = utils.read_openexr_image(filename)
 
     def read_meta_file(self, frame_id, image_dir):
         """Reads metafile of a frame."""
-        file_name = image_dir / ("Metadata_" + frame_id + ".json")
+        filename = image_dir / ("Metadata_" + frame_id + ".json")
 
-        with open(str(file_name), "r") as metafile:
+        with open(str(filename), "r") as metafile:
             metadata = json.load(metafile)
 
             date = datetime.strptime(metadata["date"], "%Y-%m-%dT%H%M%S-%f")
@@ -191,13 +191,13 @@ class ImageCompositor():
         """Extract list of frame ids from file names of SssbOnly scenes."""
         scene_name = "SssbOnly"
         image_names = scene_name + "*" + self.image_extension
-        file_names = self.image_dir.glob(image_names)
+        filenames = self.image_dir.glob(image_names)
 
         ids = []
-        for file_name in file_names:
-            file_name = str(file_name.name).strip(self.image_extension)
-            file_name = file_name.strip(scene_name)
-            ids.append(file_name.strip("_"))
+        for filename in filenames:
+            filename = str(filename.name).strip(self.image_extension)
+            filename = filename.strip(scene_name)
+            ids.append(filename.strip("_"))
 
         return ids
 
@@ -312,8 +312,8 @@ class ImageCompositor():
 
             composed_img[:, :, :] /= composed_max
 
-            file_name = self.image_dir / ("Comp_" + str(frame.id))
-            utils.write_openexr_image(file_name, composed_img)
+            filename = self.image_dir / ("Comp_" + str(frame.id))
+            utils.write_openexr_image(filename, composed_img)
 
             composed_img[:, :, :] *= 255
             composed_img = composed_img.astype(np.uint8)
@@ -321,8 +321,8 @@ class ImageCompositor():
             if self.with_infobox:
                 self.add_infobox(composed_img, frame.metadata)
             
-            file_name = self.image_dir / ("Comp_" + str(frame.id) + ".png")
-            cv2.imwrite(str(file_name), composed_img)
+            filename = self.image_dir / ("Comp_" + str(frame.id) + ".png")
+            cv2.imwrite(str(filename), composed_img)
 
     def create_sssb_ref(self, res, scale=5):
         """Creates a reference sssb image for calibration.

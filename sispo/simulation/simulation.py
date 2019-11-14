@@ -274,14 +274,14 @@ class Environment():
     def write_meta_file(self, suffix, metadict):
         """Writes metafile for a frame."""
 
-        file_name = self.render_dir / ("Metadata_" + str(suffix))
-        file_name = str(file_name)
+        filename = self.render_dir / ("Metadata_" + str(suffix))
+        filename = str(filename)
 
         file_extension = ".json"
-        if file_name[-len(file_extension):] != file_extension:
-            file_name += file_extension
+        if filename[-len(file_extension):] != file_extension:
+            filename += file_extension
 
-        with open(file_name, "w+") as metafile:
+        with open(filename, "w+") as metafile:
             json.dump(metadict, metafile, default=utils.serialise)
 
 if __name__ == "__main__":
