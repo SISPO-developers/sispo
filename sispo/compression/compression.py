@@ -10,6 +10,7 @@ import lzma
 from pathlib import Path
 import zlib
 
+import cv2
 import numpy as np
 
 import utils
@@ -78,26 +79,25 @@ class Compressor():
         Compresses images using predefined algorithm or file format.
         
         :param img: Image to be compressed.
-        :returns: A the compressed images.
+        :returns: A compressed image.
         """
-        img_cmp = self._comp_met(img, **self._settings)
+        img_cmp = self._comp_met(img, self._settings)
         with open(str(self.image_dir / self.img_ids[0]), "wb") as file:
             file.write(img_cmp)
 
         return img_cmp
 
-    def decompress(self):
+    def decompress(self, img):
         """
         Decompresses images using predefined algorithm or file format.
 
         :returns: Decompressed image.
         """
-        with open(str(self.image_dir / id), "rb") as file:
-            img = file.read()
+        if img is None:
+            with open(str(self.image_dir / self.img_ids[0]), "rb") as file:
+                img = file.read()
 
         img_dcmp = self._decomp_met(img)
-        img_dcmp = np.frombuffer(img_dcmp, dtype=np.float32)
-        img_dcmp = img_dcmp.reshape((2048,2464,3))
 
         return img_dcmp
 
@@ -110,27 +110,123 @@ class Compressor():
         :param settings: dictionary to describe settings for the compression
             algorithm. Default is {"level": 9}, i.e. highest compression.
         """
+        algo = algo.lower()
+
+        ##### Compression algorithms #####
         if algo == "bz2":
-            comp = bz2.compress
+            comp = self._decorate_builtin_compress(bz2.compress)
             settings["compresslevel"] = settings["level"]
             settings.pop("level")
-            decomp = bz2.decompress
+            decomp = self._decorate_builtin_decompress(bz2.decompress)
         elif algo == "gzip":
-            comp = gzip.compress
+            comp = self._decorate_builtin_compress(gzip.compress)
             settings["compresslevel"] = settings["level"]
             settings.pop("level")
-            decomp = gzip.decompress
+            decomp = self._decorate_builtin_decompress(gzip.decompress)
         elif algo == "lzma":
-            comp = lzma.compress
+            comp = self._decorate_builtin_compress(lzma.compress)
             settings["preset"] = settings["level"]
             settings.pop("level")
-            decomp = lzma.decompress
+            decomp = self._decorate_builtin_decompress(lzma.decompress)
         elif algo == "zlib":
-            comp = zlib.compress
-            decomp = zlib.decompress
+            comp = self._decorate_builtin_compress(zlib.compress)
+            decomp = self._decorate_builtin_decompress(zlib.decompress)
+
+        ##### File formats #####
+        elif algo == "jpeg" or algo == "jpg":
+            comp = self._decorate_cv_compress(cv2.imencode)
+            settings["ext"] = ".jpg"
+            params = (cv2.IMWRITE_JPEG_QUALITY, settings["level"] * 10)
+
+            if "progressive" in settings:
+                if isinstance(settings["progressive"], bool):
+                    params += (cv2.IMWRITE_JPEG_PROGRESSIVE, 
+                               settings["progressive"])
+                else:
+                    raise CompressionError("JPEG progressive requires bool")
+
+            if "optimize" in settings:
+                if isinstance(settings["optimize"], bool):
+                    params += (cv2.IMWRITE_JPEG_OPTIMIZE, settings["optimize"])
+                else:
+                    raise CompressionError("JPEG optimize requires bool input")
+
+            if "rst_interval" in settings:
+                if isinstance(settings["rst_interval"], int):
+                    params += (cv2.IMWRITE_JPEG_RST_INTERVAL,
+                               settings["rst_interval"])
+                else:
+                    raise CompressionError("JPEG rst_interval requires int")
+
+            if "luma_quality" in settings:
+                if isinstance(settings["luma_quality"], int):
+                    params += (cv2.IMWRITE_JPEG_LUMA_QUALITY,
+                               settings["luma_quality"])
+                else:
+                    raise CompressionError("JPEG luma_quality requires int")
+
+            if "chroma_quality" in settings:
+                if isinstance(settings["chroma_quality"], int):
+                    params += (cv2.IMWRITE_JPEG_CHROMA_QUALITY,
+                               settings["chroma_quality"])
+                else:
+                    raise CompressionError("JPEG chroma_quality requires int")
+
+            settings["params"] = params
+
+            decomp = self._decorate_cv_decompress(cv2.imdecode)
+
+        elif "png":
+            comp = self._decorate_cv_compress(cv2.imencode)
+            settings["ext"] = ".png"
+            params = (cv2.IMWRITE_PNG_COMPRESSION, settings["level"])
+            settings.pop("level")
+
+            settings["params"] = params
+
+            decomp = self._decorate_cv_decompress(cv2.imdecode)
+
         else:
             raise CompressionError("Unknown compression algorithm.")
 
         self._comp_met = comp
         self._decomp_met = decomp
         self._settings = settings
+
+    @staticmethod
+    def _decorate_builtin_compress(func):
+        def compress(img, settings):
+            img_cmp = func(img, **settings)
+            return img_cmp
+
+        return compress
+
+    @staticmethod
+    def _decorate_builtin_decompress(func):
+        def decompress(img):
+            img_dcmp = func(img)
+            img_dcmp = np.frombuffer(img_dcmp, dtype=np.float32)
+            img_dcmp = img_dcmp.reshape((2048,2464,3))
+            return img_dcmp
+
+        return decompress
+
+    @staticmethod
+    def _decorate_cv_compress(func):
+        def compress(img, settings):
+            img_temp = img * 255
+            img = img_temp.astype(np.uint8)
+            _, img_cmp = func(settings["ext"], img, settings["params"])
+            img_cmp = np.array(img_cmp).tobytes()
+            return img_cmp
+        
+        return compress
+
+    @staticmethod
+    def _decorate_cv_decompress(func):
+        def decompress(img):
+            img = np.frombuffer(img, dtype=np.uint8)
+            img_dcmp = func(img, cv2.IMREAD_UNCHANGED)
+            return img_dcmp
+
+        return decompress
