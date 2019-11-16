@@ -9,7 +9,12 @@ import OpenEXR
 import Imath
 
 def check_dir(directory):
-    """Resolves directory and creates it, if it doesn't existing."""
+    """
+    Resolves directory and creates it, if it doesn't existing.
+    
+    :type directory: Path
+    :param directory: Directory to be created if not existing
+    """
     dir_resolved = directory.resolve()
 
     if not dir_resolved.exists():
