@@ -2,6 +2,8 @@
 
 from pathlib import Path
 
+from astropy import units as u
+import numpy as np
 import orekit
 from org.orekit.orbits import KeplerianOrbit # pylint: disable=import-error
 from org.orekit.frames import FramesFactory # pylint: disable=import-error
@@ -25,6 +27,8 @@ class Spacecraft(CelestialBody):
 
         self.trajectory = KeplerianOrbit(state, self.ref_frame, self.trj_date, mu)
         self.propagator = KeplerianPropagator(self.trajectory)
+
+        self.payload = None
 
     @classmethod
     def calc_encounter_state(cls,
@@ -70,3 +74,20 @@ class Spacecraft(CelestialBody):
 
         return sc_pos
         
+
+class Instrument():
+    """Summarizes characteristics of an instrument."""
+
+    def __init__(self, characteristics=None):
+        
+        if characteristics is None:
+            self.chip_noise = 10
+            self.res = (2464, 2048)
+            self.pixel_l = 3.45 * u.micron
+            self.pixel_a = self.pixel_l ** 2 * (1 / u.pix)
+            self.chip_w = self.pixel_l * self.res[0]
+            self.quantum_eff = 0.25
+            self.focal_l = 230 * u.mm
+            self.aperture_d = 4 * u.cm
+            self.aperture_a = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) * np.pi/4
+            self.wavelength = 550 * u.nm
