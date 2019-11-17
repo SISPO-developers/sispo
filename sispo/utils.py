@@ -10,7 +10,12 @@ import OpenEXR
 import Imath
 
 def check_dir(directory):
-    """Resolves directory and creates it, if it doesn't existing."""
+    """
+    Resolves directory and creates it, if it doesn't existing.
+    
+    :type directory: Path
+    :param directory: Directory to be created if not existing
+    """
     dir_resolved = directory.resolve()
 
     if not dir_resolved.exists():
@@ -182,10 +187,10 @@ def check_file_ext(filename, extension):
 def create_logger(name):
     """Creates a logger with the common formatting."""
     now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
-    file_name = (now + "_" + name + ".log")
+    filename = (now + "_" + name + ".log")
     log_dir = Path(__file__).parent.parent / "data" / "logs"
     log_dir = check_dir(log_dir)
-    log_file = log_dir / file_name
+    log_file = log_dir / filename
 
     logger = logging.getLogger(name)
     logger.setLevel(logging.INFO)

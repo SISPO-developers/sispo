@@ -17,17 +17,6 @@ import utils
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    root_dir = Path(__file__).parent.parent
-    res_dir = utils.check_dir(root_dir / "data" / "results" / "Didymos")
-    compr = comp.Compressor(res_dir, "png")
-    compr.get_frame_ids()
-    compr.load_images()
-    cmp = compr.compress(compr.imgs[0])
-    decomp = compr.decompress(cmp)
-
-    plt.imshow(compr.imgs[0])
-    plt.show()
-    plt.imshow(decomp)
-    plt.show()
-
-    print((compr.imgs[0] == decomp).all())
+    env = sim.Environment("Didymos", 20)
+    env.simulate()
+    env.render()
