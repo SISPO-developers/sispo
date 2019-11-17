@@ -18,17 +18,16 @@ import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
     root_dir = Path(__file__).parent.parent
-    name = "Didymos"
-    res_dir = utils.check_dir(root_dir / "data" / "results" / name)
-    compr = comp.Compressor(res_dir)
+    res_dir = utils.check_dir(root_dir / "data" / "results" / "Didymos")
+    compr = comp.Compressor(res_dir, "png")
     compr.get_frame_ids()
     compr.load_images()
-    compr.compress()
-    decomp = compr.decompress()
+    cmp = compr.compress(compr.imgs[0])
+    decomp = compr.decompress(cmp)
 
     plt.imshow(compr.imgs[0])
     plt.show()
-    plt.imshow(decomp[0])
+    plt.imshow(decomp)
     plt.show()
 
-    print((compr.imgs[0] == decomp[0]).all())
+    print((compr.imgs[0] == decomp).all())
