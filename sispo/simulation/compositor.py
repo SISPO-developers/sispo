@@ -151,7 +151,7 @@ class Frame():
 class ImageCompositor():
     """This class provides functions to combine the final simulation images."""
 
-    def __init__(self, res_dir, filename=None):
+    def __init__(self, res_dir):
 
         self.res_dir = res_dir
         self.image_dir = res_dir / "rendering"
