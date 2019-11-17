@@ -228,8 +228,23 @@ class ImageCompositor():
 
         return rel_intensity
 
-    def compose(self):
-        """Composes raw images and adjusts light intensities."""
+    def compose(self, frames=None):
+        """
+        Composes raw images and adjusts light intensities.
+        
+        :type frames: Frame or List of Frame
+        :param frames: Frame or list of frames to be calibrated and composed
+        """
+
+        if frames is None:
+            frames = self.frames
+        elif isinstance(frames, Frame):
+            frames = [frames]
+        elif isinstance(frames, list) and isinstance(frames[0], Frame):
+            pass
+        else:
+            raise ImageCompositorError(
+                "Compositor.compose requires frame or list of frames as input")
         
         # Calculate Gaussian standard deviation for approx diffraction pattern
         sigma = self.dlmult * 0.45 * self.inst["wavelength"] \
@@ -389,7 +404,10 @@ class ImageCompositor():
         alpha_l = 1. - alpha_s
 
         for c in range(3):
-            img[1800:1800+tb_height, 2000:2000+tb_width, c] = (alpha_s * textbox[:, :, c] + alpha_l * img[1800:1800+tb_height, 2000:2000+tb_width, c])
+            tb_a = alpha_s * textbox[:, :, c]
+            img_a = alpha_l * img[1800:1800+tb_height, 2000:2000+tb_width, c]
+            img_channel = (tb_a + img_a)
+            img[1800:1800+tb_height, 2000:2000+tb_width, c] = img_channel
         
         return img
 
