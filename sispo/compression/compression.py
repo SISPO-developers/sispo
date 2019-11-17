@@ -137,6 +137,7 @@ class Compressor():
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".jpg"
             params = (cv2.IMWRITE_JPEG_QUALITY, settings["level"] * 10)
+            settings.pop("level")
 
             if "progressive" in settings:
                 if isinstance(settings["progressive"], bool):
@@ -176,11 +177,96 @@ class Compressor():
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
 
+        elif "jpeg2000" or "jp2":
+            comp = self._decorate_cv_compress(cv2.imencode)
+            settings["ext"] = ".jp2"
+            params = (cv2.IMWRITE_JPEG2000_COMPRESSION_X1000, settings["level"] * 100)
+            settings.pop("level")
+
+            decomp = self._decorate_cv_decompress(cv2.imdecode)
+
         elif "png":
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".png"
             params = (cv2.IMWRITE_PNG_COMPRESSION, settings["level"])
             settings.pop("level")
+
+            if "strategy" in settings:
+                if isinstance(settings["strategy"], int):
+                    params += (cv2.IMWRITE_PNG_STRATEGY, settings["strategy"])
+
+                else:
+                    raise CompressionError("PNG strategy requires int")
+
+            if "bilevel" in settings:
+                if isinstance(settings["bilevel"], bool):
+                    params += (cv2.IMWRITE_PNG_BILEVEL, settings["bilevel"])
+
+                else:
+                    raise CompressionError("PNG bilevel requires bool")
+
+            settings["params"] = params
+
+            decomp = self._decorate_cv_decompress(cv2.imdecode)
+
+        elif "tiff":
+            # According to: http://libtiff.org/support.html
+            comp = self._decorate_cv_compress(cv2.imencode)
+            settings["ext"] = ".tiff"
+            params = ()
+
+            if "scheme" in settings:
+                # Valid values
+                # 1: None
+                # 2: CCITT 1D
+                # 3: CCITT Group 3
+                # 4: CCITT Group 4
+                # 5: LZW
+                # 7: JPEG
+                # Also some more experimental ones exist
+                if isinstance(settings["scheme"], int):
+                    params += (cv2.IMWRITE_TIFF_COMPRESSION,
+                               settings["scheme"])
+                
+                else:
+                    raise CompressionError("TIFF scheme requires int")
+
+            if "resunit" in settings:
+                if isinstance(settings["resunit"], int):
+                    params += (cv2.IMWRITE_TIFF_RESUNIT, settings["resunit"])
+
+                else:
+                    raise CompressionError("TIFF resunit requries int")
+
+            if "xdpi" in settings:
+                if isinstance(settings["xdpi"], int):
+                    params += (cv2.IMWRITE_TIFF_XDPI, settings["xdpi"])
+
+                else:
+                    raise CompressionError("TIFF xdpi requires int")
+
+            if "ydpi" in settings:
+                if isinstance(settings["ydpi"], int):
+                    params += (cv2.IMWRITE_TIFF_XDPI, settings["ydpi"])
+
+                else:
+                    raise CompressionError("TIFF ydpi requires int")
+
+            settings["params"] = params
+
+            decomp = self._decorate_cv_decompress(cv2.imdecode)
+
+        elif "exr":
+            comp = self._decorate_cv_compress(cv2.imencode)
+            settings["ext"] = ".exr"
+            params = ()
+
+            if "type" in settings:
+                if isinstance(settings["type"], int):
+                    params += (cv2.IMWRITE_EXR_TYPE, settings["type"])
+
+                else:
+                    raise CompressionError("EXR type requires int")
 
             settings["params"] = params
 
