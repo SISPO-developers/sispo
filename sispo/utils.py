@@ -4,6 +4,7 @@ import logging
 from pathlib import Path
 from datetime import datetime
 
+import cv2
 import numpy as np
 import OpenEXR
 import Imath
@@ -81,17 +82,13 @@ def serialise(o):
 
 
 def read_openexr_image(filename):
-    """Read image in OpenEXR file format."""
-    filename = str(filename)
+    """Read image in OpenEXR file format into numpy array."""
+    filename = check_file_ext(filename, ".exr")
 
-    file_extension = ".exr"
-    if filename[-len(file_extension):] != file_extension:
-        filename += file_extension
-
-    if not OpenEXR.isOpenExrFile(filename):
+    if not OpenEXR.isOpenExrFile(str(filename)):
         return None
 
-    image = OpenEXR.InputFile(filename)
+    image = OpenEXR.InputFile(str(filename))
 
     if not image.isComplete():
         return None
@@ -116,7 +113,7 @@ def read_openexr_image(filename):
     pt = Imath.PixelType(Imath.PixelType.FLOAT)
 
     for c in range(0, channels):
-        image_channel = np.fromstring(image.channel(ch[c], pt), dtype=np.float32)
+        image_channel = np.fromstring(image.channel(ch[c], pt), np.float32)
         image_o[:, :, c] = image_channel.reshape(resolution[1], resolution[0])
     
     image.close()
@@ -125,12 +122,8 @@ def read_openexr_image(filename):
 
 
 def write_openexr_image(filename, image):
-    """Save image in OpenEXR file format."""
-    filename = str(filename)
-
-    file_extension = ".exr"
-    if filename[-len(file_extension):] != file_extension:
-        filename += file_extension
+    """Save image in OpenEXR file format from numpy array."""
+    filename = check_file_ext(filename, ".exr")
 
     height = len(image)
     width = len(image[0])
@@ -161,6 +154,35 @@ def write_openexr_image(filename, image):
     file_handler.writePixels(image_data)
     file_handler.close()
 
+
+def read_png_image(filename):
+    """Reads an image in png file format into numpy array."""
+    filename = check_file_ext(filename, ".png")
+
+    img = cv2.imread(str(filename), (cv2.IMREAD_UNCHANGED))
+
+    return img
+
+
+def check_file_ext(filename, extension):
+    """Checks whether filename ends with extension and adds it if not."""
+    is_path = False
+    
+    if isinstance(filename, Path):
+        is_path = True
+        filename = str(filename)    
+    elif isinstance(filename, str):
+        pass
+    else:
+        raise RuntimeError("Wrong input type for file extension check.")
+    
+    if filename[-len(extension):] != extension:
+        filename += extension
+    
+    if is_path:
+        filename = Path(filename)
+
+    return filename
 
 def create_logger(name):
     """Creates a logger with the common formatting."""
