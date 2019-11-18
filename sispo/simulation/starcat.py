@@ -32,12 +32,15 @@ class StarCatalog():
         if (starcat_dir / "u4test").exists() or \
                 (starcat_dir / "u4test.exe").exists():
             self.exe = starcat_dir / "u4test"
+
         elif (starcat_dir / "star_cats" / "u4test").exists() or \
                 (starcat_dir / "star_cats" / "u4test.exe").exists():
             self.exe = starcat_dir / "star_cats" / "u4test"
+
         elif (starcat_dir / "build_star_cats" / "u4test").exists() or \
                 (starcat_dir / "build_star_cats" / "u4test.exe").exists():
             self.exe = starcat_dir / "build_star_cats" / "u4test"
+            
         else:
             raise StarCatalogError("UCAC4 interface could not be found.")
 
@@ -55,7 +58,7 @@ class StarCatalog():
         """Retrieve star data from given field of view using UCAC4 catalog."""
         res_file = self.res_dir / filename
 
-        command = [str(self.exe), 
+        command = [str(self.exe),
                    str(ra),
                    str(dec),
                    str(width),
@@ -65,13 +68,13 @@ class StarCatalog():
                    str(res_file)]
 
         for _ in range(5):
-            retcode = subprocess.call(command)
+            ret = subprocess.run(command)
 
-            if retcode > 0:
-                logger.info("Found %d stars in catalog", retcode)
+            if ret.returncode > 0:
+                logger.info("Found %d stars in catalog", ret.returncode)
                 break
 
-            logger.info("Error code from star catalog %d", retcode)
+            logger.info("Error code from star catalog %d", ret.returncode)
 
         with open(str(res_file), "r") as rfile:
             complete_data = rfile.readlines()
