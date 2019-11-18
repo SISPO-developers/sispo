@@ -255,7 +255,7 @@ class ImageCompositor():
         resolution = self.frames[0].sssb_only.shape[0:2]
         sssb_ref_img = self.create_sssb_ref(resolution)
 
-        for frame in self.frames:
+        for frame in frames:
 
             # SSSB photometry
             sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"]) * u.m
