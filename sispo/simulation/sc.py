@@ -78,16 +78,56 @@ class Spacecraft(CelestialBody):
 class Instrument():
     """Summarizes characteristics of an instrument."""
 
-    def __init__(self, characteristics=None):
+    def __init__(self, charas=None):
+        """
+        Flexible init, all values have defaults.
         
-        if characteristics is None:
+        :type charas: Dict
+        :param charas: Required characteristics that describe the instrument.
+        """
+        
+        if charas is None:
+            charas = {}
+
+        if "chip_noise" in charas:
+            self.chip_noise = charas["chip_noise"]
+        else:
             self.chip_noise = 10
+
+        if "res" in charas:
+            self.res = charas["res"]
+        else:
             self.res = (2464, 2048)
-            self.pixel_l = 3.45 * u.micron
-            self.pixel_a = self.pixel_l ** 2 * (1 / u.pix)
-            self.chip_w = self.pixel_l * self.res[0]
+
+        if "pix_l" in charas:
+            self.pix_l = charas["pix_l"]
+            self.pix_a = self.pix_l ** 2 * (1 / u.pix)
+        elif "pix_a" in charas:
+            self.pix_a = charas["pix_a"]
+            self.pix_l = np.sqrt(self.pix_a)
+        else:
+            self.pix_l = 3.45 * u.micron
+            self.pix_a = self.pix_l ** 2 * (1 / u.pix)    
+        self.chip_w = self.pix_l * self.res[0]
+
+        if "quantum_eff" in charas:
+            self.quantum_eff = charas["quantum_eff"]
+        else:
             self.quantum_eff = 0.25
+
+        if "focal_l" in charas:
+            self.focal_l = charas["focal_l"]
+        else:
             self.focal_l = 230 * u.mm
+
+        if "aperture_d" in charas:
+            self.aperture_d = charas["aperture_d"]
+        else:
             self.aperture_d = 4 * u.cm
-            self.aperture_a = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) * np.pi/4
+
+        if "wavelength" in charas:
+            self.wavelength = charas["wavelength"]
+        else:
             self.wavelength = 550 * u.nm
+      
+        self.aperture_a = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) * np.pi/4
