@@ -35,7 +35,6 @@ class Frame():
     """Class to wrap all data of a single frame."""
 
     metadata = None
-    main_scene = None
     stars = None
     sssb_only = None
     sssb_const_dist = None
@@ -44,7 +43,6 @@ class Frame():
     def __init__(self,
                  frame_id,
                  image_dir=None,
-                 main=None,
                  stars=None,
                  sssb_only=None,
                  sssb_const_dist=None,
@@ -52,8 +50,7 @@ class Frame():
 
         self.id = frame_id
 
-        if None not in (main, stars, sssb_only, sssb_const_dist, light_ref):
-            self.main_scene = main
+        if None not in (stars, sssb_only, sssb_const_dist, light_ref):
             self.stars = stars
             self.sssb_only = sssb_only
             self.sssb_const_dist = sssb_const_dist
@@ -108,15 +105,12 @@ class Frame():
     def read_complete_frame(self, frame_id, image_dir):
         """Reads all images for a given frame id.
 
-        This includes MainScene, Stars, SssbOnly, SssbConstDist, and LightRef.
+        This includes Stars, SssbOnly, SssbConstDist, and LightRef.
         """
         frame_fmt_str = image_dir / ("{}_" + frame_id + ".exr")
         frame_fmt_str = str(frame_fmt_str)
 
         self.metadata = self.read_meta_file(frame_id, image_dir)
-
-        filename = frame_fmt_str.format("MainScene")
-        self.main = utils.read_openexr_image(filename)
 
         filename = frame_fmt_str.format("Stars")
         self.stars = utils.read_openexr_image(filename)

@@ -43,8 +43,8 @@ class BlenderController:
         self.scenes = bpy.data.scenes
         self.cameras = bpy.data.cameras
 
-        # Initial scene is MainScene, clear from objects, and set defaults
-        self.default_scene.name = "MainScene"
+        # Initial scene is SssbOnly, clear from objects, and set defaults
+        self.default_scene.name = "SssbOnly"
         for obj in bpy.data.objects:
             bpy.data.objects.remove(obj)
         self.set_scene_defaults(self.default_scene)
@@ -233,7 +233,7 @@ class BlenderController:
                          mode="PERSP", # Modes ORTHO, PERSP
                          ortho_scale=7):
         """Set camera configuration values."""
-        camera = self.cameras[camera_name]      
+        camera = self.cameras[camera_name]
         camera.clip_end = clip_end
         camera.clip_start = clip_start
         camera.lens = lens
