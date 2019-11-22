@@ -110,9 +110,6 @@ class Environment():
         self.renderer = render.BlenderController(self.render_dir)
         self.asteroid_scenes.append("SssbOnly")
 
-        #if self.with_backgroundstars:
-        #    self.renderer.create_scene("BackgroundStars")
-
         self.renderer.create_camera("ScCam")
         self.renderer.configure_camera("ScCam")
 
