@@ -82,7 +82,6 @@ class Environment():
         self.render_settings["samples"] = 48
         self.render_settings["device"] = "GPU"
         self.render_settings["tile"] = 512
-        self.render_settings["color_depth"] = "32"
 
         self.logger.info("Rendering settings: Exposure: %d; Samples: %d",
                     self.render_settings['exposure'], self.render_settings['samples'])
@@ -119,18 +118,18 @@ class Environment():
             self.asteroid_scenes.append("SssbOnly")
 
         self.renderer.create_camera("ScCam")
-        self.renderer.configure_camera("ScCam", self.inst.focal_l.value, self.inst.chip_w.value)
+        self.renderer.configure_camera("ScCam")
 
         if self.with_sssbconstdist:
             self.renderer.create_scene("SssbConstDist")
             self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
-            self.renderer.configure_camera("SssbConstDistCam", self.inst.focal_l.value, self.inst.chip_w.value)
+            self.renderer.configure_camera("SssbConstDistCam", self.inst.focal_l, self.inst.chip_w)
             self.asteroid_scenes.append("SssbConstDist")
 
         if self.with_lightingref:
             self.renderer.create_scene("LightRef")
             self.renderer.create_camera("LightRefCam", scenes="LightRef")
-            self.renderer.configure_camera("LightRefCam", self.inst.focal_l.value, self.inst.chip_w.value)
+            self.renderer.configure_camera("LightRefCam", self.inst.focal_l, self.inst.chip_w)
 
         self.renderer.set_device(self.render_settings["device"])
         self.renderer.set_samples(self.render_settings["samples"])
