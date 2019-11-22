@@ -20,7 +20,7 @@ from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.utils import Constants  # pylint: disable=import-error
 
 from simulation.cb import CelestialBody
-from simulation.sc import Spacecraft
+from simulation.sc import Instrument, Spacecraft
 from simulation.sssb import SmallSolarSystemBody
 import simulation.render as render
 import simulation.starcat as starcat
@@ -39,7 +39,8 @@ class Environment():
 
         self.res_dir = utils.check_dir(self.root_dir / "data" / "results" / name)
 
-        comp = compositor.ImageCompositor(self.res_dir)
+        self.inst = Instrument()
+        #comp = compositor.ImageCompositor(self.res_dir, self.inst)
 
         self.sta = starcat.StarCatalog(self.res_dir)
 
@@ -70,9 +71,9 @@ class Environment():
         self.slowmotion_factor = 10
 
         self.with_backgroundstars = True
-        self.with_sssbonly = True
-        self.with_sssbconstdist = True
-        self.with_lightingref = True
+        self.with_sssbonly = False
+        self.with_sssbconstdist = False
+        self.with_lightingref = False
 
         self.asteroid_scenes = []
 
@@ -81,13 +82,7 @@ class Environment():
         self.render_settings["samples"] = 48
         self.render_settings["device"] = "GPU"
         self.render_settings["tile"] = 512
-        self.render_settings["res"] = (2464, 2048)
         self.render_settings["color_depth"] = "32"
-
-        self.camera_settings = dict()
-        self.camera_settings["lens"] = 230
-        self.camera_settings["sensor"] = 3.45E-3 * \
-            self.render_settings["res"][0]
 
         self.logger.info("Rendering settings: Exposure: %d; Samples: %d",
                     self.render_settings['exposure'], self.render_settings['samples'])
@@ -124,23 +119,23 @@ class Environment():
             self.asteroid_scenes.append("SssbOnly")
 
         self.renderer.create_camera("ScCam")
-        self.renderer.configure_camera("ScCam", **self.camera_settings)
+        self.renderer.configure_camera("ScCam", self.inst.focal_l.value, self.inst.chip_w.value)
 
         if self.with_sssbconstdist:
             self.renderer.create_scene("SssbConstDist")
             self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
-            self.renderer.configure_camera("SssbConstDistCam", **self.camera_settings)
+            self.renderer.configure_camera("SssbConstDistCam", self.inst.focal_l.value, self.inst.chip_w.value)
             self.asteroid_scenes.append("SssbConstDist")
 
         if self.with_lightingref:
             self.renderer.create_scene("LightRef")
             self.renderer.create_camera("LightRefCam", scenes="LightRef")
-            self.renderer.configure_camera("LightRefCam", **self.camera_settings)
+            self.renderer.configure_camera("LightRefCam", self.inst.focal_l.value, self.inst.chip_w.value)
 
         self.renderer.set_device(self.render_settings["device"])
         self.renderer.set_samples(self.render_settings["samples"])
         self.renderer.set_exposure(self.render_settings["exposure"])
-        self.renderer.set_resolution(self.render_settings["res"])
+        self.renderer.set_resolution(self.inst.res)
         self.renderer.set_output_format()
 
     def setup_sun(self):
@@ -240,7 +235,7 @@ class Environment():
                 fov_vecs = render.get_fov_vecs("ScCam", "MainScene")
                 ra, dec, width, height = render.get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
                 starlist = self.sta.get_stardata(ra, dec, width, height)
-                fluxes = self.renderer.render_starmap(starlist, fov_vecs, self.render_settings["res"], date_str)
+                fluxes = self.renderer.render_starmap(starlist, fov_vecs, self.inst.res, date_str)
 
             metadict = dict()
             metadict["sssb_pos"] = np.asarray(sssb_pos.toArray())
