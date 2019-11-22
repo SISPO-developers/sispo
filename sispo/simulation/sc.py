@@ -97,7 +97,7 @@ class Instrument():
         if "res" in charas:
             self.res = charas["res"]
         else:
-            self.res = (2464, 2048)
+            self.res = (2456, 2054)
 
         if "pix_l" in charas:
             self.pix_l = charas["pix_l"]
