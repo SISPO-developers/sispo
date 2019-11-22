@@ -114,14 +114,10 @@ class Environment():
         self.render_dir = utils.check_dir(self.res_dir / "rendering")
 
         self.renderer = render.BlenderController(self.render_dir)
-        self.asteroid_scenes.append("MainScene")
+        self.asteroid_scenes.append("SssbOnly")
 
         #if self.with_backgroundstars:
         #    self.renderer.create_scene("BackgroundStars")
-
-        if self.with_sssbonly:
-            self.renderer.create_scene("SssbOnly")
-            self.asteroid_scenes.append("SssbOnly")
 
         self.renderer.create_camera("ScCam")
         self.renderer.configure_camera("ScCam", **self.camera_settings)
@@ -237,7 +233,7 @@ class Environment():
 
             # Render star background
             if self.with_backgroundstars:
-                fov_vecs = render.get_fov_vecs("ScCam", "MainScene")
+                fov_vecs = render.get_fov_vecs("ScCam", "SssbOnly")
                 ra, dec, width, height = render.get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
                 starlist = self.sta.get_stardata(ra, dec, width, height)
                 fluxes = self.renderer.render_starmap(starlist, fov_vecs, self.render_settings["res"], date_str)
