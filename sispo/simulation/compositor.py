@@ -35,7 +35,6 @@ class Frame():
     """Class to wrap all data of a single frame."""
 
     metadata = None
-    main_scene = None
     stars = None
     sssb_only = None
     sssb_const_dist = None
@@ -44,7 +43,6 @@ class Frame():
     def __init__(self,
                  frame_id,
                  image_dir=None,
-                 main=None,
                  stars=None,
                  sssb_only=None,
                  sssb_const_dist=None,
@@ -52,8 +50,7 @@ class Frame():
 
         self.id = frame_id
 
-        if None not in (main, stars, sssb_only, sssb_const_dist, light_ref):
-            self.main_scene = main
+        if None not in (stars, sssb_only, sssb_const_dist, light_ref):
             self.stars = stars
             self.sssb_only = sssb_only
             self.sssb_const_dist = sssb_const_dist
@@ -108,15 +105,12 @@ class Frame():
     def read_complete_frame(self, frame_id, image_dir):
         """Reads all images for a given frame id.
 
-        This includes MainScene, Stars, SssbOnly, SssbConstDist, and LightRef.
+        This includes Stars, SssbOnly, SssbConstDist, and LightRef.
         """
         frame_fmt_str = image_dir / ("{}_" + frame_id + ".exr")
         frame_fmt_str = str(frame_fmt_str)
 
         self.metadata = self.read_meta_file(frame_id, image_dir)
-
-        filename = frame_fmt_str.format("MainScene")
-        self.main = utils.read_openexr_image(filename)
 
         filename = frame_fmt_str.format("Stars")
         self.stars = utils.read_openexr_image(filename)
@@ -151,23 +145,14 @@ class Frame():
 class ImageCompositor():
     """This class provides functions to combine the final simulation images."""
 
-    def __init__(self, res_dir, filename=None):
+    def __init__(self, res_dir, instrument):
 
         self.res_dir = res_dir
         self.image_dir = res_dir / "rendering"
 
         self.image_extension = ".exr"
 
-        self.inst = {}
-        self.inst["chip_noise"] = 10
-        self.inst["pixel_l"] = 3.45 * u.micron
-        self.inst["pixel_a"] = self.inst["pixel_l"] ** 2 * (1 / u.pix)
-        self.inst["quantum_eff"] = 0.25
-        self.inst["focal_l"] = 230 * u.mm
-        self.inst["aperture_d"] = 4 * u.cm
-        self.inst["aperture_a"] = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) \
-                                  * np.pi / 4
-        self.inst["wavelength"] = 550 * u.nm
+        self.inst = instrument
         self.dlmult = 2
 
         self.sssb = {}
@@ -228,30 +213,44 @@ class ImageCompositor():
 
         return rel_intensity
 
-    def compose(self):
-        """Composes raw images and adjusts light intensities."""
+    def compose(self, frames=None):
+        """
+        Composes raw images and adjusts light intensities.
+        
+        :type frames: Frame or List of Frame
+        :param frames: Frame or list of frames to be calibrated and composed
+        """
+
+        if frames is None:
+            frames = self.frames
+        elif isinstance(frames, Frame):
+            frames = [frames]
+        elif isinstance(frames, list) and isinstance(frames[0], Frame):
+            pass
+        else:
+            raise ImageCompositorError(
+                "Compositor.compose requires frame or list of frames as input")
         
         # Calculate Gaussian standard deviation for approx diffraction pattern
-        sigma = self.dlmult * 0.45 * self.inst["wavelength"] \
-                * self.inst["focal_l"] / (self.inst["aperture_d"] \
-                * self.inst["pixel_l"])
+        sigma = self.dlmult * 0.45 * self.inst.wavelength \
+                * self.inst.focal_l / (self.inst.aperture_d \
+                * self.inst.pix_l)
 
         # SSSB reference when SSSB is too small
-        resolution = self.frames[0].sssb_only.shape[0:2]
-        sssb_ref_img = self.create_sssb_ref(resolution)
+        sssb_ref_img = self.create_sssb_ref(self.inst.res)
 
-        for frame in self.frames:
+        for frame in frames:
 
             # SSSB photometry
             sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"]) * u.m
             ref_flux = SUN_FLUX_VBAND_1AU * ((const.au / sc_sun_dist) ** 2)
-            ref_flux *= self.inst["aperture_a"] * self.inst["pixel_a"] 
-            ref_flux /= ((self.inst["focal_l"] ** 2) * np.pi)
+            ref_flux *= self.inst.aperture_a * self.inst.pix_a 
+            ref_flux /= ((self.inst.focal_l ** 2) * np.pi)
             ref_flux = ref_flux.decompose()
 
             # Star photometry
             starmap_flux = FLUX0_VBAND * frame.metadata["total_flux"]
-            starmap_flux *= self.inst["aperture_a"]
+            starmap_flux *= self.inst.aperture_a
             starmap_flux = starmap_flux.decompose()
             
             # Calibrate starmap
@@ -281,7 +280,7 @@ class ImageCompositor():
                 sssb_ref[:, :, 0:3] *= np.sum(scale, axis=-1) * dist_scale
 
                 composed_img = (sssb_ref[:, : , 0:3] + frame.stars)
-                composed_img *= self.inst["quantum_eff"]
+                composed_img *= self.inst.quantum_eff
                 composed_img = cv2.GaussianBlur(composed_img, ksize, sigma)
                 composed_img += np.random.poisson(composed_img)
                 
@@ -305,7 +304,7 @@ class ImageCompositor():
                     stars = frame.stars[:, :, c]
                     composed_img[:, :, c] = alpha * sssb + (1 - alpha) * stars
                 
-                composed_img[:, :, 0:3] *= self.inst["quantum_eff"]
+                composed_img[:, :, 0:3] *= self.inst.quantum_eff
                 composed_img = cv2.GaussianBlur(composed_img, ksize, sigma)
                 composed_img += np.random.poisson(composed_img)
                 composed_max = np.max(composed_img)
@@ -389,7 +388,10 @@ class ImageCompositor():
         alpha_l = 1. - alpha_s
 
         for c in range(3):
-            img[1800:1800+tb_height, 2000:2000+tb_width, c] = (alpha_s * textbox[:, :, c] + alpha_l * img[1800:1800+tb_height, 2000:2000+tb_width, c])
+            tb_a = alpha_s * textbox[:, :, c]
+            img_a = alpha_l * img[1800:1800+tb_height, 2000:2000+tb_width, c]
+            img_channel = (tb_a + img_a)
+            img[1800:1800+tb_height, 2000:2000+tb_width, c] = img_channel
         
         return img
 

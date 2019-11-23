@@ -27,10 +27,22 @@ class StarCatalog():
         self.starcat_dir = self.root_dir / "data" / "UCAC4"
         self.res_dir = res_dir
 
-        self.exe = self.root_dir / "software" / "star_cats" / "u4test.exe"
+        starcat_dir = self.root_dir / "software" / "star_cats"
 
-        self.cmd = f'"{str(self.exe)}" {{0}} {{1}} {{2}} {{3}} -h ' \
-                   f'"{str(self.starcat_dir)}" "{{4}}"'
+        if (starcat_dir / "u4test").exists() or \
+                (starcat_dir / "u4test.exe").exists():
+            self.exe = starcat_dir / "u4test"
+
+        elif (starcat_dir / "star_cats" / "u4test").exists() or \
+                (starcat_dir / "star_cats" / "u4test.exe").exists():
+            self.exe = starcat_dir / "star_cats" / "u4test"
+
+        elif (starcat_dir / "build_star_cats" / "u4test").exists() or \
+                (starcat_dir / "build_star_cats" / "u4test.exe").exists():
+            self.exe = starcat_dir / "build_star_cats" / "u4test"
+            
+        else:
+            raise StarCatalogError("UCAC4 interface could not be found.")
 
         # Don't display the Windows GPF dialog if the invoked program dies.
         # See comp.os.ms-windows.programmer.win32
@@ -46,16 +58,23 @@ class StarCatalog():
         """Retrieve star data from given field of view using UCAC4 catalog."""
         res_file = self.res_dir / filename
 
-        command = self.cmd.format(ra, dec, width, height, str(res_file))
+        command = [str(self.exe),
+                   str(ra),
+                   str(dec),
+                   str(width),
+                   str(height),
+                   "-h",
+                   str(self.starcat_dir),
+                   str(res_file)]
 
         for _ in range(5):
-            retcode = subprocess.call(command)
+            ret = subprocess.run(command)
 
-            if retcode > 0:
-                logger.info("Found %d stars in catalog", retcode)
+            if ret.returncode > 0:
+                logger.info("Found %d stars in catalog", ret.returncode)
                 break
 
-            logger.info("Error code from star catalog %d", retcode)
+            logger.info("Error code from star catalog %d", ret.returncode)
 
         with open(str(res_file), "r") as rfile:
             complete_data = rfile.readlines()
@@ -73,7 +92,7 @@ class StarCatalog():
         return star_data
 
 
-#class StarCache:
+# class StarCache:
 #    """Handling stars in field of view, for rendering of scene."""
 #
 #    def __init__(self, template=None, parent=None):

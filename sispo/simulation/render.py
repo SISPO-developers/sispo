@@ -10,6 +10,7 @@ import struct
 import time
 import zlib
 
+from astropy import units as u
 import bpy
 import cv2
 from mathutils import Vector # pylint: disable=import-error
@@ -43,8 +44,8 @@ class BlenderController:
         self.scenes = bpy.data.scenes
         self.cameras = bpy.data.cameras
 
-        # Initial scene is MainScene, clear from objects, and set defaults
-        self.default_scene.name = "MainScene"
+        # Initial scene is SssbOnly, clear from objects, and set defaults
+        self.default_scene.name = "SssbOnly"
         for obj in bpy.data.objects:
             bpy.data.objects.remove(obj)
         self.set_scene_defaults(self.default_scene)
@@ -226,19 +227,19 @@ class BlenderController:
 
     def configure_camera(self,
                          camera_name="Camera",
-                         lens=35,
-                         sensor=32,
+                         lens=35*u.mm,
+                         sensor=32*u.mm,
                          clip_start=1E-5,
                          clip_end=1E32,
                          mode="PERSP", # Modes ORTHO, PERSP
                          ortho_scale=7):
         """Set camera configuration values."""
-        camera = self.cameras[camera_name]      
+        camera = self.cameras[camera_name]
         camera.clip_end = clip_end
         camera.clip_start = clip_start
-        camera.lens = lens
+        camera.lens = lens.to(u.mm).value
         camera.ortho_scale = ortho_scale
-        camera.sensor_width = sensor
+        camera.sensor_width = sensor.to(u.mm).value
         camera.type = mode
 
     def set_camera_location(self, camera_name="Camera", location=(0, 0, 0)):
