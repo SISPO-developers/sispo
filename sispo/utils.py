@@ -150,7 +150,7 @@ def write_openexr_image(filename, image):
     else:
         raise RuntimeError("Invalid number of channels of starmap image.")
 
-    file_handler = OpenEXR.OutputFile(filename, hdr)
+    file_handler = OpenEXR.OutputFile(str(filename), hdr)
     file_handler.writePixels(image_data)
     file_handler.close()
 
