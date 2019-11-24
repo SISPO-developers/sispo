@@ -70,13 +70,6 @@ class Environment():
         self.timesampler_mode = 1
         self.slowmotion_factor = 10
 
-        self.with_backgroundstars = True
-        self.with_sssbonly = False
-        self.with_sssbconstdist = False
-        self.with_lightingref = False
-
-        self.asteroid_scenes = []
-
         self.render_settings = dict()
         self.render_settings["exposure"] = 1.554
         self.render_settings["samples"] = 48
@@ -108,21 +101,16 @@ class Environment():
         self.render_dir = utils.check_dir(self.res_dir / "rendering")
 
         self.renderer = render.BlenderController(self.render_dir)
-        self.asteroid_scenes.append("SssbOnly")
-
         self.renderer.create_camera("ScCam")
-        self.renderer.configure_camera("ScCam")
+        self.renderer.configure_camera("ScCam", self.inst.focal_l, self.inst.chip_w)
 
-        if self.with_sssbconstdist:
-            self.renderer.create_scene("SssbConstDist")
-            self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
-            self.renderer.configure_camera("SssbConstDistCam", self.inst.focal_l, self.inst.chip_w)
-            self.asteroid_scenes.append("SssbConstDist")
+        self.renderer.create_scene("SssbConstDist")
+        self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
+        self.renderer.configure_camera("SssbConstDistCam", self.inst.focal_l, self.inst.chip_w)
 
-        if self.with_lightingref:
-            self.renderer.create_scene("LightRef")
-            self.renderer.create_camera("LightRefCam", scenes="LightRef")
-            self.renderer.configure_camera("LightRefCam", self.inst.focal_l, self.inst.chip_w)
+        self.renderer.create_scene("LightRef")
+        self.renderer.create_camera("LightRefCam", scenes="LightRef")
+        self.renderer.configure_camera("LightRefCam", self.inst.focal_l, self.inst.chip_w)
 
         self.renderer.set_device(self.render_settings["device"])
         self.renderer.set_samples(self.render_settings["samples"])
@@ -141,7 +129,7 @@ class Environment():
         sssb_model_file = self.models_dir / "didymos2.blend"
         self.sssb = SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
             2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
-        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001", self.asteroid_scenes)
+        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001", ["SssbOnly", "SssbConstDist"])
         self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
 
     def setup_spacecraft(self):
@@ -208,26 +196,23 @@ class Environment():
             self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             
             # Update optional scenes/cameras
-            if self.with_sssbconstdist:
-                pos_cam_const_dist = pos_sc_rel_sssb * 1000. / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
-                self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
-                self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
+            pos_cam_const_dist = pos_sc_rel_sssb * 1000. / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
+            self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
+            self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
 
-            if self.with_lightingref:
-                lightrefcam_pos = -np.asarray(sssb_pos.toArray()) * 1000. /np.sqrt(np.dot(np.asarray(sssb_pos.toArray()),np.asarray(sssb_pos.toArray())))
-                self.renderer.set_camera_location("LightRefCam", lightrefcam_pos)
-                self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
-                self.renderer.target_camera(self.lightref, "LightRefCam")
+            lightrefcam_pos = -np.asarray(sssb_pos.toArray()) * 1000. /np.sqrt(np.dot(np.asarray(sssb_pos.toArray()),np.asarray(sssb_pos.toArray())))
+            self.renderer.set_camera_location("LightRefCam", lightrefcam_pos)
+            self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
+            self.renderer.target_camera(self.lightref, "LightRefCam")
             
             # Render blender scenes
             self.renderer.render(date_str)
 
             # Render star background
-            if self.with_backgroundstars:
-                fov_vecs = render.get_fov_vecs("ScCam", "SssbOnly")
-                ra, dec, width, height = render.get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
-                starlist = self.sta.get_stardata(ra, dec, width, height)
-                fluxes = self.renderer.render_starmap(starlist, fov_vecs, self.inst.res, date_str)
+            fov_vecs = render.get_fov_vecs("ScCam", "SssbOnly")
+            ra, dec, width, height = render.get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
+            starlist = self.sta.get_stardata(ra, dec, width, height)
+            fluxes = self.renderer.render_starmap(starlist, fov_vecs, self.inst.res, date_str)
 
             metadict = dict()
             metadict["sssb_pos"] = np.asarray(sssb_pos.toArray())
