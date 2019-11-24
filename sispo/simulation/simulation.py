@@ -23,7 +23,6 @@ from simulation.cb import CelestialBody
 from simulation.sc import Instrument, Spacecraft
 from simulation.sssb import SmallSolarSystemBody
 import simulation.render as render
-import simulation.starcat as starcat
 import simulation.compositor as compositor
 import utils
 
@@ -41,8 +40,6 @@ class Environment():
 
         self.inst = Instrument()
         #comp = compositor.ImageCompositor(self.res_dir, self.inst)
-
-        self.sta = starcat.StarCatalog(self.res_dir)
 
         self.logger = utils.create_logger("simulation")
 
@@ -92,8 +89,7 @@ class Environment():
         self.setup_spacecraft()
 
         # Setup Lightref
-        if self.with_lightingref:
-            self.setup_lightref()
+        self.setup_lightref()
 
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
@@ -209,10 +205,7 @@ class Environment():
             self.renderer.render(date_str)
 
             # Render star background
-            fov_vecs = render.get_fov_vecs("ScCam", "SssbOnly")
-            ra, dec, width, height = render.get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
-            starlist = self.sta.get_stardata(ra, dec, width, height)
-            fluxes = self.renderer.render_starmap(starlist, fov_vecs, self.inst.res, date_str)
+            fluxes = self.renderer.render_starmap(self.inst.res, date_str)
 
             metadict = dict()
             metadict["sssb_pos"] = np.asarray(sssb_pos.toArray())
