@@ -160,6 +160,7 @@ class ImageCompositor():
         self.sssb["max_dim"] = 512
 
         self.with_infobox = True
+        self.with_clipping = True
 
         self.frame_ids = self.get_frame_ids()
         self.frames = []
@@ -313,15 +314,18 @@ class ImageCompositor():
 
             filename = self.image_dir / ("Comp_" + str(frame.id))
             utils.write_openexr_image(filename, composed_img)
-
-            composed_img[:, :, :] *= 255
-            composed_img = composed_img.astype(np.uint8)
             
             if self.with_infobox:
-                self.add_infobox(composed_img, frame.metadata)
-            
-            filename = self.image_dir / ("Comp_" + str(frame.id) + ".png")
-            cv2.imwrite(str(filename), composed_img)
+                infobox_img = composed_img[:, :, 0:3] * 255
+                infobox_img = infobox_img.astype(np.uint8)
+                infobox_img = self.add_infobox(infobox_img, frame.metadata)
+                filename = self.image_dir / ("Comp_" + str(frame.id) + ".png")
+                cv2.imwrite(str(filename), infobox_img)
+
+            if self.with_clipping:
+                clipped_img = self.clip_color_depth(composed_img)
+                filename = self.image_dir / ("Inst_" + str(frame.id) + ".png")
+                cv2.imwrite(str(filename), clipped_img)
 
     def create_sssb_ref(self, res, scale=5):
         """Creates a reference sssb image for calibration.
@@ -393,6 +397,15 @@ class ImageCompositor():
             img_channel = (tb_a + img_a)
             img[1800:1800+tb_height, 2000:2000+tb_width, c] = img_channel
         
+        return img
+
+    def clip_color_depth(self, img):
+        """Reduces color depth to the instrument color depth."""
+        max_val = 2 ** self.inst.color_depth - 1
+
+        img = img[:, :, 0:3] * max_val
+        img = img.astype(np.uint16)
+
         return img
 
 if __name__ == "__main__":
