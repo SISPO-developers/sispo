@@ -65,12 +65,14 @@ class CelestialBody():
         """Get spacecraft state (position, velocity)."""
         return (self.get_position(date), self.get_velocity(date))
 
-    def propagate(self, start, end=None):
+    def propagate(self, start, end, steps, mode=1, factor=2):
         """Propagates CB either at given start time or from start to end.
         
         If start and end are given start is shifted a bit earlier to detect
         event at start. end is shifted a bit later to detect event at end.
         """
+        self.setup_timesampler(start, end, steps, mode, factor)
+
         if end is None:
             self.propagator.propagate(start)
         

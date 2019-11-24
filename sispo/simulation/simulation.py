@@ -148,21 +148,21 @@ class Environment():
         """Do simulation."""
         self.logger.info("Starting simulation")
 
-        self.sssb.setup_timesampler(
-            self.start_date, self.end_date, self.frame_settings["last"],
-            self.timesampler_mode, self.slowmotion_factor)
-        self.spacecraft.setup_timesampler(
-            self.start_date, self.end_date, self.frame_settings["last"],
-            self.timesampler_mode, self.slowmotion_factor)
-
         self.logger.info("Propagating SSSB")
-        self.sssb.propagate(self.start_date, self.end_date)
+        self.sssb.propagate(self.start_date,
+                            self.end_date,
+                            self.frame_settings["last"],
+                            self.timesampler_mode,
+                            self.slowmotion_factor)
 
         self.logger.info("Propagating Spacecraft")
-        self.spacecraft.propagate(self.start_date, self.end_date)
+        self.spacecraft.propagate(self.start_date,
+                                  self.end_date,
+                                  self.frame_settings["last"],
+                                  self.timesampler_mode,
+                                  self.slowmotion_factor)
 
         self.logger.info("Simulation completed")
-
         self.save_results()
 
     def render(self):
