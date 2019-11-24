@@ -343,7 +343,7 @@ class BlenderController:
         """Render a starmap from given data and field of view."""
         fov_vecs = get_fov_vecs("ScCam", "SssbOnly")
         ra, dec, width, height = get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
-        stardata = self.sta.get_stardata(ra, dec, width, height)
+        stardata = self.sta.get_stardata(ra, dec, width, height, f"ucac4_{name_suffix}")
 
         (direction, right_edge, _, upper_edge, _) = fov_vecs
         (res_x, res_y) = res
