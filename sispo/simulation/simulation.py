@@ -30,14 +30,15 @@ import utils
 class Environment():
     """Simulation environment."""
 
-    def __init__(self, name, duration):
+    def __init__(self, settings):
 
-        self.name = name
+        self.name = settings["name"]
         
         self.root_dir = Path(__file__).parent.parent.parent
-        self.models_dir = utils.check_dir(self.root_dir / "data" / "models")
+        data_dir = self.root_dir / "data"
+        self.models_dir = utils.check_dir(data_dir / "models")
 
-        self.res_dir = utils.check_dir(self.root_dir / "data" / "results" / name)
+        self.res_dir = utils.check_dir(data_dir / "results" / self.name)
 
         self.inst = Instrument()
         #comp = compositor.ImageCompositor(self.res_dir, self.inst)
@@ -47,28 +48,28 @@ class Environment():
         self.logger = utils.create_logger("simulation")
 
         self.ts = TimeScalesFactory.getTDB()
-        self.encounter_date = AbsoluteDate(2017, 8, 15, 12, 0, 0.000, self.ts)
-        self.duration = duration
+        encounter_date = settings["encounter_date"]
+        self.encounter_date = AbsoluteDate(int(encounter_date["year"]),
+                                           int(encounter_date["month"]),
+                                           int(encounter_date["day"]),
+                                           int(encounter_date["hour"]),
+                                           int(encounter_date["minutes"]),
+                                           float(encounter_date["seconds"]),
+                                           self.ts)
+        self.duration = settings["duration"]
         self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
 
         self.ref_frame = FramesFactory.getICRF()
         self.mu_sun = Constants.IAU_2015_NOMINAL_SUN_GM
 
-        self.frame_settings = dict()
-        self.frame_settings["first"] = 0
-        self.frame_settings["last"] = 10
-        self.frame_settings["step_size"] = 1
+        self.frames = settings["frames"]
 
-        self.logger.info("First frame: %d last frame: %d Step size: %d",
-                    self.frame_settings['first'], self.frame_settings['last'],
-                    self.frame_settings['step_size'])
-
-        self.minimum_distance = 1E5
-        self.with_terminator = False
-        self.with_sunnyside = True
-        self.timesampler_mode = 1
-        self.slowmotion_factor = 10
+        self.minimum_distance = settings["encounter_dist"]
+        self.with_terminator = bool(settings["with_terminator"])
+        self.with_sunnyside = bool(settings["with_sunnyside"])
+        self.timesampler_mode = settings["timesampler_mode"]
+        self.slowmotion_factor = settings["slowmotion_factor"]
 
         self.with_backgroundstars = True
         self.with_sssbonly = False
@@ -78,13 +79,10 @@ class Environment():
         self.asteroid_scenes = []
 
         self.render_settings = dict()
-        self.render_settings["exposure"] = 1.554
-        self.render_settings["samples"] = 48
-        self.render_settings["device"] = "GPU"
-        self.render_settings["tile"] = 512
-
-        self.logger.info("Rendering settings: Exposure: %d; Samples: %d",
-                    self.render_settings['exposure'], self.render_settings['samples'])
+        self.render_settings["exposure"] = settings["exposure"]
+        self.render_settings["samples"] = settings["samples"]
+        self.render_settings["device"] = settings["device"]
+        self.render_settings["tile"] = settings["tile"]
 
         # Setup rendering engine (renderer)
         self.setup_renderer()
