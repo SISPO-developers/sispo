@@ -7,16 +7,21 @@ hese images are used with openMVG and openMVS to reconstruct the 3D model and
 reconstruct the trajectory.
 """
 
+import json
 from pathlib import Path
 
 import simulation.simulation as sim
 import reconstruction.reconstruction as rc
 import compression.compression as comp
-import utils
 
 import matplotlib.pyplot as plt
 
 if __name__ == "__main__":
-    env = sim.Environment("Didymos", 20)
+    root_dir = Path(__file__).parent.parent
+    mission_def = root_dir / "data" / "input" / "mission_def.json"
+    with open(str(mission_def), "r") as cfg_file:
+        cfg = json.load(cfg_file)
+
+    env = sim.Environment(cfg["name"], cfg["duration"])
     env.simulate()
     env.render()
