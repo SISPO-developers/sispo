@@ -17,6 +17,7 @@ from mathutils import Vector # pylint: disable=import-error
 import numpy as np
 import OpenEXR
 
+import simulation.starcat as starcat
 import utils
 
 logger = utils.create_logger("rendering")
@@ -58,6 +59,7 @@ class BlenderController:
         background = bpy.data.worlds[0].node_tree.nodes["Background"]
         background.inputs[0].default_value = (0, 0, 0, 1.0)
 
+        self.sta = starcat.StarCatalog(self.res_dir)
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
     def create_scene(self, scene_name):
@@ -337,11 +339,14 @@ class BlenderController:
 
         return iter(output)
 
-
-    def render_starmap(self, stardata, fov_vecs, img_size, name_suffix):
+    def render_starmap(self, res, name_suffix):
         """Render a starmap from given data and field of view."""
+        fov_vecs = get_fov_vecs("ScCam", "SssbOnly")
+        ra, dec, width, height = get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
+        stardata = self.sta.get_stardata(ra, dec, width, height, f"ucac4_{name_suffix}")
+
         (direction, right_edge, _, upper_edge, _) = fov_vecs
-        (res_x, res_y) = img_size
+        (res_x, res_y) = res
 
         scale = self.default_scene.render.resolution_percentage
         res_x = int(res_x * scale / 100)
