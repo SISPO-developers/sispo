@@ -57,6 +57,7 @@ class StarCatalog():
     def get_stardata(self, ra, dec, width, height, filename="ucac4.txt"):
         """Retrieve star data from given field of view using UCAC4 catalog."""
         res_file = self.res_dir / filename
+        res_file = res_file.with_suffix(".txt")
 
         command = [str(self.exe),
                    str(ra),
