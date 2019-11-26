@@ -20,11 +20,28 @@ class StarCatalogError(RuntimeError):
 class StarCatalog():
     """Class to access star catalogs and render stars."""
 
-    def __init__(self, res_dir):
+    def __init__(self, res_dir, starcat_dir=None):
         """."""
 
         self.root_dir = Path(__file__).parent.parent.parent
-        self.starcat_dir = self.root_dir / "data" / "UCAC4"
+        
+        if starcat_dir is None:
+            self.starcat_dir = self.root_dir / "data" / "UCAC4"
+        else:
+            starcat = Path(starcat_dir)
+
+            try:
+                sssb_model_file = sssb_model_file.resolve()
+            except OSError as e:
+                raise StarCatalogError(e)
+
+            if not sssb_model_file.is_file():
+                    sssb_model_file = self.models_dir / sssb_model_file.name
+                    sssb_model_file = sssb_model_file.resolve()
+
+            if not sssb_model_file.is_file():
+                raise StarCatalogError("Given star cat dir does not exist.")
+
         self.res_dir = res_dir
 
         starcat_dir = self.root_dir / "software" / "star_cats"

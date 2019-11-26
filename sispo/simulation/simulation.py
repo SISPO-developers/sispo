@@ -45,7 +45,12 @@ class Environment():
         data_dir = self.root_dir / "data"
         self.models_dir = utils.check_dir(data_dir / "models")
 
-        self.res_dir = utils.check_dir(data_dir / "results" / self.name)
+        if "res_dir" in settings:
+            self.res_dir = settings["res_dir"]
+        else:
+            self.res_dir = utils.check_dir(data_dir / "results" / self.name)
+        
+        self.starcat_dir = settings["starcat"]
 
         self.inst = Instrument(settings["instrument"])
         #comp = compositor.ImageCompositor(self.res_dir, self.inst)
@@ -102,7 +107,7 @@ class Environment():
 
         self.render_dir = utils.check_dir(self.res_dir / "rendering")
 
-        self.renderer = render.BlenderController(self.render_dir)
+        self.renderer = render.BlenderController(self.render_dir, self.starcat_dir)
         self.renderer.create_camera("ScCam")
         self.renderer.configure_camera("ScCam", self.inst.focal_l, self.inst.chip_w)
 

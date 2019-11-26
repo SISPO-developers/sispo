@@ -35,7 +35,7 @@ class BlenderControllerError(RuntimeError):
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, render_dir):
+    def __init__(self, render_dir, starcat_dir):
         """Initialise blender controller class."""
 
         self.res_dir = render_dir
@@ -59,7 +59,7 @@ class BlenderController:
         background = bpy.data.worlds[0].node_tree.nodes["Background"]
         background.inputs[0].default_value = (0, 0, 0, 1.0)
 
-        self.sta = starcat.StarCatalog(self.res_dir)
+        self.sta = starcat.StarCatalog(self.res_dir, starcat_dir)
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
     def create_scene(self, scene_name):
