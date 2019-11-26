@@ -20,8 +20,8 @@ if __name__ == "__main__":
     root_dir = Path(__file__).parent.parent
     mission_def = root_dir / "data" / "input" / "mission_def.json"
     with open(str(mission_def), "r") as cfg_file:
-        cfg = json.load(cfg_file)
+        settings = json.load(cfg_file)
 
-    env = sim.Environment(cfg["name"], cfg["duration"])
+    env = sim.Environment(settings)
     env.simulate()
     env.render()
