@@ -84,7 +84,7 @@ class Environment():
         self.setup_renderer()
 
         # Setup Sun
-        self.setup_sun()
+        self.setup_sun(settings["sun"])
 
         # Setup SSSB
         self.setup_sssb(settings["sssb"])
@@ -118,10 +118,24 @@ class Environment():
         self.renderer.set_resolution(self.inst.res)
         self.renderer.set_output_format()
 
-    def setup_sun(self):
+    def setup_sun(self, settings):
         """Create Sun and respective render object."""
-        sun_model_file = self.models_dir / "didymos_lowpoly.blend"
-        self.sun = CelestialBody("Sun", model_file=sun_model_file)
+        sun_model_file = Path(settings["model"]["file"])
+
+        try:
+            sun_model_file = sun_model_file.resolve()
+        except OSError as e:
+            raise SimulationError(e)
+
+        if not sun_model_file.is_file():
+                sun_model_file = self.models_dir / sun_model_file.name
+                sun_model_file = sun_model_file.resolve()
+        
+        if not sun_model_file.is_file():
+            raise SimulationError("Given SSSB model filename does not exist.")
+
+        self.sun = CelestialBody(settings["model"]["name"],
+                                 model_file=sun_model_file)
         self.sun.render_obj = self.renderer.load_object(self.sun.model_file,
                                                         self.sun.name)
 
@@ -141,7 +155,7 @@ class Environment():
         if not sssb_model_file.is_file():
             raise SimulationError("Given SSSB model filename does not exist.")
 
-        self.sssb = SmallSolarSystemBody(settings["name"],
+        self.sssb = SmallSolarSystemBody(settings["model"]["name"],
                                           self.mu_sun, 
                                           settings["trj"],
                                           settings["att"],
