@@ -37,6 +37,8 @@ class Environment():
 
     def __init__(self, settings):
 
+        self.settings = settings
+
         self.name = settings["name"]
         
         self.root_dir = Path(__file__).parent.parent.parent
