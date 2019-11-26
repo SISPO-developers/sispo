@@ -26,6 +26,12 @@ import simulation.render as render
 import simulation.compositor as compositor
 import utils
 
+
+class SimulationError(RuntimeError):
+    """Generic simulation error."""
+    pass
+
+
 class Environment():
     """Simulation environment."""
 
@@ -121,9 +127,29 @@ class Environment():
 
     def setup_sssb(self, settings):
         """Create SmallSolarSystemBody and respective blender object."""
-        sssb_model_file = self.models_dir / "didymos2.blend"
-        self.sssb = SmallSolarSystemBody("Didymos", self.mu_sun, settings["trj"], settings["att"], model_file=sssb_model_file)
-        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001", ["SssbOnly", "SssbConstDist"])
+        sssb_model_file = Path(settings["filename"])
+
+        try:
+            sssb_model_file = sssb_model_file.resolve()
+        except OSError as e:
+            raise SimulationError(e)
+
+        if not sssb_model_file.is_file():
+                sssb_model_file = self.models_dir / sssb_model_file.name
+                sssb_model_file = sssb_model_file.resolve()
+        
+        if not sssb_model_file.is_file():
+            raise SimulationError("Given SSSB model filename does not exist.")  
+
+        self.sssb = SmallSolarSystemBody(settings["name"],
+                                          self.mu_sun, 
+                                          settings["trj"],
+                                          settings["att"],
+                                          model_file=sssb_model_file)
+        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file,
+                                                         "Didymos.001",
+                                                         ["SssbOnly", 
+                                                          "SssbConstDist"])
         self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
 
     def setup_spacecraft(self):
