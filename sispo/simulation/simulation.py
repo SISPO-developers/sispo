@@ -45,7 +45,7 @@ class Environment():
 
         self.res_dir = utils.check_dir(data_dir / "results" / self.name)
 
-        self.inst = Instrument()
+        self.inst = Instrument(settings["instrument"])
         #comp = compositor.ImageCompositor(self.res_dir, self.inst)
 
         self.logger = utils.create_logger("simulation")
@@ -173,8 +173,10 @@ class Environment():
                                                    self.minimum_distance,
                                                    self.with_terminator,
                                                    self.with_sunnyside)
-        self.spacecraft = Spacecraft(
-            "CI", self.mu_sun, sc_state, self.encounter_date)
+        self.spacecraft = Spacecraft("CI", 
+                                     self.mu_sun,
+                                     sc_state,
+                                     self.encounter_date)
 
     def setup_lightref(self, settings):
         """Create lightreference blender object."""

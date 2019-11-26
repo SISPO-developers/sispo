@@ -89,18 +89,13 @@ class Instrument():
         if charas is None:
             charas = {}
 
-        if "chip_noise" in charas:
-            self.chip_noise = charas["chip_noise"]
-        else:
-            self.chip_noise = 10
-
         if "res" in charas:
-            self.res = charas["res"]
+            self.res = (charas["res"][0], charas["res"][1])
         else:
             self.res = (2456, 2054)
 
         if "pix_l" in charas:
-            self.pix_l = charas["pix_l"]
+            self.pix_l = charas["pix_l"] * u.micron
             self.pix_a = self.pix_l ** 2 * (1 / u.pix)
         elif "pix_a" in charas:
             self.pix_a = charas["pix_a"]
@@ -110,24 +105,29 @@ class Instrument():
             self.pix_a = self.pix_l ** 2 * (1 / u.pix)    
         self.chip_w = self.pix_l * self.res[0]
 
-        if "quantum_eff" in charas:
-            self.quantum_eff = charas["quantum_eff"]
-        else:
-            self.quantum_eff = 0.25
-
         if "focal_l" in charas:
-            self.focal_l = charas["focal_l"]
+            self.focal_l = charas["focal_l"] * u.mm
         else:
             self.focal_l = 230 * u.mm
 
         if "aperture_d" in charas:
-            self.aperture_d = charas["aperture_d"]
+            self.aperture_d = charas["aperture_d"] * u.cm
         else:
             self.aperture_d = 4 * u.cm
 
         if "wavelength" in charas:
-            self.wavelength = charas["wavelength"]
+            self.wavelength = charas["wavelength"] * u.nm
         else:
             self.wavelength = 550 * u.nm
+
+        if "chip_noise" in charas:
+            self.chip_noise = charas["chip_noise"]
+        else:
+            self.chip_noise = 10
+
+        if "quantum_eff" in charas:
+            self.quantum_eff = charas["quantum_eff"]
+        else:
+            self.quantum_eff = 0.25
       
         self.aperture_a = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) * np.pi/4
