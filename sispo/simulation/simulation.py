@@ -93,7 +93,7 @@ class Environment():
         self.setup_spacecraft()
 
         # Setup Lightref
-        self.setup_lightref()
+        self.setup_lightref(settings["lightref"])
 
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
@@ -176,10 +176,25 @@ class Environment():
         self.spacecraft = Spacecraft(
             "CI", self.mu_sun, sc_state, self.encounter_date)
 
-    def setup_lightref(self):
+    def setup_lightref(self, settings):
         """Create lightreference blender object."""
-        lightref_model_file = self.models_dir / "didymos_lowpoly.blend"
-        self.lightref = self.renderer.load_object(lightref_model_file, "CalibrationDisk", scenes="LightRef")
+        lightref_model_file = Path(settings["model"]["file"])
+
+        try:
+            lightref_model_file = lightref_model_file.resolve()
+        except OSError as e:
+            raise SimulationError(e)
+
+        if not lightref_model_file.is_file():
+                lightref_model_file = self.models_dir / lightref_model_file.name
+                lightref_model_file = lightref_model_file.resolve()
+        
+        if not lightref_model_file.is_file():
+            raise SimulationError("Given SSSB model filename does not exist.")
+
+        self.lightref = self.renderer.load_object(lightref_model_file,
+                                                  settings["model"]["name"],
+                                                  scenes="LightRef")
         self.lightref.location = (0, 0, 0)
 
     def simulate(self):
