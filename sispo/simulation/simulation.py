@@ -45,6 +45,9 @@ class Environment():
         self.logger = utils.create_logger("simulation")
 
         self.ts = TimeScalesFactory.getTDB()
+        self.ref_frame = FramesFactory.getICRF()
+        self.mu_sun = Constants.IAU_2015_NOMINAL_SUN_GM
+
         encounter_date = settings["encounter_date"]
         self.encounter_date = AbsoluteDate(int(encounter_date["year"]),
                                            int(encounter_date["month"]),
@@ -56,9 +59,6 @@ class Environment():
         self.duration = settings["duration"]
         self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
-
-        self.ref_frame = FramesFactory.getICRF()
-        self.mu_sun = Constants.IAU_2015_NOMINAL_SUN_GM
 
         self.frames = settings["frames"]
 
@@ -81,7 +81,7 @@ class Environment():
         self.setup_sun()
 
         # Setup SSSB
-        self.setup_sssb()
+        self.setup_sssb(settings["sssb"])
 
         # Setup SC
         self.setup_spacecraft()
@@ -116,13 +116,13 @@ class Environment():
         """Create Sun and respective render object."""
         sun_model_file = self.models_dir / "didymos_lowpoly.blend"
         self.sun = CelestialBody("Sun", model_file=sun_model_file)
-        self.sun.render_obj = self.renderer.load_object(self.sun.model_file, self.sun.name)
+        self.sun.render_obj = self.renderer.load_object(self.sun.model_file,
+                                                        self.sun.name)
 
-    def setup_sssb(self):
+    def setup_sssb(self, settings):
         """Create SmallSolarSystemBody and respective blender object."""
         sssb_model_file = self.models_dir / "didymos2.blend"
-        self.sssb = SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
-            2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
+        self.sssb = SmallSolarSystemBody("Didymos", self.mu_sun, settings["trj"], settings["att"], model_file=sssb_model_file)
         self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001", ["SssbOnly", "SssbConstDist"])
         self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
 
@@ -149,14 +149,14 @@ class Environment():
         self.logger.info("Propagating SSSB")
         self.sssb.propagate(self.start_date,
                             self.end_date,
-                            self.frame_settings["last"],
+                            self.frames,
                             self.timesampler_mode,
                             self.slowmotion_factor)
 
         self.logger.info("Propagating Spacecraft")
         self.spacecraft.propagate(self.start_date,
                                   self.end_date,
-                                  self.frame_settings["last"],
+                                  self.frames,
                                   self.timesampler_mode,
                                   self.slowmotion_factor)
 
