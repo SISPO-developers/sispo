@@ -127,7 +127,7 @@ class Environment():
 
     def setup_sssb(self, settings):
         """Create SmallSolarSystemBody and respective blender object."""
-        sssb_model_file = Path(settings["filename"])
+        sssb_model_file = Path(settings["model"]["file"])
 
         try:
             sssb_model_file = sssb_model_file.resolve()
@@ -139,7 +139,7 @@ class Environment():
                 sssb_model_file = sssb_model_file.resolve()
         
         if not sssb_model_file.is_file():
-            raise SimulationError("Given SSSB model filename does not exist.")  
+            raise SimulationError("Given SSSB model filename does not exist.")
 
         self.sssb = SmallSolarSystemBody(settings["name"],
                                           self.mu_sun, 
@@ -147,7 +147,7 @@ class Environment():
                                           settings["att"],
                                           model_file=sssb_model_file)
         self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file,
-                                                         "Didymos.001",
+                                                         settings["model"]["name"],
                                                          ["SssbOnly", 
                                                           "SssbConstDist"])
         self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
