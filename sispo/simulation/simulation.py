@@ -26,10 +26,18 @@ import simulation.render as render
 import simulation.compositor as compositor
 import utils
 
+
+class SimulationError(RuntimeError):
+    """Generic simulation error."""
+    pass
+
+
 class Environment():
     """Simulation environment."""
 
     def __init__(self, settings):
+
+        self.settings = settings
 
         self.name = settings["name"]
         
@@ -37,14 +45,22 @@ class Environment():
         data_dir = self.root_dir / "data"
         self.models_dir = utils.check_dir(data_dir / "models")
 
-        self.res_dir = utils.check_dir(data_dir / "results" / self.name)
+        if "res_dir" in settings:
+            self.res_dir = settings["res_dir"]
+        else:
+            self.res_dir = utils.check_dir(data_dir / "results" / self.name)
+        
+        self.starcat_dir = settings["starcat"]
 
-        self.inst = Instrument()
+        self.inst = Instrument(settings["instrument"])
         #comp = compositor.ImageCompositor(self.res_dir, self.inst)
 
         self.logger = utils.create_logger("simulation")
 
         self.ts = TimeScalesFactory.getTDB()
+        self.ref_frame = FramesFactory.getICRF()
+        self.mu_sun = Constants.IAU_2015_NOMINAL_SUN_GM
+
         encounter_date = settings["encounter_date"]
         self.encounter_date = AbsoluteDate(int(encounter_date["year"]),
                                            int(encounter_date["month"]),
@@ -56,9 +72,6 @@ class Environment():
         self.duration = settings["duration"]
         self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
-
-        self.ref_frame = FramesFactory.getICRF()
-        self.mu_sun = Constants.IAU_2015_NOMINAL_SUN_GM
 
         self.frames = settings["frames"]
 
@@ -78,23 +91,23 @@ class Environment():
         self.setup_renderer()
 
         # Setup Sun
-        self.setup_sun()
+        self.setup_sun(settings["sun"])
 
         # Setup SSSB
-        self.setup_sssb()
+        self.setup_sssb(settings["sssb"])
 
         # Setup SC
         self.setup_spacecraft()
 
         # Setup Lightref
-        self.setup_lightref()
+        self.setup_lightref(settings["lightref"])
 
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
 
         self.render_dir = utils.check_dir(self.res_dir / "rendering")
 
-        self.renderer = render.BlenderController(self.render_dir)
+        self.renderer = render.BlenderController(self.render_dir, self.starcat_dir)
         self.renderer.create_camera("ScCam")
         self.renderer.configure_camera("ScCam", self.inst.focal_l, self.inst.chip_w)
 
@@ -112,18 +125,52 @@ class Environment():
         self.renderer.set_resolution(self.inst.res)
         self.renderer.set_output_format()
 
-    def setup_sun(self):
+    def setup_sun(self, settings):
         """Create Sun and respective render object."""
-        sun_model_file = self.models_dir / "didymos_lowpoly.blend"
-        self.sun = CelestialBody("Sun", model_file=sun_model_file)
-        self.sun.render_obj = self.renderer.load_object(self.sun.model_file, self.sun.name)
+        sun_model_file = Path(settings["model"]["file"])
 
-    def setup_sssb(self):
+        try:
+            sun_model_file = sun_model_file.resolve()
+        except OSError as e:
+            raise SimulationError(e)
+
+        if not sun_model_file.is_file():
+                sun_model_file = self.models_dir / sun_model_file.name
+                sun_model_file = sun_model_file.resolve()
+        
+        if not sun_model_file.is_file():
+            raise SimulationError("Given SSSB model filename does not exist.")
+
+        self.sun = CelestialBody(settings["model"]["name"],
+                                 model_file=sun_model_file)
+        self.sun.render_obj = self.renderer.load_object(self.sun.model_file,
+                                                        self.sun.name)
+
+    def setup_sssb(self, settings):
         """Create SmallSolarSystemBody and respective blender object."""
-        sssb_model_file = self.models_dir / "didymos2.blend"
-        self.sssb = SmallSolarSystemBody("Didymos", self.mu_sun, AbsoluteDate(
-            2017, 8, 19, 0, 0, 0.000, self.ts), model_file=sssb_model_file)
-        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, "Didymos.001", ["SssbOnly", "SssbConstDist"])
+        sssb_model_file = Path(settings["model"]["file"])
+
+        try:
+            sssb_model_file = sssb_model_file.resolve()
+        except OSError as e:
+            raise SimulationError(e)
+
+        if not sssb_model_file.is_file():
+                sssb_model_file = self.models_dir / sssb_model_file.name
+                sssb_model_file = sssb_model_file.resolve()
+        
+        if not sssb_model_file.is_file():
+            raise SimulationError("Given SSSB model filename does not exist.")
+
+        self.sssb = SmallSolarSystemBody(settings["model"]["name"],
+                                          self.mu_sun, 
+                                          settings["trj"],
+                                          settings["att"],
+                                          model_file=sssb_model_file)
+        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file,
+                                                         settings["model"]["name"],
+                                                         ["SssbOnly", 
+                                                          "SssbConstDist"])
         self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
 
     def setup_spacecraft(self):
@@ -133,13 +180,30 @@ class Environment():
                                                    self.minimum_distance,
                                                    self.with_terminator,
                                                    self.with_sunnyside)
-        self.spacecraft = Spacecraft(
-            "CI", self.mu_sun, sc_state, self.encounter_date)
+        self.spacecraft = Spacecraft("CI", 
+                                     self.mu_sun,
+                                     sc_state,
+                                     self.encounter_date)
 
-    def setup_lightref(self):
+    def setup_lightref(self, settings):
         """Create lightreference blender object."""
-        lightref_model_file = self.models_dir / "didymos_lowpoly.blend"
-        self.lightref = self.renderer.load_object(lightref_model_file, "CalibrationDisk", scenes="LightRef")
+        lightref_model_file = Path(settings["model"]["file"])
+
+        try:
+            lightref_model_file = lightref_model_file.resolve()
+        except OSError as e:
+            raise SimulationError(e)
+
+        if not lightref_model_file.is_file():
+                lightref_model_file = self.models_dir / lightref_model_file.name
+                lightref_model_file = lightref_model_file.resolve()
+        
+        if not lightref_model_file.is_file():
+            raise SimulationError("Given SSSB model filename does not exist.")
+
+        self.lightref = self.renderer.load_object(lightref_model_file,
+                                                  settings["model"]["name"],
+                                                  scenes="LightRef")
         self.lightref.location = (0, 0, 0)
 
     def simulate(self):
@@ -149,14 +213,14 @@ class Environment():
         self.logger.info("Propagating SSSB")
         self.sssb.propagate(self.start_date,
                             self.end_date,
-                            self.frame_settings["last"],
+                            self.frames,
                             self.timesampler_mode,
                             self.slowmotion_factor)
 
         self.logger.info("Propagating Spacecraft")
         self.spacecraft.propagate(self.start_date,
                                   self.end_date,
-                                  self.frame_settings["last"],
+                                  self.frames,
                                   self.timesampler_mode,
                                   self.slowmotion_factor)
 

@@ -20,26 +20,44 @@ class StarCatalogError(RuntimeError):
 class StarCatalog():
     """Class to access star catalogs and render stars."""
 
-    def __init__(self, res_dir):
+    def __init__(self, res_dir, starcat_dir=None):
         """."""
 
         self.root_dir = Path(__file__).parent.parent.parent
-        self.starcat_dir = self.root_dir / "data" / "UCAC4"
+        
+        if starcat_dir is None:
+            self.starcat_dir = self.root_dir / "data" / "UCAC4"
+        else:
+            starcat_dir = Path(starcat_dir)
+
+            try:
+                starcat_dir = starcat_dir.resolve()
+            except OSError as e:
+                raise StarCatalogError(e)
+
+            if not starcat_dir.is_dir():
+                    starcat_dir = self.models_dir / starcat_dir.name
+                    starcat_dir = starcat_dir.resolve()
+
+            if not starcat_dir.is_dir():
+                raise StarCatalogError("Given star cat dir does not exist.")
+        self.starcat_dir = starcat_dir
+
         self.res_dir = res_dir
 
-        starcat_dir = self.root_dir / "software" / "star_cats"
+        exe_dir = self.root_dir / "software" / "star_cats"
 
-        if (starcat_dir / "u4test").exists() or \
-                (starcat_dir / "u4test.exe").exists():
-            self.exe = starcat_dir / "u4test"
+        if (exe_dir / "u4test").is_file() or \
+                (exe_dir / "u4test.exe").is_file():
+            self.exe = exe_dir / "u4test"
 
-        elif (starcat_dir / "star_cats" / "u4test").exists() or \
-                (starcat_dir / "star_cats" / "u4test.exe").exists():
-            self.exe = starcat_dir / "star_cats" / "u4test"
+        elif (exe_dir / "star_cats" / "u4test").is_file() or \
+                (exe_dir / "star_cats" / "u4test.exe").is_file():
+            self.exe = exe_dir / "star_cats" / "u4test"
 
-        elif (starcat_dir / "build_star_cats" / "u4test").exists() or \
-                (starcat_dir / "build_star_cats" / "u4test.exe").exists():
-            self.exe = starcat_dir / "build_star_cats" / "u4test"
+        elif (exe_dir / "build_star_cats" / "u4test").is_file() or \
+                (exe_dir / "build_star_cats" / "u4test.exe").is_file():
+            self.exe = exe_dir / "build_star_cats" / "u4test"
             
         else:
             raise StarCatalogError("UCAC4 interface could not be found.")
