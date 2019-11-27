@@ -53,7 +53,6 @@ class Environment():
         self.starcat_dir = settings["starcat"]
 
         self.inst = Instrument(settings["instrument"])
-        #comp = compositor.ImageCompositor(self.res_dir, self.inst)
 
         self.logger = utils.create_logger("simulation")
 
@@ -101,6 +100,9 @@ class Environment():
 
         # Setup Lightref
         self.setup_lightref(settings["lightref"])
+
+        # Create compositor
+        self.comp = compositor.ImageCompositor(self.res_dir, self.inst)
 
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
@@ -280,6 +282,8 @@ class Environment():
             self.write_meta_file(date_str, metadict)
 
         self.logger.info("Rendering completed")
+
+        self.comp.compose()
 
     def save_results(self):
         """Save simulation results to a file."""
