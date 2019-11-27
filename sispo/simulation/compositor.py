@@ -170,8 +170,6 @@ class ImageCompositor():
 
         logger.info("Number of files: %d", len(self.frames))
 
-        self.compose()
-
     def get_frame_ids(self):
         """Extract list of frame ids from file names of SssbOnly scenes."""
         scene_name = "SssbOnly"
