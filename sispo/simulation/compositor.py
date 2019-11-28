@@ -148,7 +148,7 @@ class ImageCompositor():
     def __init__(self, res_dir, instrument):
 
         self.res_dir = res_dir
-        self.image_dir = res_dir / "rendering"
+        self.image_dir = self.res_dir
 
         self.image_extension = ".exr"
 

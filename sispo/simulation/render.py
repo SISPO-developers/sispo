@@ -8,6 +8,7 @@ import math
 from pathlib import Path
 import struct
 import time
+import threading
 import zlib
 
 from astropy import units as u
@@ -17,6 +18,7 @@ from mathutils import Vector # pylint: disable=import-error
 import numpy as np
 import OpenEXR
 
+import simulation.compositor as compositor
 import simulation.starcat as starcat
 import utils
 
@@ -35,7 +37,7 @@ class BlenderControllerError(RuntimeError):
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, render_dir, starcat_dir):
+    def __init__(self, render_dir, starcat_dir, instrument):
         """Initialise blender controller class."""
 
         self.res_dir = render_dir
@@ -59,7 +61,13 @@ class BlenderController:
         background = bpy.data.worlds[0].node_tree.nodes["Background"]
         background.inputs[0].default_value = (0, 0, 0, 1.0)
 
+        # Star catalog
         self.sta = starcat.StarCatalog(self.res_dir, starcat_dir)
+
+        # Create compositor
+        self.comp = compositor.ImageCompositor(self.res_dir, instrument)
+        self._threads = []
+
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
     def create_scene(self, scene_name):
@@ -272,6 +280,28 @@ class BlenderController:
             self.set_output_file(name_suffix, scene)
             bpy.ops.render.render(write_still=True, scene=scene.name)
             self.save_blender_dfile(name_suffix, scene)
+
+    def _compose(self, name_suffix):
+        """
+        Composes different images into final image, uses multi-threading.
+        
+        :type name_suffix: str
+        :param name_suffix: Image suffix for file I/O. Used for constructing
+                            file names to read different images of a frame as
+                            well as used for composed image output.
+        """
+        for thr in self._threads:
+            if not thr.is_alive():
+                self._threads.pop(self._threads.index(thr))
+    
+        if len(self._threads) < 2:
+            # Allow up to 2 additional threads
+            thr = threading.Thread(target=self.comp.compose, args=(name_suffix,))
+            thr.start()
+            self._threads.append(thr)
+        else:
+            # If too many, also compose in main thread to not drop a frame
+            self.comp.compose(name_suffix)
 
     def load_object(self, filename, object_name, scenes=None):
         """Load blender object from file."""

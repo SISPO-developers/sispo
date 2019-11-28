@@ -3,7 +3,6 @@
 from datetime import datetime
 import json
 from pathlib import Path
-import threading
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,7 +23,6 @@ from simulation.cb import CelestialBody
 from simulation.sc import Instrument, Spacecraft
 from simulation.sssb import SmallSolarSystemBody
 import simulation.render as render
-import simulation.compositor as compositor
 import utils
 
 
@@ -102,15 +100,12 @@ class Environment():
         # Setup Lightref
         self.setup_lightref(settings["lightref"])
 
-        # Create compositor
-        self.comp = compositor.ImageCompositor(self.res_dir, self.inst)
-
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
 
         self.render_dir = utils.check_dir(self.res_dir / "rendering")
 
-        self.renderer = render.BlenderController(self.render_dir, self.starcat_dir)
+        self.renderer = render.BlenderController(self.render_dir, self.starcat_dir, self.inst)
         self.renderer.create_camera("ScCam")
         self.renderer.configure_camera("ScCam", self.inst.focal_l, self.inst.chip_w)
 
@@ -257,7 +252,7 @@ class Environment():
 
             self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             
-            # Update optional scenes/cameras
+            # Update scenes/cameras
             pos_cam_const_dist = pos_sc_rel_sssb * 1000. / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
             self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
             self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
@@ -266,7 +261,7 @@ class Environment():
             self.renderer.set_camera_location("LightRefCam", lightrefcam_pos)
             self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
             self.renderer.target_camera(self.lightref, "LightRefCam")
-            
+
             # Render blender scenes
             self.renderer.render(date_str)
 
@@ -280,21 +275,9 @@ class Environment():
             metadict["date"] = date_str
             metadict["sc_rel_pos"] = pos_sc_rel_sssb
             metadict["total_flux"] = fluxes[0]
-
             self.write_meta_file(date_str, metadict)
 
-            for thr in threads:
-                if not thr.is_alive():
-                    threads.pop(threads.index(thr))
-
-            if len(threads) < 2:
-                # Allow up to 2 additional threads
-                thr = threading.Thread(target=self.comp.compose, args=(date_str,))
-                thr.start()
-                threads.append(thr)
-            else:
-                # If too many, also compose in main thread to not drop a frame
-                self.comp.compose(date_str)
+            self.renderer._compose(date_str)
 
         self.logger.info("Rendering completed")
 
