@@ -107,7 +107,7 @@ class BlenderController:
 
         self.device = self._determine_device(device)
         self._set_cycles_device()
-        tile_size = self.get_tile_size()
+        tile_size = self._get_tile_size()
 
         # Sets render device of scenes
         for scene in self._get_scenes_iter(scenes):
@@ -163,7 +163,7 @@ class BlenderController:
             logger.info("Invalid device: %s", self.device)
             raise BlenderControllerError(f"Invalid device: {self.device}")
 
-    def get_tile_size(self):
+    def _get_tile_size(self):
         """Determine size of tiles while rendering based on render device."""
         if self.device == "GPU":
             tile_size = 512
