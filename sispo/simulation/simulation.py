@@ -3,6 +3,7 @@
 from datetime import datetime
 import json
 from pathlib import Path
+import threading
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -53,7 +54,6 @@ class Environment():
         self.starcat_dir = settings["starcat"]
 
         self.inst = Instrument(settings["instrument"])
-        #comp = compositor.ImageCompositor(self.res_dir, self.inst)
 
         self.logger = utils.create_logger("simulation")
 
@@ -101,6 +101,9 @@ class Environment():
 
         # Setup Lightref
         self.setup_lightref(settings["lightref"])
+
+        # Create compositor
+        self.comp = compositor.ImageCompositor(self.res_dir, self.inst)
 
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
@@ -163,10 +166,10 @@ class Environment():
             raise SimulationError("Given SSSB model filename does not exist.")
 
         self.sssb = SmallSolarSystemBody(settings["model"]["name"],
-                                          self.mu_sun, 
-                                          settings["trj"],
-                                          settings["att"],
-                                          model_file=sssb_model_file)
+                                         self.mu_sun, 
+                                         settings["trj"],
+                                         settings["att"],
+                                         model_file=sssb_model_file)
         self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file,
                                                          settings["model"]["name"],
                                                          ["SssbOnly", 
@@ -232,6 +235,7 @@ class Environment():
         self.logger.info("Rendering simulation")
 
         # Render frame by frame
+        threads = []
         for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
                                                       self.spacecraft.pos_history,
                                                       self.sssb.pos_history,
@@ -279,6 +283,19 @@ class Environment():
 
             self.write_meta_file(date_str, metadict)
 
+            for thr in threads:
+                if not thr.is_alive():
+                    threads.pop(threads.index(thr))
+
+            if len(threads) < 2:
+                # Allow up to 2 additional threads
+                thr = threading.Thread(target=self.comp.compose, args=(date_str,))
+                thr.start()
+                threads.append(thr)
+            else:
+                # If too many, also compose in main thread to not drop a frame
+                self.comp.compose(date_str)
+
         self.logger.info("Rendering completed")
 
     def save_results(self):
@@ -312,5 +329,4 @@ class Environment():
             json.dump(metadict, metafile, default=utils.serialise)
 
 if __name__ == "__main__":
-    env = Environment("Didymos", 2 * 60.)
-    env.simulate()
+    pass

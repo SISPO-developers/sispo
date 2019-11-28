@@ -161,17 +161,6 @@ class ImageCompositor():
 
         self.with_infobox = True
 
-        self.frame_ids = self.get_frame_ids()
-        self.frames = []
-        
-        for frame_id in self.frame_ids:
-            new_frame = Frame(frame_id, self.image_dir)
-            self.frames.append(new_frame)
-
-        logger.info("Number of files: %d", len(self.frames))
-
-        self.compose()
-
     def get_frame_ids(self):
         """Extract list of frame ids from file names of SssbOnly scenes."""
         scene_name = "SssbOnly"
@@ -217,12 +206,21 @@ class ImageCompositor():
         """
         Composes raw images and adjusts light intensities.
         
-        :type frames: Frame or List of Frame
-        :param frames: Frame or list of frames to be calibrated and composed
+        :type frames: String, Frame or List of Frame
+        :param frames: FrameID, Frame or list of frames for calibration and
+                       composition.
         """
 
         if frames is None:
-            frames = self.frames
+            self.frame_ids = self.get_frame_ids()
+            frames = []
+            for frame_id in self.frame_ids:
+                new_frame = Frame(frame_id, self.image_dir)
+                frames.append(new_frame)
+
+        elif isinstance(frames, str):
+            frames = [Frame(frames, self.image_dir)]
+
         elif isinstance(frames, Frame):
             frames = [frames]
         elif isinstance(frames, list) and isinstance(frames[0], Frame):
