@@ -136,7 +136,6 @@ class Frame():
             metadata["distance"] = metadata["distance"] * u.m
 
             metadata["sc_pos"] = np.asarray(metadata["sc_pos"]) * u.m
-            metadata["sc_rel_pos"] = np.asarray(metadata["sc_rel_pos"]) * u.m
             metadata["sssb_pos"] = np.asarray(metadata["sssb_pos"]) * u.m
 
         return metadata

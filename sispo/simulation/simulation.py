@@ -230,7 +230,6 @@ class Environment():
         self.logger.info("Rendering simulation")
 
         # Render frame by frame
-        threads = []
         for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
                                                       self.spacecraft.pos_history,
                                                       self.sssb.pos_history,
@@ -238,6 +237,13 @@ class Environment():
 
             date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
             date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
+
+            # metadict creation
+            metainfo = dict()
+            metainfo["sssb_pos"] = np.asarray(sssb_pos.toArray())
+            metainfo["sc_pos"] = np.asarray(sc_pos.toArray())
+            metainfo["distance"] = sc_pos.distance(sssb_pos)
+            metainfo["date"] = date_str
 
             # Update environment
             self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / 1000.
@@ -263,21 +269,7 @@ class Environment():
             self.renderer.target_camera(self.lightref, "LightRefCam")
 
             # Render blender scenes
-            self.renderer.render(date_str)
-
-            # Render star background
-            fluxes = self.renderer.render_starmap(self.inst.res, date_str)
-
-            metadict = dict()
-            metadict["sssb_pos"] = np.asarray(sssb_pos.toArray())
-            metadict["sc_pos"] = np.asarray(sc_pos.toArray())
-            metadict["distance"] = sc_pos.distance(sssb_pos)
-            metadict["date"] = date_str
-            metadict["sc_rel_pos"] = pos_sc_rel_sssb
-            metadict["total_flux"] = fluxes[0]
-            self.write_meta_file(date_str, metadict)
-
-            self.renderer._compose(date_str)
+            self.renderer.render(metainfo)
 
         self.logger.info("Rendering completed")
 
@@ -298,18 +290,6 @@ class Environment():
 
         self.logger.info("Propagation results saved")
 
-    def write_meta_file(self, suffix, metadict):
-        """Writes metafile for a frame."""
-
-        filename = self.render_dir / ("Metadata_" + str(suffix))
-        filename = str(filename)
-
-        file_extension = ".json"
-        if filename[-len(file_extension):] != file_extension:
-            filename += file_extension
-
-        with open(filename, "w+") as metafile:
-            json.dump(metadict, metafile, default=utils.serialise)
 
 if __name__ == "__main__":
     pass
