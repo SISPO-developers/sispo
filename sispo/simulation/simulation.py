@@ -3,7 +3,6 @@
 from datetime import datetime
 import json
 from pathlib import Path
-import threading
 
 import numpy as np
 import matplotlib.pyplot as plt
@@ -24,7 +23,6 @@ from simulation.cb import CelestialBody
 from simulation.sc import Instrument, Spacecraft
 from simulation.sssb import SmallSolarSystemBody
 import simulation.render as render
-import simulation.compositor as compositor
 import utils
 
 
@@ -102,15 +100,12 @@ class Environment():
         # Setup Lightref
         self.setup_lightref(settings["lightref"])
 
-        # Create compositor
-        self.comp = compositor.ImageCompositor(self.res_dir, self.inst)
-
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
 
         self.render_dir = utils.check_dir(self.res_dir / "rendering")
 
-        self.renderer = render.BlenderController(self.render_dir, self.starcat_dir)
+        self.renderer = render.BlenderController(self.render_dir, self.starcat_dir, self.inst)
         self.renderer.create_camera("ScCam")
         self.renderer.configure_camera("ScCam", self.inst.focal_l, self.inst.chip_w)
 
@@ -235,7 +230,6 @@ class Environment():
         self.logger.info("Rendering simulation")
 
         # Render frame by frame
-        threads = []
         for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
                                                       self.spacecraft.pos_history,
                                                       self.sssb.pos_history,
@@ -243,6 +237,13 @@ class Environment():
 
             date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
             date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
+
+            # metadict creation
+            metainfo = dict()
+            metainfo["sssb_pos"] = np.asarray(sssb_pos.toArray())
+            metainfo["sc_pos"] = np.asarray(sc_pos.toArray())
+            metainfo["distance"] = sc_pos.distance(sssb_pos)
+            metainfo["date"] = date_str
 
             # Update environment
             self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / 1000.
@@ -257,7 +258,7 @@ class Environment():
 
             self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             
-            # Update optional scenes/cameras
+            # Update scenes/cameras
             pos_cam_const_dist = pos_sc_rel_sssb * 1000. / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
             self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
             self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
@@ -266,35 +267,9 @@ class Environment():
             self.renderer.set_camera_location("LightRefCam", lightrefcam_pos)
             self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
             self.renderer.target_camera(self.lightref, "LightRefCam")
-            
+
             # Render blender scenes
-            self.renderer.render(date_str)
-
-            # Render star background
-            fluxes = self.renderer.render_starmap(self.inst.res, date_str)
-
-            metadict = dict()
-            metadict["sssb_pos"] = np.asarray(sssb_pos.toArray())
-            metadict["sc_pos"] = np.asarray(sc_pos.toArray())
-            metadict["distance"] = sc_pos.distance(sssb_pos)
-            metadict["date"] = date_str
-            metadict["sc_rel_pos"] = pos_sc_rel_sssb
-            metadict["total_flux"] = fluxes[0]
-
-            self.write_meta_file(date_str, metadict)
-
-            for thr in threads:
-                if not thr.is_alive():
-                    threads.pop(threads.index(thr))
-
-            if len(threads) < 2:
-                # Allow up to 2 additional threads
-                thr = threading.Thread(target=self.comp.compose, args=(date_str,))
-                thr.start()
-                threads.append(thr)
-            else:
-                # If too many, also compose in main thread to not drop a frame
-                self.comp.compose(date_str)
+            self.renderer.render(metainfo)
 
         self.logger.info("Rendering completed")
 
@@ -315,18 +290,6 @@ class Environment():
 
         self.logger.info("Propagation results saved")
 
-    def write_meta_file(self, suffix, metadict):
-        """Writes metafile for a frame."""
-
-        filename = self.render_dir / ("Metadata_" + str(suffix))
-        filename = str(filename)
-
-        file_extension = ".json"
-        if filename[-len(file_extension):] != file_extension:
-            filename += file_extension
-
-        with open(filename, "w+") as metafile:
-            json.dump(metadict, metafile, default=utils.serialise)
 
 if __name__ == "__main__":
     pass

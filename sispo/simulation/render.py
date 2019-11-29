@@ -6,8 +6,10 @@ This implementation uses the blender python module bpy.
 
 import math
 from pathlib import Path
+import json
 import struct
 import time
+import threading
 import zlib
 
 from astropy import units as u
@@ -17,6 +19,7 @@ from mathutils import Vector # pylint: disable=import-error
 import numpy as np
 import OpenEXR
 
+import simulation.compositor as compositor
 import simulation.starcat as starcat
 import utils
 
@@ -35,7 +38,7 @@ class BlenderControllerError(RuntimeError):
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, render_dir, starcat_dir):
+    def __init__(self, render_dir, starcat_dir, instrument):
         """Initialise blender controller class."""
 
         self.res_dir = render_dir
@@ -59,7 +62,13 @@ class BlenderController:
         background = bpy.data.worlds[0].node_tree.nodes["Background"]
         background.inputs[0].default_value = (0, 0, 0, 1.0)
 
+        # Star catalog
         self.sta = starcat.StarCatalog(self.res_dir, starcat_dir)
+
+        # Create compositor
+        self.comp = compositor.ImageCompositor(self.res_dir, instrument)
+        self._threads = []
+
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
     def create_scene(self, scene_name):
@@ -262,16 +271,49 @@ class BlenderController:
             scene.cycles.seed = time.time()
             scene.view_layers.update()
 
-    def render(self, name_suffix=None, scenes=None):
+    def render(self, metainfo, scenes=None):
         """Render given scene."""
-        if name_suffix is None:
+        if metainfo["date"] is None:
             name = self.res_dir / f"r{self.render_id:0.8X}"
 
         for scene in self._get_scenes_iter(scenes):
             self.update(scene)
-            self.set_output_file(name_suffix, scene)
+            self.set_output_file(metainfo["date"], scene)
             bpy.ops.render.render(write_still=True, scene=scene.name)
-            self.save_blender_dfile(name_suffix, scene)
+            self.save_blender_dfile(metainfo["date"], scene)
+
+        # Render star background
+        res = (self.default_scene.render.resolution_x, 
+               self.default_scene.render.resolution_y)
+        fluxes = self.render_starmap(res, metainfo["date"])
+
+        metainfo["total_flux"] = fluxes[0]
+
+        self.write_meta_file(metainfo)
+
+        self._compose(metainfo["date"])
+
+    def _compose(self, name_suffix):
+        """
+        Composes different images into final image, uses multi-threading.
+        
+        :type name_suffix: str
+        :param name_suffix: Image suffix for file I/O. Used for constructing
+                            file names to read different images of a frame as
+                            well as used for composed image output.
+        """
+        for thr in self._threads:
+            if not thr.is_alive():
+                self._threads.pop(self._threads.index(thr))
+    
+        if len(self._threads) < 2:
+            # Allow up to 2 additional threads
+            thr = threading.Thread(target=self.comp.compose, args=(name_suffix,))
+            thr.start()
+            self._threads.append(thr)
+        else:
+            # If too many, also compose in main thread to not drop a frame
+            self.comp.compose(name_suffix)
 
     def load_object(self, filename, object_name, scenes=None):
         """Load blender object from file."""
@@ -310,6 +352,19 @@ class BlenderController:
 
         bpy.ops.wm.save_as_mainfile(filepath=filename)
 
+    def write_meta_file(self, metainfo):
+        """Writes metafile for a frame."""
+
+        filename = self.res_dir / ("Metadata_" + str(metainfo["date"]))
+        filename = str(filename)
+
+        file_extension = ".json"
+        if filename[-len(file_extension):] != file_extension:
+            filename += file_extension
+
+        with open(filename, "w+") as metafile:
+            json.dump(metainfo, metafile, default=utils.serialise)
+
     def _get_scenes_iter(self, scenes):
         """Checks scenes input to allow different types and create iterator.
         
@@ -341,10 +396,12 @@ class BlenderController:
 
     def render_starmap(self, res, name_suffix):
         """Render a starmap from given data and field of view."""
-        fov_vecs = get_fov_vecs("ScCam", "SssbOnly")
-        ra, dec, width, height = get_fov(fov_vecs[1], fov_vecs[2], fov_vecs[3], fov_vecs[4])
-        stardata = self.sta.get_stardata(ra, dec, width, height, f"ucac4_{name_suffix}")
+        
+        ra, dec, width, height = get_fov("ScCam", "SssbOnly")
+        res_file = f"ucac4_{name_suffix}"
+        stardata = self.sta.get_stardata(ra, dec, width, height, res_file)
 
+        fov_vecs = get_fov_vecs("ScCam", "SssbOnly")
         (direction, right_edge, _, upper_edge, _) = fov_vecs
         (res_x, res_y) = res
 
@@ -354,17 +411,18 @@ class BlenderController:
 
         upper_edge -= direction
         right_edge -= direction
-        total_flux = 0.
         up_norm = upper_edge.normalized()
         right_norm = right_edge.normalized()
         f_over_h_ccd_2 = 1. / upper_edge.length
         f_over_w_ccd_2 = 1. / right_edge.length
+        
         ss = 2
         starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
         
-        # Add alpha channel
+        # Set alpha channel
         starmap[:, :, 3] = 1.
 
+        total_flux = 0.
         for star in stardata:
             mag_star = star[2]
             flux = np.power(10., -0.4 * mag_star)
@@ -437,7 +495,6 @@ def get_fov_vecs(camera_name, scene_name):
 
     return (direction, right_edge, left_edge, upper_edge, lower_edge)
 
-
 def get_ra_dec(vec):
     """Calculate Right Ascension (RA) and Declination (DEC) in radians."""
     vec = vec.normalized()
@@ -445,9 +502,12 @@ def get_ra_dec(vec):
     ra = math.acos(vec.x / math.cos(dec))
     return (ra + math.pi, dec)
 
-
-def get_fov(right_edge, left_edge, upper_edge, lower_edge):
+def get_fov(camera_name, scene_name):
     """Calculate centre and size of current Field of View (FOV) in degrees."""
+    fov_vecs = get_fov_vecs(camera_name, scene_name)
+
+    _, right_edge, left_edge, upper_edge, lower_edge = fov_vecs
+
     ra_max = max(get_ra_dec(right_edge)[0], get_ra_dec(left_edge)[0])
     ra_max = math.degrees(ra_max)
     ra_min = min(get_ra_dec(right_edge)[0], get_ra_dec(left_edge)[0])
@@ -468,6 +528,4 @@ def get_fov(right_edge, left_edge, upper_edge, lower_edge):
     height = (dec_max - dec_min)
 
     return (ra, dec, width, height)
-
-
  
