@@ -67,7 +67,6 @@ class BlenderController:
 
         # Create compositor
         self.comp = compositor.ImageCompositor(self.res_dir, instrument)
-        self._threads = []
 
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
@@ -291,29 +290,7 @@ class BlenderController:
 
         self.write_meta_file(metainfo)
 
-        self._compose(metainfo["date"])
-
-    def _compose(self, name_suffix):
-        """
-        Composes different images into final image, uses multi-threading.
-        
-        :type name_suffix: str
-        :param name_suffix: Image suffix for file I/O. Used for constructing
-                            file names to read different images of a frame as
-                            well as used for composed image output.
-        """
-        for thr in self._threads:
-            if not thr.is_alive():
-                self._threads.pop(self._threads.index(thr))
-    
-        if len(self._threads) < 2:
-            # Allow up to 2 additional threads
-            thr = threading.Thread(target=self.comp.compose, args=(name_suffix,))
-            thr.start()
-            self._threads.append(thr)
-        else:
-            # If too many, also compose in main thread to not drop a frame
-            self.comp.compose(name_suffix)
+        self.comp.compose(frames=metainfo["date"])
 
     def load_object(self, filename, object_name, scenes=None):
         """Load blender object from file."""

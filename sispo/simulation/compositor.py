@@ -8,6 +8,7 @@ compositor is required to fix the intensity issue and add the star background.
 
 from datetime import datetime
 import json
+import threading
 
 from astropy import constants as const
 from astropy import units as u
@@ -151,6 +152,8 @@ class ImageCompositor():
 
         self.image_extension = ".exr"
 
+        self._threads = []
+
         self.inst = instrument
         self.dlmult = 2
 
@@ -201,13 +204,19 @@ class ImageCompositor():
 
         return rel_intensity
 
-    def compose(self, frames=None):
+    def compose(self, frames=None, max_threads=3):
         """
-        Composes raw images and adjusts light intensities.
+        Composes different images into final image, uses multi-threading.
+        
+        !!! CAUTION !!! Call only once at a time.
         
         :type frames: String, Frame or List of Frame
         :param frames: FrameID, Frame or list of frames for calibration and
                        composition.
+        :type name_suffix: str
+        :param name_suffix: Image suffix for file I/O. Used for constructing
+                            file names to read different images of a frame as
+                            well as used for composed image output.
         """
 
         if frames is None:
@@ -227,98 +236,117 @@ class ImageCompositor():
         else:
             raise ImageCompositorError(
                 "Compositor.compose requires frame or list of frames as input")
+
+        for frame in frames:
+
+            for thr in self._threads:
+                if not thr.is_alive():
+                    self._threads.pop(self._threads.index(thr))
+
+            if len(self._threads) < max_threads - 1:
+                # Allow up to 2 additional threads
+                thr = threading.Thread(target=self._compose, args=(frame,))
+                thr.start()
+                self._threads.append(thr)
+            else:
+                # If too many, also compose in main thread to not drop a frame
+                self._compose(frame)
+
+    
+    def _compose(self, frame):
+        """
+        Composes raw images and adjusts light intensities.
+        
+        :type frame: Frame
+        :param frame: Frame containing necessary inormation for composition.
+        """
         
         # Calculate Gaussian standard deviation for approx diffraction pattern
         sigma = self.dlmult * 0.45 * self.inst.wavelength \
                 * self.inst.focal_l / (self.inst.aperture_d \
-                * self.inst.pix_l)
+                * self.inst.pix_l)  
 
-        # SSSB reference when SSSB is too small
-        sssb_ref_img = self.create_sssb_ref(self.inst.res)
+        # SSSB photometry
+        sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"]) * u.m
+        ref_flux = SUN_FLUX_VBAND_1AU * ((const.au / sc_sun_dist) ** 2)
+        ref_flux *= self.inst.aperture_a * self.inst.pix_a 
+        ref_flux /= ((self.inst.focal_l ** 2) * np.pi)
+        ref_flux = ref_flux.decompose()
 
-        for frame in frames:
-
-            # SSSB photometry
-            sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"]) * u.m
-            ref_flux = SUN_FLUX_VBAND_1AU * ((const.au / sc_sun_dist) ** 2)
-            ref_flux *= self.inst.aperture_a * self.inst.pix_a 
-            ref_flux /= ((self.inst.focal_l ** 2) * np.pi)
-            ref_flux = ref_flux.decompose()
-
-            # Star photometry
-            starmap_flux = FLUX0_VBAND * frame.metadata["total_flux"]
-            starmap_flux *= self.inst.aperture_a
-            starmap_flux = starmap_flux.decompose()
+        # Star photometry
+        starmap_flux = FLUX0_VBAND * frame.metadata["total_flux"]
+        starmap_flux *= self.inst.aperture_a
+        starmap_flux = starmap_flux.decompose()
             
-            # Calibrate starmap
-            (_, stars_sums) = frame.calc_stars_stats()
-            frame.stars[:, :, 0:3] *= starmap_flux.value / stars_sums[0]
+        # Calibrate starmap
+        (_, stars_sums) = frame.calc_stars_stats()
+        frame.stars[:, :, 0:3] *= starmap_flux.value / stars_sums[0]
 
-            # Create composition image array
-            composed_img = np.zeros(frame.stars.shape, dtype=np.float32)
+        # Create composition image array
+        composed_img = np.zeros(frame.stars.shape, dtype=np.float32)
 
-            # Calibrate SSSB, depending on visible size 
-            dist_scale = np.power(1E6 * u.m / frame.metadata["distance"], 2.)  
-            vis_dim = self.sssb["max_dim"] * dist_scale
+        # Calibrate SSSB, depending on visible size 
+        dist_scale = np.power(1E6 * u.m / frame.metadata["distance"], 2.)  
+        vis_dim = self.sssb["max_dim"] * dist_scale
 
-            # Kernel size calculated to equal skimage.filters.gaussian
-            # Reference:
-            # https://github.com/scipy/scipy/blob/4bfc152f6ee1ca48c73c06e27f7ef021d729f496/scipy/ndimage/filters.py#L214
-            kernel = int((4 * sigma + 0.5) * 2)
-            kernel = max(kernel, 5) # Don't use smaller than 5
-            ksize = (kernel, kernel)
+        # Kernel size calculated to equal skimage.filters.gaussian
+        # Reference:
+        # https://github.com/scipy/scipy/blob/4bfc152f6ee1ca48c73c06e27f7ef021d729f496/scipy/ndimage/filters.py#L214
+        kernel = int((4 * sigma + 0.5) * 2)
+        kernel = max(kernel, 5) # Don't use smaller than 5
+        ksize = (kernel, kernel)
 
-            if vis_dim < 0.1:
-                # Use point source sssb
-                # Generate point source reference image
-                sssb_ref = sssb_ref_img.copy()
-                alpha = frame.sssb_const_dist[:, :, 3]
-                scale = frame.sssb_const_dist[:, :, 0:3] * alpha 
-                sssb_ref[:, :, 0:3] *= np.sum(scale, axis=-1) * dist_scale
+        if vis_dim < 0.1:
+            # Use point source sssb
+            # Generate point source reference image
+            sssb_ref = self.create_sssb_ref(self.inst.res)
+            alpha = frame.sssb_const_dist[:, :, 3]
+            scale = frame.sssb_const_dist[:, :, 0:3] * alpha 
+            sssb_ref[:, :, 0:3] *= np.sum(scale, axis=-1) * dist_scale
 
-                composed_img = (sssb_ref[:, : , 0:3] + frame.stars)
-                composed_img *= self.inst.quantum_eff
-                composed_img = cv2.GaussianBlur(composed_img, ksize, sigma)
-                composed_img += np.random.poisson(composed_img)
+            composed_img = (sssb_ref[:, : , 0:3] + frame.stars)
+            composed_img *= self.inst.quantum_eff
+            composed_img = cv2.GaussianBlur(composed_img, ksize, sigma)
+            composed_img += np.random.poisson(composed_img)
                 
-                composed_max = np.max(composed_img)
-                ref_sssb_max = np.max(sssb_ref[:, :, 0:3])
-                if composed_max > ref_sssb_max * 5:
-                    composed_max = ref_sssb_max * 5
+            composed_max = np.max(composed_img)
+            ref_sssb_max = np.max(sssb_ref[:, :, 0:3])
+            if composed_max > ref_sssb_max * 5:
+                composed_max = ref_sssb_max * 5
 
-            else:
-                # Calibrate sssb images
-                ref_int = frame.calc_ref_intensity()
-                sssb_cal_factor = ref_flux * self.sssb["albedo"] / ref_int
-                sssb_cal_factor = sssb_cal_factor.decompose().value
-                frame.sssb_only[:, :, 0:3] *= sssb_cal_factor
-                frame.sssb_const_dist[:, :, 0:3] *= sssb_cal_factor
+        else:
+            # Calibrate sssb images
+            ref_int = frame.calc_ref_intensity()
+            sssb_cal_factor = ref_flux * self.sssb["albedo"] / ref_int
+            sssb_cal_factor = sssb_cal_factor.decompose().value
+            frame.sssb_only[:, :, 0:3] *= sssb_cal_factor
+            frame.sssb_const_dist[:, :, 0:3] *= sssb_cal_factor
 
-                # Merge images taking alpha channel and q.e. into account
-                alpha = frame.sssb_only[:, :, 3]
-                for c in range(3):
-                    sssb = frame.sssb_only[:, :, c]
-                    stars = frame.stars[:, :, c]
-                    composed_img[:, :, c] = alpha * sssb + (1 - alpha) * stars
+            # Merge images taking alpha channel and q.e. into account
+            alpha = frame.sssb_only[:, :, 3]
+            for c in range(3):
+                sssb = frame.sssb_only[:, :, c]
+                stars = frame.stars[:, :, c]
+                composed_img[:, :, c] = alpha * sssb + (1 - alpha) * stars
                 
-                composed_img[:, :, 0:3] *= self.inst.quantum_eff
-                composed_img = cv2.GaussianBlur(composed_img, ksize, sigma)
-                composed_img += np.random.poisson(composed_img)
-                composed_max = np.max(composed_img)
+            composed_img[:, :, 0:3] *= self.inst.quantum_eff
+            composed_img = cv2.GaussianBlur(composed_img, ksize, sigma)
+            composed_img += np.random.poisson(composed_img)
+            composed_max = np.max(composed_img)
 
-            composed_img[:, :, :] /= composed_max
+        composed_img[:, :, :] /= composed_max
 
-            filename = self.image_dir / ("Comp_" + str(frame.id))
-            utils.write_openexr_image(filename, composed_img)
+        filename = self.image_dir / ("Comp_" + str(frame.id))
+        utils.write_openexr_image(filename, composed_img)
 
-            composed_img[:, :, :] *= 255
-            composed_img = composed_img.astype(np.uint8)
+        composed_img[:, :, 0:3] *= 255
+        composed_img = composed_img.astype(np.uint8)
             
-            if self.with_infobox:
-                self.add_infobox(composed_img, frame.metadata)
+        if self.with_infobox:
+            self.add_infobox(composed_img, frame.metadata)
             
-            filename = self.image_dir / ("Comp_" + str(frame.id) + ".png")
-            cv2.imwrite(str(filename), composed_img)
+        filename = self.image_dir / ("Comp_" + str(frame.id) + ".png")
+        cv2.imwrite(str(filename), composed_img[:, :, 0:3])
 
     def create_sssb_ref(self, res, scale=5):
         """Creates a reference sssb image for calibration.
