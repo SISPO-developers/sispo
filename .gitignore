@@ -3,6 +3,7 @@
 temp/*
 data/*
 !data/README.md
+!data/input/definition.json
 software/*
 !software/README.md
 
