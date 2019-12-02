@@ -44,10 +44,7 @@ class Environment():
         data_dir = self.root_dir / "data"
         self.models_dir = utils.check_dir(data_dir / "models")
 
-        if "res_dir" in settings:
-            self.res_dir = settings["res_dir"]
-        else:
-            self.res_dir = utils.check_dir(data_dir / "results" / self.name)
+        self.res_dir = settings["res_dir"]
         
         self.starcat_dir = settings["starcat"]
 
