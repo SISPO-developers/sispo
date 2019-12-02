@@ -1,0 +1,22 @@
+from setuptools import setup, find_namespace_packages
+
+setup(name="sispo",
+      version="0.1.0",
+      description="Space Imaging Simulator for Proximity Operations",
+      platform="Windows",
+      url="https://github.com/YgabrielsY/sispo",
+      author="Gabriel J. Schwarzkopf et al.",
+      license="BSD 2-Clause",
+      packages=find_namespace_packages(include=["sispo",
+                                                "sim",
+                                                "reconstruction",
+                                                "compression"],
+                                       exclude=["*test*",
+                                                "*software*",
+                                                "*build*",
+                                                "*doc*",
+                                                "*data*",
+                                                "*.vs*",
+                                                "*.vscode*",
+                                                "*.mypy_cache*"]),
+      zip_safe=False)
