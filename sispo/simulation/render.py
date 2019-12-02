@@ -19,7 +19,7 @@ from mathutils import Vector # pylint: disable=import-error
 import numpy as np
 import OpenEXR
 
-import simulation.compositor as compositor
+import simulation.compositor as cp
 import simulation.starcat as starcat
 import utils
 
@@ -41,6 +41,7 @@ class BlenderController:
     def __init__(self, render_dir, starcat_dir, instrument):
         """Initialise blender controller class."""
 
+        self.raw_dir = render_dir / "raw"
         self.res_dir = render_dir
         self.cycles = bpy.context.preferences.addons["cycles"]
 
@@ -63,10 +64,10 @@ class BlenderController:
         background.inputs[0].default_value = (0, 0, 0, 1.0)
 
         # Star catalog
-        self.sta = starcat.StarCatalog(self.res_dir, starcat_dir)
+        self.sta = starcat.StarCatalog(self.raw_dir, starcat_dir)
 
         # Create compositor
-        self.comp = compositor.ImageCompositor(self.res_dir, instrument)
+        self.comp = cp.ImageCompositor(self.raw_dir, self.res_dir, instrument)
 
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
@@ -215,7 +216,7 @@ class BlenderController:
 
     def set_output_file(self, name_suffix=None, scene=bpy.context.scene):
         """Set output file path to given scenes with prior extension check."""
-        filename = self.res_dir / (scene.name + "_" + str(name_suffix))
+        filename = self.raw_dir / (scene.name + "_" + str(name_suffix))
         filename = str(filename)
 
         file_extension = ".exr"
@@ -273,7 +274,7 @@ class BlenderController:
     def render(self, metainfo, scenes=None):
         """Render given scene."""
         if metainfo["date"] is None:
-            name = self.res_dir / f"r{self.render_id:0.8X}"
+            name = self.raw_dir / f"r{self.render_id:0.8X}"
 
         for scene in self._get_scenes_iter(scenes):
             self.update(scene)
@@ -320,7 +321,7 @@ class BlenderController:
 
     def save_blender_dfile(self, name_suffix=None, scene=bpy.context.scene):
         """Save a blender d file."""
-        filename = self.res_dir / (scene.name + "_" + str(name_suffix))
+        filename = self.raw_dir / (scene.name + "_" + str(name_suffix))
         filename = str(filename)
 
         file_extension = ".blend"
@@ -332,7 +333,7 @@ class BlenderController:
     def write_meta_file(self, metainfo):
         """Writes metafile for a frame."""
 
-        filename = self.res_dir / ("Metadata_" + str(metainfo["date"]))
+        filename = self.raw_dir / ("Metadata_" + str(metainfo["date"]))
         filename = str(filename)
 
         file_extension = ".json"
@@ -441,7 +442,7 @@ class BlenderController:
                                 interpolation=cv2.INTER_AREA)
         sm_scale *= (ss * ss)
 
-        filename = self.res_dir / ("Stars_" + name_suffix)
+        filename = self.raw_dir / ("Stars_" + name_suffix)
         utils.write_openexr_image(filename, sm_scale)
 
         return (total_flux, np.sum(sm_scale[:, :, 0]))

@@ -145,10 +145,10 @@ class Frame():
 class ImageCompositor():
     """This class provides functions to combine the final simulation images."""
 
-    def __init__(self, res_dir, instrument):
+    def __init__(self, raw_dir, res_dir, instrument):
 
         self.res_dir = res_dir
-        self.image_dir = self.res_dir
+        self.image_dir = raw_dir
 
         self.image_extension = ".exr"
 
@@ -336,7 +336,7 @@ class ImageCompositor():
 
         composed_img[:, :, :] /= composed_max
 
-        filename = self.image_dir / ("Comp_" + str(frame.id))
+        filename = self.res_dir / ("Comp_" + str(frame.id))
         utils.write_openexr_image(filename, composed_img)
 
         composed_img[:, :, 0:3] *= 255
@@ -345,7 +345,7 @@ class ImageCompositor():
         if self.with_infobox:
             self.add_infobox(composed_img, frame.metadata)
             
-        filename = self.image_dir / ("Comp_" + str(frame.id) + ".png")
+        filename = self.res_dir / ("Comp_" + str(frame.id) + ".png")
         cv2.imwrite(str(filename), composed_img[:, :, 0:3])
 
     def create_sssb_ref(self, res, scale=5):
