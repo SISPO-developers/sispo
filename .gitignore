@@ -3,6 +3,7 @@
 temp/*
 data/*
 !data/README.md
+!data/input/definition.json
 software/*
 !software/README.md
 
@@ -15,6 +16,11 @@ software/*
 
 ## Ignore mypy files
 .mypy_cache/*
+
+## Ignore building files
+build/lib/*
+*egg-info
+dist/*
 
 ## Ignore Visual Stdio Code settings
 .vscode/*

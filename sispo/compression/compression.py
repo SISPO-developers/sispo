@@ -13,7 +13,7 @@ import zlib
 import cv2
 import numpy as np
 
-import utils
+from .. import utils
 
 class CompressionError(RuntimeError):
     """Generic error class for compression errors."""
@@ -24,10 +24,10 @@ class Compressor():
     """Main class to interface compression module."""
 
     def __init__(self, res_dir, algo=None, settings=None):
-        self.res_dir = res_dir
+        self.res_dir = res_dir / "compressed"
         self.image_dir = res_dir / "rendering"
 
-        self.image_extension = ".exr"
+        self.img_extension = ".exr"
 
         self.imgs = []
 
@@ -37,17 +37,18 @@ class Compressor():
             settings = {"level": 9}
 
         self.select_algo(algo, settings)
+        self.algo = algo
 
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of Composition images."""
         scene_name = "Comp"
-        image_names = scene_name + "*" + self.image_extension
+        image_names = scene_name + "*" + self.img_extension
         file_names = self.image_dir.glob(image_names)
 
         ids = []
         for file_name in file_names:
-            file_name = str(file_name.name).strip(self.image_extension)
+            file_name = str(file_name.name).strip(self.img_extension)
             file_name = file_name.strip(scene_name)
             ids.append(file_name.strip("_"))
 
@@ -60,8 +61,8 @@ class Compressor():
         else:
             self.img_ids = img_ids
 
-        for id in self.img_ids:
-            img_path = self.image_dir / ("Comp_" + id + self.image_extension)
+        for img_id in self.img_ids:
+            img_path = self.image_dir / ("Comp_" + img_id + self.img_extension)
 
             img = utils.read_openexr_image(img_path)
             self.imgs.append(img)
@@ -71,10 +72,13 @@ class Compressor():
         Compresses multiple images using :py:meth: `.compress`
         """
         compressed = []
-        for img in self.imgs:
-            self.compress(img)
+        for img_id, img in zip(self.img_ids, self.imgs):
+            img_cmp = self.compress(img, img_id)
+            compressed.append(img_cmp)
 
-    def compress(self, img):
+        return compressed
+
+    def compress(self, img, img_id=None):
         """
         Compresses images using predefined algorithm or file format.
         
@@ -82,8 +86,12 @@ class Compressor():
         :returns: A compressed image.
         """
         img_cmp = self._comp_met(img, self._settings)
-        with open(str(self.image_dir / self.img_ids[0]), "wb") as file:
-            file.write(img_cmp)
+
+        if img_id is not None:
+            file_extension = "." + self.algo
+            filename = self.res_dir / (str(img_id) + file_extension)
+            with open(str(self.res_dir / filename), "wb") as file:
+                file.write(img_cmp)
 
         return img_cmp
 
@@ -94,7 +102,7 @@ class Compressor():
         :returns: Decompressed image.
         """
         if img is None:
-            with open(str(self.image_dir / self.img_ids[0]), "rb") as file:
+            with open(str(self.res_dir / self.img_ids[0]), "rb") as file:
                 img = file.read()
 
         img_dcmp = self._decomp_met(img)
@@ -292,7 +300,7 @@ class Compressor():
         def decompress(img):
             img_dcmp = func(img)
             img_dcmp = np.frombuffer(img_dcmp, dtype=np.float32)
-            img_dcmp = img_dcmp.reshape((2048,2464,3))
+            img_dcmp = img_dcmp.reshape((2048,2464,4))
             return img_dcmp
 
         return decompress
