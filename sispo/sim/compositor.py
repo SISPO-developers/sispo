@@ -16,8 +16,7 @@ import cv2
 import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
-
-import utils
+from .. import utils
 
 logger = utils.create_logger("compositor")
 

@@ -3,7 +3,7 @@
 from pathlib import Path
 import subprocess
 
-import utils
+from .. import utils
 
 logger = utils.create_logger("openmvs")
 

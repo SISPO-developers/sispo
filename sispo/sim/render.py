@@ -19,9 +19,11 @@ from mathutils import Vector # pylint: disable=import-error
 import numpy as np
 import OpenEXR
 
-import simulation.compositor as cp
-import simulation.starcat as starcat
-import utils
+from . import compositor as cp
+from .compositor import *
+from . import starcat
+from .starcat import *
+from .. import utils
 
 logger = utils.create_logger("rendering")
 

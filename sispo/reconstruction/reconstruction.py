@@ -6,8 +6,8 @@ Currently this module uses openMVG and openMVS.
 
 from pathlib import Path
 
-import reconstruction.openmvg as openmvg
-import reconstruction.openmvs as openmvs
+from . import openmvg
+from . import openmvs
 
 
 class Reconstructor():

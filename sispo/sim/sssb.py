@@ -11,7 +11,7 @@ from org.orekit.propagation.analytical import KeplerianPropagator # pylint: disa
 from org.orekit.time import AbsoluteDate
 from org.hipparchus.geometry.euclidean.threed import Rotation, RotationConvention, Vector3D  # pylint: disable=import-error
 
-from simulation.cb import CelestialBody
+from .cb import CelestialBody
 
 
 class SmallSolarSystemBody(CelestialBody):

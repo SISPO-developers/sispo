@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-import utils
+from .. import utils
 
 logger = utils.create_logger("starcat")
 

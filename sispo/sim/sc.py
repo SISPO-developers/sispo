@@ -12,7 +12,7 @@ from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=im
 from org.orekit.utils import PVCoordinates # pylint: disable=import-error
 from org.hipparchus.geometry.euclidean.threed import Vector3D  # pylint: disable=import-error
 
-from simulation.cb import CelestialBody
+from .cb import CelestialBody
 
 
 class Spacecraft(CelestialBody):

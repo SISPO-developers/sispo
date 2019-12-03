@@ -10,8 +10,7 @@ import orekit
 from orekit.pyhelpers import setup_orekit_curdir
 #################### orekit VM init ####################
 FILE_DIR = Path(__file__).parent.resolve()
-ROOT_DIR = FILE_DIR.parent.parent
-OREKIT_DATA_FILE = ROOT_DIR / "data" / "orekit-data.zip"
+OREKIT_DATA_FILE = FILE_DIR / "orekit-data.zip"
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
 setup_orekit_curdir(str(OREKIT_DATA_FILE))
 #################### orekit VM init ####################
@@ -19,11 +18,15 @@ from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=i
 from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.utils import Constants  # pylint: disable=import-error
 
-from simulation.cb import CelestialBody
-from simulation.sc import Instrument, Spacecraft
-from simulation.sssb import SmallSolarSystemBody
-import simulation.render as render
-import utils
+from . import cb
+from .cb import *
+from . import sc
+from .sc import *
+from . import sssb
+from .sssb import *
+from . import render
+from .render import *
+from .. import utils
 
 
 class SimulationError(RuntimeError):

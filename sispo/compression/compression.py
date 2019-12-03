@@ -13,7 +13,7 @@ import zlib
 import cv2
 import numpy as np
 
-import utils
+from .. import utils
 
 class CompressionError(RuntimeError):
     """Generic error class for compression errors."""

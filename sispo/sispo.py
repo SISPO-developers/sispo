@@ -12,11 +12,14 @@ import json
 from pathlib import Path
 import time
 
-import simulation.simulation as sim
-import reconstruction.reconstruction as rc
-import compression.compression as cs
+from . import sim
+from .sim import *
+from . import reconstruction
+from .reconstruction import *
+from . import compression
+from .compression import *
 
-import utils
+from . import utils
 
 parser = argparse.ArgumentParser(description=__file__.__doc__)
 parser.add_argument("-i", action="store", default=None, type=str, help="Definition file")
@@ -100,7 +103,7 @@ def main():
     t_start = time.time()
 
     if not args.no_sim or not args.no_render:
-        env = sim.Environment(settings)
+        env = Environment(settings)
 
         if not args.no_sim:
             env.simulate()
@@ -109,12 +112,12 @@ def main():
             env.render()
 
     if not args.no_compression:
-        comp = cs.Compressor(Path(settings["res_dir"]).resolve(), "jpg", {"level": 7})
+        comp = Compressor(Path(settings["res_dir"]).resolve(), "jpg", {"level": 7})
         comp.load_images()
         comp.compress_series()
 
     if not args.no_reconstruction:
-        recon = rc.Reconstructor()
+        recon = Reconstructor()
         recon.reconstruct()
 
     t_end = time.time()
