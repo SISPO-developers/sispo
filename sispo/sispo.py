@@ -15,7 +15,6 @@ import time
 from .sim import *
 from .reconstruction import *
 from .compression import *
-
 from . import utils
 
 parser = argparse.ArgumentParser(description=__file__.__doc__)
