@@ -21,4 +21,5 @@ setup(name="sispo",
                                                 "*.vscode*",
                                                 "*.mypy_cache*"]),
       entry_points={"console_scripts": ["sispo = sispo:main"]},
+      include_package_data=True,
       zip_safe=False)
