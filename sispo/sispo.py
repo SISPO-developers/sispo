@@ -12,11 +12,8 @@ import json
 from pathlib import Path
 import time
 
-from . import sim
 from .sim import *
-from . import reconstruction
 from .reconstruction import *
-from . import compression
 from .compression import *
 
 from . import utils
