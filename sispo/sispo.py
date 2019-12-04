@@ -18,18 +18,53 @@ from .compression import *
 from . import utils
 
 parser = argparse.ArgumentParser(description=__file__.__doc__)
-parser.add_argument("-i", action="store", default=None, type=str, 
+parser.add_argument("-i",
+                    action="store",
+                    default=None,
+                    type=str, 
                     help="Definition file")
-parser.add_argument("--cli", action="store_true",
+parser.add_argument("--cli",
+                    action="store_true",
                     help="If set, starts interactive cli tool")
-parser.add_argument("--no-sim", action="store_false",
+parser.add_argument("--no-sim",
+                    action="store_const",
+                    const=False,
+                    default=True,
+                    dest="with_sim",
                     help="If set, sispo will not simulate the scenario")
-parser.add_argument("--no-render", action="store_false",
+parser.add_argument("--no-render",
+                    action="store_const",
+                    const=False,
+                    default=True,
+                    dest="with_render",
                     help="If set, sispo will not render the scenario")
-parser.add_argument("--no-compression", action="store_false",
+parser.add_argument("--no-compression",
+                    action="store_const",
+                    const=False,
+                    default=True,
+                    dest="with_compression",
                     help="If set, images will not be compressed after rendering")
-parser.add_argument("--no-reconstruction", action="store_false",
+parser.add_argument("--no-reconstruction",
+                    action="store_const",
+                    const=False,
+                    default=True,
+                    dest="with_reconstruction",
                     help="If set, no 3D model will be reconstructed")
+parser.add_argument("--sim-only",
+                    action="store_true",
+                    help="Will only simulate, not perform other steps.")
+parser.add_argument("--sim-render-only",
+                    action="store_true",
+                    help="Will only simulate and render, not perform other steps.")
+parser.add_argument("--render-only",
+                    action="store_true",
+                    help="Will only render, not perform other steps.")
+parser.add_argument("--compress-only",
+                    action="store_true",
+                    help="Will only compress images, not perform other steps.")
+parser.add_argument("--reconstruct-only",
+                    action="store_true",
+                    help="Will only reconstruct 3D, not perform other steps.")
 
 def read_input():
     """
@@ -103,23 +138,52 @@ def main():
         settings = read_input_file(args.i)
 
     t_start = time.time()
+    
+    if args.sim_only:
+        env = Environment(settings)
+        env.simulate()
+        return
+    
+    if args.sim_render_only:
+        env = Environment(settings)
+        env.simulate()
+        env.render()
+        return
 
-    if args.sim or args.render:
+    if args.render_only:
+        raise NotImplementedError()
+        env = Environment(settings)
+        env.render()
+        return
+
+    if args.compress_only:
+        params = {"level": 7}
+        comp = Compressor(Path(settings["res_dir"]).resolve(), "jpg", params)
+        comp.load_images()
+        comp.compress_series()
+        return
+
+    if args.reconstruct_only:
+        recon = Reconstructor()
+        recon.reconstruct()
+        return
+
+    if args.with_sim or args.with_render:
         env = Environment(settings)
 
-        if args.sim:
+        if args.with_sim:
             env.simulate()
         
-        if args.render:
+        if args.with_render:
             env.render()
 
-    if args.compression:
+    if args.with_compression:
         params = {"level": 7}
         comp = Compressor(Path(settings["res_dir"]).resolve(), "jpg", params)
         comp.load_images()
         comp.compress_series()
 
-    if args.reconstruction:
+    if args.with_reconstruction:
         recon = Reconstructor()
         recon.reconstruct()
 
