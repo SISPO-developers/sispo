@@ -30,6 +30,7 @@ class Compressor():
         self.img_extension = ".exr"
 
         self.imgs = []
+        self._res = None
 
         if algo is None:
             algo = "lzma"
@@ -66,6 +67,11 @@ class Compressor():
 
             img = utils.read_openexr_image(img_path)
             self.imgs.append(img)
+
+        self._res = self.imgs[0].shape
+        for img in self.imgs:
+            if not img.shape == self._res:
+                raise CompressionError("All images must have same size!")
 
     def compress_series(self):
         """
@@ -125,20 +131,20 @@ class Compressor():
             comp = self._decorate_builtin_compress(bz2.compress)
             settings["compresslevel"] = settings["level"]
             settings.pop("level")
-            decomp = self._decorate_builtin_decompress(bz2.decompress)
+            decomp = self._decorate_builtin_decompress(bz2.decompress, self._res)
         elif algo == "gzip":
             comp = self._decorate_builtin_compress(gzip.compress)
             settings["compresslevel"] = settings["level"]
             settings.pop("level")
-            decomp = self._decorate_builtin_decompress(gzip.decompress)
+            decomp = self._decorate_builtin_decompress(gzip.decompress, self._res)
         elif algo == "lzma":
             comp = self._decorate_builtin_compress(lzma.compress)
             settings["preset"] = settings["level"]
             settings.pop("level")
-            decomp = self._decorate_builtin_decompress(lzma.decompress)
+            decomp = self._decorate_builtin_decompress(lzma.decompress, self._res)
         elif algo == "zlib":
             comp = self._decorate_builtin_compress(zlib.compress)
-            decomp = self._decorate_builtin_decompress(zlib.decompress)
+            decomp = self._decorate_builtin_decompress(zlib.decompress, self._res)
 
         ##### File formats #####
         elif algo == "jpeg" or algo == "jpg":
@@ -188,7 +194,8 @@ class Compressor():
         elif "jpeg2000" or "jp2":
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".jp2"
-            params = (cv2.IMWRITE_JPEG2000_COMPRESSION_X1000, settings["level"] * 100)
+            level = settings["level"] * 100 # Ranges from 0 to 1000
+            params = (cv2.IMWRITE_JPEG2000_COMPRESSION_X1000, level)
             settings.pop("level")
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
@@ -296,11 +303,11 @@ class Compressor():
         return compress
 
     @staticmethod
-    def _decorate_builtin_decompress(func):
+    def _decorate_builtin_decompress(func, res):
         def decompress(img):
             img_dcmp = func(img)
             img_dcmp = np.frombuffer(img_dcmp, dtype=np.float32)
-            img_dcmp = img_dcmp.reshape((2048,2464,4))
+            img_dcmp = img_dcmp.reshape(res)
             return img_dcmp
 
         return decompress
