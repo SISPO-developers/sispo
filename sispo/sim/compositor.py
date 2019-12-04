@@ -145,6 +145,9 @@ class Frame():
 class ImageCompositor():
     """This class provides functions to combine the final simulation images."""
 
+    IMG_MIN_SIZE_INFOBOX = (1000, 1200)
+    INFOBOX_SIZE = {"default": (100, 400), "min": (50, 200)}
+
     def __init__(self, raw_dir, res_dir, instrument):
 
         self.res_dir = res_dir
@@ -338,15 +341,17 @@ class ImageCompositor():
 
         filename = self.res_dir / ("Comp_" + str(frame.id))
         utils.write_openexr_image(filename, composed_img)
-
-        composed_img[:, :, 0:3] *= 255
-        composed_img = composed_img.astype(np.uint8)
-            
+  
         if self.with_infobox:
-            self.add_infobox(composed_img, frame.metadata)
+            infobox_img = composed_img[:, :, 0:3] * 255
+            infobox_img = infobox_img.astype(np.uint8)
+            try:
+                self.add_infobox(infobox_img, frame.metadata)
+            except ImageCompositorError as e:
+                print(f"No Infobox could be added. {str(e)}!")
             
-        filename = self.res_dir / ("Comp_" + str(frame.id) + ".png")
-        cv2.imwrite(str(filename), composed_img[:, :, 0:3])
+            filename = self.res_dir / ("Comp_" + str(frame.id) + ".png")
+            cv2.imwrite(str(filename), infobox_img[:, :, 0:3])
 
     def create_sssb_ref(self, res, scale=5):
         """Creates a reference sssb image for calibration.
@@ -382,13 +387,37 @@ class ImageCompositor():
             
         return sssb
 
-    def add_infobox(self, img, metadata, tb_height=100, tb_width=400):
+    def add_infobox(self, img, metadata, height=None, width=None):
         """Overlays an infobox to a given image in the lower right corner."""
+        # ~ Smallest size 1000 1200 for which 100 400 works
+        x_res, y_res = img.shape
+
+        if height is None:
+            if y_res > self.IMG_MIN_SIZE_INFOBOX[0]:
+                height = self.INFOBOX_SIZE["default"][0]
+            else:
+                scale = y_res / self.IMG_MIN_SIZE_INFOBOX[0]
+                height = scale * self.INFOBOX_SIZE["default"][0]
+
+        if width is None:
+            if x_res > self.IMG_MIN_SIZE_INFOBOX[1]:
+                width = self.INFOBOX_SIZE["default"][1]
+            else:
+                scale = x_res / self.IMG_MIN_SIZE_INFOBOX[1]
+                width = scale * self.INFOBOX_SIZE["default"][1]
+        
+        if height is not None or width is not None:
+            if height < y_res or width < x_res:
+                raise ImageCompositorError("Infobox is bigger than image.")
+        elif height < self.INFOBOX_SIZE["min"][0] or \
+                width < self.INFOBOX_SIZE["min"][1]:
+            raise ImageCompositorError("Infobox is too small to be readable.")
+
         sig = 3
-        textbox = np.zeros((tb_height * sig, tb_width * sig, 4), np.float32)
+        textbox = np.zeros((height * sig, width * sig, 4), np.float32)
 
         pt1 = (0, 0)
-        pt2 = (tb_width * sig, tb_height * sig)
+        pt2 = (width * sig, height * sig)
         color = (128, 128, 128, 128)
         cv2.rectangle(textbox, pt1, pt2, color, cv2.FILLED)
 
@@ -407,16 +436,16 @@ class ImageCompositor():
         kernel = int((4 * sigma + 0.5) * 2)
         ksize = (kernel, kernel)
         textbox = cv2.GaussianBlur(textbox, ksize, sigma)
-        textbox = cv2.resize(textbox, (tb_width, tb_height), 
+        textbox = cv2.resize(textbox, (width, height), 
                                 interpolation=cv2.INTER_AREA)
         alpha_s = textbox[:, :, 3] / 255.0
         alpha_l = 1. - alpha_s
 
         for c in range(3):
             tb_a = alpha_s * textbox[:, :, c]
-            img_a = alpha_l * img[1800:1800+tb_height, 2000:2000+tb_width, c]
+            img_a = alpha_l * img[1800:1800+height, 2000:2000+width, c]
             img_channel = (tb_a + img_a)
-            img[1800:1800+tb_height, 2000:2000+tb_width, c] = img_channel
+            img[1800:1800+height, 2000:2000+width, c] = img_channel
         
         return img
 
