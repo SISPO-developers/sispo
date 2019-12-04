@@ -165,6 +165,7 @@ class ImageCompositor():
         self.sssb["max_dim"] = 512
 
         self.with_infobox = True
+        self.with_clipping = True
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of SssbOnly scenes."""
@@ -311,12 +312,10 @@ class ImageCompositor():
             composed_img *= self.inst.quantum_eff
             composed_img = cv2.GaussianBlur(composed_img, ksize, sigma)
             composed_img += np.random.poisson(composed_img)
-                
             composed_max = np.max(composed_img)
             ref_sssb_max = np.max(sssb_ref[:, :, 0:3])
             if composed_max > ref_sssb_max * 5:
                 composed_max = ref_sssb_max * 5
-
         else:
             # Calibrate sssb images
             ref_int = frame.calc_ref_intensity()
@@ -351,7 +350,12 @@ class ImageCompositor():
                 print(f"No Infobox could be added. {str(e)}!")
             
             filename = self.res_dir / ("Comp_" + str(frame.id) + ".png")
-            cv2.imwrite(str(filename), infobox_img[:, :, 0:3])
+            cv2.imwrite(str(filename), infobox_img)
+
+        if self.with_clipping:
+            clipped_img = self.clip_color_depth(composed_img)
+            filename = self.image_dir / ("Inst_" + str(frame.id) + ".png")
+            cv2.imwrite(str(filename), clipped_img)
 
     def create_sssb_ref(self, res, scale=5):
         """Creates a reference sssb image for calibration.
@@ -447,6 +451,17 @@ class ImageCompositor():
             img_channel = (tb_a + img_a)
             img[1800:1800+height, 2000:2000+width, c] = img_channel
         
+        return img
+
+    def clip_color_depth(self, img):
+        """Reduces color depth to the instrument color depth."""
+        max_val = 2 ** self.inst.color_depth - 1
+
+        img = img[:, :, 0:3] * max_val
+        img = img.astype(np.uint16)
+        img = np.asarray(img * (65535. / max_val), np.float32)
+        img = img.astype(np.uint16)
+
         return img
 
 if __name__ == "__main__":

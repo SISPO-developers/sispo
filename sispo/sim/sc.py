@@ -130,4 +130,9 @@ class Instrument():
         else:
             self.quantum_eff = 0.25
       
+        if "color_depth" in charas:
+            self.color_depth = charas["color_depth"]
+        else:
+            self.color_depth = 12
+
         self.aperture_a = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) * np.pi/4
