@@ -142,26 +142,31 @@ def main():
     if args.sim_only:
         env = Environment(settings)
         env.simulate()
+        return
     
     if args.sim_render_only:
         env = Environment(settings)
         env.simulate()
         env.render()
+        return
 
     if args.render_only:
         raise NotImplementedError()
         env = Environment(settings)
         env.render()
+        return
 
     if args.compress_only:
         params = {"level": 7}
         comp = Compressor(Path(settings["res_dir"]).resolve(), "jpg", params)
         comp.load_images()
         comp.compress_series()
+        return
 
     if args.reconstruct_only:
         recon = Reconstructor()
         recon.reconstruct()
+        return
 
     if args.with_sim or args.with_render:
         env = Environment(settings)
