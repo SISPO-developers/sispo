@@ -108,7 +108,8 @@ def main():
             env.render()
 
     if not args.no_compression:
-        comp = Compressor(Path(settings["res_dir"]).resolve(), "jpg", {"level": 7})
+        params = {"level": 7}
+        comp = Compressor(Path(settings["res_dir"]).resolve(), "jpg", params)
         comp.load_images()
         comp.compress_series()
 
