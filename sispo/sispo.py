@@ -22,13 +22,13 @@ parser.add_argument("-i", action="store", default=None, type=str,
                     help="Definition file")
 parser.add_argument("--cli", action="store_true",
                     help="If set, starts interactive cli tool")
-parser.add_argument("--sim", action="store_false",
+parser.add_argument("--no-sim", action="store_false",
                     help="If set, sispo will not simulate the scenario")
-parser.add_argument("--render", action="store_false",
+parser.add_argument("--no-render", action="store_false",
                     help="If set, sispo will not render the scenario")
-parser.add_argument("--compression", action="store_false",
+parser.add_argument("--no-compression", action="store_false",
                     help="If set, images will not be compressed after rendering")
-parser.add_argument("--reconstruction", action="store_false",
+parser.add_argument("--no-reconstruction", action="store_false",
                     help="If set, no 3D model will be reconstructed")
 
 def read_input():
