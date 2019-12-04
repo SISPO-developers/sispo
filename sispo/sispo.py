@@ -18,12 +18,18 @@ from .compression import *
 from . import utils
 
 parser = argparse.ArgumentParser(description=__file__.__doc__)
-parser.add_argument("-i", action="store", default=None, type=str, help="Definition file")
-parser.add_argument("--cli", action="store_true", help="If set, starts interactive cli tool")
-parser.add_argument("--no-sim", action="store_true", help="If set, sispo will not simulate the scenario")
-parser.add_argument("--no-render", action="store_true", help="If set, sispo will not render the scenario")
-parser.add_argument("--no-compression", action="store_true", help="If set, images will not be compressed after rendering")
-parser.add_argument("--no-reconstruction", action="store_true", help="If set, no 3D model will be reconstructed")
+parser.add_argument("-i", action="store", default=None, type=str, 
+                    help="Definition file")
+parser.add_argument("--cli", action="store_true",
+                    help="If set, starts interactive cli tool")
+parser.add_argument("--no-sim", action="store_false",
+                    help="If set, sispo will not simulate the scenario")
+parser.add_argument("--no-render", action="store_false",
+                    help="If set, sispo will not render the scenario")
+parser.add_argument("--no-compression", action="store_false",
+                    help="If set, images will not be compressed after rendering")
+parser.add_argument("--no-reconstruction", action="store_false",
+                    help="If set, no 3D model will be reconstructed")
 
 def read_input():
     """
@@ -98,22 +104,22 @@ def main():
 
     t_start = time.time()
 
-    if not args.no_sim or not args.no_render:
+    if args.sim or args.render:
         env = Environment(settings)
 
-        if not args.no_sim:
+        if args.sim:
             env.simulate()
         
-        if not args.no_render:
+        if args.render:
             env.render()
 
-    if not args.no_compression:
+    if args.compression:
         params = {"level": 7}
         comp = Compressor(Path(settings["res_dir"]).resolve(), "jpg", params)
         comp.load_images()
         comp.compress_series()
 
-    if not args.no_reconstruction:
+    if args.reconstruction:
         recon = Reconstructor()
         recon.reconstruct()
 
