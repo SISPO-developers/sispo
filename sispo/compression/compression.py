@@ -13,7 +13,7 @@ import zlib
 import cv2
 import numpy as np
 
-import utils
+from .. import utils
 
 class CompressionError(RuntimeError):
     """Generic error class for compression errors."""
@@ -24,12 +24,13 @@ class Compressor():
     """Main class to interface compression module."""
 
     def __init__(self, res_dir, algo=None, settings=None):
-        self.res_dir = res_dir
+        self.res_dir = res_dir / "compressed"
         self.image_dir = res_dir / "rendering"
 
-        self.image_extension = ".exr"
+        self.img_extension = ".exr"
 
         self.imgs = []
+        self._res = None
 
         if algo is None:
             algo = "lzma"
@@ -37,17 +38,18 @@ class Compressor():
             settings = {"level": 9}
 
         self.select_algo(algo, settings)
+        self.algo = algo
 
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of Composition images."""
         scene_name = "Comp"
-        image_names = scene_name + "*" + self.image_extension
+        image_names = scene_name + "*" + self.img_extension
         file_names = self.image_dir.glob(image_names)
 
         ids = []
         for file_name in file_names:
-            file_name = str(file_name.name).strip(self.image_extension)
+            file_name = str(file_name.name).strip(self.img_extension)
             file_name = file_name.strip(scene_name)
             ids.append(file_name.strip("_"))
 
@@ -60,21 +62,29 @@ class Compressor():
         else:
             self.img_ids = img_ids
 
-        for id in self.img_ids:
-            img_path = self.image_dir / ("Comp_" + id + self.image_extension)
+        for img_id in self.img_ids:
+            img_path = self.image_dir / ("Comp_" + img_id + self.img_extension)
 
             img = utils.read_openexr_image(img_path)
             self.imgs.append(img)
+
+        self._res = self.imgs[0].shape
+        for img in self.imgs:
+            if not img.shape == self._res:
+                raise CompressionError("All images must have same size!")
 
     def compress_series(self):
         """
         Compresses multiple images using :py:meth: `.compress`
         """
         compressed = []
-        for img in self.imgs:
-            self.compress(img)
+        for img_id, img in zip(self.img_ids, self.imgs):
+            img_cmp = self.compress(img, img_id)
+            compressed.append(img_cmp)
 
-    def compress(self, img):
+        return compressed
+
+    def compress(self, img, img_id=None):
         """
         Compresses images using predefined algorithm or file format.
         
@@ -82,8 +92,12 @@ class Compressor():
         :returns: A compressed image.
         """
         img_cmp = self._comp_met(img, self._settings)
-        with open(str(self.image_dir / self.img_ids[0]), "wb") as file:
-            file.write(img_cmp)
+
+        if img_id is not None:
+            file_extension = "." + self.algo
+            filename = self.res_dir / (str(img_id) + file_extension)
+            with open(str(self.res_dir / filename), "wb") as file:
+                file.write(img_cmp)
 
         return img_cmp
 
@@ -94,7 +108,7 @@ class Compressor():
         :returns: Decompressed image.
         """
         if img is None:
-            with open(str(self.image_dir / self.img_ids[0]), "rb") as file:
+            with open(str(self.res_dir / self.img_ids[0]), "rb") as file:
                 img = file.read()
 
         img_dcmp = self._decomp_met(img)
@@ -117,20 +131,20 @@ class Compressor():
             comp = self._decorate_builtin_compress(bz2.compress)
             settings["compresslevel"] = settings["level"]
             settings.pop("level")
-            decomp = self._decorate_builtin_decompress(bz2.decompress)
+            decomp = self._decorate_builtin_decompress(bz2.decompress, self._res)
         elif algo == "gzip":
             comp = self._decorate_builtin_compress(gzip.compress)
             settings["compresslevel"] = settings["level"]
             settings.pop("level")
-            decomp = self._decorate_builtin_decompress(gzip.decompress)
+            decomp = self._decorate_builtin_decompress(gzip.decompress, self._res)
         elif algo == "lzma":
             comp = self._decorate_builtin_compress(lzma.compress)
             settings["preset"] = settings["level"]
             settings.pop("level")
-            decomp = self._decorate_builtin_decompress(lzma.decompress)
+            decomp = self._decorate_builtin_decompress(lzma.decompress, self._res)
         elif algo == "zlib":
             comp = self._decorate_builtin_compress(zlib.compress)
-            decomp = self._decorate_builtin_decompress(zlib.decompress)
+            decomp = self._decorate_builtin_decompress(zlib.decompress, self._res)
 
         ##### File formats #####
         elif algo == "jpeg" or algo == "jpg":
@@ -180,7 +194,8 @@ class Compressor():
         elif "jpeg2000" or "jp2":
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".jp2"
-            params = (cv2.IMWRITE_JPEG2000_COMPRESSION_X1000, settings["level"] * 100)
+            level = settings["level"] * 100 # Ranges from 0 to 1000
+            params = (cv2.IMWRITE_JPEG2000_COMPRESSION_X1000, level)
             settings.pop("level")
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
@@ -288,11 +303,11 @@ class Compressor():
         return compress
 
     @staticmethod
-    def _decorate_builtin_decompress(func):
+    def _decorate_builtin_decompress(func, res):
         def decompress(img):
             img_dcmp = func(img)
             img_dcmp = np.frombuffer(img_dcmp, dtype=np.float32)
-            img_dcmp = img_dcmp.reshape((2048,2464,3))
+            img_dcmp = img_dcmp.reshape(res)
             return img_dcmp
 
         return decompress
