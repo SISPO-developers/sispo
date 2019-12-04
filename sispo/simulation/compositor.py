@@ -405,6 +405,8 @@ class ImageCompositor():
 
         img = img[:, :, 0:3] * max_val
         img = img.astype(np.uint16)
+        img = np.asarray(img * (65535. / max_val), np.float32)
+        img = img.astype(np.uint16)
 
         return img
 
