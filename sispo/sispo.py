@@ -30,6 +30,16 @@ parser.add_argument("--no-compression", action="store_false",
                     help="If set, images will not be compressed after rendering")
 parser.add_argument("--no-reconstruction", action="store_false",
                     help="If set, no 3D model will be reconstructed")
+parser.add_argument("--sim-only", action="store_true",
+                    help="Will only simulate, not perform other steps.")
+parser.add_argument("--sim-render-only", action="store_true",
+                    help="Will only simulate and render, not perform other steps.")
+parser.add_argument("--render-only", action="store_true",
+                    help="Will only render, not perform other steps.")
+parser.add_argument("--compress-only", action="store_true",
+                    help="Will only compress images, not perform other steps.")
+parser.add_argument("--reconstruct-only", action="store_true",
+                    help="Will only reconstruct 3D, not perform other steps.")
 
 def read_input():
     """
@@ -103,6 +113,30 @@ def main():
         settings = read_input_file(args.i)
 
     t_start = time.time()
+    
+    if args.sim_only:
+        env = Environment(settings)
+        env.simulate()
+    
+    if args.sim_render_only:
+        env = Environment(settings)
+        env.simulate()
+        env.render()
+
+    if args.render_only:
+        raise NotImplementedError()
+        env = Environment(settings)
+        env.render()
+
+    if args.compress_only:
+        params = {"level": 7}
+        comp = Compressor(Path(settings["res_dir"]).resolve(), "jpg", params)
+        comp.load_images()
+        comp.compress_series()
+
+    if args.reconstruct_only:
+        recon = Reconstructor()
+        recon.reconstruct()
 
     if args.sim or args.render:
         env = Environment(settings)
