@@ -24,8 +24,8 @@ class Compressor():
     """Main class to interface compression module."""
 
     def __init__(self, res_dir, algo=None, settings=None):
-        self.res_dir = res_dir / "compressed"
-        self.image_dir = res_dir / "rendering"
+        self.res_dir = utils.check_dir(res_dir / "compressed")
+        self.image_dir = utils.check_dir(res_dir / "rendering")
 
         self.img_extension = ".exr"
 
