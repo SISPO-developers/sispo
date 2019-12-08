@@ -164,7 +164,7 @@ def main():
         return
 
     if args.reconstruct_only:
-        recon = Reconstructor()
+        recon = Reconstructor(settings)
         recon.reconstruct()
         return
 
@@ -184,7 +184,7 @@ def main():
         comp.compress_series()
 
     if args.with_reconstruction:
-        recon = Reconstructor()
+        recon = Reconstructor(settings)
         recon.reconstruct()
 
     t_end = time.time()

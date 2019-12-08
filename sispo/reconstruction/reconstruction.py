@@ -13,12 +13,22 @@ from . import openmvs
 class Reconstructor():
     """Reconstruction of a 3D object from images."""
 
-    def __init__(self):
+    def __init__(self, settings):
         """Initialises main directory and file structure."""
         self.root_dir = Path(__file__).parent.parent.parent
         self.res_dir = self.root_dir / "data" / "results" / "Didymos"
-        self.oMVG = openmvg.OpenMVGController(self.res_dir)
-        self.oMVS = openmvs.OpenMVSController(self.res_dir)
+
+        if "openMVG_dir" in settings:
+            openMVG_dir = Path(settings["openMVG_dir"]).resolve()
+        if not openMVG_dir.is_dir():
+            openMVG_dir = None
+        self.oMVG = openmvg.OpenMVGController(self.res_dir, openMVG_dir)
+
+        if "openMVS_dir" in settings:
+            openMVS_dir = Path(settings["openMVS_dir"]).resolve()
+        if not openMVS_dir.is_dir():
+            openMVS_dir = None
+        self.oMVS = openmvs.OpenMVSController(self.res_dir, openMVS_dir)
 
     def create_pointcloud(self):
         """Creates point cloud from images."""
