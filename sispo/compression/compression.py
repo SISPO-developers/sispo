@@ -24,11 +24,11 @@ class CompressionError(RuntimeError):
 class Compressor():
     """Main class to interface compression module."""
 
-    def __init__(self, res_dir, img_ext=".exr", algo=None, settings=None):
+    def __init__(self, res_dir, img_ext="exr", algo=None, settings=None):
         self.res_dir = utils.check_dir(res_dir / "compressed")
         self.image_dir = utils.check_dir(res_dir / "rendering")
 
-        self.img_extension = img_ext
+        self.img_extension = "." + img_ext
 
         self.imgs = []
         self._res = None
@@ -67,7 +67,10 @@ class Compressor():
         for img_id in self.img_ids:
             img_path = self.image_dir / ("Comp_" + img_id + self.img_extension)
 
-            img = utils.read_openexr_image(img_path)
+            if self.img_extension == ".exr":
+                img = utils.read_openexr_image(img_path)
+            else:
+                img = cv2.imread(str(img_path))
             self.imgs.append(img)
 
         self._res = self.imgs[0].shape
