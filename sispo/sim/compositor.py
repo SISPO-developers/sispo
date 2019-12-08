@@ -394,7 +394,7 @@ class ImageCompositor():
     def add_infobox(self, img, metadata, height=None, width=None):
         """Overlays an infobox to a given image in the lower right corner."""
         # ~ Smallest size 1000 1200 for which 100 400 works
-        x_res, y_res = img.shape
+        x_res, y_res, _ = img.shape
 
         if height is None:
             if y_res > self.IMG_MIN_SIZE_INFOBOX[0]:
