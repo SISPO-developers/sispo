@@ -145,8 +145,8 @@ class Frame():
 class ImageCompositor():
     """This class provides functions to combine the final simulation images."""
 
-    IMG_MIN_SIZE_INFOBOX = (1000, 1200)
-    INFOBOX_SIZE = {"default": (100, 400), "min": (50, 200)}
+    IMG_MIN_SIZE_INFOBOX = (1200, 1000)
+    INFOBOX_SIZE = {"default": (400, 100), "min": (200, 50)}
 
     def __init__(self, raw_dir, res_dir, instrument):
 
@@ -394,24 +394,24 @@ class ImageCompositor():
     def add_infobox(self, img, metadata, height=None, width=None):
         """Overlays an infobox to a given image in the lower right corner."""
         # ~ Smallest size 1000 1200 for which 100 400 works
-        x_res, y_res, _ = img.shape
+        y_res, x_res, _ = img.shape
 
         if height is None:
-            if y_res > self.IMG_MIN_SIZE_INFOBOX[0]:
-                height = self.INFOBOX_SIZE["default"][0]
+            if y_res > self.IMG_MIN_SIZE_INFOBOX[1]:
+                height = self.INFOBOX_SIZE["default"][1]
             else:
-                scale = y_res / self.IMG_MIN_SIZE_INFOBOX[0]
-                height = scale * self.INFOBOX_SIZE["default"][0]
+                scale = y_res / self.IMG_MIN_SIZE_INFOBOX[1]
+                height = scale * self.INFOBOX_SIZE["default"][1]
 
         if width is None:
-            if x_res > self.IMG_MIN_SIZE_INFOBOX[1]:
-                width = self.INFOBOX_SIZE["default"][1]
+            if x_res > self.IMG_MIN_SIZE_INFOBOX[0]:
+                width = self.INFOBOX_SIZE["default"][0]
             else:
-                scale = x_res / self.IMG_MIN_SIZE_INFOBOX[1]
-                width = scale * self.INFOBOX_SIZE["default"][1]
-        
+                scale = x_res / self.IMG_MIN_SIZE_INFOBOX[0]
+                width = scale * self.INFOBOX_SIZE["default"][0]
+        print(height, width, x_res, y_res)
         if height is not None or width is not None:
-            if height < y_res or width < x_res:
+            if height > y_res or width > x_res:
                 raise ImageCompositorError("Infobox is bigger than image.")
         elif height < self.INFOBOX_SIZE["min"][0] or \
                 width < self.INFOBOX_SIZE["min"][1]:
@@ -447,9 +447,9 @@ class ImageCompositor():
 
         for c in range(3):
             tb_a = alpha_s * textbox[:, :, c]
-            img_a = alpha_l * img[1800:1800+height, 2000:2000+width, c]
+            img_a = alpha_l * img[y_res-height:y_res+1, x_res-width:x_res+1, c]
             img_channel = (tb_a + img_a)
-            img[1800:1800+height, 2000:2000+width, c] = img_channel
+            img[y_res-height:y_res+1, x_res-width:x_res+1, c] = img_channel
         
         return img
 
