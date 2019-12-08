@@ -16,11 +16,20 @@ class OpenMVSControllerError(RuntimeError):
 class OpenMVSController():
     """Controls behaviour of openMVS data processing."""
 
-    def __init__(self, res_dir):
+    def __init__(self, res_dir, openMVS_dir=None):
         """."""
-        self.root_dir = Path(__file__).parent.parent.parent
-        self.openMVS_dir = self.root_dir / "software" / "openMVS" / "build_openMVS"
-        self.openMVS_dir = self.openMVS_dir / "bin" / "x64" / "Release"
+        root_dir = Path(__file__).parent.parent.parent
+        if openMVS_dir is None:
+            self.openMVS_dir = root_dir / "software" / "openMVS" / "build_openMVS"
+
+            if (self.openMVS_dir / "bin" / "x64" / "Release").is_dir():
+                self.openMVS_dir = self.openMVS_dir / "bin" / "x64" / "Release"
+            elif (self.openMVS_dir / "install" / "bin").is_dir():
+                self.openMVS_dir = self.openMVS_dir / "install" / "bin"
+            else:
+                raise OpenMVSControllerError("Could not find executables dir!")
+        else:
+            self.openMVS_dir = openMVS_dir
 
         self.res_dir = res_dir
 
@@ -60,7 +69,6 @@ class OpenMVSController():
 
         ret = subprocess.run(args)
         logger.info("Point cloud densification returned: %s", str(ret))
-
 
     def create_mesh(self,
                     p_prio=-1,
@@ -125,7 +133,7 @@ class OpenMVSController():
         working_dir = utils.check_dir(self.res_dir / "refined_mesh")
         self.refined_mesh = working_dir / "mesh_refined.mvs"
 
-        args =[str(self.openMVS_dir / "RefineMesh")]
+        args = [str(self.openMVS_dir / "RefineMesh")]
         args.extend(["-i", str(self.mesh_scene)])
         args.extend(["-o", str(self.refined_mesh)])
         args.extend(["-w", str(working_dir)])
