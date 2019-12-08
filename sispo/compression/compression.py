@@ -8,6 +8,7 @@ import bz2
 import gzip
 import lzma
 from pathlib import Path
+import threading
 import zlib
 
 import cv2
@@ -40,6 +41,7 @@ class Compressor():
         self.select_algo(algo, settings)
         self.algo = algo
 
+        self._threads = []
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of Composition images."""
@@ -73,14 +75,25 @@ class Compressor():
             if not img.shape == self._res:
                 raise CompressionError("All images must have same size!")
 
-    def compress_series(self):
+    def compress_series(self, max_threads=3):
         """
         Compresses multiple images using :py:meth: `.compress`
         """
         compressed = []
         for img_id, img in zip(self.img_ids, self.imgs):
-            img_cmp = self.compress(img, img_id)
-            compressed.append(img_cmp)
+
+            for thr in self._threads:
+                if not thr.is_alive():
+                    self._threads.pop(self._threads.index(thr))
+
+            if len(self._threads) < max_threads - 1:
+                # Allow up to 2 additional threads
+                thr = threading.Thread(target=self.compress, args=(img,img_id))
+                thr.start()
+                self._threads.append(thr)
+            else:
+                # If too many, also compress in main thread to not drop a frame
+                self.compress(img, img_id)
 
         return compressed
 
