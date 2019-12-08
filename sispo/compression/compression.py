@@ -24,11 +24,11 @@ class CompressionError(RuntimeError):
 class Compressor():
     """Main class to interface compression module."""
 
-    def __init__(self, res_dir, algo=None, settings=None):
+    def __init__(self, res_dir, img_ext=".exr", algo=None, settings=None):
         self.res_dir = utils.check_dir(res_dir / "compressed")
         self.image_dir = utils.check_dir(res_dir / "rendering")
 
-        self.img_extension = ".exr"
+        self.img_extension = img_ext
 
         self.imgs = []
         self._res = None
