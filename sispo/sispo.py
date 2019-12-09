@@ -8,11 +8,14 @@ reconstruct the trajectory.
 """
 
 import argparse
+from datetime import datetime
 import cProfile
 import io
 import json
+import logging
 from pathlib import Path
 import pstats
+import sys
 import time
 
 from .sim import *
@@ -20,12 +23,31 @@ from .reconstruction import *
 from .compression import *
 from . import utils
 
+now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
+filename = (now + "_sispo.log")
+log_dir = Path(__file__).resolve().parent.parent / "data" / "logs"
+if not log_dir.is_dir:
+    Path.mkdir(log_dir)
+log_file = log_dir / filename
+logger = logging.getLogger("sispo")
+logger.setLevel(logging.DEBUG)
+logger_formatter = logging.Formatter(
+    "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+file_handler = logging.FileHandler(str(log_file))
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(logger_formatter)
+logger.addHandler(file_handler)
+logger.debug("\n\n#################### NEW LOG ####################\n")
+
 parser = argparse.ArgumentParser(description=__file__.__doc__)
 parser.add_argument("-i",
                     action="store",
                     default=None,
                     type=str, 
                     help="Definition file")
+parser.add_argument("-v",
+                    action="store_false",
+                    help="Verbose output, displays log also on STDOUT")
 parser.add_argument("--cli",
                     action="store_true",
                     help="If set, starts interactive cli tool")
@@ -118,18 +140,21 @@ def parse_settings(settings):
     sun_file = Path(sun_file)
     sun_file.resolve()
     if not sun_file.is_file():
+        logger.debug("Sun model file does not exists!")
         raise RuntimeError("Sun model file does not exists!")
 
     lightref_file = settings["lightref"]["model"]["file"]
     lightref_file = Path(lightref_file)
     lightref_file.resolve()
     if not lightref_file.is_file():
+        logger.debug("Light reference model file does not exists!")
         raise RuntimeError("Light reference model file does not exists!")
 
     sssb_file = settings["sssb"]["model"]["file"]
     sssb_file = Path(sssb_file)
     sssb_file.resolve()
     if not sssb_file.is_file():
+        logger.debug("SSSB model file does not exists!")
         raise RuntimeError("SSSB model file does not exists!")
 
     return settings
@@ -138,36 +163,54 @@ def main():
     """
     Main function to run when executing file
     """
+    logger.debug("Parsing input arguments")
     args = parser.parse_args()
+
+    if args.v:
+        logger.debug("Verbose output")
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setLevel(logging.DEBUG)
+        stream_handler.setFormatter(logger_formatter)
+        logger.addHandler(stream_handler)
     
     if args.cli:
+        logger.debug("Starting interactive CLI")
         settings = read_input()
     else:
+        logger.debug("Read input (definition) file")
         settings = read_input_file(args.i)
 
     if args.profile:
+        logger.debug("Start Profiling")
         pr.enable()
 
     t_start = time.time()
     
     if args.sim_only:
+        logger.debug("Only simulating, no other step")
         env = Environment(settings)
         env.simulate()
+        logger.debug("Finished simulating")
         return
     
     if args.sim_render_only:
+        logger.debug("Only simulating and rendering, no other step")
         env = Environment(settings)
         env.simulate()
         env.render()
+        logger.debug("Finished simulating and rendering")
         return
 
     if args.render_only:
         raise NotImplementedError()
+        logger.debug("Only rendering, no other step")
         env = Environment(settings)
         env.render()
+        logger.debug("Finished rendering")
         return
 
     if args.compress_only:
+        logger.debug("Only compressing, no other step")
         params = {"level": 7}
         comp = Compressor(Path(settings["res_dir"]).resolve(), 
                           img_ext="png",
@@ -175,14 +218,20 @@ def main():
                           settings=params)
         comp.load_images()
         comp.compress_series()
+        logger.debug("Finished compressing")
         return
 
     if args.reconstruct_only:
+        logger.debug("Only reconstructing, no other step")
         recon = Reconstructor(settings)
         recon.reconstruct()
+        logger.debug("Finished reconstructing")
         return
     
+    logger.debug("Run full pipeline")
+
     if args.with_sim or args.with_render:
+        logger.debug("With either simulation or rendering")
         env = Environment(settings)
 
         if args.with_sim:
@@ -192,6 +241,7 @@ def main():
             env.render()
 
     if args.with_compression:
+        logger.debug("With compression")
         params = {"level": 7}
         comp = Compressor(Path(settings["res_dir"]).resolve(), 
                           img_ext="png",
@@ -201,6 +251,7 @@ def main():
         comp.compress_series()
 
     if args.with_reconstruction:
+        logger.debug("With reconstruction")
         recon = Reconstructor(settings)
         recon.reconstruct()
 
@@ -208,16 +259,19 @@ def main():
     
     if args.profile:
         pr.disable()
+        logger.debug("Stop Profile")
+
         s = io.StringIO()
         sortby = pstats.SortKey.CUMULATIVE
         ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
         ps.print_stats()
     
-        print("############################################################")
-        print(s.getvalue())
-        print("############################################################")
+        logger.debug("\n##################### Pstats #####################\n")
+        logger.debug("\n" + s.getvalue() + "\n")
+        logger.debug("\n##################################################\n")
     
-    print(f"Total time: {t_end - t_start} s")
+    logger.debug(f"Total time: {t_end - t_start} s")
+    logger.debug("Finished sispo main")
 
 def run():
     """Alias for main()."""
