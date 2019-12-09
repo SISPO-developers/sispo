@@ -197,5 +197,9 @@ def main():
 
     print(f"Total time: {t_end - t_start} s")
 
+def run():
+    """Alias for main()."""
+    main()
+    
 if __name__ == "__main__":
     main()
