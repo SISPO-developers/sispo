@@ -215,7 +215,8 @@ def main():
         comp = Compressor(Path(settings["res_dir"]).resolve(), 
                           img_ext="png",
                           algo="jpg",
-                          settings=params)
+                          settings=params,
+                          ext_logger=logger)
         comp.load_images()
         comp.compress_series()
         logger.debug("Finished compressing")
@@ -246,7 +247,8 @@ def main():
         comp = Compressor(Path(settings["res_dir"]).resolve(), 
                           img_ext="png",
                           algo="jpg",
-                          settings=params)
+                          settings=params,
+                          ext_logger=logger)
         comp.load_images()
         comp.compress_series()
 
