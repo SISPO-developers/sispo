@@ -7,7 +7,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from .. import utils
+from . import utils
 
 
 

@@ -15,8 +15,8 @@ import zlib
 
 import cv2
 import numpy as np
-
-from .. import utils
+import OpenEXR
+import Imath
 
 
 class CompressionError(RuntimeError):
@@ -62,7 +62,7 @@ class Compressor():
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of Inst(rument) images."""
-        scene_name = "Inst"
+        scene_name = "Comp"
         image_names = scene_name + "*" + self.img_extension
         file_names = self.image_dir.glob(image_names)
 
@@ -84,10 +84,10 @@ class Compressor():
             self.img_ids = img_ids
 
         for img_id in self.img_ids:
-            img_path = self.image_dir / ("Inst_" + img_id + self.img_extension)
+            img_path = self.image_dir / ("Comp_" + img_id + self.img_extension)
 
             if self.img_extension == ".exr":
-                img = utils.read_openexr_image(img_path)
+                img = self._read_openexr_image(img_path)
             else:
                 img = cv2.imread(str(img_path), cv2.IMREAD_ANYCOLOR)
             self.imgs.append(img)
@@ -431,3 +431,56 @@ class Compressor():
             self.logger.debug("Exists!")
 
         return dir_resolved
+
+    @staticmethod
+    def _read_openexr_image(filename):
+        """Read image in OpenEXR file format into numpy array."""
+        extension = ".exr"
+        if isinstance(filename, Path):
+            is_path = True
+            filename = str(filename)    
+        elif isinstance(filename, str):
+            pass
+        else:
+            raise RuntimeError("Wrong input type for file extension check.")
+    
+        if filename[-len(extension):] != extension:
+            filename += extension
+
+        if is_path:
+            filename = Path(filename)
+
+        if not OpenEXR.isOpenExrFile(str(filename)):
+            return None
+
+        image = OpenEXR.InputFile(str(filename))
+
+        if not image.isComplete():
+            return None
+
+        header = image.header()
+        
+        size = header["displayWindow"]
+        resolution = (size.max.x - size.min.x + 1, size.max.y - size.min.y + 1)
+
+        ch_info = header["channels"]
+        if "R" in ch_info and "G" in ch_info and "B" in ch_info:
+            if "A" in ch_info:
+                channels = 4
+            else:
+                channels = 3
+        else:
+            return None
+        
+        image_o = np.zeros((resolution[1],resolution[0],channels), np.float32)
+        
+        ch = ["R", "G", "B", "A"]
+        pt = Imath.PixelType(Imath.PixelType.FLOAT)
+
+        for c in range(0, channels):
+            image_channel = np.fromstring(image.channel(ch[c], pt), np.float32)
+            image_o[:, :, c] = image_channel.reshape(resolution[1], resolution[0])
+        
+        image.close()
+
+        return image_o

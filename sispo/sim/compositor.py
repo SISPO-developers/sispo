@@ -17,7 +17,7 @@ import numpy as np
 from pathlib import Path
 import matplotlib.pyplot as plt
 
-from .. import utils
+from . import utils
 
 
 #Astrometric calibrations 
