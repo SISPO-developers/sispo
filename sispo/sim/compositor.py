@@ -409,7 +409,7 @@ class ImageCompositor():
             else:
                 scale = x_res / self.IMG_MIN_SIZE_INFOBOX[0]
                 width = scale * self.INFOBOX_SIZE["default"][0]
-        print(height, width, x_res, y_res)
+
         if height is not None or width is not None:
             if height > y_res or width > x_res:
                 raise ImageCompositorError("Infobox is bigger than image.")
