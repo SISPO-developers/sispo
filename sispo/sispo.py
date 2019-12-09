@@ -179,7 +179,10 @@ def main():
 
     if args.with_compression:
         params = {"level": 7}
-        comp = Compressor(Path(settings["res_dir"]).resolve(), "jpg", params)
+        comp = Compressor(Path(settings["res_dir"]).resolve(), 
+                          img_ext="png",
+                          algo="jpg",
+                          settings=params)
         comp.load_images()
         comp.compress_series()
 
