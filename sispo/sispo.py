@@ -145,7 +145,7 @@ def main():
     else:
         settings = read_input_file(args.i)
 
-    if args.profiling:
+    if args.profile:
         pr.enable()
 
     t_start = time.time()
@@ -206,7 +206,7 @@ def main():
 
     t_end = time.time()
     
-    if args.profiling:
+    if args.profile:
         pr.disable()
         s = io.StringIO()
         sortby = pstats.SortKey.CUMULATIVE
