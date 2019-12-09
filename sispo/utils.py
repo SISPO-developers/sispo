@@ -199,15 +199,15 @@ def check_file_ext(filename, extension):
 
     return filename
 
-def create_logger(name):
+def create_logger():
     """Creates a logger with the common formatting."""
     now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
-    filename = (now + "_" + name + ".log")
+    filename = (now + "_sim.log")
     log_dir = Path(__file__).parent.parent / "data" / "logs"
     log_dir = check_dir(log_dir)
     log_file = log_dir / filename
 
-    logger = logging.getLogger(name)
+    logger = logging.getLogger("sim")
     logger.setLevel(logging.INFO)
     logger_formatter = logging.Formatter(
         "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
@@ -215,7 +215,7 @@ def create_logger(name):
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(logger_formatter)
     logger.addHandler(file_handler)
-    logger.info("\n\n#################### NEW LOG ####################\n")
+    logger.info("\n\n#################### NEW SIM LOG ####################\n")
 
     return logger
 
