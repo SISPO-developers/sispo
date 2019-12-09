@@ -37,7 +37,12 @@ class SimulationError(RuntimeError):
 class Environment():
     """Simulation environment."""
 
-    def __init__(self, settings):
+    def __init__(self, settings, ext_logger=None):
+
+        if ext_logger is not None:
+            self.logger = ext_logger
+        else:
+            self.logger = utils.create_logger()
 
         self.settings = settings
 
@@ -52,8 +57,6 @@ class Environment():
         self.starcat_dir = settings["starcat"]
 
         self.inst = Instrument(settings["instrument"])
-
-        self.logger = utils.create_logger("simulation")
 
         self.ts = TimeScalesFactory.getTDB()
         self.ref_frame = FramesFactory.getICRF()
@@ -105,7 +108,7 @@ class Environment():
 
         self.render_dir = utils.check_dir(self.res_dir / "rendering")
 
-        self.renderer = render.BlenderController(self.render_dir, self.starcat_dir, self.inst)
+        self.renderer = render.BlenderController(self.render_dir, self.starcat_dir, self.inst, ext_logger=self.logger)
         self.renderer.create_camera("ScCam")
         self.renderer.configure_camera("ScCam", self.inst.focal_l, self.inst.chip_w)
 
@@ -206,28 +209,28 @@ class Environment():
 
     def simulate(self):
         """Do simulation."""
-        self.logger.info("Starting simulation")
+        self.logger.debug("Starting simulation")
 
-        self.logger.info("Propagating SSSB")
+        self.logger.debug("Propagating SSSB")
         self.sssb.propagate(self.start_date,
                             self.end_date,
                             self.frames,
                             self.timesampler_mode,
                             self.slowmotion_factor)
 
-        self.logger.info("Propagating Spacecraft")
+        self.logger.debug("Propagating Spacecraft")
         self.spacecraft.propagate(self.start_date,
                                   self.end_date,
                                   self.frames,
                                   self.timesampler_mode,
                                   self.slowmotion_factor)
 
-        self.logger.info("Simulation completed")
+        self.logger.debug("Simulation completed")
         self.save_results()
 
     def render(self):
         """Render simulation scenario."""
-        self.logger.info("Rendering simulation")
+        self.logger.debug("Rendering simulation")
 
         # Render frame by frame
         for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
@@ -271,11 +274,11 @@ class Environment():
             # Render blender scenes
             self.renderer.render(metainfo)
 
-        self.logger.info("Rendering completed")
+        self.logger.debug("Rendering completed")
 
     def save_results(self):
         """Save simulation results to a file."""
-        self.logger.info("Saving propagation results")
+        self.logger.debug("Saving propagation results")
 
         with open(str(self.res_dir / "PositionHistory.txt"), "w+") as file:
             for (date, sc_pos, sssb_pos) in zip(self.spacecraft.date_history,
@@ -288,7 +291,7 @@ class Environment():
                 file.write(str(date) + "\t" + str(sssb_pos) + "\t"
                            + str(sc_pos) + "\n")
 
-        self.logger.info("Propagation results saved")
+        self.logger.debug("Propagation results saved")
 
 
 if __name__ == "__main__":

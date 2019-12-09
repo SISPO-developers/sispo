@@ -25,7 +25,6 @@ from . import starcat
 from .starcat import *
 from .. import utils
 
-logger = utils.create_logger("rendering")
 
 class RenderingError(RuntimeError):
     """Generic error for rendering process."""
@@ -40,8 +39,13 @@ class BlenderControllerError(RuntimeError):
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, render_dir, starcat_dir, instrument):
+    def __init__(self, render_dir, starcat_dir, instrument, ext_logger=None):
         """Initialise blender controller class."""
+
+        if ext_logger is not None:
+            self.logger = ext_logger
+        else:
+            self.logger = utils.create_logger()
 
         self.raw_dir = render_dir / "raw"
         self.res_dir = render_dir
@@ -66,10 +70,15 @@ class BlenderController:
         background.inputs[0].default_value = (0, 0, 0, 1.0)
 
         # Star catalog
-        self.sta = starcat.StarCatalog(self.raw_dir, starcat_dir)
+        self.sta = starcat.StarCatalog(self.raw_dir,
+                                       ext_logger=self.logger,
+                                       starcat_dir=starcat_dir)
 
         # Create compositor
-        self.comp = cp.ImageCompositor(self.raw_dir, self.res_dir, instrument)
+        self.comp = cp.ImageCompositor(self.raw_dir,
+                                       self.res_dir,
+                                       instrument,
+                                       ext_logger=self.logger)
 
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
@@ -114,7 +123,7 @@ class BlenderController:
         When device="AUTO" it is attempted to use GPU first, otherwise
         fallback is CPU. Currently, assumes set_device is only used once.
         """
-        logger.info("Attempting to set cycle rendering device to: %s", device)
+        self.logger.debug("Attempting to set cycle rendering device to: %s", device)
 
         self.device = self._determine_device(device)
         self._set_cycles_device()
@@ -135,7 +144,7 @@ class BlenderController:
         """
         self.cycles.preferences.get_devices()
         devices = self.cycles.preferences.devices
-        logger.info("Available devices: %s", [dev.name for dev in devices])
+        self.logger.debug("Available devices: %s", [dev.name for dev in devices])
 
         if device in ("AUTO", "GPU"):
             device_types = {device.type for device in devices}
@@ -149,7 +158,7 @@ class BlenderController:
             used_device = "CPU"
 
         else:
-            logger.info("Invalid rendering device setting.")
+            self.logger.debug("Invalid rendering device setting.")
             raise BlenderControllerError("Invalid rendering device setting.")
 
         return used_device
@@ -167,11 +176,11 @@ class BlenderController:
             for device in devices:
                 if device.type == device_type:
                     device.use = True
-                    logger.info("%s device name: %s", device_type, device.name)
+                    self.logger.debug("%s device name: %s", device_type, device.name)
                 else:
                     device.use = False
         else:
-            logger.info("Invalid device: %s", self.device)
+            self.logger.debug("Invalid device: %s", self.device)
             raise BlenderControllerError(f"Invalid device: {self.device}")
 
     def _get_tile_size(self):
@@ -181,7 +190,7 @@ class BlenderController:
         elif self.device == "CPU":
             tile_size = 128
         else:
-            logger.info("Can not get tile size for device %s", self.device)
+            self.logger.debug("Can not get tile size for device %s", self.device)
             raise BlenderControllerError("Can not get tile size.")
 
         return tile_size
@@ -311,7 +320,7 @@ class BlenderController:
             return obj
         else:
             msg = f"{object_name} not found in {filename}"
-            logger.info(msg)
+            self.logger.debug(msg)
             raise BlenderControllerError(msg)
 
     def create_empty(self, name="Empty", scenes=None):
@@ -366,10 +375,10 @@ class BlenderController:
             elif isinstance(scenes[0], bpy.types.Scene):
                 output = scenes
             else:
-                logger.info("Invalid scenes input %s", scenes)
+                self.logger.debug("Invalid scenes input %s", scenes)
                 raise BlenderControllerError(f"Invalid scenes input {scenes}")
         else:
-            logger.info("Invalid scenes input %s", scenes)
+            self.logger.debug("Invalid scenes input %s", scenes)
             raise BlenderControllerError(f"Invalid scenes input {scenes}")
 
         return iter(output)

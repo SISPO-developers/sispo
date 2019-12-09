@@ -9,7 +9,6 @@ from pathlib import Path
 
 from .. import utils
 
-logger = utils.create_logger("starcat")
 
 
 class StarCatalogError(RuntimeError):
@@ -20,8 +19,10 @@ class StarCatalogError(RuntimeError):
 class StarCatalog():
     """Class to access star catalogs and render stars."""
 
-    def __init__(self, res_dir, starcat_dir=None):
+    def __init__(self, res_dir, ext_logger, starcat_dir=None):
         """."""
+
+        self.logger = ext_logger
 
         self.root_dir = Path(__file__).parent.parent.parent
         
@@ -67,7 +68,7 @@ class StarCatalog():
         # How to suppress crash notification dialog?, Jan 14,2004 -
         # Raymond Chen"s response [1]
         if sys.platform.startswith("win"):
-            logger.info("Windows system, surrpressing GPF dialog.")
+            self.logger.debug("Windows system, surrpressing GPF dialog.")
             import ctypes
             SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
             ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
@@ -90,10 +91,10 @@ class StarCatalog():
             ret = subprocess.run(command)
 
             if ret.returncode > 0:
-                logger.info("Found %d stars in catalog", ret.returncode)
+                self.logger.debug("Found %d stars in catalog", ret.returncode)
                 break
 
-            logger.info("Error code from star catalog %d", ret.returncode)
+            self.logger.debug("Error code from star cat %d", ret.returncode)
 
         with open(str(res_file), "r") as rfile:
             complete_data = rfile.readlines()

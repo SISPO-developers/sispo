@@ -5,8 +5,6 @@ import subprocess
 
 from .. import utils
 
-logger = utils.create_logger("openmvg")
-
 
 class OpenMVGControllerError(RuntimeError):
     """Generic openMVG error."""
@@ -16,7 +14,9 @@ class OpenMVGControllerError(RuntimeError):
 class OpenMVGController():
     """Controls behaviour of openMVG data processing."""
 
-    def __init__(self, res_dir, openMVG_dir=None):
+    def __init__(self, res_dir, ext_logger, openMVG_dir=None):
+
+        self.logger = ext_logger
 
         root_dir = Path(__file__).parent.parent.parent
         if openMVG_dir is None:
@@ -33,7 +33,7 @@ class OpenMVGController():
         self.sensor_database = root_dir / "data" / \
             "sensor_database" / "sensor_width_camera_database.txt"
 
-        logger.info("openMVG executables dir %s", str(self.openMVG_dir))
+        self.logger.debug("openMVG executables dir %s", str(self.openMVG_dir))
 
         #self.input_dir = root_dir / "data" / "ImageDataset_SceauxCastle-master" / "images"
         self.input_dir = res_dir / "compressed"
@@ -46,7 +46,7 @@ class OpenMVGController():
                        prior=True,
                        p_weights=(1.0, 1.0, 1.0)):
         """ImageListing step of reconstruction."""
-        logger.info("Start Imagelisting")
+        self.logger.debug("Start Imagelisting")
 
         self.matches_dir = self.res_dir / "matches"
         self.matches_dir = utils.check_dir(self.matches_dir)
@@ -65,7 +65,7 @@ class OpenMVGController():
             args.extend(["-W", ";".join([str(value) for value in p_weights])])
 
         ret = subprocess.run(args)
-        logger.info("Image analysis returned: %s", str(ret))
+        self.logger.debug("Image analysis returned: %s", str(ret))
 
         if not ret.returncode == 0:
             raise OpenMVGControllerError(
@@ -78,7 +78,7 @@ class OpenMVGController():
                          d_preset="ULTRA",
                          num_threads=0):
         """Compute features in images."""
-        logger.info("Compute features of listed images")
+        self.logger.debug("Compute features of listed images")
 
         self.sfm_data = self.matches_dir / "sfm_data.json"
 
@@ -93,7 +93,7 @@ class OpenMVGController():
         args.extend(["-n", str(num_threads)])
 
         ret = subprocess.run(args)
-        logger.info("Feature computation returned: %s", str(ret))
+        self.logger.debug("Feature computation returned: %s", str(ret))
 
         if not ret.returncode == 0:
             raise OpenMVGControllerError(
@@ -109,7 +109,7 @@ class OpenMVGController():
                        guided=False,
                        cache_size=None):
         """Match computed features of images."""
-        logger.info("Match features of images")
+        self.logger.debug("Match features of images")
 
         args = [str(self.openMVG_dir / "openMVG_main_ComputeMatches")]
         args.extend(["-i", str(self.sfm_data)])
@@ -127,7 +127,7 @@ class OpenMVGController():
             args.extend(["-c", str(cache_size)])
 
         ret = subprocess.run(args)
-        logger.info("Feature matching returned: %s", str(ret))
+        self.logger.debug("Feature matching returned: %s", str(ret))
 
         if not ret.returncode == 0:
             raise OpenMVGControllerError(
@@ -142,7 +142,7 @@ class OpenMVGController():
                         match_file=None):
         """Reconstruct 3D models sequentially."""
         # set manually the initial pair to avoid the prompt question
-        logger.info("Do incremental/sequential reconstructions")
+        self.logger.debug("Do incremental/sequential reconstructions")
 
         self.reconstruction_dir = self.res_dir / "sequential"
         self.reconstruction_dir = utils.check_dir(self.reconstruction_dir)
@@ -163,7 +163,7 @@ class OpenMVGController():
             args.extend(["-M", str(match_file)])
 
         ret = subprocess.run(args)
-        logger.info("Incremental SfM returned: %s", str(ret))
+        self.logger.debug("Incremental SfM returned: %s", str(ret))
 
         if not ret.returncode == 0:
             raise OpenMVGControllerError(
@@ -171,7 +171,7 @@ class OpenMVGController():
 
     def export_MVS(self, num_threads=0):
         """Export 3D model to MVS format."""
-        logger.info("Exporting MVG result to MVS format")
+        self.logger.debug("Exporting MVG result to MVS format")
 
         input_file = self.reconstruction_dir / "sfm_data.bin"
         self.export_dir = utils.check_dir(self.res_dir / "export")
@@ -186,7 +186,7 @@ class OpenMVGController():
         args.extend(["-n", str(num_threads)])
 
         ret = subprocess.run(args)
-        logger.info("Exporting to MVS returned: %s", str(ret))
+        self.logger.debug("Exporting to MVS returned: %s", str(ret))
 
         if not ret.returncode == 0:
             raise OpenMVGControllerError(

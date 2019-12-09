@@ -5,7 +5,9 @@ This module is the main contribution of my master thesis.
 """
 
 import bz2
+from datetime import datetime
 import gzip
+import logging
 import lzma
 from pathlib import Path
 import threading
@@ -16,6 +18,7 @@ import numpy as np
 
 from .. import utils
 
+
 class CompressionError(RuntimeError):
     """Generic error class for compression errors."""
     pass
@@ -24,9 +27,20 @@ class CompressionError(RuntimeError):
 class Compressor():
     """Main class to interface compression module."""
 
-    def __init__(self, res_dir, img_ext="exr", algo=None, settings=None):
-        self.res_dir = utils.check_dir(res_dir / "compressed")
-        self.image_dir = utils.check_dir(res_dir / "rendering")
+    def __init__(self, 
+                 res_dir,
+                 img_ext="exr",
+                 algo=None,
+                 settings=None,
+                 ext_logger=None):
+
+        if ext_logger is not None:
+            self.logger = ext_logger
+        else:
+            self.logger = self._create_logger()
+
+        self.res_dir = self._check_dir(res_dir / "compressed")
+        self.image_dir = self._check_dir(res_dir / "rendering")
 
         self.img_extension = "." + img_ext
 
@@ -41,6 +55,9 @@ class Compressor():
         self.select_algo(algo, settings)
         self.algo = algo
 
+        self.logger.debug(f"Compressing with algorithm {self.algo}")
+        self.logger.debug(f"Compressing with settings {self._settings}")
+
         self._threads = []
 
     def get_frame_ids(self):
@@ -54,6 +71,8 @@ class Compressor():
             file_name = str(file_name.name).strip(self.img_extension)
             file_name = file_name.strip(scene_name)
             ids.append(file_name.strip("_"))
+
+        self.logger.debug(f"Found {len(ids)} frame ids")
 
         return ids
 
@@ -73,15 +92,22 @@ class Compressor():
                 img = cv2.imread(str(img_path), cv2.IMREAD_ANYCOLOR)
             self.imgs.append(img)
 
+        self.logger.debug(f"Loaded {len(self.imgs)} images")
+
         self._res = self.imgs[0].shape
+        self.logger.debug(f"Image size is {self._res}")
+
         for img in self.imgs:
             if not img.shape == self._res:
+                self.logger.debug("All images must have same size!")
                 raise CompressionError("All images must have same size!")
 
     def compress_series(self, max_threads=3):
         """
         Compresses multiple images using :py:meth: `.compress`
         """
+        self.logger.debug(f"Compress series of images with {max_threads} threads")
+
         compressed = []
         for img_id, img in zip(self.img_ids, self.imgs):
 
@@ -98,6 +124,9 @@ class Compressor():
                 # If too many, also compress in main thread to not drop a frame
                 self.compress(img, img_id)
 
+        for thr in self._threads:
+            thr.join()
+
         return compressed
 
     def compress(self, img, img_id=None):
@@ -110,6 +139,7 @@ class Compressor():
         img_cmp = self._comp_met(img, self._settings)
 
         if img_id is not None:
+            self.logger.debug(f"Save image {img_id}")
             file_extension = "." + self.algo
             filename = self.res_dir / (str(img_id) + file_extension)
             with open(str(self.res_dir / filename), "wb") as file:
@@ -124,6 +154,7 @@ class Compressor():
         :returns: Decompressed image.
         """
         if img is None:
+            self.logger.debug(f"Read image {self.img_ids[0]}")
             filename = self.res_dir / (self.img_ids[0] + "." + self.algo)
             with open(str(filename), "rb") as file:
                 img = file.read()
@@ -347,3 +378,56 @@ class Compressor():
             return img_dcmp
 
         return decompress
+
+    @staticmethod
+    def _create_logger():
+        """
+        Creates local logger in case no external logger was provided.
+        """
+        now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
+        filename = (now + "_compression.log")
+        log_dir = Path(__file__).resolve().parent.parent.parent 
+        log_dir = log_dir / "data" / "logs"
+        if not log_dir.is_dir:
+            Path.mkdir(log_dir)
+        log_file = log_dir / filename
+        logger = logging.getLogger("compression")
+        logger.setLevel(logging.DEBUG)
+        logger_formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+        file_handler = logging.FileHandler(str(log_file))
+        file_handler.setLevel(logging.DEBUG)
+        file_handler.setFormatter(logger_formatter)
+        logger.addHandler(file_handler)
+        logger.debug("\n\n############## NEW COMPRESSION LOG ##############\n")
+
+        return logger
+
+    def _check_dir(self, directory, create=True):
+        """
+        Resolves directory and creates it, if it doesn't existing.
+        
+        :type directory: Path or str
+        :param directory: Directory to be created if not existing
+
+        :type create: bool
+        :param create: Set to false if directory should not be created and
+                       instead an exception shall be raise
+        """
+        self.logger.debug(f"Checking if directory {directory} exists...")
+        if isinstance(directory, str):
+            directory = Path(directory)
+
+        dir_resolved = directory.resolve()
+
+        if not dir_resolved.exists():
+            if create:
+                self.logger.debug(f"{directory} doesn't exist. Creating it...")
+                Path.mkdir(dir_resolved)
+                self.logger.debug("Finished!")
+            else:
+                raise RuntimeError(f"Directory {directory} does not exist!")
+        else:
+            self.logger.debug("Exists!")
+
+        return dir_resolved
