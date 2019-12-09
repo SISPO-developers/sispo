@@ -71,8 +71,8 @@ class BlenderController:
 
         # Star catalog
         self.sta = starcat.StarCatalog(self.raw_dir,
-                                       starcat_dir,
-                                       ext_logger=self.logger)
+                                       ext_logger=self.logger,
+                                       starcat_dir=starcat_dir)
 
         # Create compositor
         self.comp = cp.ImageCompositor(self.raw_dir,
