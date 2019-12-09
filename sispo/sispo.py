@@ -8,8 +8,11 @@ reconstruct the trajectory.
 """
 
 import argparse
+import cProfile
+import io
 import json
 from pathlib import Path
+import pstats
 import time
 
 from .sim import *
@@ -65,6 +68,11 @@ parser.add_argument("--compress-only",
 parser.add_argument("--reconstruct-only",
                     action="store_true",
                     help="Will only reconstruct 3D, not perform other steps.")
+parser.add_argument("--profile",
+                    action="store_true",
+                    help="Use cProfiler and write results to log.")
+
+pr = cProfile.Profile()
 
 def read_input():
     """
@@ -137,6 +145,9 @@ def main():
     else:
         settings = read_input_file(args.i)
 
+    if args.profiling:
+        pr.enable()
+
     t_start = time.time()
     
     if args.sim_only:
@@ -170,7 +181,7 @@ def main():
         recon = Reconstructor(settings)
         recon.reconstruct()
         return
-
+    
     if args.with_sim or args.with_render:
         env = Environment(settings)
 
@@ -194,7 +205,18 @@ def main():
         recon.reconstruct()
 
     t_end = time.time()
-
+    
+    if args.profiling:
+        pr.disable()
+        s = io.StringIO()
+        sortby = pstats.SortKey.CUMULATIVE
+        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+        ps.print_stats()
+    
+        print("############################################################")
+        print(s.getvalue())
+        print("############################################################")
+    
     print(f"Total time: {t_end - t_start} s")
 
 def run():
