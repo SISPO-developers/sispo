@@ -20,13 +20,17 @@ class Reconstructor():
 
         if "openMVG_dir" in settings:
             openMVG_dir = Path(settings["openMVG_dir"]).resolve()
-        if not openMVG_dir.is_dir():
+            if not openMVG_dir.is_dir():
+                openMVG_dir = None
+        else:
             openMVG_dir = None
         self.oMVG = openmvg.OpenMVGController(self.res_dir, openMVG_dir)
 
         if "openMVS_dir" in settings:
             openMVS_dir = Path(settings["openMVS_dir"]).resolve()
-        if not openMVS_dir.is_dir():
+            if not openMVS_dir.is_dir():
+                openMVS_dir = None
+        else:
             openMVS_dir = None
         self.oMVS = openmvs.OpenMVSController(self.res_dir, openMVS_dir)
 
