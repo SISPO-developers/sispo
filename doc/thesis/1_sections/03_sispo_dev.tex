@@ -14,6 +14,20 @@ The most important python dependencies of \gls{sispo} are:
     \item orekit: Space dynamics library
 \end{itemize}
 
+\subsection{User Interface}
+The sispo package can be installed using pip and the GitHub project. If done, it will be installed into the site-packages folder of the used python environment. Additionally, an executable is installed, providing a \gls{cli} as user interface. The most recent possible input arguments are documented in the repository or by using the --help input. The most important arguments for the \gls{cli} are seen in Table \ref{tab:cli_args}.
+
+\begin{table}[htpb]
+\caption{Input arguments for sispo \gls{cli}}
+\begin{tabular}{lll}
+\textbf{Name}               & \textbf{Default Value}     & \textbf{Description}                                      \\ \hline
+\multicolumn{1}{l|}{--help} & ---                        & Prints list of arguments with hints                       \\
+\multicolumn{1}{l|}{-i}     & data/input/definition.json & Path to a definition file, i.e. that defines the settings \\
+\multicolumn{1}{l|}{}       &                            &                                                          
+\end{tabular}
+\label{tab:cli_args}
+\end{table}
+
 \subsection{simulation module}
 The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system \cite{bessel1979ubvri}.
 
