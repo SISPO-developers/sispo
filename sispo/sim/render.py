@@ -23,7 +23,7 @@ from . import compositor as cp
 from .compositor import *
 from . import starcat
 from .starcat import *
-from .. import utils
+from . import utils
 
 
 class RenderingError(RuntimeError):

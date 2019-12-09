@@ -19,9 +19,9 @@ import sys
 import time
 
 from .sim import *
+from .sim import utils
 from .reconstruction import *
 from .compression import *
-from . import utils
 
 now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
 filename = (now + "_sispo.log")
@@ -231,26 +231,26 @@ def main():
     
     logger.debug("Run full pipeline")
 
-    if args.with_sim or args.with_render:
-        logger.debug("With either simulation or rendering")
-        env = Environment(settings, ext_logger=logger)
+    #if args.with_sim or args.with_render:
+    #    logger.debug("With either simulation or rendering")
+    #    env = Environment(settings, ext_logger=logger)
+#
+    #    if args.with_sim:
+    #        env.simulate()
+    #    
+    #    if args.with_render:
+    #        env.render()
 
-        if args.with_sim:
-            env.simulate()
-        
-        if args.with_render:
-            env.render()
-
-    if args.with_compression:
-        logger.debug("With compression")
-        params = {"level": 7}
-        comp = Compressor(Path(settings["res_dir"]).resolve(), 
-                          img_ext="png",
-                          algo="jpg",
-                          settings=params,
-                          ext_logger=logger)
-        comp.load_images()
-        comp.compress_series()
+    #if args.with_compression:
+    #    logger.debug("With compression")
+    #    params = {"level": 7}
+    #    comp = Compressor(Path(settings["res_dir"]).resolve(), 
+    #                      img_ext="exr",
+    #                      algo="jpg",
+    #                      settings=params,
+    #                      ext_logger=logger)
+    #    comp.load_images()
+    #    comp.compress_series()
 
     if args.with_reconstruction:
         logger.debug("With reconstruction")

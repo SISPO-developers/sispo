@@ -3,7 +3,7 @@
 from pathlib import Path
 import subprocess
 
-from .. import utils
+from . import utils
 
 
 class OpenMVGControllerError(RuntimeError):
@@ -145,7 +145,7 @@ class OpenMVGController():
         self.logger.debug("Do incremental/sequential reconstructions")
 
         self.reconstruction_dir = self.res_dir / "sequential"
-        self.reconstruction_dir = utils.check_dir(self.reconstruction_dir)
+        self.reconstruction_dir =utils.check_dir(self.reconstruction_dir)
 
         args = [str(self.openMVG_dir / "openMVG_main_IncrementalSfM")]
         args.extend(["-i", str(self.sfm_data)])

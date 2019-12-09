@@ -3,7 +3,7 @@
 from pathlib import Path
 import subprocess
 
-from .. import utils
+from . import utils
 
 
 class OpenMVSControllerError(RuntimeError):

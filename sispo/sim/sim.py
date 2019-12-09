@@ -26,7 +26,7 @@ from . import sssb
 from .sssb import *
 from . import render
 from .render import *
-from .. import utils
+from . import utils
 
 
 class SimulationError(RuntimeError):
