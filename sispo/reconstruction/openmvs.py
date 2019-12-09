@@ -5,8 +5,6 @@ import subprocess
 
 from .. import utils
 
-logger = utils.create_logger("openmvs")
-
 
 class OpenMVSControllerError(RuntimeError):
     """Generic openMVS error."""
@@ -16,8 +14,10 @@ class OpenMVSControllerError(RuntimeError):
 class OpenMVSController():
     """Controls behaviour of openMVS data processing."""
 
-    def __init__(self, res_dir, openMVS_dir=None):
+    def __init__(self, res_dir, ext_logger, openMVS_dir=None):
         """."""
+        self.logger = ext_logger
+
         root_dir = Path(__file__).parent.parent.parent
         if openMVS_dir is None:
             self.openMVS_dir = root_dir / "software" / "openMVS" / "build_openMVS"
@@ -44,7 +44,7 @@ class OpenMVSController():
                            est_normals=False,
                            sample_mesh=0):
         """Increases number of points to make 3D model smoother."""
-        logger.info("Densify point cloud to make model smoother")
+        self.logger.debug("Densify point cloud to make model smoother")
 
         self.export_dir = utils.check_dir(self.res_dir / "export")
         self.export_scene = self.export_dir / "scene.mvs"
@@ -68,7 +68,7 @@ class OpenMVSController():
         args.extend(["--sample-mesh", str(sample_mesh)])
 
         ret = subprocess.run(args)
-        logger.info("Point cloud densification returned: %s", str(ret))
+        self.logger.debug("Point cloud densification returned: %s", str(ret))
 
     def create_mesh(self,
                     p_prio=-1,
@@ -83,7 +83,7 @@ class OpenMVSController():
                     holes=30,
                     smooth=2):
         """Create a mesh from a 3D point cloud."""
-        logger.info("Create mesh from point cloud")
+        self.logger.debug("Create mesh from point cloud")
 
         working_dir = utils.check_dir(self.res_dir / "mesh")
         self.mesh_scene = working_dir / "mesh.mvs"
@@ -106,7 +106,7 @@ class OpenMVSController():
         args.extend(["--smooth", str(smooth)])
 
         ret = subprocess.run(args)
-        logger.info("Mesh creation returned: %s", str(ret))
+        self.logger.debug("Mesh creation returned: %s", str(ret))
 
     def refine_mesh(self,
                     p_prio=-1,
@@ -128,7 +128,7 @@ class OpenMVSController():
                     vertex_ratio=0,
                     cuda=True):
         """Refine 3D mesh."""
-        logger.info("Refine 3D mesh")
+        self.logger.debug("Refine 3D mesh")
 
         working_dir = utils.check_dir(self.res_dir / "refined_mesh")
         self.refined_mesh = working_dir / "mesh_refined.mvs"
@@ -158,7 +158,7 @@ class OpenMVSController():
         args.extend(["--use-cuda", str(int(cuda))])
 
         ret = subprocess.run(args)
-        logger.info("Mesh refinement returned: %s", str(ret))
+        self.logger.debug("Mesh refinement returned: %s", str(ret))
 
     def texture_mesh(self,
                      export_type="obj",
@@ -175,7 +175,7 @@ class OpenMVSController():
                      empty_color=16744231,
                      orthographic_res=0):
         """Add texture to mesh using images."""
-        logger.info("Add texture to mesh using images")
+        self.logger.debug("Add texture to mesh using images")
 
         working_dir = utils.check_dir(self.res_dir / "textured_mesh")
         self.textured_obj = working_dir / "textured_model.obj"
@@ -200,4 +200,4 @@ class OpenMVSController():
         args.extend(["--orthographic-image-resolution", str(orthographic_res)])
 
         ret = subprocess.run(args)
-        logger.info("Adding texture returned: %s", str(ret))
+        self.logger.debug("Adding texture returned: %s", str(ret))
