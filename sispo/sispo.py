@@ -158,7 +158,10 @@ def main():
 
     if args.compress_only:
         params = {"level": 7}
-        comp = Compressor(Path(settings["res_dir"]).resolve(), "jpg", params)
+        comp = Compressor(Path(settings["res_dir"]).resolve(), 
+                          img_ext="png",
+                          algo="jpg",
+                          settings=params)
         comp.load_images()
         comp.compress_series()
         return
