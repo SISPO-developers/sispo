@@ -19,7 +19,6 @@ import matplotlib.pyplot as plt
 
 from .. import utils
 
-logger = utils.create_logger("compositor")
 
 #Astrometric calibrations 
 #https://www.cfa.harvard.edu/~dfabricant/huchra/ay145/mags.html
@@ -148,8 +147,10 @@ class ImageCompositor():
     IMG_MIN_SIZE_INFOBOX = (1200, 1000)
     INFOBOX_SIZE = {"default": (400, 100), "min": (200, 50)}
 
-    def __init__(self, raw_dir, res_dir, instrument):
+    def __init__(self, raw_dir, res_dir, instrument, ext_logger):
 
+        self.logger = ext_logger
+        
         self.res_dir = res_dir
         self.image_dir = raw_dir
 
@@ -255,6 +256,9 @@ class ImageCompositor():
             else:
                 # If too many, also compose in main thread to not drop a frame
                 self._compose(frame)
+
+            for thr in self._threads:
+                thr.join()
 
     
     def _compose(self, frame):
