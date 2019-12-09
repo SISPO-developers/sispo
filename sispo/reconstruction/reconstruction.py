@@ -15,8 +15,7 @@ class Reconstructor():
 
     def __init__(self, settings):
         """Initialises main directory and file structure."""
-        self.root_dir = Path(__file__).parent.parent.parent
-        self.res_dir = self.root_dir / "data" / "results" / "Didymos"
+        self.res_dir = settings["res_dir"]
 
         if "openMVG_dir" in settings:
             openMVG_dir = Path(settings["openMVG_dir"]).resolve()
