@@ -188,14 +188,14 @@ def main():
     
     if args.sim_only:
         logger.debug("Only simulating, no other step")
-        env = Environment(settings)
+        env = Environment(settings, ext_logger=logger)
         env.simulate()
         logger.debug("Finished simulating")
         return
     
     if args.sim_render_only:
         logger.debug("Only simulating and rendering, no other step")
-        env = Environment(settings)
+        env = Environment(settings, ext_logger=logger)
         env.simulate()
         env.render()
         logger.debug("Finished simulating and rendering")
@@ -204,7 +204,7 @@ def main():
     if args.render_only:
         raise NotImplementedError()
         logger.debug("Only rendering, no other step")
-        env = Environment(settings)
+        env = Environment(settings, ext_logger=logger)
         env.render()
         logger.debug("Finished rendering")
         return
@@ -224,7 +224,7 @@ def main():
 
     if args.reconstruct_only:
         logger.debug("Only reconstructing, no other step")
-        recon = Reconstructor(settings)
+        recon = Reconstructor(settings, ext_logger=logger)
         recon.reconstruct()
         logger.debug("Finished reconstructing")
         return
@@ -233,7 +233,7 @@ def main():
 
     if args.with_sim or args.with_render:
         logger.debug("With either simulation or rendering")
-        env = Environment(settings)
+        env = Environment(settings, ext_logger=logger)
 
         if args.with_sim:
             env.simulate()
@@ -254,7 +254,7 @@ def main():
 
     if args.with_reconstruction:
         logger.debug("With reconstruction")
-        recon = Reconstructor(settings)
+        recon = Reconstructor(settings, ext_logger=logger)
         recon.reconstruct()
 
     t_end = time.time()
