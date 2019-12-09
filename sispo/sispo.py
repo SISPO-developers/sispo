@@ -37,7 +37,7 @@ file_handler = logging.FileHandler(str(log_file))
 file_handler.setLevel(logging.DEBUG)
 file_handler.setFormatter(logger_formatter)
 logger.addHandler(file_handler)
-logger.debug("\n\n#################### NEW LOG ####################\n")
+logger.debug("\n\n#################### NEW SISPO LOG ####################\n")
 
 parser = argparse.ArgumentParser(description=__file__.__doc__)
 parser.add_argument("-i",
