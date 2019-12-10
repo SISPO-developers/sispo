@@ -5,6 +5,7 @@ Currently this module uses openMVG and openMVS.
 """
 
 from datetime import datetime
+import logging
 from pathlib import Path
 
 from . import openmvg
