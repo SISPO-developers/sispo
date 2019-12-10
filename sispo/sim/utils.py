@@ -203,7 +203,7 @@ def create_logger():
     """Creates a logger with the common formatting."""
     now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
     filename = (now + "_sim.log")
-    log_dir = Path(__file__).parent.parent / "data" / "logs"
+    log_dir = Path(__file__).parent.parent.parent / "data" / "logs"
     log_dir = check_dir(log_dir)
     log_file = log_dir / filename
 
