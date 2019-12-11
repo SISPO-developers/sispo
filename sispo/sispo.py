@@ -138,21 +138,21 @@ def parse_settings(settings):
 
     sun_file = settings["sun"]["model"]["file"]
     sun_file = Path(sun_file)
-    sun_file.resolve()
+    sun_file = sun_file.resolve()
     if not sun_file.is_file():
         logger.debug("Sun model file does not exists!")
         raise RuntimeError("Sun model file does not exists!")
 
     lightref_file = settings["lightref"]["model"]["file"]
     lightref_file = Path(lightref_file)
-    lightref_file.resolve()
+    lightref_file = lightref_file.resolve()
     if not lightref_file.is_file():
         logger.debug("Light reference model file does not exists!")
         raise RuntimeError("Light reference model file does not exists!")
 
     sssb_file = settings["sssb"]["model"]["file"]
     sssb_file = Path(sssb_file)
-    sssb_file.resolve()
+    sssb_file = sssb_file.resolve()
     if not sssb_file.is_file():
         logger.debug("SSSB model file does not exists!")
         raise RuntimeError("SSSB model file does not exists!")
@@ -212,7 +212,7 @@ def main():
     if args.compress_only:
         logger.debug("Only compressing, no other step")
         params = {"level": 7}
-        comp = Compressor(Path(settings["res_dir"]).resolve(), 
+        comp = Compressor(settings["res_dir"],
                           img_ext="png",
                           algo="jpg",
                           settings=params,
@@ -244,7 +244,7 @@ def main():
     if args.with_compression:
         logger.debug("With compression")
         params = {"level": 7}
-        comp = Compressor(Path(settings["res_dir"]).resolve(), 
+        comp = Compressor(settings["res_dir"], 
                           img_ext="exr",
                           algo="jpg",
                           settings=params,
