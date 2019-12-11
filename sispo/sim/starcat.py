@@ -91,7 +91,6 @@ class StarCatalog():
             ret = subprocess.run(command)
 
             if ret.returncode > 0:
-                self.logger.debug("Found %d stars in catalog", ret.returncode)
                 break
 
             self.logger.debug("Error code from star cat %d", ret.returncode)
@@ -108,6 +107,8 @@ class StarCatalog():
             mag_star = float(line_data[3])
 
             star_data.append((ra_star, dec_star, mag_star))
+
+        self.logger.debug("Found %d stars in catalog", len(star_data))
 
         return star_data
 
