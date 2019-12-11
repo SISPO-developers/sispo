@@ -181,7 +181,13 @@ class OpenMVSController():
         self.textured_obj = working_dir / "textured_model.obj"
 
         args = [str(self.openMVS_dir / "TextureMesh")]
-        args.extend(["-i", str(self.refined_mesh)])
+        if self.refined_mesh.is_file():
+            args.extend(["-i", str(self.refined_mesh)])
+        elif self.mesh_scene.is_file():
+            self.logger.debug("Using regular mesh instead of refined mesh.")
+            args.extend(["-i", str(self.mesh_scene)])
+        else:
+            raise OpenMVSControllerError("No mesh was found, will not texture")
         args.extend(["-o", str(self.textured_obj)])
         args.extend(["-w", str(working_dir)])
 
