@@ -102,6 +102,10 @@ class Compressor():
                 self.logger.debug("All images must have same size!")
                 raise CompressionError("All images must have same size!")
 
+    def unload_images(self):
+        """Unloads images to free memory, keeps IDs."""
+        self.imgs = []
+
     def compress_series(self, max_threads=3):
         """
         Compresses multiple images using :py:meth: `.compress`
@@ -126,6 +130,8 @@ class Compressor():
 
         for thr in self._threads:
             thr.join()
+
+        self.unload_images()
 
         return compressed
 
