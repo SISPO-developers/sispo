@@ -358,7 +358,7 @@ class ImageCompositor():
 
         if self.with_clipping:
             clipped_img = self.clip_color_depth(composed_img)
-            filename = self.image_dir / ("Inst_" + str(frame.id) + ".png")
+            filename = self.res_dir / ("Inst_" + str(frame.id) + ".png")
             cv2.imwrite(str(filename), clipped_img)
 
     def create_sssb_ref(self, res, scale=5):
