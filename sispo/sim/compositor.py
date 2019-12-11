@@ -351,7 +351,7 @@ class ImageCompositor():
             try:
                 self.add_infobox(infobox_img, frame.metadata)
             except ImageCompositorError as e:
-                print(f"No Infobox could be added. {str(e)}!")
+                self.logger.debug(f"No Infobox could be added. {str(e)}!")
             
             filename = self.res_dir / ("Comp_" + str(frame.id) + ".png")
             cv2.imwrite(str(filename), infobox_img)
@@ -406,6 +406,7 @@ class ImageCompositor():
             else:
                 scale = y_res / self.IMG_MIN_SIZE_INFOBOX[1]
                 height = scale * self.INFOBOX_SIZE["default"][1]
+                height = int(np.ceil(height))
 
         if width is None:
             if x_res > self.IMG_MIN_SIZE_INFOBOX[0]:
@@ -413,13 +414,14 @@ class ImageCompositor():
             else:
                 scale = x_res / self.IMG_MIN_SIZE_INFOBOX[0]
                 width = scale * self.INFOBOX_SIZE["default"][0]
+                width = int(np.ceil(width))
 
         if height is not None or width is not None:
             if height > y_res or width > x_res:
                 raise ImageCompositorError("Infobox is bigger than image.")
-        elif height < self.INFOBOX_SIZE["min"][0] or \
-                width < self.INFOBOX_SIZE["min"][1]:
-            raise ImageCompositorError("Infobox is too small to be readable.")
+            elif height < self.INFOBOX_SIZE["min"][0] or \
+                    width < self.INFOBOX_SIZE["min"][1]:
+                raise ImageCompositorError("Infobox is too small to read.")
 
         sig = 3
         textbox = np.zeros((height * sig, width * sig, 4), np.float32)
