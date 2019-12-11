@@ -17,7 +17,6 @@ import bpy
 import cv2
 from mathutils import Vector # pylint: disable=import-error
 import numpy as np
-import OpenEXR
 
 from . import compositor as cp
 from .compositor import *
