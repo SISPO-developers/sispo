@@ -139,15 +139,21 @@ class Environment():
                                                  self.with_clipping,
                                                  ext_logger=self.logger)
         self.renderer.create_camera("ScCam")
-        self.renderer.configure_camera("ScCam", self.inst.focal_l, self.inst.chip_w)
+        self.renderer.configure_camera("ScCam", 
+                                       self.inst.focal_l,
+                                       self.inst.chip_w)
 
         self.renderer.create_scene("SssbConstDist")
         self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
-        self.renderer.configure_camera("SssbConstDistCam", self.inst.focal_l, self.inst.chip_w)
+        self.renderer.configure_camera("SssbConstDistCam", 
+                                       self.inst.focal_l,
+                                       self.inst.chip_w)
 
         self.renderer.create_scene("LightRef")
         self.renderer.create_camera("LightRefCam", scenes="LightRef")
-        self.renderer.configure_camera("LightRefCam", self.inst.focal_l, self.inst.chip_w)
+        self.renderer.configure_camera("LightRefCam", 
+                                       self.inst.focal_l,
+                                       self.inst.chip_w)
 
         self.renderer.set_device(self.render_settings["device"])
         self.renderer.set_samples(self.render_settings["samples"])
