@@ -123,39 +123,70 @@ def read_input_file(filename=None):
     with open(str(def_file), "r") as cfg_file:
         settings = json.load(cfg_file)
 
-    return parse_settings(settings)
+    return parse_settings_file(settings)
 
-def parse_settings(settings):
+def parse_settings_file(settings):
     """
     Parses settings from input file or CLI into correct data formats
 
     :type settings: dict
     :param settings: String based description of settings.
     """
-    settings["res_dir"] = utils.check_dir(settings["res_dir"])
+    if "simulation" not in settings:
+        logger.debug("No simulation settings provided!")
+
+    if "compression" not in settings:
+        logger.debug("No compression settings provided!")
     
-    settings["starcat"] = utils.check_dir(settings["starcat"], create=False)
+    if "reconstruction" not in settings:
+        logger.debug("No reconstruction settings provided!")
 
-    sun_file = settings["sun"]["model"]["file"]
-    sun_file = Path(sun_file)
-    sun_file = sun_file.resolve()
-    if not sun_file.is_file():
-        logger.debug("Sun model file does not exists!")
-        raise RuntimeError("Sun model file does not exists!")
+    _parse_paths(settings)
 
-    lightref_file = settings["lightref"]["model"]["file"]
-    lightref_file = Path(lightref_file)
-    lightref_file = lightref_file.resolve()
-    if not lightref_file.is_file():
-        logger.debug("Light reference model file does not exists!")
-        raise RuntimeError("Light reference model file does not exists!")
+    if "flags" in settings:
+        parser.parse_args(args=settings["flags"], namespace=args)
 
-    sssb_file = settings["sssb"]["model"]["file"]
-    sssb_file = Path(sssb_file)
-    sssb_file = sssb_file.resolve()
-    if not sssb_file.is_file():
-        logger.debug("SSSB model file does not exists!")
-        raise RuntimeError("SSSB model file does not exists!")
+    return settings
+
+def _parse_paths(settings):
+    """
+    Recursively parses all settings with _dir suffix to a Path object.
+
+    :type settings: dict
+    :param settings: Dictionary containing settings
+    """
+    for key in settings.keys():
+        if "dir" in key:
+            if "res" in key:
+                path = utils.check_dir(settings[key])
+            else:
+                path = utils.check_dir(settings[key], False)
+
+            settings[key] = path
+        elif "file" in key:
+            file = Path(settings[key])
+            file = file.resolve()
+            if not file.is_file():
+                raise RuntimeError(f"File {file} does not exist.")
+            else:
+                settings[key] = file
+        elif isinstance(settings[key], dict):
+            settings[key] = _parse_paths(settings[key])
+
+    return settings
+
+def _parse_flags(settings):
+    """
+    Recursively parses all settings with with_ prefix to a bool.
+
+    :type settings: dict
+    :param settings: Dictionary containing settings
+    """
+    for key in settings.keys():
+        if "with" in key:
+            settings[key] = bool(settings[key])
+        elif isinstance(settings[key], dict):
+            settings[key] = _parse_flags[settings[key]]
 
     return settings
 
@@ -163,22 +194,10 @@ def main():
     """
     Main function to run when executing file
     """
-    logger.debug("Parsing input arguments")
-    args = parser.parse_args()
 
-    if args.v:
-        logger.debug("Verbose output")
-        stream_handler = logging.StreamHandler(sys.stdout)
-        stream_handler.setLevel(logging.DEBUG)
-        stream_handler.setFormatter(logger_formatter)
-        logger.addHandler(stream_handler)
-    
-    if args.cli:
-        logger.debug("Starting interactive CLI")
-        settings = read_input()
-    else:
-        logger.debug("Read input (definition) file")
-        settings = read_input_file(args.i)
+    sim_settings = settings["simulation"]
+    comp_settings = settings["compression"]
+    recon_settings = settings["reconstruction"]
 
     if args.profile:
         logger.debug("Start Profiling")
@@ -188,14 +207,14 @@ def main():
     
     if args.sim_only:
         logger.debug("Only simulating, no other step")
-        env = Environment(settings, ext_logger=logger)
+        env = Environment(**sim_settings, ext_logger=logger)
         env.simulate()
         logger.debug("Finished simulating")
         return
     
     if args.sim_render_only:
         logger.debug("Only simulating and rendering, no other step")
-        env = Environment(settings, ext_logger=logger)
+        env = Environment(**sim_settings, ext_logger=logger)
         env.simulate()
         env.render()
         logger.debug("Finished simulating and rendering")
@@ -204,19 +223,14 @@ def main():
     if args.render_only:
         raise NotImplementedError()
         logger.debug("Only rendering, no other step")
-        env = Environment(settings, ext_logger=logger)
+        env = Environment(**sim_settings, ext_logger=logger)
         env.render()
         logger.debug("Finished rendering")
         return
 
     if args.compress_only:
         logger.debug("Only compressing, no other step")
-        params = {"level": 7}
-        comp = Compressor(settings["res_dir"],
-                          img_ext="png",
-                          algo="jpg",
-                          settings=params,
-                          ext_logger=logger)
+        comp = Compressor(**comp_settings, ext_logger=logger)
         comp.load_images()
         comp.compress_series()
         logger.debug("Finished compressing")
@@ -224,7 +238,7 @@ def main():
 
     if args.reconstruct_only:
         logger.debug("Only reconstructing, no other step")
-        recon = Reconstructor(settings, ext_logger=logger)
+        recon = Reconstructor(**recon_settings, ext_logger=logger)
         recon.reconstruct()
         logger.debug("Finished reconstructing")
         return
@@ -233,8 +247,8 @@ def main():
 
     if args.with_sim or args.with_render:
         logger.debug("With either simulation or rendering")
-        env = Environment(settings, ext_logger=logger)
-
+        env = Environment(**sim_settings, ext_logger=logger)
+    
         if args.with_sim:
             env.simulate()
         
@@ -243,18 +257,13 @@ def main():
 
     if args.with_compression:
         logger.debug("With compression")
-        params = {"level": 7}
-        comp = Compressor(settings["res_dir"], 
-                          img_ext="exr",
-                          algo="jpg",
-                          settings=params,
-                          ext_logger=logger)
+        comp = Compressor(**comp_settings, ext_logger=logger)
         comp.load_images()
         comp.compress_series()
 
     if args.with_reconstruction:
         logger.debug("With reconstruction")
-        recon = Reconstructor(settings, ext_logger=logger)
+        recon = Reconstructor(**recon_settings, ext_logger=logger)
         recon.reconstruct()
 
     t_end = time.time()
@@ -278,6 +287,29 @@ def main():
 def run():
     """Alias for main()."""
     main()
+
+def change_arg(arg):
+    """Change an argument in the argparser namespace."""
+    if not isinstance(arg, list):
+        arg = [arg]
+    parser.parse_args(args=arg, namespace=args)
+
+logger.debug("Parsing input arguments")
+args = parser.parse_args()
+
+if args.v:
+    logger.debug("Verbose output")
+    stream_handler = logging.StreamHandler(sys.stdout)
+    stream_handler.setLevel(logging.DEBUG)
+    stream_handler.setFormatter(logger_formatter)
+    logger.addHandler(stream_handler)
     
+if args.cli:
+    logger.debug("Starting interactive CLI")
+    settings = read_input()
+else:
+    logger.debug("Read input (definition) file")
+    settings = read_input_file(args.i)
+
 if __name__ == "__main__":
     main()
