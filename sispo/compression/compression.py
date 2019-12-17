@@ -27,6 +27,7 @@ class Compressor():
 
     def __init__(self, 
                  res_dir,
+                 img_dir,
                  img_ext="exr",
                  algo=None,
                  settings=None,
@@ -37,8 +38,8 @@ class Compressor():
         else:
             self.logger = self._create_logger()
 
-        self.res_dir = self._check_dir(res_dir / "compressed")
-        self.image_dir = self._check_dir(res_dir / "rendering")
+        self.res_dir = self._check_dir(res_dir)
+        self.image_dir = self._check_dir(img_dir)
 
         self.img_extension = "." + img_ext
 
