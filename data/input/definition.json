@@ -1,6 +1,7 @@
 {
     "name": "Didymos",
     "flags": ["--reconstruct-only"],
+    "res_dir": "data/results/Didymos",
     "simulation":
     {
         "res_dir": "data/results/Didymos/rendering",
