@@ -23,21 +23,10 @@ from .sim import utils
 from .reconstruction import *
 from .compression import *
 
-now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
-filename = (now + "_sispo.log")
-log_dir = Path(__file__).resolve().parent.parent / "data" / "logs"
-if not log_dir.is_dir:
-    Path.mkdir(log_dir)
-log_file = log_dir / filename
 logger = logging.getLogger("sispo")
 logger.setLevel(logging.DEBUG)
 logger_formatter = logging.Formatter(
     "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
-file_handler = logging.FileHandler(str(log_file))
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(logger_formatter)
-logger.addHandler(file_handler)
-logger.debug("\n\n#################### NEW SISPO LOG ####################\n")
 
 parser = argparse.ArgumentParser(description=__file__.__doc__)
 parser.add_argument("-i",
@@ -194,7 +183,8 @@ def main():
     """
     Main function to run when executing file
     """
-
+    logger.debug("Settings:")
+    logger.debug(f"{settings}")
     sim_settings = settings["simulation"]
     comp_settings = settings["compression"]
     recon_settings = settings["reconstruction"]
@@ -294,22 +284,30 @@ def change_arg(arg):
         arg = [arg]
     parser.parse_args(args=arg, namespace=args)
 
-logger.debug("Parsing input arguments")
 args = parser.parse_args()
 
 if args.v:
-    logger.debug("Verbose output")
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(logging.DEBUG)
     stream_handler.setFormatter(logger_formatter)
     logger.addHandler(stream_handler)
     
 if args.cli:
-    logger.debug("Starting interactive CLI")
     settings = read_input()
 else:
-    logger.debug("Read input (definition) file")
     settings = read_input_file(args.i)
+
+now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
+filename = (now + "_sispo.log")
+log_dir = settings["res_dir"]
+if not log_dir.is_dir:
+    Path.mkdir(log_dir)
+log_file = log_dir / filename
+file_handler = logging.FileHandler(str(log_file))
+file_handler.setLevel(logging.DEBUG)
+file_handler.setFormatter(logger_formatter)
+logger.addHandler(file_handler)
+logger.debug("\n\n#################### NEW SISPO LOG ####################\n")
 
 if __name__ == "__main__":
     main()
