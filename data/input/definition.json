@@ -1,45 +1,106 @@
 {
     "name": "Didymos",
-    "res_dir": "D:\\02_Master_of_Science\\MasterThesis\\repo\\data\\results\\Didymos",
-    "duration": 20,
-    "encounter_date": {"year": 2017, "month": 8, "day": 15, "hour": 12, "minutes": 0, "seconds": 0.0},
-    "frames": 3,
-    "encounter_dist": 1E5,
-    "with_terminator": 0,
-    "with_sunnyside": 1,
-    "timesampler_mode": 1,
-    "slowmotion_factor": 10,
-    "exposure": 1.554,
-    "samples": 48,
-    "device": "GPU",
-    "tile": 512,
-    "starcat": "D:\\02_Master_of_Science\\MasterThesis\\repo\\data\\UCAC4",
-    "sun": {"model": {"file": "D:\\02_Master_of_Science\\MasterThesis\\repo\\data\\models\\didymos_lowpoly.blend",
-                      "name": "Sun"}},
-    "lightref": {"model": {"file": "D:\\02_Master_of_Science\\MasterThesis\\repo\\data\\models\\didymos_lowpoly.blend",
-                "name": "CalibrationDisk"}},
-    "sssb": {"trj": {"a": 1.644641475071416,
-                     "e": 3.838774437558215E-01,
-                     "i": 3.408231185574551E+00,
-                     "P": 7.703805051391988E+02,
-                     "omega": 3.192958853076784E+02,
-                     "Omega": 7.320940216397703E+01, 
-                     "M": 1.967164895190036E+02,
-                     "date": {"year": 2017, 
-                              "month": 8,
-                              "day": 19,
-                              "hour": 0,
-                              "minutes": 0,
-                              "seconds": 0.0}},
-             "att": {"rotation_rate": 8133.48},
-             "model": {"file": "D:\\02_Master_of_Science\\MasterThesis\\repo\\data\\models\\didymos2.blend",
-                       "name": "Didymos.001"}},
-    "instrument": {"res": [2464, 2048],
-                   "pix_l": 3.45,
-                   "focal_l": 230,
-                   "aperture_d": 4,
-                   "wavelength": 550,
-                   "quantum_eff": 0.25,
-                   "chip_noise": 10 }
-                        
+    "flags": ["--reconstruct-only"],
+    "simulation":
+    {
+        "res_dir": "data/results/Didymos/rendering",
+        "duration": 20,
+        "encounter_date": 
+        {
+            "year": 2017,
+            "month": 8,
+            "day": 15,
+            "hour": 12,
+            "minutes": 0,
+            "seconds": 0.0
+        },
+        "frames": 30,
+        "encounter_distance": 1E5,
+        "with_terminator": 0,
+        "with_sunnyside": 1,
+        "timesampler_mode": 1,
+        "slowmotion_factor": 10,
+        "exposure": 1.554,
+        "samples": 48,
+        "device": "GPU",
+        "tile_size": 512,
+        "starcat_dir": "data/UCAC4",
+        "sun": 
+        {
+            "model":
+            {
+                "file": "data/models/didymos_lowpoly.blend",
+                "name": "Sun"
+            }
+        },
+        "lightref": 
+        {
+            "model": 
+            {
+                "file": "data/models/didymos_lowpoly.blend",
+                "name": "CalibrationDisk"
+            }
+        },
+        "sssb":
+        {
+            "trj":
+            {
+                "a": 1.644641475071416,
+                "e": 3.838774437558215E-01,
+                "i": 3.408231185574551E+00,
+                "P": 7.703805051391988E+02,
+                "omega": 3.192958853076784E+02,
+                "Omega": 7.320940216397703E+01, 
+                "M": 1.967164895190036E+02,
+                "date": 
+                {
+                    "year": 2017, 
+                    "month": 8,
+                    "day": 19,
+                    "hour": 0,
+                    "minutes": 0,
+                    "seconds": 0.0
+                }
+            },
+            "att": 
+            {
+                "rotation_rate": 8133.48
+            },
+            "model":
+            {
+                "file": "data/models/didymos2.blend",
+                "name": "Didymos.001"
+            },
+            "albedo": 0.15,
+            "max_dim": 512
+        },
+        "instrument": 
+        {
+            "res": [2464, 2048],
+            "pix_l": 3.45,
+            "focal_l": 230,
+            "aperture_d": 4,
+            "wavelength": 550,
+            "quantum_eff": 0.25,
+            "chip_noise": 10,
+            "color_depth": 12
+        },
+        "with_infobox": 0,
+        "with_clipping": 1
+    },
+    "compression":
+    {
+        "res_dir": "data/results/Didymos/compressed",
+        "img_dir": "data/results/Didymos/rendering",
+        "img_ext": "png",
+        "algo": "jpg",
+        "settings":
+        {
+            "level": 9
+        }
+    },
+    "reconstruction":
+    {
+        "res_dir": "data/results/Didymos"
+    }
 }

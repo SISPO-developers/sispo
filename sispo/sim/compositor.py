@@ -147,12 +147,19 @@ class ImageCompositor():
     IMG_MIN_SIZE_INFOBOX = (1200, 1000)
     INFOBOX_SIZE = {"default": (400, 100), "min": (200, 50)}
 
-    def __init__(self, raw_dir, res_dir, instrument, ext_logger):
+    def __init__(self, 
+                 res_dir,
+                 img_dir,
+                 instrument,
+                 sssb,
+                 with_infobox,
+                 with_clipping,
+                 ext_logger):
 
         self.logger = ext_logger
         
         self.res_dir = res_dir
-        self.image_dir = raw_dir
+        self.image_dir = img_dir
 
         self.image_extension = ".exr"
 
@@ -161,12 +168,12 @@ class ImageCompositor():
         self.inst = instrument
         self.dlmult = 2
 
-        self.sssb = {}
-        self.sssb["albedo"] = 0.15
-        self.sssb["max_dim"] = 512
+        self.sssb = sssb
 
-        self.with_infobox = True
-        self.with_clipping = True
+        self.with_infobox = with_infobox
+        self.with_clipping = with_clipping
+
+        self.logger.debug(f"Infobox: {with_infobox}. Clip: {with_clipping}.")
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of SssbOnly scenes."""

@@ -15,7 +15,11 @@ from . import openmvs
 class Reconstructor():
     """Reconstruction of a 3D object from images."""
 
-    def __init__(self, settings, ext_logger=None):
+    def __init__(self, 
+                 res_dir,
+                 openMVG_dir=None,
+                 openMVS_dir=None,
+                 ext_logger=None):
         """Initialises main directory and file structure."""
 
         if ext_logger is not None:
@@ -23,10 +27,10 @@ class Reconstructor():
         else:
             self.logger = self._create_logger()
 
-        self.res_dir = settings["res_dir"]
+        self.res_dir = res_dir
 
-        if "openMVG_dir" in settings:
-            openMVG_dir = Path(settings["openMVG_dir"]).resolve()
+        if openMVG_dir is not None:
+            openMVG_dir = Path(openMVG_dir).resolve()
             if not openMVG_dir.is_dir():
                 openMVG_dir = None
         else:
@@ -35,8 +39,8 @@ class Reconstructor():
                                               ext_logger=self.logger,
                                               openMVG_dir=openMVG_dir)
 
-        if "openMVS_dir" in settings:
-            openMVS_dir = Path(settings["openMVS_dir"]).resolve()
+        if openMVS_dir is not None:
+            openMVS_dir = Path(openMVS_dir).resolve()
             if not openMVS_dir.is_dir():
                 openMVS_dir = None
         else:

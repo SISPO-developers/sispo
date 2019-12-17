@@ -38,7 +38,15 @@ class BlenderControllerError(RuntimeError):
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, render_dir, starcat_dir, instrument, ext_logger=None):
+    def __init__(self, 
+                 res_dir,
+                 raw_dir,
+                 starcat_dir,
+                 instrument,
+                 sssb,
+                 with_infobox,
+                 with_clipping,
+                 ext_logger=None):
         """Initialise blender controller class."""
 
         if ext_logger is not None:
@@ -46,8 +54,8 @@ class BlenderController:
         else:
             self.logger = utils.create_logger()
 
-        self.raw_dir = render_dir / "raw"
-        self.res_dir = render_dir
+        self.raw_dir = raw_dir
+        self.res_dir = res_dir
         self.cycles = bpy.context.preferences.addons["cycles"]
 
         self.default_scene = bpy.context.scene
@@ -74,9 +82,12 @@ class BlenderController:
                                        starcat_dir=starcat_dir)
 
         # Create compositor
-        self.comp = cp.ImageCompositor(self.raw_dir,
-                                       self.res_dir,
+        self.comp = cp.ImageCompositor(self.res_dir,
+                                       self.raw_dir,
                                        instrument,
+                                       sssb,
+                                       with_infobox,
+                                       with_clipping,
                                        ext_logger=self.logger)
 
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))

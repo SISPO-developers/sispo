@@ -37,32 +37,49 @@ class SimulationError(RuntimeError):
 class Environment():
     """Simulation environment."""
 
-    def __init__(self, settings, ext_logger=None):
+    def __init__(self,
+                 res_dir,
+                 starcat_dir,
+                 instrument,
+                 with_infobox,
+                 with_clipping,
+                 sssb,
+                 sun,
+                 lightref,
+                 encounter_date,
+                 duration,
+                 frames,
+                 encounter_distance,
+                 with_sunnyside,
+                 with_terminator,
+                 timesampler_mode,
+                 slowmotion_factor,
+                 exposure,
+                 samples,
+                 device,
+                 tile_size,
+                 ext_logger=None):
 
         if ext_logger is not None:
             self.logger = ext_logger
         else:
             self.logger = utils.create_logger()
-
-        self.settings = settings
-
-        self.name = settings["name"]
         
         self.root_dir = Path(__file__).parent.parent.parent
         data_dir = self.root_dir / "data"
         self.models_dir = utils.check_dir(data_dir / "models")
 
-        self.res_dir = settings["res_dir"]
+        self.res_dir = res_dir
         
-        self.starcat_dir = settings["starcat"]
+        self.starcat_dir = starcat_dir
 
-        self.inst = Instrument(settings["instrument"])
+        self.inst = Instrument(instrument)
 
         self.ts = TimeScalesFactory.getTDB()
         self.ref_frame = FramesFactory.getICRF()
         self.mu_sun = Constants.IAU_2015_NOMINAL_SUN_GM
 
-        encounter_date = settings["encounter_date"]
+        encounter_date = encounter_date
         self.encounter_date = AbsoluteDate(int(encounter_date["year"]),
                                            int(encounter_date["month"]),
                                            int(encounter_date["day"]),
@@ -70,55 +87,73 @@ class Environment():
                                            int(encounter_date["minutes"]),
                                            float(encounter_date["seconds"]),
                                            self.ts)
-        self.duration = settings["duration"]
+        self.duration = duration
         self.start_date = self.encounter_date.shiftedBy(-self.duration / 2.)
         self.end_date = self.encounter_date.shiftedBy(self.duration / 2.)
 
-        self.frames = settings["frames"]
+        self.frames = frames
 
-        self.minimum_distance = settings["encounter_dist"]
-        self.with_terminator = bool(settings["with_terminator"])
-        self.with_sunnyside = bool(settings["with_sunnyside"])
-        self.timesampler_mode = settings["timesampler_mode"]
-        self.slowmotion_factor = settings["slowmotion_factor"]
+        self.minimum_distance = encounter_distance
+        self.with_terminator = bool(with_terminator)
+        self.with_sunnyside = bool(with_sunnyside)
+        self.timesampler_mode = timesampler_mode
+        self.slowmotion_factor = slowmotion_factor
 
         self.render_settings = dict()
-        self.render_settings["exposure"] = settings["exposure"]
-        self.render_settings["samples"] = settings["samples"]
-        self.render_settings["device"] = settings["device"]
-        self.render_settings["tile"] = settings["tile"]
+        self.render_settings["exposure"] = exposure
+        self.render_settings["samples"] = samples
+        self.render_settings["device"] = device
+        self.render_settings["tile"] = tile_size
+
+        self.sssb_settings = sssb
+        self.with_infobox = with_infobox
+        self.with_clipping = with_clipping
 
         # Setup rendering engine (renderer)
         self.setup_renderer()
 
         # Setup Sun
-        self.setup_sun(settings["sun"])
+        self.setup_sun(sun)
 
         # Setup SSSB
-        self.setup_sssb(settings["sssb"])
+        self.setup_sssb(sssb)
 
         # Setup SC
         self.setup_spacecraft()
 
         # Setup Lightref
-        self.setup_lightref(settings["lightref"])
+        self.setup_lightref(lightref)
 
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
 
-        self.render_dir = utils.check_dir(self.res_dir / "rendering")
+        render_dir = utils.check_dir(self.res_dir / "rendering")
+        raw_dir = utils.check_dir(render_dir / "raw")
 
-        self.renderer = render.BlenderController(self.render_dir, self.starcat_dir, self.inst, ext_logger=self.logger)
+        self.renderer = render.BlenderController(render_dir,
+                                                 raw_dir, 
+                                                 self.starcat_dir,
+                                                 self.inst,
+                                                 self.sssb_settings,
+                                                 self.with_infobox,
+                                                 self.with_clipping,
+                                                 ext_logger=self.logger)
         self.renderer.create_camera("ScCam")
-        self.renderer.configure_camera("ScCam", self.inst.focal_l, self.inst.chip_w)
+        self.renderer.configure_camera("ScCam", 
+                                       self.inst.focal_l,
+                                       self.inst.chip_w)
 
         self.renderer.create_scene("SssbConstDist")
         self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
-        self.renderer.configure_camera("SssbConstDistCam", self.inst.focal_l, self.inst.chip_w)
+        self.renderer.configure_camera("SssbConstDistCam", 
+                                       self.inst.focal_l,
+                                       self.inst.chip_w)
 
         self.renderer.create_scene("LightRef")
         self.renderer.create_camera("LightRefCam", scenes="LightRef")
-        self.renderer.configure_camera("LightRefCam", self.inst.focal_l, self.inst.chip_w)
+        self.renderer.configure_camera("LightRefCam", 
+                                       self.inst.focal_l,
+                                       self.inst.chip_w)
 
         self.renderer.set_device(self.render_settings["device"])
         self.renderer.set_samples(self.render_settings["samples"])
