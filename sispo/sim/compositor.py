@@ -8,13 +8,13 @@ compositor is required to fix the intensity issue and add the star background.
 
 from datetime import datetime
 import json
+from pathlib import Path
 import threading
 
 from astropy import constants as const
 from astropy import units as u
 import cv2
 import numpy as np
-from pathlib import Path
 
 from . import utils
 
