@@ -127,7 +127,7 @@ class Environment():
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
 
-        render_dir = utils.check_dir(self.res_dir / "rendering")
+        render_dir = utils.check_dir(self.res_dir)
         raw_dir = utils.check_dir(render_dir / "raw")
 
         self.renderer = render.BlenderController(render_dir,
