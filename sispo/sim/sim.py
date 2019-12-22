@@ -5,7 +5,6 @@ import json
 from pathlib import Path
 
 import numpy as np
-import matplotlib.pyplot as plt
 import orekit
 from orekit.pyhelpers import setup_orekit_curdir
 #################### orekit VM init ####################

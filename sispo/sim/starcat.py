@@ -3,9 +3,9 @@ Interface for handling data from a star catalogue. Retrieve data as well as
 render and write images.
 """
 
+from pathlib import Path
 import subprocess
 import sys
-from pathlib import Path
 
 from . import utils
 
