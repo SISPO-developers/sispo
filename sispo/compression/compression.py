@@ -180,17 +180,14 @@ class Compressor():
         if algo == "bz2":
             comp = self._decorate_builtin_compress(bz2.compress)
             settings["compresslevel"] = settings["level"]
-            settings.pop("level")
             decomp = self._decorate_builtin_decompress(bz2.decompress)
         elif algo == "gzip":
             comp = self._decorate_builtin_compress(gzip.compress)
             settings["compresslevel"] = settings["level"]
-            settings.pop("level")
             decomp = self._decorate_builtin_decompress(gzip.decompress)
         elif algo == "lzma":
             comp = self._decorate_builtin_compress(lzma.compress)
             settings["preset"] = settings["level"]
-            settings.pop("level")
             decomp = self._decorate_builtin_decompress(lzma.decompress)
         elif algo == "zlib":
             comp = self._decorate_builtin_compress(zlib.compress)
@@ -201,7 +198,6 @@ class Compressor():
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".jpg"
             params = (cv2.IMWRITE_JPEG_QUALITY, settings["level"] * 10)
-            settings.pop("level")
 
             if "progressive" in settings:
                 if isinstance(settings["progressive"], bool):
@@ -246,7 +242,6 @@ class Compressor():
             settings["ext"] = ".jp2"
             level = settings["level"] * 100 # Ranges from 0 to 1000
             params = (cv2.IMWRITE_JPEG2000_COMPRESSION_X1000, level)
-            settings.pop("level")
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
 
@@ -254,7 +249,6 @@ class Compressor():
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".png"
             params = (cv2.IMWRITE_PNG_COMPRESSION, settings["level"])
-            settings.pop("level")
 
             if "strategy" in settings:
                 if isinstance(settings["strategy"], int):
