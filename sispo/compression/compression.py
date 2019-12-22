@@ -61,7 +61,7 @@ class Compressor():
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of Inst(rument) images."""
-        scene_name = "Comp"
+        scene_name = "Inst"
         image_names = scene_name + "*" + self.img_extension
         file_names = self.image_dir.glob(image_names)
 
@@ -84,7 +84,7 @@ class Compressor():
 
         for img_id in self.img_ids:
             self.logger.debug(f"Load image {img_id}")
-            img_path = self.image_dir / ("Comp_" + img_id + self.img_extension)
+            img_path = self.image_dir / ("Inst_" + img_id + self.img_extension)
             img = cv2.imread(str(img_path), cv2.IMREAD_UNCHANGED)
             self.imgs.append(img)
 
