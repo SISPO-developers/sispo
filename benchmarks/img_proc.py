@@ -32,16 +32,15 @@ stream_handler.setLevel(logging.DEBUG)
 stream_handler.setFormatter(logger_formatter)
 logger.addHandler(stream_handler)
 
-def benchmark_cv(image, kernel, sigma):
+def benchmark_cv(image, sigma, kernel):
     """Run benchmark of OpenCV."""
     result = np.zeros(image.shape, dtype=np.float32)
     result = cv2.GaussianBlur(image, (kernel, kernel), sigma, sigma)
 
     return result
 
-def benchmark_skimage(image, kernel, sigma):
+def benchmark_skimage(image, sigma, trunc):
     """Run benchmark of scikit-image."""
-    trunc = (kernel - 1) / 2 / sigma
     result = np.zeros(image.shape, dtype=np.float32)
     result = skimage.filters.gaussian(image, sigma, truncate=trunc, multichannel=True)
 
@@ -51,6 +50,7 @@ def run(filepath):
     """Executes benchmark."""
     sigma = 5
     kernel = 5
+    trunc = (kernel - 1) / 2 / sigma
     iterations = 10
 
     logger.debug("Starting opencv vs skimage benchmarking")
@@ -62,14 +62,14 @@ def run(filepath):
     
     start = datetime.now()
     for _ in range(iterations):
-        benchmark_skimage(raw_img, kernel, sigma)
+        benchmark_skimage(raw_img, sigma, trunc)
     end = datetime.now()
 
     time_skimage = end - start
 
     start = datetime.now()
     for _ in range(iterations):
-        benchmark_cv(raw_img, kernel, sigma)
+        benchmark_cv(raw_img, sigma, kernel)
     end = datetime.now()
 
     time_cv = end - start
@@ -78,6 +78,9 @@ def run(filepath):
     logger.debug(f"skimage timing: {time_skimage / iterations} s")
     logger.debug(f"OpenCV timing: {time_cv / iterations} s")
     logger.debug(f"Ratio skimage/OpenCV: {time_skimage / time_cv}")
+
+    cmd_skimage += "\n" + "print('SK type: ', sk_image.dtype)"
+    cmd_cv2 += "\n" + "print('CV2 type: ', cv_image.dtype)"
 
     exec(setup_skimage + "\n" + cmd_skimage + "\n" + "utils.write_openexr_image(str(file) + '_sk', sk_image)")
     exec(setup_cv2 + "\n" + cmd_cv2 + "\n" + "utils.write_openexr_image(str(file) + '_cv', cv_image)")
