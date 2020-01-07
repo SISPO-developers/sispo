@@ -48,14 +48,17 @@ def benchmark_skimage(image, kernel, sigma):
     return result
 
 def run(filepath):
-    logger.debug("Starting opencv vs skimage benchmarking")
-    logger.debug(f"Using image {filepath}")
-
-    raw_img = read_openexr_image(filepath)
-
+    """Executes benchmark."""
     sigma = 5
     kernel = 5
     iterations = 10
+
+    logger.debug("Starting opencv vs skimage benchmarking")
+    logger.debug(f"Using image {filepath}")
+    logger.debug(f"Gaussian Sigma: {sigma} and Kernel: {kernel}")
+    logger.debug(f"Iterations: #{iterations}")
+
+    raw_img = read_openexr_image(filepath)
     
     start = datetime.now()
     for _ in range(iterations):
@@ -72,12 +75,9 @@ def run(filepath):
     time_cv = end - start
 
     
-    print(f"skimage: {time_skimage / iterations} s")
-    print(f"opencv: {time_cv / iterations} s")
-    print(f"Ratio Skimage/opencv: {time_skimage / time_cv}")
-
-    cmd_skimage += "\n" + "print('SK type: ', sk_image.dtype)"
-    cmd_cv2 += "\n" + "print('CV2 type: ', cv_image.dtype)"
+    logger.debug(f"skimage timing: {time_skimage / iterations} s")
+    logger.debug(f"OpenCV timing: {time_cv / iterations} s")
+    logger.debug(f"Ratio skimage/OpenCV: {time_skimage / time_cv}")
 
     exec(setup_skimage + "\n" + cmd_skimage + "\n" + "utils.write_openexr_image(str(file) + '_sk', sk_image)")
     exec(setup_cv2 + "\n" + cmd_cv2 + "\n" + "utils.write_openexr_image(str(file) + '_cv', cv_image)")
