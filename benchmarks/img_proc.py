@@ -33,13 +33,13 @@ stream_handler.setLevel(logging.DEBUG)
 stream_handler.setFormatter(logger_formatter)
 logger.addHandler(stream_handler)
 
-def benchmark_cv(image):
+def benchmark_cv(image, kernel, sigma):
     """Run benchmark of OpenCV."""
     raise NotImplementedError()
 
-def benchmark_skimage(image):
+def benchmark_skimage(image, kernel, sigma):
     """Run benchmark of scikit-image."""
-    raise NotImplementedError()
+    truncation = (kernel - 1) / 2 / sigma
 
 def run(filepath):
     logger.debug("Starting opencv vs skimage benchmarking")
@@ -47,24 +47,12 @@ def run(filepath):
 
     raw_img = utils.read_openexr_image(filepath)
 
-    setup = "#gc.enable()"
-    setup += "\n" + "import numpy as np"
-    setup += "\n" + "import utils"
-    setup += "\n" + "from pathlib import Path"
-    setup += "\n" + "path = Path('.').resolve()"
-    setup += "\n" + "path = path / '..' / '..' / 'data' / 'results' / 'Didymos' / 'rendering'"
-    setup += "\n" + "file = path / 'Composition_2017-08-15T115840-817000.exr'"
-    setup += "\n" + "file = file.resolve()"
-    setup += "\n" + "img = utils.read_openexr_image(str(file))"
-    setup += "\n" + "sigma = 5"
-    setup += "\n" + "kernel = 5"
+    sigma = 5
+    kernel = 5
 
-    setup_skimage = setup + "\n" + "truncation = (kernel - 1) / 2 / sigma" \
-                    + "\n" + "from skimage.filters import gaussian"
     cmd_skimage = "sk_image = np.zeros(img.shape, dtype=np.float32)"
     cmd_skimage += "\n" + "sk_image = gaussian(img, sigma, truncate=truncation, multichannel=True)"
 
-    setup_cv2 = setup + "\n" + "from cv2 import GaussianBlur"
     cmd_cv2 = "cv_image = np.zeros(img.shape, dtype=np.float32)"
     cmd_cv2 += "\n" + "cv_image = GaussianBlur(img,(kernel,kernel),sigma,sigma)"
 
