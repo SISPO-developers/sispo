@@ -9,11 +9,10 @@ import sys
 
 import cv2
 import logging
-import numpy
+import numpy as np
+import OpenEXR
+import Imath
 import skimage
-import timeit
-
-from sispo.sim import utils
 
 logger = logging.getLogger("cv_skimage")
 logger.setLevel(logging.DEBUG)
@@ -35,34 +34,47 @@ logger.addHandler(stream_handler)
 
 def benchmark_cv(image, kernel, sigma):
     """Run benchmark of OpenCV."""
-    raise NotImplementedError()
+    result = np.zeros(image.shape, dtype=np.float32)
+    result = cv2.GaussianBlur(image, (kernel, kernel), sigma, sigma)
+
+    return result
 
 def benchmark_skimage(image, kernel, sigma):
     """Run benchmark of scikit-image."""
-    truncation = (kernel - 1) / 2 / sigma
+    trunc = (kernel - 1) / 2 / sigma
+    result = np.zeros(image.shape, dtype=np.float32)
+    result = skimage.filters.gaussian(image, sigma, truncate=trunc, multichannel=True)
+
+    return result
 
 def run(filepath):
     logger.debug("Starting opencv vs skimage benchmarking")
     logger.debug(f"Using image {filepath}")
 
-    raw_img = utils.read_openexr_image(filepath)
+    raw_img = read_openexr_image(filepath)
 
     sigma = 5
     kernel = 5
-
-    cmd_skimage = "sk_image = np.zeros(img.shape, dtype=np.float32)"
-    cmd_skimage += "\n" + "sk_image = gaussian(img, sigma, truncate=truncation, multichannel=True)"
-
-    cmd_cv2 = "cv_image = np.zeros(img.shape, dtype=np.float32)"
-    cmd_cv2 += "\n" + "cv_image = GaussianBlur(img,(kernel,kernel),sigma,sigma)"
-
-    iterations = 10000
-    times_sk = timeit.timeit(cmd_skimage, number=iterations, setup=setup_skimage)
-    times_cv2 = timeit.timeit(cmd_cv2, number=iterations, setup=setup_cv2)
+    iterations = 10
     
-    print(f"skimage: {times_sk / iterations} s")
-    print(f"opencv: {times_cv2 / iterations} s")
-    print(f"Ratio Skimage/opencv: {times_sk / times_cv2}")
+    start = datetime.now()
+    for _ in range(iterations):
+        benchmark_skimage(raw_img, kernel, sigma)
+    end = datetime.now()
+
+    time_skimage = end - start
+
+    start = datetime.now()
+    for _ in range(iterations):
+        benchmark_cv(raw_img, kernel, sigma)
+    end = datetime.now()
+
+    time_cv = end - start
+
+    
+    print(f"skimage: {time_skimage / iterations} s")
+    print(f"opencv: {time_cv / iterations} s")
+    print(f"Ratio Skimage/opencv: {time_skimage / time_cv}")
 
     cmd_skimage += "\n" + "print('SK type: ', sk_image.dtype)"
     cmd_cv2 += "\n" + "print('CV2 type: ', cv_image.dtype)"
@@ -77,9 +89,47 @@ def run(filepath):
     statistics += "\n" + "print('Alpha min sk, cv; max, sk, cv: ', np.min(sk_image[:,:,3]), np.min(cv_image[:,:,3]), np.max(sk_image[:,:,3]), np.max(cv_image[:,:,3]))"
     exec(statistics)
 
+def read_openexr_image(filename):
+    """Read image in OpenEXR file format into numpy array."""
+
+    if not OpenEXR.isOpenExrFile(str(filename)):
+        return None
+
+    image = OpenEXR.InputFile(str(filename))
+
+    if not image.isComplete():
+        return None
+
+    header = image.header()
+    
+    size = header["displayWindow"]
+    resolution = (size.max.x - size.min.x + 1, size.max.y - size.min.y + 1)
+
+    ch_info = header["channels"]
+    if "R" in ch_info and "G" in ch_info and "B" in ch_info:
+        if "A" in ch_info:
+            channels = 4
+        else:
+            channels = 3
+    else:
+        return None
+    
+    image_o = np.zeros((resolution[1],resolution[0],channels), np.float32)
+    
+    ch = ["R", "G", "B", "A"]
+    pt = Imath.PixelType(Imath.PixelType.FLOAT)
+
+    for c in range(0, channels):
+        image_channel = np.fromstring(image.channel(ch[c], pt), np.float32)
+        image_o[:, :, c] = image_channel.reshape(resolution[1], resolution[0])
+    
+    image.close()
+
+    return image_o
+
 if __name__ == "__main__":
     try:
-        img_path = Path(sys.argv[1])
+        img_path = Path(sys.argv[1]).resolve()
     except Exception as e:
         raise RuntimeError("Include filepath as argument")
 
