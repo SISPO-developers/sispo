@@ -28,6 +28,14 @@ sispo.reconstruction.reconstruction module
    :undoc-members:
    :show-inheritance:
 
+sispo.reconstruction.utils module
+---------------------------------
+
+.. automodule:: sispo.reconstruction.utils
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
 
 Module contents
 ---------------
