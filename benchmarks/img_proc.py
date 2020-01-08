@@ -36,14 +36,64 @@ stream_handler.setFormatter(logger_formatter)
 logger.addHandler(stream_handler)
 
 
-def run_cv(image, sigma, kernel):
-    """Run benchmark of OpenCV."""
+def run_cv_gauss(image, sigma, kernel):
     return cv2.GaussianBlur(image, (kernel, kernel), sigma, sigma)
 
 
-def run_skimage(image, sigma, trunc):
-    """Run benchmark of scikit-image."""
+def run_cv_resize(image, scale):
+    return cv2.resize(image, None, fx=1/scale, fy=1/scale, interpolation=cv2.INTER_AREA)
+
+
+def run_skimage_gauss(image, sigma, trunc):
     return skimage.filters.gaussian(image, sigma, truncate=trunc, multichannel=True)
+
+
+def run_skimage_resize(image, scale):
+    return skimage.transform.downscale_local_mean(image, (scale, scale, 1))
+
+
+def benchmark_cv(raw_img, sigma, kernel, scale, iterations=10000):
+    times_cv = []
+    for _ in range(iterations):
+        start = time.time()
+        run_cv_gauss(raw_img, sigma, kernel)
+        end = time.time()
+        times_cv.append(end - start)
+
+    time_cv_gauss = min(times_cv)
+
+    times_cv = []
+    for _ in range(iterations):
+        start = time.time()
+        run_cv_resize(raw_img, scale)
+        end = time.time()
+        times_cv.append(end - start)
+
+    time_cv_resize = min(times_cv)
+
+    return time_cv_gauss, time_cv_resize
+
+
+def benchmark_sk(raw_img, sigma, trunc, scale, iterations=10000):
+    times_sk = []
+    for _ in range(iterations):
+        start = time.time()
+        run_skimage_gauss(raw_img, sigma, trunc)
+        end = time.time()
+        times_sk.append(end - start)
+
+    time_sk_gauss = min(times_sk)
+
+    times_sk = []
+    for _ in range(iterations):
+        start = time.time()
+        run_skimage_resize(raw_img, scale)
+        end = time.time()
+        times_sk.append(end - start)
+
+    time_sk_resize = min(times_sk)
+
+    return time_sk_gauss, time_sk_resize
 
 
 def benchmark(filepath, iterations=10000):
@@ -51,37 +101,35 @@ def benchmark(filepath, iterations=10000):
     sigma = 5
     kernel = 5
     trunc = (kernel - 1) / 2 / sigma
+    scale = 4
 
     logger.debug("Starting opencv vs skimage benchmarking")
     logger.debug(f"Using image {filepath}")
     logger.debug(f"Gaussian Sigma: {sigma} and Kernel: {kernel}")
+    logger.debug(f"Resizing scale: {scale}")
     logger.debug(f"Iterations: #{iterations}")
 
     raw_img = read_openexr_image(filepath)
 
-    times_sk = []
-    for _ in range(iterations):
-        start = time.time()
-        run_skimage(raw_img, sigma, trunc)
-        end = time.time()
-        times_sk.append(end - start)
+    time_sk_gauss, time_sk_resize = benchmark_sk(
+        raw_img, sigma, trunc, scale, iterations)
+    time_cv_gauss, time_cv_resize = benchmark_cv(
+        raw_img, sigma, kernel, scale, iterations)
 
-    times_cv = []
-    for _ in range(iterations):
-        start = time.time()
-        run_cv(raw_img, sigma, kernel)
-        end = time.time()
-        times_cv.append(end - start)
+    logger.debug(f"skimage gaussian filter timing: {time_sk_gauss} s")
+    logger.debug(f"OpenCV gaussian filter timing: {time_cv_gauss} s")
+    logger.debug(
+        f"Gaussian filter timing ratio skimage/OpenCV: {time_sk_gauss / time_cv_gauss}")
 
-    time_skimage = min(times_sk)
-    time_cv = min(times_cv)
+    logger.debug(f"skimage resize timing: {time_sk_resize} s")
+    logger.debug(f"OpenCV resize timing: {time_cv_resize} s")
+    logger.debug(
+        f"Resize timing ratio skimage/OpenCV: {time_sk_resize / time_cv_resize}")
 
-    logger.debug(f"skimage timing: {time_skimage} s")
-    logger.debug(f"OpenCV timing: {time_cv} s")
-    logger.debug(f"Timing ratio skimage/OpenCV: {time_skimage / time_cv}")
+    logger.debug("Gaussian filter statistics")
 
-    img_skimage = run_skimage(raw_img, sigma, trunc)
-    img_cv = run_cv(raw_img, sigma, kernel)
+    img_skimage = run_skimage_gauss(raw_img, sigma, trunc)
+    img_cv = run_cv_gauss(raw_img, sigma, kernel)
 
     write_openexr_image(res_dir / "skimage.exr", img_skimage)
     write_openexr_image(res_dir / "opencv.exr", img_cv)
@@ -89,6 +137,25 @@ def benchmark(filepath, iterations=10000):
     diff = img_skimage - img_cv
     logger.debug(f"Difference min: {np.min(diff)}; max: {np.max(diff)}")
     write_openexr_image(res_dir / "diff.exr", diff)
+
+    equality = (img_skimage[:, :, 0:2] == img_cv[:, :, 0:2])
+    logger.debug(f"Equality all: {equality.all()}; any: {equality.any()}")
+
+    logger.debug(
+        f"Image skimage min: {np.min(img_skimage)}; max: {np.max(img_skimage)}")
+    logger.debug(f"Image OpenCV min: {np.min(img_cv)}; max: {np.max(img_cv)}")
+
+    logger.debug("Resizing statistics")
+
+    img_skimage = run_skimage_resize(raw_img, scale)
+    img_cv = run_cv_resize(raw_img, scale)
+
+    write_openexr_image(res_dir / "skimage_resized.exr", img_skimage)
+    write_openexr_image(res_dir / "opencv_resized.exr", img_cv)
+
+    diff = img_skimage - img_cv
+    logger.debug(f"Difference min: {np.min(diff)}; max: {np.max(diff)}")
+    write_openexr_image(res_dir / "resized_diff.exr", diff)
 
     equality = img_skimage[:, :, 0:2] == img_cv[:, :, 0:2]
     logger.debug(f"Equality all: {equality.all()}; any: {equality.any()}")
