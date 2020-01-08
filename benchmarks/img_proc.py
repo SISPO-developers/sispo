@@ -35,13 +35,16 @@ stream_handler.setLevel(logging.DEBUG)
 stream_handler.setFormatter(logger_formatter)
 logger.addHandler(stream_handler)
 
+
 def run_cv(image, sigma, kernel):
     """Run benchmark of OpenCV."""
     return cv2.GaussianBlur(image, (kernel, kernel), sigma, sigma)
 
+
 def run_skimage(image, sigma, trunc):
     """Run benchmark of scikit-image."""
     return skimage.filters.gaussian(image, sigma, truncate=trunc, multichannel=True)
+
 
 def benchmark(filepath, iterations=10000):
     """Executes benchmark."""
@@ -87,11 +90,13 @@ def benchmark(filepath, iterations=10000):
     logger.debug(f"Difference min: {np.min(diff)}; max: {np.max(diff)}")
     write_openexr_image(res_dir / "diff.exr", diff)
 
-    equality = img_skimage[:,:,0:2] == img_cv[:,:,0:2]
+    equality = img_skimage[:, :, 0:2] == img_cv[:, :, 0:2]
     logger.debug(f"Equality all: {equality.all()}; any: {equality.any()}")
 
-    logger.debug(f"Image skimage min: {np.min(img_skimage)}; max: {np.max(img_skimage)}")
+    logger.debug(
+        f"Image skimage min: {np.min(img_skimage)}; max: {np.max(img_skimage)}")
     logger.debug(f"Image OpenCV min: {np.min(img_cv)}; max: {np.max(img_cv)}")
+
 
 def read_openexr_image(filename):
     """Read image in OpenEXR file format into numpy array."""
@@ -105,7 +110,7 @@ def read_openexr_image(filename):
         return None
 
     header = image.header()
-    
+
     size = header["displayWindow"]
     resolution = (size.max.x - size.min.x + 1, size.max.y - size.min.y + 1)
 
@@ -117,16 +122,16 @@ def read_openexr_image(filename):
             channels = 3
     else:
         return None
-    
-    image_o = np.zeros((resolution[1],resolution[0],channels), np.float32)
-    
+
+    image_o = np.zeros((resolution[1], resolution[0], channels), np.float32)
+
     ch = ["R", "G", "B", "A"]
     pt = Imath.PixelType(Imath.PixelType.FLOAT)
 
     for c in range(0, channels):
         image_channel = np.fromstring(image.channel(ch[c], pt), np.float32)
         image_o[:, :, c] = image_channel.reshape(resolution[1], resolution[0])
-    
+
     image.close()
 
     return image_o
@@ -162,6 +167,7 @@ def write_openexr_image(filename, image):
     file_handler = OpenEXR.OutputFile(str(filename), hdr)
     file_handler.writePixels(image_data)
     file_handler.close()
+
 
 if __name__ == "__main__":
     args = {}
