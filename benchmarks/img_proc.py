@@ -129,7 +129,7 @@ def read_openexr_image(filename):
     pt = Imath.PixelType(Imath.PixelType.FLOAT)
 
     for c in range(0, channels):
-        image_channel = np.fromstring(image.channel(ch[c], pt), np.float32)
+        image_channel = np.frombuffer(image.channel(ch[c], pt), np.float32)
         image_o[:, :, c] = image_channel.reshape(resolution[1], resolution[0])
 
     image.close()
