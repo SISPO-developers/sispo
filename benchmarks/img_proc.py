@@ -43,11 +43,14 @@ def run_cv_gauss(image, sigma, kernel):
 def run_cv_resize(image, scale):
     return cv2.resize(image, None, fx=1/scale, fy=1/scale, interpolation=cv2.INTER_AREA)
 
+
 def run_skimage_gauss(image, sigma, trunc):
     return skimage.filters.gaussian(image, sigma, truncate=trunc, multichannel=True)
 
+
 def run_skimage_resize(image, scale):
-    return skimage.transform.downscale_local_mean(image, (scale,scale,1))
+    return skimage.transform.downscale_local_mean(image, (scale, scale, 1))
+
 
 def benchmark_cv(raw_img, sigma, kernel, scale, iterations=10000):
     times_cv = []
@@ -87,10 +90,11 @@ def benchmark_sk(raw_img, sigma, trunc, scale, iterations=10000):
         run_skimage_resize(raw_img, scale)
         end = time.time()
         times_sk.append(end - start)
-    
+
     time_sk_resize = min(times_sk)
 
     return time_sk_gauss, time_sk_resize
+
 
 def benchmark(filepath, iterations=10000):
     """Executes benchmark."""
@@ -107,16 +111,20 @@ def benchmark(filepath, iterations=10000):
 
     raw_img = read_openexr_image(filepath)
 
-    time_sk_gauss, time_sk_resize = benchmark_sk(raw_img, sigma, trunc, scale, iterations)
-    time_cv_gauss, time_cv_resize = benchmark_cv(raw_img, sigma, kernel, scale, iterations)
+    time_sk_gauss, time_sk_resize = benchmark_sk(
+        raw_img, sigma, trunc, scale, iterations)
+    time_cv_gauss, time_cv_resize = benchmark_cv(
+        raw_img, sigma, kernel, scale, iterations)
 
     logger.debug(f"skimage gaussian filter timing: {time_sk_gauss} s")
     logger.debug(f"OpenCV gaussian filter timing: {time_cv_gauss} s")
-    logger.debug(f"Gaussian filter timing ratio skimage/OpenCV: {time_sk_gauss / time_cv_gauss}")
+    logger.debug(
+        f"Gaussian filter timing ratio skimage/OpenCV: {time_sk_gauss / time_cv_gauss}")
 
     logger.debug(f"skimage resize timing: {time_sk_resize} s")
     logger.debug(f"OpenCV resize timing: {time_cv_resize} s")
-    logger.debug(f"Resize timing ratio skimage/OpenCV: {time_sk_resize / time_cv_resize}")
+    logger.debug(
+        f"Resize timing ratio skimage/OpenCV: {time_sk_resize / time_cv_resize}")
 
     logger.debug("Gaussian filter statistics")
 
@@ -136,7 +144,6 @@ def benchmark(filepath, iterations=10000):
     logger.debug(
         f"Image skimage min: {np.min(img_skimage)}; max: {np.max(img_skimage)}")
     logger.debug(f"Image OpenCV min: {np.min(img_cv)}; max: {np.max(img_cv)}")
-    
 
     logger.debug("Resizing statistics")
 
