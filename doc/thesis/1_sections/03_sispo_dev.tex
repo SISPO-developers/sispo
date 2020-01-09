@@ -18,7 +18,7 @@ It was attempted to reduce dependencies to other libraries as much as possible. 
 
 To ease development, numerous parameters are silently assigned default values if not provided e.g. for an instrument. Therefore, all parameters should be explicitly set when before running a simulation.
 
-
+\gls{sispo} was developed in an attempt to logically separate the distinct steps involved of the entire pipeline. Such modularity eases further development as well as reduce unnecessary library imports to reduce memory consumption.
 
 \subsection{User Interface}
 The sispo package can be installed using pip and the GitHub project. If done, it will be installed into the site-packages folder of the used python environment. Additionally, an executable is installed, providing a \gls{cli} as user interface. The most recent possible input arguments are documented in the repository or by using the --help input. The most important arguments for the \gls{cli} are seen in Table \ref{tab:cli_args}.
@@ -47,12 +47,31 @@ The sispo package can be installed using pip and the GitHub project. If done, it
 \label{tab:cli_args}
 \end{table}
 
-\gls{sispo} can be imported as a Python module. 
+\gls{sispo} can be imported as a Python module. Execution is then started either by sispo.run() or sispo.main(), which are equivalent.
 
 \subsection{Simulation Module}
-The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system \cite{bessel1979ubvri}.
+The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using Orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system \cite{bessel1979ubvri}.
 
-All images during the rendering and calibration process use \gls{hdr} images to minimise the loss of information in intermediate steps.
+The \textit{sim} sub-package was developed to contain all general information about the environment in the Environment class in order to have one consistent instance for constants. 
+
+All images during the rendering and calibration process use the OpenEXR format to minimise the loss of information in intermediate steps.
+
+The Orekit library runs a \gls{vm} to execute its Java code. Additionally, a data set is required which is currently distributed inside the \textit{sim} sub-package. Propagation is based on Orekit's KeplerianOrbit and KeplerianPropagator classes.
+
+The initial state of the spacecraft is calculated based on the input parameters presented in \ref{tab:sc_enc_paras}.
+
+\begin{table}[htb]
+    \caption{Parameters that define the encounter state of the spacecraft.}
+    \label{tab:sc_enc_paras}
+    \begin{tabular}{p{0.23\textwidth}|p{0.06\textwidth}|p{0.62\textwidth}}
+        Parameter           & Type  & Description                                                                                                                                                  \\ \hline
+        encounter\_distance & float & Minimum distance between SSSB and spacecraft in meters                                                                                                       \\
+        with\_terminator    & bool  & Determines whether the terminator is visible at the closest approach                                                                                         \\
+        with\_sunnyside     & bool  & Determines whether the spacecraft passes the SSSB on the Sun facing side or the SSSB's side facing away from the Sun                                         \\
+        sssb\_state         & tuple & SSSB state vector, including 3 position and 3 velocity components, at encounter. The spacecraft encounter state is calculated relative to this state vector.
+    \end{tabular}
+\end{table}
+
 
 \subsubsection{Composition}
 
@@ -78,8 +97,8 @@ The common steps for the complete pipeline is comprised of the following steps:
 \end{enumerate}
 
 \subsection{Setup}
-\gls{sispo} can be setup with Linux and Windows. The default case used in this description is a Windows setup. Known differences or problems under Linux will be pointed out as well. While it should be possible to use a plain Python environment and pip, a miniconda environment manager was used for development. Also a C compiler is necessary. Linux has the GCC already installed, for Windows it is easiest to install Microsoft Visual Studio with \gls{msvc} and \gls{msbuild}. Another possibility when using Windows is to use vcpkg\footnote{Found at \url{https://github.com/microsoft/vcpkg}}. However, previously the openMVG and openMVS ports in vcpkg did not work. Vcpkg can also be used with Linux. However during an attempt, there were unsolvable problems when using vcpkg so everything was installed natively.
-For \gls{omvg}, \gls{omvs} and star\_cats it is necessary to have the executables in the correct folder for \gls{sispo} to function. \newline
+\gls{sispo} can be setup with Linux and Windows. The default case used in this description is a Windows setup. Known differences or problems under Linux will be pointed out. While it should be possible to use a plain Python environment and pip, a miniconda environment manager was used for development. Also a C compiler is necessary. Linux provides the GCC, for Windows it is easiest to install Microsoft Visual Studio with \gls{msvc} and \gls{msbuild}. Another possibility when using Windows is to use vcpkg\footnote{Found at \url{https://github.com/microsoft/vcpkg}}. However, previously the openMVG and openMVS ports in vcpkg did not work. Vcpkg can also be used with Linux. However, there were unsolvable problems when using vcpkg so everything was installed natively.
+For \gls{omvg}, \gls{omvs} and star\_cats it is necessary to have the executables in the correct folder for \gls{sispo} to function.\newline
 
 \begin{figure}
     \dirtree{%
@@ -116,9 +135,11 @@ For \gls{omvg}, \gls{omvs} and star\_cats it is necessary to have the executable
     \caption{Directory structure after setup}
     \label{fig:dir_tree}
 \end{figure}
-Figure \ref{fig:dir_tree} shows the assumed overall folder structure after installation. No subfolders of the build folder or any files are depicted. 
+Figure \ref{fig:dir_tree} shows the assumed overall folder structure after installation. No subfolders of the build folder or any files are depicted.
 
-To make \gls{sispo} perform well, it is beneficial to install Nvidia CUDA Toolkit (https://developer.nvidia.com/cuda-downloads) in case an Nvidia graphics card is available.
+To make \gls{sispo} perform well, it is beneficial to install the Nvidia CUDA Toolkit (https://developer.nvidia.com/cuda-downloads) in case an Nvidia graphics card is available.
+
+In the following enumeration, commands intended to be run in a shell are highlighted with a grey box.
 
 \begin{enumerate}
     \item Clone the GitHub repository onto the local machine \\ \shellcmd{git clone https://github.com/YgabrielsY/sispo.git}. The project provides a software folder which is intended to be used to install all following software.
@@ -167,10 +188,9 @@ To make \gls{sispo} perform well, it is beneficial to install Nvidia CUDA Toolki
 
 \subsection{Performance}
 \subsubsection{skimage vs opencv}
-The original simulation used the \gls{skimage} and OpenCV library. In order to reduce the number of dependencies, it was decided to benchmark relevant functions of the two libraries. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of 5 images was selected, these are shown in \ref{sec:app_cvskimage}. Two star images were selected due to the large variance of number of stars. The two selected represent the extreme cases 1804 and 51338 stars.
+The original simulation used the \gls{skimage} and OpenCV library. In order to reduce the number of dependencies, it was decided to benchmark relevant functions of the two libraries. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of 5 images was selected, these are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance of number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
 
-Two machines were used for the benchmark to eliminate platform dependency.
-The laptop has \SI{8}{\giga\byte} \gls{ram}, an Intel i7-6700HQ with 4 cores at \SI{2.6}{\giga\hertz} and is running Windows 10. The workstation computer has \SI{16}{\giga\byte} of \gls{ram}, an Intel i7-8700 with 6 cores at \SI{3.2}{\giga\hertz} and is running a Linux distribution.
+Two computers were used for the benchmark. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel i7-6700HQ with 4 cores at \SI{2.6}{\giga\hertz} and Windows 10. A workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel i7-8700 with 6 cores at \SI{3.2}{\giga\hertz} and a Linux distribution.
 
 \begin{figure}[htb]
     \centering
@@ -186,7 +206,7 @@ The laptop has \SI{8}{\giga\byte} \gls{ram}, an Intel i7-6700HQ with 4 cores at 
         \caption{Resizing.}
         \label{fig:bm_comparison_res}
     \end{subfigure}
-    \caption{Comparison of execution time ratios of Gaussian filtering and resizing 5 different images using OpenCV and \gls{skimage} on 2 different computers. Values larger than one correspond to OpenCV being faster. The mean value of each computer is given in the legend.}
+    \caption{Comparison of execution time ratios of Gaussian filtering and resizing 5 different images using OpenCV and \gls{skimage} on 2 different computers. Values $\ge 1$ correspond to OpenCV being faster. The mean values are given in the legend.}
     \label{fig:bm_comparison}
 \end{figure}
 
@@ -199,8 +219,9 @@ For our case, OpenCV has a clear performance advantage over the \gls{skimage} li
 
 \subsection{Future Developments}
 There are several issues left open within the \gls{sispo} software package. First, there is currently no realistic model of spacecraft attitude motion and control implemented. The camera of the simulation environment is perfectly oriented towards the centre of the \gls{sssb}'s nucleus during the entire simulation. Realistic rotation should cover at least two effects, motion blur due to instantaneous rotation velocities of spacecraft and off-centre pointing due to control inaccuracies. Furthermore, it is necessary to include  image distortions such as astigmatism, bokeh, coma, field curvature, glare. Moreover, it is necessary to include a gas and dust environment around the nucleus. From a technical perspective, a proper simulation of the data transmission should be included. For example, a realistic simulation for packet loss. The ultimate goal is to develop a prioritisation algorithm for the images which should prioritise data transmission on packet level.
+Moreover, multi-instumrent capability was intended as well as including multiple \gls{sssb}s in the future to allow more complex simulations including e.g. a binary system.
 Furthermore, the shader used to create the \gls{sssb} models should be developed further. The interface for it should be included into \gls{sispo} and restricted to values that create reasonable shaped outputs.
-
+An attempt to include a HAPKE model via the synthspace package \url{https://github.com/oknuutti/synthspace} was unsuccessful. However, it would be interesting to compare the results of blender and the HAPKE model. A HAPKE model is substantially faster while providing less detail though possibly still sufficient for some cases.
 
 THOUGHTS:\\
 -default data set, different compression and reconstruction\\
