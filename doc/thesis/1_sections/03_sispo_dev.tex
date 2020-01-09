@@ -54,6 +54,9 @@ The simulation module creates photo-realistic images by simulating a realistic t
 
 All images during the rendering and calibration process use \gls{hdr} images to minimise the loss of information in intermediate steps.
 
+\subsubsection{Composition}
+
+
 \subsection{Compression Module}
 The compression module provides compression and decompression algorithms. These can be tested against different mission scenarios and image series to investigate the impact of compression and decompression on the science quality.
 
@@ -162,6 +165,45 @@ To make \gls{sispo} perform well, it is beneficial to install Nvidia CUDA Toolki
     \end{enumerate}
 \end{enumerate}{}
 
+\subsection{Performance}
+\subsubsection{skimage vs opencv}
+The original simulation used the \gls{skimage} and OpenCV library. In order to reduce the number of dependencies, it was decided to benchmark relevant functions of the two libraries. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means.
+
+Two machines were used for the benchmark to eliminate platform dependency, one running a Linux distribution and one running Windows 10.
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/Comparison_Gaussian}
+        \caption{Gaussian filtering.}
+        \label{fig:bm_comparison_gauss}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/Comparison_Resize}
+        \caption{Resizing.}
+        \label{fig:bm_comparison_res}
+    \end{subfigure}
+    \caption{Comparison of execution time ratios of Gaussian filtering and resizing 5 images using OpenCV and \gls{skimage} on different computers.}
+    \label{liitekuva}
+\end{figure}
+
+Maximum error gauss:  1.4864218655930017e-06
+Maximum error resize:  7.152557373046875e-07
+
+For our case, OpenCV has a clear performance advantage over the \gls{skimage} library hence only OpenCV is being used.
+
+In addition to the performance advantages, OpenCV might be used in the future to also replace the OpenEXR depdency, if OpenCV's exr implementation is improved.
+
 \subsection{Future Developments}
 There are several issues left open within the \gls{sispo} software package. First, there is currently no realistic model of spacecraft attitude motion and control implemented. The camera of the simulation environment is perfectly oriented towards the centre of the \gls{sssb}'s nucleus during the entire simulation. Realistic rotation should cover at least two effects, motion blur due to instantaneous rotation velocities of spacecraft and off-centre pointing due to control inaccuracies. Furthermore, it is necessary to include  image distortions such as astigmatism, bokeh, coma, field curvature, glare. Moreover, it is necessary to include a gas and dust environment around the nucleus. From a technical perspective, a proper simulation of the data transmission should be included. For example, a realistic simulation for packet loss. The ultimate goal is to develop a prioritisation algorithm for the images which should prioritise data transmission on packet level.
 Furthermore, the shader used to create the \gls{sssb} models should be developed further. The interface for it should be included into \gls{sispo} and restricted to values that create reasonable shaped outputs.
+
+
+THOUGHTS:
+-default data set, different compression and reconstruction
+    -compressions: png, jpg2000 quality 1000, jpg2000 quality 500, jpg2000 quality 100, jpg2000 quality 10
+-different trajectories: default : 400 km, 100km, 1000km
+-different lighting situations
+-different models
