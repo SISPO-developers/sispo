@@ -167,43 +167,44 @@ To make \gls{sispo} perform well, it is beneficial to install Nvidia CUDA Toolki
 
 \subsection{Performance}
 \subsubsection{skimage vs opencv}
-The original simulation used the \gls{skimage} and OpenCV library. In order to reduce the number of dependencies, it was decided to benchmark relevant functions of the two libraries. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means.
+The original simulation used the \gls{skimage} and OpenCV library. In order to reduce the number of dependencies, it was decided to benchmark relevant functions of the two libraries. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of 5 images was selected, these are shown in \ref{sec:app_cvskimage}. Two star images were selected due to the large variance of number of stars. The two selected represent the extreme cases 1804 and 51338 stars.
 
-Two machines were used for the benchmark to eliminate platform dependency, one running a Linux distribution and one running Windows 10.
+Two machines were used for the benchmark to eliminate platform dependency.
+The laptop has \SI{8}{\giga\byte} \gls{ram}, an Intel i7-6700HQ with 4 cores at \SI{2.6}{\giga\hertz} and is running Windows 10. The workstation computer has \SI{16}{\giga\byte} of \gls{ram}, an Intel i7-8700 with 6 cores at \SI{3.2}{\giga\hertz} and is running a Linux distribution.
 
 \begin{figure}[htb]
     \centering
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{doc/thesis/0_figures/Comparison_Gaussian}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/cv_skimage/Comparison_Gaussian}
         \caption{Gaussian filtering.}
         \label{fig:bm_comparison_gauss}
     \end{subfigure}
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{doc/thesis/0_figures/Comparison_Resize}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/cv_skimage/Comparison_Resize}
         \caption{Resizing.}
         \label{fig:bm_comparison_res}
     \end{subfigure}
-    \caption{Comparison of execution time ratios of Gaussian filtering and resizing 5 images using OpenCV and \gls{skimage} on different computers.}
-    \label{liitekuva}
+    \caption{Comparison of execution time ratios of Gaussian filtering and resizing 5 different images using OpenCV and \gls{skimage} on 2 different computers. Values larger than one correspond to OpenCV being faster. The mean value of each computer is given in the legend.}
+    \label{fig:bm_comparison}
 \end{figure}
 
-Maximum error gauss:  1.4864218655930017e-06
-Maximum error resize:  7.152557373046875e-07
+Figure \ref{fig:bm_comparison} shows the execution time ratios with their averages over the different images. A positive ratio corresponds to a longer execution time of \gls{skimage}. OpenCV outperforms \gls{skimage} for both tests on both computers. The maximum absolute difference between pixel values of images is \SI{1.486e-6}{} and \SI{7.153e-7}{} for the Gaussian filterred and the resized images respectively. Such differences are irrelevant considering \gls{ccd} sensor color depths of \SI{16}{bit}.
 
-For our case, OpenCV has a clear performance advantage over the \gls{skimage} library hence only OpenCV is being used.
+%Maximum error gauss:  1.4864218655930017e-06
+%Maximum error resize:  7.152557373046875e-07
 
-In addition to the performance advantages, OpenCV might be used in the future to also replace the OpenEXR depdency, if OpenCV's exr implementation is improved.
+For our case, OpenCV has a clear performance advantage over the \gls{skimage} library hence only OpenCV is being used. In addition to the performance advantages, OpenCV might also be used to replace the OpenEXR dependency in the future, if OpenCV's exr implementation includes alpha channel support.
 
 \subsection{Future Developments}
 There are several issues left open within the \gls{sispo} software package. First, there is currently no realistic model of spacecraft attitude motion and control implemented. The camera of the simulation environment is perfectly oriented towards the centre of the \gls{sssb}'s nucleus during the entire simulation. Realistic rotation should cover at least two effects, motion blur due to instantaneous rotation velocities of spacecraft and off-centre pointing due to control inaccuracies. Furthermore, it is necessary to include  image distortions such as astigmatism, bokeh, coma, field curvature, glare. Moreover, it is necessary to include a gas and dust environment around the nucleus. From a technical perspective, a proper simulation of the data transmission should be included. For example, a realistic simulation for packet loss. The ultimate goal is to develop a prioritisation algorithm for the images which should prioritise data transmission on packet level.
 Furthermore, the shader used to create the \gls{sssb} models should be developed further. The interface for it should be included into \gls{sispo} and restricted to values that create reasonable shaped outputs.
 
 
-THOUGHTS:
--default data set, different compression and reconstruction
-    -compressions: png, jpg2000 quality 1000, jpg2000 quality 500, jpg2000 quality 100, jpg2000 quality 10
--different trajectories: default : 400 km, 100km, 1000km
--different lighting situations
--different models
+THOUGHTS:\\
+-default data set, different compression and reconstruction\\
+    -compressions: png, jpg2000 quality 1000, jpg2000 quality 500, jpg2000 quality 100, jpg2000 quality 10\\
+-different trajectories: default : 400 km, 100km, 1000km\\
+-different lighting situations\\
+-different models 100m, 1km, 10km
