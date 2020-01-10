@@ -187,10 +187,16 @@ In the following enumeration, commands intended to be run in a shell are highlig
 \end{enumerate}{}
 
 \subsection{Performance}
-\subsubsection{skimage vs opencv}
-The original simulation used the \gls{skimage} and OpenCV library. In order to reduce the number of dependencies, it was decided to benchmark relevant functions of the two libraries. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of 5 images was selected, these are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance of number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
+\subsubsection{Image processing benchmark}
+The original codebase used the \gls{skimage} and OpenCV library. In order to reduce the number of dependencies, it was decided to benchmark relevant functions of the two libraries. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of 5 images is selected and are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance of number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
 
-Two computers were used for the benchmark. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel i7-6700HQ with 4 cores at \SI{2.6}{\giga\hertz} and Windows 10. A workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel i7-8700 with 6 cores at \SI{3.2}{\giga\hertz} and a Linux distribution.
+Two computers are used for the benchmark. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel i7-6700HQ with 4 cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel i7-8700 with 6 cores at \SI{3.2}{\giga\hertz} and Ubuntu 18.04.3 LTS.
+
+To compare the performance between the two libraries the ratio of execution time is used. The ratio is defined as
+\begin{align}
+    Ratio = \frac{t_{skimage}}{t_{opencv}}, \label{eq:bm_exec_ratio}
+\end{align}
+where $t_{skimage}$ is the execution time of \gls{skimage} and $t_{opencv}$ is the execution time of OpenCV. Each command is executed and timed 1000 times. The lowest value is chosen as the result, since higher values are rather influenced by other processes running on the respective machine than the relevant code snippet itself \cite{timeit2020}.
 
 \begin{figure}[htb]
     \centering
@@ -210,12 +216,12 @@ Two computers were used for the benchmark. A laptop with \SI{8}{\giga\byte} \gls
     \label{fig:bm_comparison}
 \end{figure}
 
-Figure \ref{fig:bm_comparison} shows the execution time ratios with their averages over the different images. A positive ratio corresponds to a longer execution time of \gls{skimage}. OpenCV outperforms \gls{skimage} for both tests on both computers. The maximum absolute difference between pixel values of images is \SI{1.486e-6}{} and \SI{7.153e-7}{} for the Gaussian filterred and the resized images respectively. Such differences are irrelevant considering \gls{ccd} sensor color depths of \SI{16}{bit}.
+Figure \ref{fig:bm_comparison} shows the execution time ratios with their averages over the different images. A positive ratio corresponds to a longer execution time of \gls{skimage}. OpenCV outperforms \gls{skimage} for both tests on both computers. The maximum absolute difference between pixel values of images is \SI{1.486e-6}{} and \SI{7.153e-7}{} for the Gaussian filtered and the resized images respectively. Such differences are irrelevant considering \gls{ccd} sensor color depths of \SI{16}{bit}.
 
 %Maximum error gauss:  1.4864218655930017e-06
 %Maximum error resize:  7.152557373046875e-07
 
-For our case, OpenCV has a clear performance advantage over the \gls{skimage} library hence only OpenCV is being used. In addition to the performance advantages, OpenCV might also be used to replace the OpenEXR dependency in the future, if OpenCV's exr implementation includes alpha channel support.
+For our case, OpenCV has a clear performance advantage over the \gls{skimage} library hence only OpenCV is being used. In addition to the performance advantages, OpenCV might also be used to replace the OpenEXR dependency in the future, if OpenCV's exr implementation includes alpha channel support\footnote{A GitHub issue was created at \url{https://github.com/YgabrielsY/sispo/issues/128} that links to the relevant OpenCV GitHub issue}.
 
 \subsection{Future Developments}
 There are several issues left open within the \gls{sispo} software package. First, there is currently no realistic model of spacecraft attitude motion and control implemented. The camera of the simulation environment is perfectly oriented towards the centre of the \gls{sssb}'s nucleus during the entire simulation. Realistic rotation should cover at least two effects, motion blur due to instantaneous rotation velocities of spacecraft and off-centre pointing due to control inaccuracies. Furthermore, it is necessary to include  image distortions such as astigmatism, bokeh, coma, field curvature, glare. Moreover, it is necessary to include a gas and dust environment around the nucleus. From a technical perspective, a proper simulation of the data transmission should be included. For example, a realistic simulation for packet loss. The ultimate goal is to develop a prioritisation algorithm for the images which should prioritise data transmission on packet level.
