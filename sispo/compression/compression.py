@@ -104,7 +104,7 @@ class Compressor():
 
     def compress_series(self, max_threads=3):
         """
-        Compresses multiple images using :py:meth: `.compress`
+        Compresses multiple images using :py:func:`compress`
         """
         self.logger.debug(f"Compress series of images with {max_threads} threads")
 
@@ -237,15 +237,17 @@ class Compressor():
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
 
-        elif "jpeg2000" or "jp2":
+        elif algo == "jpeg2000" or algo == "jp2":
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".jp2"
             level = settings["level"] * 100 # Ranges from 0 to 1000
             params = (cv2.IMWRITE_JPEG2000_COMPRESSION_X1000, level)
 
+            settings["params"] = params
+
             decomp = self._decorate_cv_decompress(cv2.imdecode)
 
-        elif "png":
+        elif algo == "png":
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".png"
             params = (cv2.IMWRITE_PNG_COMPRESSION, settings["level"])
@@ -268,7 +270,7 @@ class Compressor():
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
 
-        elif "tiff":
+        elif algo == "tiff":
             # According to: http://libtiff.org/support.html
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".tiff"
@@ -315,7 +317,7 @@ class Compressor():
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
 
-        elif "exr":
+        elif algo == "exr":
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".exr"
             params = ()
