@@ -16,9 +16,9 @@ The most important python dependencies of \gls{sispo} are:
 
 It was attempted to reduce dependencies to other libraries as much as possible. Originally, both \textit{scikit-image} and \textit{opencv} were used. After a small benchmark between the two libraries, it was evident that \textit{opencv} performs three to seven times faster compared to \textit{scikit-image}. Hence \textit{scikit-image} was completely replaced with equivalent \textit{opencv} functions. Additionally, it was attempted to use the \textit{opencv} package to replace the \textit{OpenEXR} dependency since it is not easy to install. However, this is currently not possible as the \textit{OpenEXR} implementation of \textit{opencv} does not provide an alpha channel and is generally less flexible.
 
-To ease development, numerous parameters are silently assigned default values if not provided e.g. for an instrument. Therefore, all parameters should be explicitly set when before running a simulation.
+To ease development, numerous parameters are silently assigned default values if not provided e.g. for an instrument. Therefore, all parameters should be explicitly set before running a simulation.
 
-\gls{sispo} was developed in an attempt to logically separate the distinct steps involved of the entire pipeline. Such modularity eases further development as well as reduce unnecessary library imports to reduce memory consumption.
+\gls{sispo} was developed in an attempt to logically separate the distinct steps involved of the entire processing pipeline. Such modularity eases further development as well as reduce unnecessary library imports to reduce memory consumption.
 
 \subsection{User Interface}
 The sispo package can be installed using pip and the GitHub project. If done, it will be installed into the site-packages folder of the used python environment. Additionally, an executable is installed, providing a \gls{cli} as user interface. The most recent possible input arguments are documented in the repository or by using the --help input. The most important arguments for the \gls{cli} are seen in Table \ref{tab:cli_args}.
@@ -50,13 +50,22 @@ The sispo package can be installed using pip and the GitHub project. If done, it
 \gls{sispo} can be imported as a Python module. Execution is then started either by sispo.run() or sispo.main(), which are equivalent.
 
 \subsection{Simulation Module}
-The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using Orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system \cite{bessel1979ubvri}.
+The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using Orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}. Additionally, the date, the spacecraft position, \gls{sssb} position and their distance is stored as metadata. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system \cite{bessel1979ubvri}. The composition process is explained in more detail in section \ref{sec:composition}
+
+A run of the simulation package includes the following steps
+\begin{enumerate}
+    \item Propagate \label{enum:propagate}
+    \item Render
+\end{enumerate}
+
+In the propagate step \ref{enum:propagate}, Orekit is used to determine state information of the \gls{sssb} and the spacecraft. The state information includes the date, position and the rotation angles of the \gls{sssb}. Propagation is defined by start and end date, number of steps, the timesampler mode and a slowmotion factor.
+The timesampler mode determines whether the steps are distributed linear in time (mode 1, default) or whether an exponential model (mode 2) is used which takes more samples around the encounter. How many samples more are taken can be controlled with the slowmotion factor. Mode 2 is especially helpful when simulating a long period since far from the \gls{sssb} nucleus, there are only minor visible changes over longer periods.
 
 The \textit{sim} sub-package was developed to contain all general information about the environment in the Environment class in order to have one consistent instance for constants. 
 
 All images during the rendering and calibration process use the OpenEXR format to minimise the loss of information in intermediate steps.
 
-The Orekit library runs a \gls{vm} to execute its Java code. Additionally, a data set is required which is currently distributed inside the \textit{sim} sub-package. Propagation is based on Orekit's KeplerianOrbit and KeplerianPropagator classes.
+The Orekit library runs a \gls{vm} to execute its Java code. Additionally, physical data is required which is currently distributed with the \textit{sim} sub-package. The \gls{vm} and physical data are initialised in the \textit{sim} main module and only afterwards other modules are imported which is why other modules do not include the Orekit initialisation. This approach was taken in order to reduce resource consumption by having several instances of the \gls{vm} running. Propagation is based on Orekit's KeplerianOrbit and KeplerianPropagator classes.
 
 The initial state of the spacecraft is calculated based on the input parameters presented in \ref{tab:sc_enc_paras}.
 
@@ -72,8 +81,18 @@ The initial state of the spacecraft is calculated based on the input parameters 
     \end{tabular}
 \end{table}
 
+\subsubsection{Composition} \label{sec:composition}
+Rendered images of blender vary in absolute light intensity thus requiring photometric calibration. This calibration is based on the Johnson magnitude system, also called the UBV photometric system \cite{bessel1979ubvri}. The V-band is used which is centered around \SI{550}{\nano\meter}.
 
-\subsubsection{Composition}
+The reference used for photometric calibration is the solar photon flux at \SI{1}{\astronomicalunit} calculated based on \cite{wirth}.
+
+The photon flux is defined as,
+\begin{align}
+    F = F_0 \times \frac{d\lambda}{\lambda} \times 10^{-0.4 \times m}, \label{eq:comp_flux_0mag}
+\end{align}
+with $F_0$ being the flux at magnitude 0, is a factor of 0.16 for the V-band, and m being the object's magnitude. The V-band photon flux at $0~mag$ in SI units is \SI{5.4964e10}{\per\second \per\square\meter}. With a magnitude of $m_{\bigodot} = -26.74~mag$ at a distance of \SI{1}{\astronomicalunit}, the solar photon flux becomes \SI{4.36715206e+20}{\per\second\per\square\meter}.
+
+In the first step, the reference photon flux for the spacecraft is calculated using the spacecarft distance to the Sun and the inverse square law.
 
 
 \subsection{Compression Module}
@@ -188,7 +207,7 @@ In the following enumeration, commands intended to be run in a shell are highlig
 
 \subsection{Performance}
 \subsubsection{Image processing benchmark}
-The original codebase used the \gls{skimage} and OpenCV library. In order to reduce the number of dependencies, it was decided to benchmark relevant functions of the two libraries. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of 5 images is selected and are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance of number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
+The original codebase used the \gls{skimage} and OpenCV libraries. In order to reduce the number of dependencies, it was decided to benchmark relevant functions of the two libraries. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of five images is selected and are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance in the number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
 
 Two computers are used for the benchmark. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel i7-6700HQ with 4 cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel i7-8700 with 6 cores at \SI{3.2}{\giga\hertz} and Ubuntu 18.04.3 LTS.
 
@@ -196,7 +215,7 @@ To compare the performance between the two libraries the ratio of execution time
 \begin{align}
     Ratio = \frac{t_{skimage}}{t_{opencv}}, \label{eq:bm_exec_ratio}
 \end{align}
-where $t_{skimage}$ is the execution time of \gls{skimage} and $t_{opencv}$ is the execution time of OpenCV. Each command is executed and timed 1000 times. The lowest value is chosen as the result, since higher values are rather influenced by other processes running on the respective machine than the relevant code snippet itself \cite{timeit2020}.
+where $t_{skimage}$ is the execution time of \gls{skimage} and $t_{opencv}$ is the execution time of OpenCV. Each command is executed and timed for 1000 times. The lowest value is chosen as the result, since higher values are rather influenced by other processes running on the respective machine than the relevant code snippet itself \cite{timeit2020}.
 
 \begin{figure}[htb]
     \centering
@@ -212,16 +231,16 @@ where $t_{skimage}$ is the execution time of \gls{skimage} and $t_{opencv}$ is t
         \caption{Resizing.}
         \label{fig:bm_comparison_res}
     \end{subfigure}
-    \caption{Comparison of execution time ratios of Gaussian filtering and resizing 5 different images using OpenCV and \gls{skimage} on 2 different computers. Values $\ge 1$ correspond to OpenCV being faster. The mean values are given in the legend.}
+    \caption{Comparison of execution time ratios of Gaussian filtering and resizing five different images using OpenCV and \gls{skimage} on two different computers. Values $\ge 1$ correspond to OpenCV being faster. The mean values are given in the legend.}
     \label{fig:bm_comparison}
 \end{figure}
 
-Figure \ref{fig:bm_comparison} shows the execution time ratios with their averages over the different images. A positive ratio corresponds to a longer execution time of \gls{skimage}. OpenCV outperforms \gls{skimage} for both tests on both computers. The maximum absolute difference between pixel values of images is \SI{1.486e-6}{} and \SI{7.153e-7}{} for the Gaussian filtered and the resized images respectively. Such differences are irrelevant considering \gls{ccd} sensor color depths of \SI{16}{bit}.
+Figure \ref{fig:bm_comparison} shows the execution time ratios with their averages over different images. A positive ratio corresponds to a longer execution time of \gls{skimage}. OpenCV outperforms \gls{skimage} for both tests on both computers. The maximum absolute difference between pixel values of images is \SI{1.486e-6}{} and \SI{7.153e-7}{} for the Gaussian filtered and the resized images respectively. Such differences are irrelevant considering \gls{ccd} sensor color depths of \SI{16}{bit}.
 
 %Maximum error gauss:  1.4864218655930017e-06
 %Maximum error resize:  7.152557373046875e-07
 
-For our case, OpenCV has a clear performance advantage over the \gls{skimage} library hence only OpenCV is being used. In addition to the performance advantages, OpenCV might also be used to replace the OpenEXR dependency in the future, if OpenCV's exr implementation includes alpha channel support\footnote{A GitHub issue was created at \url{https://github.com/YgabrielsY/sispo/issues/128} that links to the relevant OpenCV GitHub issue}.
+For our case, OpenCV has a clear performance advantage over the \gls{skimage} library, hence only OpenCV is being used. In addition to the performance advantages, OpenCV might also be used to replace the OpenEXR dependency in the future, if OpenCV's exr implementation includes alpha channel support\footnote{A GitHub issue was created at \url{https://github.com/YgabrielsY/sispo/issues/128} that links to the relevant OpenCV GitHub issue}.
 
 \subsection{Future Developments}
 There are several issues left open within the \gls{sispo} software package. First, there is currently no realistic model of spacecraft attitude motion and control implemented. The camera of the simulation environment is perfectly oriented towards the centre of the \gls{sssb}'s nucleus during the entire simulation. Realistic rotation should cover at least two effects, motion blur due to instantaneous rotation velocities of spacecraft and off-centre pointing due to control inaccuracies. Furthermore, it is necessary to include  image distortions such as astigmatism, bokeh, coma, field curvature, glare. Moreover, it is necessary to include a gas and dust environment around the nucleus. From a technical perspective, a proper simulation of the data transmission should be included. For example, a realistic simulation for packet loss. The ultimate goal is to develop a prioritisation algorithm for the images which should prioritise data transmission on packet level.
