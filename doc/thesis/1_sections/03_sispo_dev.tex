@@ -14,7 +14,7 @@ The most important python dependencies of \gls{sispo} are:
     \item Orekit: Space dynamics library
 \end{itemize}
 
-It was attempted to reduce dependencies to other libraries as much as possible. Originally, both \textit{scikit-image} and \textit{opencv} were used. After a small benchmark between the two libraries, it was evident that \textit{opencv} performs three to seven times faster compared to \textit{scikit-image}. Hence \textit{scikit-image} was completely replaced with equivalent \textit{opencv} functions. Additionally, it was attempted to use the \textit{opencv} package to replace the \textit{OpenEXR} dependency since it is not easy to install. However, this is currently not possible as the \textit{OpenEXR} implementation of \textit{opencv} does not provide an alpha channel and is generally less flexible.
+It was attempted to reduce dependencies to other libraries as much as possible. Originally, both \textit{scikit-image} and \textit{opencv} were used. After a small benchmark between the two libraries, it was evident that \textit{opencv} performs three to seven times faster compared to \textit{scikit-image} (cf. \ref{sec:cvskimage}. Hence \textit{scikit-image} was completely replaced with equivalent \textit{opencv} functions. Additionally, it was attempted to use the \textit{opencv} package to replace the \textit{OpenEXR} dependency since it is not easy to install. However, this is currently not possible as the \textit{OpenEXR} implementation of \textit{opencv} does not provide an alpha channel and is generally less flexible.
 
 To ease development, numerous parameters are silently assigned default values if not provided e.g. for an instrument. Therefore, all parameters should be explicitly set before running a simulation.
 
@@ -84,6 +84,8 @@ The initial state of the spacecraft is calculated based on the input parameters 
 \subsubsection{Composition} \label{sec:composition}
 Rendered images of blender vary in absolute light intensity thus requiring photometric calibration. This calibration is based on the Johnson magnitude system, also called the UBV photometric system \cite{bessel1979ubvri}. The V-band is used which is centered around \SI{550}{\nano\meter}.
 
+The starting point for composition is a set of four images, SssbOnly, SssbConstDist, LightRef and Stars, which are then composed to a single final image.
+
 The reference used for photometric calibration is the solar photon flux at \SI{1}{\astronomicalunit} calculated based on \cite{wirth}.
 
 The photon flux is defined as,
@@ -92,8 +94,33 @@ The photon flux is defined as,
 \end{align}
 with $F_0$ being the flux at magnitude 0, is a factor of 0.16 for the V-band, and m being the object's magnitude. The V-band photon flux at $0~mag$ in SI units is \SI{5.4964e10}{\per\second \per\square\meter}. With a magnitude of $m_{\bigodot} = -26.74~mag$ at a distance of \SI{1}{\astronomicalunit}, the solar photon flux becomes \SI{4.36715206e+20}{\per\second\per\square\meter}.
 
-In the first step, the reference photon flux for the spacecraft is calculated using the spacecarft distance to the Sun and the inverse square law.
+In the first step, the reference photon flux per pixel is calculated using,
+\begin{align}
+        F_{ref} = F \times \frac{\SI{1}{\astronomicalunit}}{d_{\bigodot}}^2 \times \frac{A \times pix_A}{f^2 \times \pi}, \label{eq:comp_ref_flux}
+\end{align}
+with $F$ being the solar flux at \SI{1}{\astronomicalunit}, $d_{\bigodot}$ being the spacecraft's distance from the Sun, $A$ being the aperture area, $pix_A$ being the area of a pixel and $f$ being the focal length.
 
+For the star background, every pixel is calibrated according to Eq. \ref{eq:comp_cal_starmap}.
+\begin{align}
+        pix = pix_0 \times F_0 \times A \times \frac{F_{stars}}{S_{stars}}, \label{eq:comp_cal_starmap}
+\end{align}
+with $pix_0$ being the original pixel value, $F_0$ being the flux at magnitude 0, $A$ being the aperture area, $F_{stars}$ being the total flux of visible stars and $S_{stars}$ being the summed pixel value of one channel of a starmap.
+
+Depending on the visible size of the \gls{sssb} in the image, either a point source \gls{sssb} image is generated and used or the \gls{sssb} image is calibrated.
+
+The point source image is created by Gaussian filtering a single white pixel at the center of an image oversized by a factor of scale and then resized to the original size using local means.
+
+If the \gls{sssb} image is used, the reference intensity of the image is calculated as the mean of a \SI{70}{} square pixels of the light reference image.
+
+Using the calibration factor defined as
+\begin{align}
+    f_c = \frac{F_{ref} \times I_{ref}}{\alpha}, \label{eq:comp_cal_fac}
+\end{align}
+where $F_{ref}$ is the reference flux, $I_{ref}$ is the reference intensity and $\alpha$ is the geometric albedo. Every pixel of the image is multiplied with this factor to produce the calibrated \gls{sssb} image. For merging the star background and the calibrated \gls{sssb} image, the alpha values are taken into account.
+
+The composed image is then multiplied by the quantum efficiency of the \gls{ccd}, Gaussian filtered and noise based on a Poisson distribution is added. The resulting image is then scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the the reference if the maximum value of the merged image is above this threshold.
+
+In a final step, the image values are rescaled to the bit depth of the \gls{ccd}. The current maximum allowed bit depth is \SI{16}{bit}.
 
 \subsection{Compression Module}
 The compression module provides compression and decompression algorithms. These can be tested against different mission scenarios and image series to investigate the impact of compression and decompression on the science quality.
@@ -206,8 +233,8 @@ In the following enumeration, commands intended to be run in a shell are highlig
 \end{enumerate}{}
 
 \subsection{Performance}
-\subsubsection{Image processing benchmark}
-The original codebase used the \gls{skimage} and OpenCV libraries. In order to reduce the number of dependencies, it was decided to benchmark relevant functions of the two libraries. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of five images is selected and are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance in the number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
+\subsubsection{Image processing benchmark} \label{sec:cvskimage}
+The original codebase used the \gls{skimage} and OpenCV libraries. In order to reduce the number of dependencies, the relevant functions of the two libraries were benchmarked. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of five images is selected and are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance in the number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
 
 Two computers are used for the benchmark. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel i7-6700HQ with 4 cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel i7-8700 with 6 cores at \SI{3.2}{\giga\hertz} and Ubuntu 18.04.3 LTS.
 
@@ -216,6 +243,11 @@ To compare the performance between the two libraries the ratio of execution time
     Ratio = \frac{t_{skimage}}{t_{opencv}}, \label{eq:bm_exec_ratio}
 \end{align}
 where $t_{skimage}$ is the execution time of \gls{skimage} and $t_{opencv}$ is the execution time of OpenCV. Each command is executed and timed for 1000 times. The lowest value is chosen as the result, since higher values are rather influenced by other processes running on the respective machine than the relevant code snippet itself \cite{timeit2020}.
+
+Figure \ref{fig:bm_comparison} shows the execution time ratios with their averages over set of images. A ratio larger than one corresponds to a longer execution time of \gls{skimage}. OpenCV outperforms \gls{skimage} for both tests on both computers. The maximum absolute difference between pixel values of images is \SI{1.486e-6}{} and \SI{7.153e-7}{} for the Gaussian filtered and the resized images respectively. Such differences are irrelevant considering \gls{ccd} sensor color depths of \SI{16}{bit}.
+
+%Maximum error gauss:  1.4864218655930017e-06
+%Maximum error resize:  7.152557373046875e-07
 
 \begin{figure}[htb]
     \centering
@@ -231,16 +263,11 @@ where $t_{skimage}$ is the execution time of \gls{skimage} and $t_{opencv}$ is t
         \caption{Resizing.}
         \label{fig:bm_comparison_res}
     \end{subfigure}
-    \caption{Comparison of execution time ratios of Gaussian filtering and resizing five different images using OpenCV and \gls{skimage} on two different computers. Values $\ge 1$ correspond to OpenCV being faster. The mean values are given in the legend.}
+    \caption{Comparison of execution time ratios of Gaussian filtering and resizing five different images using OpenCV and \gls{skimage} on two different computers. Values $> 1$ correspond to OpenCV being faster. The mean values are given in the legend.}
     \label{fig:bm_comparison}
 \end{figure}
 
-Figure \ref{fig:bm_comparison} shows the execution time ratios with their averages over different images. A positive ratio corresponds to a longer execution time of \gls{skimage}. OpenCV outperforms \gls{skimage} for both tests on both computers. The maximum absolute difference between pixel values of images is \SI{1.486e-6}{} and \SI{7.153e-7}{} for the Gaussian filtered and the resized images respectively. Such differences are irrelevant considering \gls{ccd} sensor color depths of \SI{16}{bit}.
-
-%Maximum error gauss:  1.4864218655930017e-06
-%Maximum error resize:  7.152557373046875e-07
-
-For our case, OpenCV has a clear performance advantage over the \gls{skimage} library, hence only OpenCV is being used. In addition to the performance advantages, OpenCV might also be used to replace the OpenEXR dependency in the future, if OpenCV's exr implementation includes alpha channel support\footnote{A GitHub issue was created at \url{https://github.com/YgabrielsY/sispo/issues/128} that links to the relevant OpenCV GitHub issue}.
+For our case, OpenCV has a clear performance advantage over the \gls{skimage} library, hence only OpenCV is being used. In addition to the performance advantages, OpenCV might also be used to replace the OpenEXR dependency in the future, if OpenCV's OpenEXR implementation includes alpha channel support\footnote{A GitHub issue was created at \url{https://github.com/YgabrielsY/sispo/issues/128} that links to the relevant OpenCV GitHub issue}.
 
 \subsection{Future Developments}
 There are several issues left open within the \gls{sispo} software package. First, there is currently no realistic model of spacecraft attitude motion and control implemented. The camera of the simulation environment is perfectly oriented towards the centre of the \gls{sssb}'s nucleus during the entire simulation. Realistic rotation should cover at least two effects, motion blur due to instantaneous rotation velocities of spacecraft and off-centre pointing due to control inaccuracies. Furthermore, it is necessary to include  image distortions such as astigmatism, bokeh, coma, field curvature, glare. Moreover, it is necessary to include a gas and dust environment around the nucleus. From a technical perspective, a proper simulation of the data transmission should be included. For example, a realistic simulation for packet loss. The ultimate goal is to develop a prioritisation algorithm for the images which should prioritise data transmission on packet level.
