@@ -155,7 +155,7 @@ class OpenMVGController():
         if first_image is not None:
             args.extend(["-a", str(first_image)])
         if second_image is not None:
-            args.extend(["-a", str(second_image)])
+            args.extend(["-b", str(second_image)])
         args.extend(["-c", str(cam_model)])
         args.extend(["-f", str(refine_options)])
         args.extend(["-P", str(int(prior))])
