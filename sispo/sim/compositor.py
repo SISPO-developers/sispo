@@ -367,6 +367,12 @@ class ImageCompositor():
             filename = self.res_dir / ("Inst_" + str(frame.id) + ".png")
             cv2.imwrite(str(filename), clipped_img)
 
+            rel_pos = frame.metadata["sc_pos"] - frame.metadata["sssb_pos"]
+            rel_pos = rel_pos.value
+            filename = str(filename) + ".xyz"
+            with open(str(filename), "w") as priorfile:
+                priorfile.write(f"{rel_pos[0]} {rel_pos[1]} {rel_pos[2]}")
+
     def create_sssb_ref(self, res, scale=5):
         """Creates a reference sssb image for calibration.
         
