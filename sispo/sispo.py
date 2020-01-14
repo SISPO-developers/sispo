@@ -13,6 +13,12 @@ import cProfile
 import io
 import json
 import logging
+###############################################################################
+################## Hack to enable JPEG2000 format in OpenCV ###################
+######## See https://github.com/opencv/opencv/issues/14058 for details ########
+import os
+os.environ["OPENCV_IO_ENABLE_JASPER"] = "TRUE"
+###############################################################################
 from pathlib import Path
 import pstats
 import sys
@@ -222,7 +228,7 @@ def main():
         logger.debug("Only compressing, no other step")
         comp = Compressor(**comp_settings, ext_logger=logger)
         comp.load_images()
-        comp.compress_series()
+        comp.comp_decomp_series()
         logger.debug("Finished compressing")
         return
 
@@ -249,7 +255,7 @@ def main():
         logger.debug("With compression")
         comp = Compressor(**comp_settings, ext_logger=logger)
         comp.load_images()
-        comp.compress_series()
+        comp.comp_decomp_series()
 
     if args.with_reconstruction:
         logger.debug("With reconstruction")
