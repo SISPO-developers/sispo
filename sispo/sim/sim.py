@@ -34,7 +34,12 @@ class SimulationError(RuntimeError):
 
 
 class Environment():
-    """Simulation environment."""
+    """
+    Simulation environment.
+
+    This environment is used to propagate trajectories and render images at
+    each simulation step.
+    """
 
     def __init__(self,
                  res_dir,
@@ -291,7 +296,7 @@ class Environment():
 
             sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
             sssb_angle = sssb_rot.getAngle()
-            self.sssb.render_obj.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)          
+            self.sssb.render_obj.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)       
 
             self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             
