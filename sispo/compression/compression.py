@@ -10,6 +10,7 @@ import gzip
 import logging
 import lzma
 from pathlib import Path
+import shutil
 import threading
 import zlib
 
@@ -44,6 +45,7 @@ class Compressor():
         self.img_extension = "." + img_ext
 
         self.imgs = []
+        self.xyzs = {}
         self._res = None
 
         if algo is None:
@@ -87,6 +89,14 @@ class Compressor():
             img_path = self.image_dir / ("Inst_" + img_id + self.img_extension)
             img = cv2.imread(str(img_path), cv2.IMREAD_UNCHANGED)
             self.imgs.append(img)
+
+            xyz_file = ("Inst_" + img_id + self.img_extension + ".xyz")
+            xyz_path = self.image_dir / xyz_file
+            if xyz_path.is_file():
+                self.xyzs[img_id] = xyz_path
+            else:
+                self.xyzs[img_id] = None
+
 
         self.logger.debug(f"Loaded {len(self.imgs)} images")
 
@@ -146,6 +156,11 @@ class Compressor():
             filename = self.res_dir / (str(img_id) + file_extension)
             with open(str(self.res_dir / filename), "wb") as file:
                 file.write(img_cmp)
+
+            if self.xyzs[img_id] is not None:
+                xyz_file = str(filename) + ".xyz"
+                shutil.copyfile(self.xyzs[img_id], xyz_file)
+                self.logger.debug(f"Save prior file {xyz_file}")
 
         return img_cmp
 

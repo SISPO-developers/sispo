@@ -347,9 +347,6 @@ class ImageCompositor():
             composed_max = np.max(composed_img)
 
         composed_img[:, :, :] /= composed_max
-
-        filename = self.res_dir / ("Comp_" + str(frame.id))
-        utils.write_openexr_image(filename, composed_img)
   
         if self.with_infobox:
             infobox_img = composed_img[:, :, 0:3] * 255
@@ -362,6 +359,10 @@ class ImageCompositor():
             filename = self.res_dir / ("Comp_" + str(frame.id) + ".png")
             cv2.imwrite(str(filename), infobox_img)
 
+            exrfile = self.image_dir / ("Comp_" + str(frame.id))
+        else:
+            exrfile = self.res_dir / ("Comp_" + str(frame.id))
+
         if self.with_clipping:
             clipped_img = self.clip_color_depth(composed_img)
             filename = self.res_dir / ("Inst_" + str(frame.id) + ".png")
@@ -372,6 +373,12 @@ class ImageCompositor():
             filename = str(filename) + ".xyz"
             with open(str(filename), "w") as priorfile:
                 priorfile.write(f"{rel_pos[0]} {rel_pos[1]} {rel_pos[2]}")
+
+            exrfile = self.image_dir / ("Comp_" + str(frame.id))
+        else:
+            exrfile = self.res_dir / ("Comp_" + str(frame.id))
+   
+        utils.write_openexr_image(exrfile, composed_img)
 
     def create_sssb_ref(self, res, scale=5):
         """Creates a reference sssb image for calibration.
