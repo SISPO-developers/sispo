@@ -5,7 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
-import sispo.utils as utils
+from sispo import utils
 
 
 class TestUtils(unittest.TestCase):
