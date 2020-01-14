@@ -102,7 +102,12 @@ class BlenderController:
         bpy.context.window.scene = self.default_scene
 
     def set_scene_defaults(self, scenes=None):
-        """Sets default settings to a scene."""
+        """
+        Sets default settings to a scene.
+        
+        :type scenes: None, String, bpy.types.Scene, list
+        :param scenes: Scene(s) which default settings are applied to.
+        """
         for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
