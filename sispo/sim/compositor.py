@@ -480,12 +480,16 @@ class ImageCompositor():
 
     def clip_color_depth(self, img):
         """Reduces color depth to the instrument color depth."""
-        max_val = 2 ** self.inst.color_depth - 1
+        max_val = int(2 ** self.inst.color_depth - 1)
 
-        img = img[:, :, 0:3] * max_val
-        img = img.astype(np.uint16)
-        img = np.asarray(img * (65535. / max_val), np.float32)
-        img = img.astype(np.uint16)
+        if max_val <= 255:
+            img = img[:, :, 0:3] * max_val
+            img = img.astype(np.uint8)
+        else:
+            img = img[:, :, 0:3] * max_val
+            img = img.astype(np.uint16)
+            img = np.asarray(img * (65535. / max_val), np.float32)
+            img = img.astype(np.uint16)
 
         return img
 

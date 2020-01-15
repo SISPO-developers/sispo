@@ -384,11 +384,18 @@ class Compressor():
     def _decorate_cv_compress(func):
         def compress(img, settings):
             if img.dtype == np.float32 and np.max(img) <= 1.:
-                img_temp = img * 65535
-                img = img_temp.astype(np.uint16)
-            if settings["ext"] == ".jpg":
+                img_temp = img * 255
+                img = img_temp.astype(np.uint8)
+            elif img.dtype == np.uint16:
                 img_temp = img / 255
                 img = img_temp.astype(np.uint8)
+            elif img.dtype == np.uint8:
+                pass            
+            else:
+                raise RuntimeError("Invalid input")
+            #if settings["ext"] == ".jpg":
+            #    img_temp = img / 255
+            #    img = img_temp.astype(np.uint8)
             _, img_cmp = func(settings["ext"], img, settings["params"])
             img_cmp = np.array(img_cmp).tobytes()
             return img_cmp
