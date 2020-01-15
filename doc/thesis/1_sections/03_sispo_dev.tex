@@ -178,9 +178,9 @@ where $F_{ref}$ is the reference flux, $I_{ref}$ is the reference intensity and 
 
 The composed image is then multiplied by the quantum efficiency of the \gls{ccd}. This quantum efficiency currently includes all efficiencies to convert incoming photon flux into an electrical signal (pixel value). Afterwards, the image is Gaussian filtered and noise based on a Poisson distribution is added. The standard deviation for Gaussian filtering is calculated to approximate the diffraction pattern, defined as
 \begin{align}
-    \sigma = 0.45 \times \lambda \times \frac{f}{D} \times d \times \frac{1}{pix_l}, \label{eq:comp_sigma}
+    \sigma = 0.45 \times \lambda \times \frac{f}{D}\times \frac{1}{pix_l} \times m, \label{eq:comp_sigma}
 \end{align}
-where $\sigma$ is the standard deviation, $d$ is the XXXXXXX, $\lambda$ is the instrument wavelength, $f$ is the focal length, $D$ is the aperture diameter and $pix_l$ is the length of one side of a pixel. The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Fig. \ref{fig:comp_imageset} is presented Fig. \ref{fig:comp_composed}.
+where $\sigma$ is the standard deviation, $\lambda$ is the instrument wavelength, $f$ is the focal length, $D$ is the aperture diameter, $pix_l$ is the length of one side of a pixel and $d$ is a multiplier for none diffraction limited systems (in our case $d = 2$. The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Fig. \ref{fig:comp_imageset} is presented Fig. \ref{fig:comp_composed}.
 
 \begin{figure}
     \centering
