@@ -138,7 +138,7 @@ class OpenMVGController():
                         second_image=None,
                         cam_model=3,
                         refine_options="ADJUST_ALL",
-                        prior=False,
+                        prior=True,
                         match_file=None):
         """Reconstruct 3D models sequentially."""
         # set manually the initial pair to avoid the prompt question
