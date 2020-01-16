@@ -369,7 +369,7 @@ class ImageCompositor():
             cv2.imwrite(str(filename), clipped_img)
 
             rel_pos = frame.metadata["sc_pos"] - frame.metadata["sssb_pos"]
-            rel_pos = rel_pos.value
+            rel_pos = rel_pos.value / 1000.
             filename = str(filename) + ".xyz"
             with open(str(filename), "w") as priorfile:
                 priorfile.write(f"{rel_pos[0]} {rel_pos[1]} {rel_pos[2]}")
