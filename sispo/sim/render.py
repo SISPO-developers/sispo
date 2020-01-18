@@ -216,7 +216,7 @@ class BlenderController:
         for scene in self._get_scenes_iter(scenes):
             scene.cycles.samples = samples
 
-    def set_exposure(self, exposure, scenes=None):
+    def set_exposure(self, exposure=0, scenes=None):
         """Set exposure value."""
         for scene in self._get_scenes_iter(scenes):
             scene.view_settings.exposure = exposure
