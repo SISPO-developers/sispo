@@ -366,6 +366,16 @@ class Compressor():
     @staticmethod
     def _decorate_builtin_compress(func):
         def compress(img, settings):
+            if img.dtype == np.float32 and np.max(img) <= 1.:
+                img_temp = img * 255
+                img = img_temp.astype(np.uint8)
+            elif img.dtype == np.uint16:
+                img_temp = img / 255
+                img = img_temp.astype(np.uint8)
+            elif img.dtype == np.uint8:
+                pass            
+            else:
+                raise RuntimeError("Invalid compression input")
             img_cmp = func(img, **settings)
             return img_cmp
 
@@ -374,7 +384,7 @@ class Compressor():
     def _decorate_builtin_decompress(self, func):
         def decompress(img):
             img_dcmp = func(img)
-            img_dcmp = np.frombuffer(img_dcmp, dtype=np.float32)
+            img_dcmp = np.frombuffer(img_dcmp, dtype=np.uint8)
             img_dcmp = img_dcmp.reshape(self._res)
             return img_dcmp
 
@@ -392,7 +402,7 @@ class Compressor():
             elif img.dtype == np.uint8:
                 pass            
             else:
-                raise RuntimeError("Invalid input")
+                raise RuntimeError("Invalid compression input")
             #if settings["ext"] == ".jpg":
             #    img_temp = img / 255
             #    img = img_temp.astype(np.uint8)
