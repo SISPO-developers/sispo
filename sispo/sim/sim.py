@@ -54,6 +54,7 @@ class Environment():
                  duration,
                  frames,
                  encounter_distance,
+                 relative_velocity,
                  with_sunnyside,
                  with_terminator,
                  timesampler_mode,
@@ -98,6 +99,7 @@ class Environment():
         self.frames = frames
 
         self.minimum_distance = encounter_distance
+        self.relative_velocity = relative_velocity
         self.with_terminator = bool(with_terminator)
         self.with_sunnyside = bool(with_sunnyside)
         self.timesampler_mode = timesampler_mode
@@ -218,6 +220,7 @@ class Environment():
         sssb_state = self.sssb.get_state(self.encounter_date)
         sc_state = Spacecraft.calc_encounter_state(sssb_state,
                                                    self.minimum_distance,
+                                                   self.relative_velocity,
                                                    self.with_terminator,
                                                    self.with_sunnyside)
         self.spacecraft = Spacecraft("CI", 
