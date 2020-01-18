@@ -33,7 +33,8 @@ class Spacecraft(CelestialBody):
     @classmethod
     def calc_encounter_state(cls,
                              sssb_state,
-                             min_dist, 
+                             min_dist,
+                             rel_vel, 
                              terminator=True,
                              sunnyside=False):
         """Calculate the state of a Spacecraft at closest distance to SSSB."""
@@ -43,7 +44,7 @@ class Spacecraft(CelestialBody):
             sssb_pos, min_dist, terminator, sunnyside)
             
         sc_vel = sssb_vel.scalarMultiply(
-            (sssb_vel.getNorm() - 10000.) / sssb_vel.getNorm())
+            (sssb_vel.getNorm() - rel_vel) / sssb_vel.getNorm())
 
         #self.logger.info("Spacecraft relative velocity: %s", sc_vel)
         #self.logger.info("Spacecraft distance from sun: %s",
