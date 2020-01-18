@@ -126,8 +126,15 @@ class OpenMVSController():
                     rig_ela_r=0.9,
                     grad_step=45.05,
                     vertex_ratio=0,
-                    cuda=True):
-        """Refine 3D mesh."""
+                    cuda=False):
+        """
+        Refine 3D mesh.
+        
+        Despite being used by default, CUDA is specifically disabled as default
+        since it is known to cause problems. See also
+        https://github.com/cdcseacave/openMVS/issues/378
+        https://github.com/cdcseacave/openMVS/issues/230
+        """
         self.logger.debug("Refine 3D mesh")
 
         working_dir = utils.check_dir(self.res_dir / "refined_mesh")
