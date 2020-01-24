@@ -78,6 +78,32 @@ class Compressor():
 
         return ids
 
+    def load_image(self, img_id):
+        """
+        Load a single image into memory.
+
+        :type img_id: str
+        :param img_id: id of the image to load
+        """
+        self.logger.debug(f"Load image {img_id}")
+        img_path = self.image_dir / ("Inst_" + img_id + self.img_extension)
+        img = cv2.imread(str(img_path), cv2.IMREAD_UNCHANGED)
+        self.imgs[img_id] = img
+
+        if self.imgs:
+            id0 = list(self.imgs.keys())[0]
+            self._res = self.imgs[id0].shape
+            if not img.shape == self._res:
+                self.logger.debug(f"Images must have size {self._res}!")
+                raise CompressionError(f"Images must have size {self._res}!")
+
+        xyz_file = ("Inst_" + img_id + self.img_extension + ".xyz")
+        xyz_path = self.image_dir / xyz_file
+        if xyz_path.is_file():
+            self.xyzs[img_id] = xyz_path
+        else:
+            self.xyzs[img_id] = None
+
     def load_images(self, img_ids=None):
         """Load composition images using ids."""
         if img_ids is None:
@@ -86,29 +112,9 @@ class Compressor():
             self.img_ids = img_ids
 
         for img_id in self.img_ids:
-            self.logger.debug(f"Load image {img_id}")
-            img_path = self.image_dir / ("Inst_" + img_id + self.img_extension)
-            img = cv2.imread(str(img_path), cv2.IMREAD_UNCHANGED)
-            self.imgs[img_id] = img
+            self.load_image(img_id)
 
-            xyz_file = ("Inst_" + img_id + self.img_extension + ".xyz")
-            xyz_path = self.image_dir / xyz_file
-            if xyz_path.is_file():
-                self.xyzs[img_id] = xyz_path
-            else:
-                self.xyzs[img_id] = None
-
-
-        self.logger.debug(f"Loaded {len(self.imgs.keys())} images")
-
-        self._res = self.imgs[self.img_ids[0]].shape
-        self.logger.debug(f"Image size is {self._res}")
-
-        for img_id in self.img_ids:
-            img = self.imgs[img_id]
-            if not img.shape == self._res:
-                self.logger.debug("All images must have same size!")
-                raise CompressionError("All images must have same size!")
+        self.logger.debug(f"Loaded {len(self.imgs.keys())} images")       
 
     def unload_images(self):
         """Unloads images to free memory, keeps IDs."""
@@ -121,8 +127,9 @@ class Compressor():
         method = self.comp_decomp
         self.logger.debug(f"{method} img series with {max_threads} threads")
 
+        self.img_ids = self.get_frame_ids()
+
         for img_id in self.img_ids:
-            img = self.imgs[img_id]
 
             for thr in self._threads:
                 if not thr.is_alive():
@@ -130,19 +137,19 @@ class Compressor():
 
             if len(self._threads) < max_threads - 1:
                 # Allow up to 2 additional threads
-                thr = threading.Thread(target=method, args=(img,img_id))
+                thr = threading.Thread(target=method, args=(None,img_id))
                 thr.start()
                 self._threads.append(thr)
             else:
                 # If too many, also compress in main thread to not drop a frame
-                method(img, img_id)
+                method(None,img_id)
 
         for thr in self._threads:
             thr.join()
 
         self.unload_images()
 
-    def comp_decomp(self, img, img_id=None):
+    def comp_decomp(self, img=None, img_id=None):
         """
         Default function that applies compression and decompression.
 
@@ -162,13 +169,18 @@ class Compressor():
                 shutil.copyfile(self.xyzs[img_id], xyz_file)
                 self.logger.debug(f"Save prior file {xyz_file}")
 
-    def compress(self, img, img_id=None):
+    def compress(self, img=None, img_id=None):
         """
         Compresses images using predefined algorithm or file format.
         
         :param img: Image to be compressed.
         :returns: A compressed image.
         """
+        
+        if img is None and img_id is not None:
+            self.load_image(img_id)
+            img = self.imgs[img_id]
+
         img_cmp = self._comp_met(img, self._settings)
 
         if img_id is not None:

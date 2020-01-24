@@ -227,7 +227,6 @@ def main():
     if args.compress_only:
         logger.debug("Only compressing, no other step")
         comp = Compressor(**comp_settings, ext_logger=logger)
-        comp.load_images()
         comp.comp_decomp_series()
         logger.debug("Finished compressing")
         return
@@ -254,7 +253,6 @@ def main():
     if args.with_compression:
         logger.debug("With compression")
         comp = Compressor(**comp_settings, ext_logger=logger)
-        comp.load_images()
         comp.comp_decomp_series()
 
     if args.with_reconstruction:
