@@ -67,8 +67,7 @@ class OpenMVSController():
         args.extend(["--estimate-normals", str(int(est_normals))])
         args.extend(["--sample-mesh", str(sample_mesh)])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Point cloud densification returned: %s", str(ret))
+        utils.execute(args, self.logger, OpenMVSControllerError)
 
     def create_mesh(self,
                     p_prio=-1,
@@ -105,8 +104,7 @@ class OpenMVSController():
         args.extend(["--close-holes", str(holes)])
         args.extend(["--smooth", str(smooth)])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Mesh creation returned: %s", str(ret))
+        utils.execute(args, self.logger, OpenMVSControllerError)
 
     def refine_mesh(self,
                     p_prio=-1,
@@ -164,8 +162,7 @@ class OpenMVSController():
         args.extend(["--planar-vertex-ratio", str(vertex_ratio)])
         args.extend(["--use-cuda", str(int(cuda))])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Mesh refinement returned: %s", str(ret))
+        utils.execute(args, self.logger, OpenMVSControllerError)
 
     def texture_mesh(self,
                      export_type="obj",
@@ -212,5 +209,4 @@ class OpenMVSController():
         args.extend(["--empty-color", str(empty_color)])
         args.extend(["--orthographic-image-resolution", str(orthographic_res)])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Adding texture returned: %s", str(ret))
+        utils.execute(args, self.logger, OpenMVSControllerError)
