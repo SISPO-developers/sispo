@@ -103,6 +103,15 @@
     },
     "reconstruction":
     {
-        "res_dir": "data/results/default"
+        "res_dir": "data/results/default",
+        "export_type": "obj",
+        "focal": 65437,
+        "use_prior": 1,
+        "force_compute": 0,
+        "descriptor": "SIFT",
+        "d_preset": "ULTRA",
+        "method": "FASTCASCADEHASHINGL2",
+        "refine_options": "ADJUST_ALL",
+        "reduce_memory": 1
     }
 }
