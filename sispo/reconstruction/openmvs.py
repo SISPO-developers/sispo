@@ -70,6 +70,7 @@ class OpenMVSController():
         utils.execute(args, self.logger, OpenMVSControllerError)
 
     def create_mesh(self,
+                    export_type="obj",
                     p_prio=-1,
                     max_threads=0,
                     const_weight=1,
@@ -77,9 +78,9 @@ class OpenMVSController():
                     thickness=1,
                     quality=1,
                     decimate=1,
-                    spurious=20,
-                    spikes=True,
-                    holes=30,
+                    remove_spurious=20,
+                    remove_spikes=True,
+                    close_holes=30,
                     smooth=2):
         """Create a mesh from a 3D point cloud."""
         self.logger.debug("Create mesh from point cloud")
@@ -92,6 +93,7 @@ class OpenMVSController():
         args.extend(["-o", str(self.mesh_scene)])
         args.extend(["-w", str(working_dir)])
 
+        args.extend(["--export-type", str(export_type)])
         args.extend(["--process-priority", str(p_prio)])
         args.extend(["--max-threads", str(max_threads)])
         args.extend(["--constant-weight", str(const_weight)])
@@ -99,14 +101,15 @@ class OpenMVSController():
         args.extend(["--thickness-factor", str(thickness)])
         args.extend(["--quality-factor", str(quality)])
         args.extend(["--decimate", str(decimate)])
-        args.extend(["--remove-spurious", str(spurious)])
-        args.extend(["--remove-spikes", str(int(spikes))])
-        args.extend(["--close-holes", str(holes)])
+        args.extend(["--remove-spurious", str(remove_spurious)])
+        args.extend(["--remove-spikes", str(int(remove_spikes))])
+        args.extend(["--close-holes", str(close_holes)])
         args.extend(["--smooth", str(smooth)])
 
         utils.execute(args, self.logger, OpenMVSControllerError)
 
     def refine_mesh(self,
+                    export_type="obj",
                     p_prio=-1,
                     max_threads=0,
                     res_lvl=0,
@@ -124,7 +127,7 @@ class OpenMVSController():
                     rig_ela_r=0.9,
                     grad_step=45.05,
                     vertex_ratio=0,
-                    cuda=False):
+                    use_cuda=False):
         """
         Refine 3D mesh.
         
@@ -143,6 +146,7 @@ class OpenMVSController():
         args.extend(["-o", str(self.refined_mesh)])
         args.extend(["-w", str(working_dir)])
 
+        args.extend(["--export-type", str(export_type)])
         args.extend(["--process-priority", str(p_prio)])
         args.extend(["--max-threads", str(max_threads)])
         args.extend(["--resolution-level", str(res_lvl)])
@@ -160,7 +164,7 @@ class OpenMVSController():
         args.extend(["--rigidity-elasticity-ratio", str(rig_ela_r)])
         args.extend(["--gradient-step", str(grad_step)])
         args.extend(["--planar-vertex-ratio", str(vertex_ratio)])
-        args.extend(["--use-cuda", str(int(cuda))])
+        args.extend(["--use-cuda", str(int(use_cuda))])
 
         utils.execute(args, self.logger, OpenMVSControllerError)
 
