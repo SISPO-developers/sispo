@@ -90,6 +90,8 @@ Blender is interfaced using its Python bindings which need to be compiled manual
 
 Since the images are composed and calibrated at a later step, described in \ref{sec:composition}, the settings shown in Table \ref{tab:color_space} are selected to not change the rendered raw images with Blender while saving.
 
+The interface of the BlenderController class is usable with a scene name (string), a list of scene names (list of strings), a scene object (bpy.types.Scene) or a list of scene objects (list of bpy.types.Scene). This provides flexibility when using the BlenderController class in the simulation module.
+
 \begin{table}[htpb]
 \caption{Blender settings relevant to color space and are fixed to get raw images out of the Blender rendering process.}
 \label{tab:color_space}
@@ -106,14 +108,18 @@ Film transparent     & True           & World background is transparent, i.e. al
 \begin{table}[htpb]
 \caption{Blender settings that can be changed.}
 \label{tab:blender_settings_input}
-\begin{tabular}{p{0.12\textwidth}|p{0.1\textwidth}|p{0.7\textwidth}}
-\textbf{Name}       & \textbf{Default Value} & \textbf{Description}                                                                                                         \\ \hline
+\begin{tabular}{p{0.12\textwidth}|p{0.1\textwidth}|p{0.6\textwidth}}
+\textbf{Name}       & \textbf{Default Value} & \textbf{Description} \\ \hline
 Device     & AUTO          & Device used for rendering. "AUTO" attempts to use GPU, if not available uses CPU. \\
-Samples    & 6             &                                                                                                                     \\
-Exposure   & 0             & Exposure in stops, applied before display transform.                                                                \\
+Samples    & 6             & \\
+Exposure   & 0             & Exposure in stops, applied before display transform. \\
 Resolution & ---           & Array determining number of pixels in x- and y-direction.                                                          
 \end{tabular}
 \end{table}
+
+Within a Blender scene, the \gls{sssb} is kept at the origin. Only the Sun object and the cameras change position. In total there are three scenes with one camera each. These scenes are called \textit{SssbOnly} with the \textit{ScCam} camera, the \textit{SssbConstDist} scene with the \textit{SssbConstDistCam} and the \textit{LightRef} scene with the \textit{LightRefCam} camera. Each camera is configured equally, using the Instrument data from the input file. This is necessary for the composition step. All cameras are perspective cameras with a distance of $[\SI{1e-5}{},\SI{1e32}{}]$. The \gls{fov} of the \textit{SssbOnly} camera is also used for rendering stars (cf. \ref{sec:stars}).
+
+Due to problems during rendering, the Blender scene is scaled to kilometers instead of meters. I.e. one Blender unit corresponds to \SI{1}{\kilo\meter}. This is the only deviation from SI base units in the software.
 
 \subsubsection{Star Rendering} \label{sec:stars}
 The background stars are rendered based on the star catalogue \gls{ucac4}. This catalogue includes stars up to magnitude 16. The \gls{fov} is determined based on the spacecraft camera in the SssbOnly scene. The edges of the \gls{fov} are calculated using the following equations
@@ -214,7 +220,7 @@ The composed image is then multiplied by the quantum efficiency of the \gls{ccd}
 \begin{align}
     \sigma = 0.45 \times \lambda \times \frac{f}{D}\times \frac{1}{pix_l} \times m, \label{eq:comp_sigma}
 \end{align}
-where $\sigma$ is the standard deviation, $\lambda$ is the instrument wavelength, $f$ is the focal length, $D$ is the aperture diameter, $pix_l$ is the length of one side of a pixel and $m$ is a multiplier for none diffraction limited systems (in our case $m = 2$. The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Fig. \ref{fig:comp_imageset} is presented Fig. \ref{fig:comp_composed}.
+where $\sigma$ is the standard deviation, $\lambda$ is the instrument wavelength, $f$ is the focal length, $D$ is the aperture diameter, $pix_l$ is the length of one side of a pixel and $m$ is a multiplier for none diffraction limited systems (in our case $m = 2$, a perfectly diffraction limited system would have $m = 1$). The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Fig. \ref{fig:comp_imageset} is presented Fig. \ref{fig:comp_composed}.
 
 \begin{figure}
     \centering
