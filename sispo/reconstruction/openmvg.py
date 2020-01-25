@@ -64,12 +64,8 @@ class OpenMVGController():
             args.extend(["-P"])
             args.extend(["-W", ";".join([str(value) for value in p_weights])])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Image analysis returned: %s", str(ret))
+        utils.execute(args, self.logger, OpenMVGControllerError)
 
-        if not ret.returncode == 0:
-            raise OpenMVGControllerError(
-                f"Imagelisting exited with returncode: {ret.returncode}")
 
     def compute_features(self,
                          force_compute=False,
@@ -92,12 +88,7 @@ class OpenMVGController():
         args.extend(["-p", str(d_preset)])
         args.extend(["-n", str(num_threads)])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Feature computation returned: %s", str(ret))
-
-        if not ret.returncode == 0:
-            raise OpenMVGControllerError(
-                f"Feature computation exited with returncode: {ret.returncode}")
+        utils.execute(args, self.logger, OpenMVGControllerError)
 
     def match_features(self,
                        force_compute=False,
@@ -126,12 +117,7 @@ class OpenMVGController():
         if cache_size is not None:
             args.extend(["-c", str(cache_size)])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Feature matching returned: %s", str(ret))
-
-        if not ret.returncode == 0:
-            raise OpenMVGControllerError(
-                f"Feature matching exited with returncode: {ret.returncode}")
+        utils.execute(args, self.logger, OpenMVGControllerError)
 
     def reconstruct_seq(self,
                         first_image=None,
@@ -162,12 +148,7 @@ class OpenMVGController():
         if match_file is not None:
             args.extend(["-M", str(match_file)])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Incremental SfM returned: %s", str(ret))
-
-        if not ret.returncode == 0:
-            raise OpenMVGControllerError(
-                f"Incremental SfM exited with returncode: {ret.returncode}")
+        utils.execute(args, self.logger, OpenMVGControllerError)
 
     def export_MVS(self, num_threads=0):
         """Export 3D model to MVS format."""
@@ -185,9 +166,4 @@ class OpenMVGController():
 
         args.extend(["-n", str(num_threads)])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Exporting to MVS returned: %s", str(ret))
-
-        if not ret.returncode == 0:
-            raise OpenMVGControllerError(
-                f"Exporting exited with returncode: {ret.returncode}")
+        utils.execute(args, self.logger, OpenMVGControllerError)
