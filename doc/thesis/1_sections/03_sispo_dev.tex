@@ -84,10 +84,14 @@ The initial state of the spacecraft is calculated based on the input parameters 
 \end{table}
 
 \subsubsection{Blender}
-To render the \gls{sssb} and calibration images, Blender is used. A set of predefined settings is used for each scene while some parameters can be changed via the definition file. The rendering engine \textit{Cycles} is used to render photo-realistic, physics-based images from the Blender scenes. Since the images are composed and calibrated at a later step, described in \ref{sec:composition}, the settings shown in Table \ref{tab:color_space} are selected to not change the rendered raw images in Blender.
+To render the \gls{sssb} and calibration images, Blender is used. A set of predefined settings is used for each scene while some parameters can be changed via the definition file. The rendering engine \textit{Cycles} is used to render photo-realistic, physics-based images from the Blender scenes.
+
+Blender is interfaced using its Python bindings which need to be compiled manually (cf. \ref{sec:setup}. To control the behaviour of Blender the BlenderController class is used. It handles setting all defaults such as a black background and the creation of the default scene, SssbOnly. In addition, the BlenderController interfaces to the star catalogue and the compositor.
+
+Since the images are composed and calibrated at a later step, described in \ref{sec:composition}, the settings shown in Table \ref{tab:color_space} are selected to not change the rendered raw images with Blender while saving.
 
 \begin{table}[htpb]
-\caption{Blender settings relevant to color space.}
+\caption{Blender settings relevant to color space and are fixed to get raw images out of the Blender rendering process.}
 \label{tab:color_space}
 \begin{tabular}{p{0.25\textwidth}|p{0.08\textwidth}|p{0.57\textwidth}}
 \textbf{Name}        & \textbf{Value} & \textbf{Description}                                                                                         \\ \hline
@@ -98,8 +102,6 @@ Look                 & None           & No artistic effect is applied before col
 Film transparent     & True           & World background is transparent, i.e. alpha values can be used for image composition and proper occultation.
 \end{tabular}
 \end{table}
-
-
 
 \begin{table}[htpb]
 \caption{Blender settings that can be changed.}
@@ -263,7 +265,7 @@ The common steps for the complete pipeline is comprised of the following steps:
     \item Apply texture to mesh to create final 3D model [TextureMesh in \gls{omvs}]
 \end{enumerate}
 
-\subsection{Setup}
+\subsection{Setup} \label{sec:setup}
 \gls{sispo} can be setup with Linux and Windows. The default case used in this description is a Windows setup. Known differences or problems under Linux will be pointed out. While it should be possible to use a plain Python environment and pip, a miniconda environment manager was used for development. Also a C compiler is necessary. Linux provides the GCC, for Windows it is easiest to install Microsoft Visual Studio with \gls{msvc} and \gls{msbuild}. Another possibility when using Windows is to use vcpkg\footnote{Found at \url{https://github.com/microsoft/vcpkg}}. However, previously the openMVG and openMVS ports in vcpkg did not work. Vcpkg can also be used with Linux. However, there were unsolvable problems when using vcpkg so everything was installed natively.
 For \gls{omvg}, \gls{omvs} and star\_cats it is necessary to have the executables in the correct folder for \gls{sispo} to function.\newline
 
