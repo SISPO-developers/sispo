@@ -70,8 +70,8 @@ class OpenMVGController():
     def compute_features(self,
                          force_compute=False,
                          descriptor="SIFT",
-                         use_upright=True,
                          d_preset="ULTRA",
+                         use_upright=True,
                          num_threads=0):
         """Compute features in images."""
         self.logger.debug("Compute features of listed images")
