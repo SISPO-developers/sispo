@@ -47,7 +47,7 @@ The sispo package can be installed using pip and the GitHub project. If done, it
 \label{tab:cli_args}
 \end{table}
 
-The standard interface to be used is a \textit{definition.json} file which provides all input parameters in the \gls{json} format.
+The default interface is a \textit{definition.json} file which provides all input parameters in the \gls{json} format. An example is given in the repository in the data/input folder. While this example provides the most important settings, there are more settings that can be used. Especially the software packages used for \gls{sfm} have many default settings which an be customised. For an explanation of all parameters, refer to the documentation of the respective software or Python package.
 
 \gls{sispo} can be imported as a Python module. Execution is then started either by sispo.run() or sispo.main(), which are equivalent.
 
@@ -69,19 +69,33 @@ All images during the rendering and calibration process use the OpenEXR format t
 
 The Orekit library runs a \gls{vm} to execute its Java code. Additionally, physical data is required which is currently distributed with the \textit{sim} sub-package. The \gls{vm} and physical data are initialised in the \textit{sim} main module and only afterwards other modules are imported which is why other modules do not include the Orekit initialisation. This approach was taken in order to reduce resource consumption by having several instances of the \gls{vm} running. Propagation is based on Orekit's KeplerianOrbit and KeplerianPropagator classes.
 
-The initial state of the spacecraft is calculated based on the input parameters presented in \ref{tab:sc_enc_paras}. Only the three first parameters need to be given as input in the definition file.
+The initial state of the spacecraft is calculated based on the input parameters presented in \ref{tab:sc_enc_paras}. Only the three first parameters need to be given as input in the definition file. The \textit{sssb\_state} is calculated based on the \gls{sssb} input data. Additional input parameters that define the simulation are given in Table \ref{tab:sim_input_params}.
 
-\begin{table}[htb]
+\begin{table}[htpb]
     \caption{Parameters that define the encounter state of the spacecraft.}
     \label{tab:sc_enc_paras}
     \begin{tabular}{p{0.23\textwidth}|p{0.06\textwidth}|p{0.62\textwidth}}
-        Parameter           & Type  & Description                                                                                                                                                  \\ \hline
-        encounter\_distance & float & Minimum distance between SSSB and spacecraft in meters                                                                                                       \\
-        with\_terminator    & bool  & Determines whether the terminator is visible at the closest approach                                                                                         \\
-        with\_sunnyside     & bool  & Determines whether the spacecraft passes the SSSB on the Sun facing side or the SSSB's side facing away from the Sun                                         \\
-        sssb\_state         & tuple & \gls{sssb} state vector, including 3 position and 3 velocity components, at encounter. The spacecraft encounter state is calculated relative to this state vector. The \gls{sssb} state does not need to be set in the  definition file but is calculated based on the \gls{sssb} trajectory and encounter date.
+        \textbf{Parameter}  & \textbf{Type} & \textbf{Description} \\ \hline
+        encounter\_distance & float         & Minimum distance between SSSB and spacecraft, in \SI{}{\meter}. \\
+        with\_terminator    & bool          & Determines whether the terminator is visible at the closest approach. \\
+        with\_sunnyside     & bool          & Determines whether the spacecraft passes the SSSB on the Sun facing side or the SSSB's side facing away from the Sun. \\
+        relative\_velocity  & float         & Relative velocity of the spacecraft to the \gls{sssb} at the encounter, in \SI{}{\meter\per\second}. \\
+        sssb\_state         & tuple         & \gls{sssb} state vector, including 3 position and 3 velocity components, at encounter. The spacecraft encounter state is calculated relative to this state vector. The \gls{sssb} state does not need to be set in the  definition file but is calculated based on the \gls{sssb} trajectory and encounter date.
     \end{tabular}
 \end{table}
+
+\begin{table}[htpb]
+    \caption{Additional input parameters for simulation.}
+    \label{tab:sim_input_params}
+    \begin{tabular}{p{0.23\textwidth}|p{0.06\textwidth}|p{0.62\textwidth}}
+        \textbf{Parameter}  & \textbf{Type} & \textbf{Description} \\ \hline
+        duration            & float         & Total length of the simulation, in \SI{}{\second}. The closest approach is reached at half of the duration. \\
+        timesampler\_mode   & int           & Mode 1 = linear, mode 2 = exponential sampling.  \\
+        slowmotion\_factor  & float         & Determines how many more samples are taken around the encounter. Only applies if timesampler\_mode is exponential. \\
+    \end{tabular}
+\end{table}
+
+
 
 \subsubsection{Blender}
 To render the \gls{sssb} and calibration images, Blender is used. A set of predefined settings is used for each scene while some parameters can be changed via the definition file. The rendering engine \textit{Cycles} is used to render photo-realistic, physics-based images from the Blender scenes.
@@ -108,12 +122,12 @@ Film transparent     & True           & World background is transparent, i.e. al
 \begin{table}[htpb]
 \caption{Blender settings that can be changed.}
 \label{tab:blender_settings_input}
-\begin{tabular}{p{0.12\textwidth}|p{0.1\textwidth}|p{0.6\textwidth}}
+\begin{tabular}{p{0.12\textwidth}|p{0.15\textwidth}|p{0.62\textwidth}}
 \textbf{Name}       & \textbf{Default Value} & \textbf{Description} \\ \hline
-Device     & AUTO          & Device used for rendering. "AUTO" attempts to use GPU, if not available uses CPU. \\
-Samples    & 6             & \\
-Exposure   & 0             & Exposure in stops, applied before display transform. \\
-Resolution & ---           & Array determining number of pixels in x- and y-direction.                                                          
+device     & AUTO          & Device used for rendering. "AUTO" attempts to use GPU, if not available uses CPU. \\
+samples    & 6             & \\
+exposure   & 0             & Exposure in stops, applied before display transform. \\
+tile\_size & 512 (GPU)/ 128 (CPU)       & Size of a rendering tile. When rendering with a \gls{gpu} a bigger tile size tends to have better performance. When rendering with a \gls{cpu}, a smaller tile size tends to have better performance.\footnote{\url{https://docs.blender.org/manual/en/latest/render/cycles/render\_settings/performance.html?highlight=tile\%20size}}
 \end{tabular}
 \end{table}
 
