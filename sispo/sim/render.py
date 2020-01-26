@@ -133,7 +133,7 @@ class BlenderController:
             scene.cycles.seed = time.time()
             scene.cycles.film_transparent = True
 
-    def set_device(self, device="AUTO", scenes=None):
+    def set_device(self, device="AUTO", tile_size=None, scenes=None):
         """Set cycles rendering device for given scenes.
 
         When device="AUTO" it is attempted to use GPU first, otherwise
@@ -143,7 +143,9 @@ class BlenderController:
 
         self.device = self._determine_device(device)
         self._set_cycles_device()
-        tile_size = self._get_tile_size()
+        
+        if tile_size is None:
+            tile_size = self._get_tile_size()
 
         # Sets render device of scenes
         for scene in self._get_scenes_iter(scenes):
