@@ -69,7 +69,7 @@ All images during the rendering and calibration process use the OpenEXR format t
 
 The Orekit library runs a \gls{vm} to execute its Java code. Additionally, physical data is required which is currently distributed with the \textit{sim} sub-package. The \gls{vm} and physical data are initialised in the \textit{sim} main module and only afterwards other modules are imported which is why other modules do not include the Orekit initialisation. This approach was taken in order to reduce resource consumption by having several instances of the \gls{vm} running. Propagation is based on Orekit's KeplerianOrbit and KeplerianPropagator classes.
 
-The initial state of the spacecraft is calculated based on the input parameters presented in \ref{tab:sc_enc_paras}. Only the three first parameters need to be given as input in the definition file. The \textit{sssb\_state} is calculated based on the \gls{sssb} input data. Additional input parameters that define the simulation are given in Table \ref{tab:sim_input_params}.
+The initial state of the spacecraft is calculated based on the input parameters presented in Table \ref{tab:sc_enc_paras}. Only the three first parameters need to be given as input in the definition file. The \textit{sssb\_state} is calculated based on the \gls{sssb} input data. Additional input parameters that define the simulation are given in Table \ref{tab:sim_input_params}.
 
 \begin{table}[htpb]
     \caption{Parameters that define the encounter state of the spacecraft.}
@@ -266,9 +266,20 @@ zlib              &
 
 Independent of the algorithm, files are handled equally to. The images are loaded into \textit{NumPy} arrays inside Python to have a common raw format. Before encoding, the information is reduced to \SI{8}{\bit} since the reconstruction module only reads images with \SI{8}{\bit} colour depth correctly. Images are encoded with the respective algorithm and converted into a binary stream. A copy of this data is saved as a file in the raw folder. The raw binary data is then converted back to a \textit{NumPy} array and decoded to retrieve as much information as possible. Finally, the compressed and decompressed data is stored as a png file to not lose any further information.
 
-The formats png, jpeg, jpeg2000 and tiff are implemented using \textit{OpenCV}. There are various settings for each format. A description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html#ga292d81be8d76901bff7988d18d2b42ac}.
+The formats png, jpeg, jpeg2000 and tiff are implemented using \textit{OpenCV}. There are various settings for each format\footnote{A description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
 
-The most important input parameter that is relevant to all algorithms is the "level" argument which describes either the compression level (from 1 to 9 for bz2, gzip, lzma, zlib and png, higher meaning more compression) or the quality level (from 1 to 10 for jpeg and jpeg2000, higher meaning better quality and less compression).
+The most important input parameter that is relevant to all algorithms is the "level" argument in "settings" which describes either the compression level (from 1 to 9 for bz2, gzip, lzma, zlib and png, higher meaning more compression) or the quality level (from 1 to 10 for jpeg and jpeg2000, higher meaning better quality and less compression). Other input parameters to the compression package are presented in Table \ref{tab:compression_settings}.
+
+\begin{table}[htpb]
+    \caption{Input parameters of compression package.}
+    \label{tab:compression_settings}
+    \begin{tabular}{p{0.1\textwidth}|p{0.14\textwidth}|p{0.65\textwidth}}
+        \textbf{Name} & \textbf{Default Value} & \textbf{Description} \\ \hline
+        algo    & png          & Compression algorithm, for a list of available algorithms see Table \ref{tab:compression_format}\\
+        settings    & \{"level": 9\} & Python dictionary including all settings for compression algorithms. For a description of the possible settings see the code or documentation of the providing library. \\
+        img\_ext    & png          & Image extension to search for when loading images for compression. 
+    \end{tabular}
+\end{table}
 
 \subsection{Reconstruction Module}
 The reconstruction module can be used to generate a 3D model of an object using a series of images. It provides a full Multi-View Stereo reconstruction data process pipeline. To achieve this, two libraries are used and combined and called using python. The first library is \gls{omvg} by \cite{openMVG}. The second library is \gls{omvs}. 
