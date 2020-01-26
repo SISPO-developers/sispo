@@ -161,7 +161,8 @@ class Environment():
                                        self.inst.focal_l,
                                        self.inst.chip_w)
 
-        self.renderer.set_device(self.render_settings["device"])
+        self.renderer.set_device(self.render_settings["device"], 
+                                 self.render_settings["tile"])
         self.renderer.set_samples(self.render_settings["samples"])
         self.renderer.set_exposure(self.render_settings["exposure"])
         self.renderer.set_resolution(self.inst.res)
