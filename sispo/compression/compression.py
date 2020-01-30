@@ -92,7 +92,8 @@ class Compressor():
 
         if self.imgs:
             id0 = list(self.imgs.keys())[0]
-            self._res = self.imgs[id0].shape
+            if self.imgs[id0] is not None:
+                self._res = self.imgs[id0].shape
             if not img.shape == self._res:
                 self.logger.debug(f"Images must have size {self._res}!")
                 raise CompressionError(f"Images must have size {self._res}!")
@@ -116,11 +117,15 @@ class Compressor():
 
         self.logger.debug(f"Loaded {len(self.imgs.keys())} images")       
 
+    def unload_image(self, img_id):
+        """Unload image with given img_id, keeps ID."""
+        self.imgs[img_id] = None
+
     def unload_images(self):
         """Unloads images to free memory, keeps IDs."""
         self.imgs = {}
 
-    def comp_decomp_series(self, max_threads=3):
+    def comp_decomp_series(self, max_threads=7):
         """
         Compresses and decompresses multiple images using :py:func:comp_decomp
         """
@@ -187,6 +192,8 @@ class Compressor():
             filename_raw = self.raw_dir / (str(img_id) + "." + self.algo)
             with open(str(self.raw_dir / filename_raw), "wb") as file:
                 file.write(img_cmp)
+            
+            self.unload_image(img_id)
 
         return img_cmp
 
