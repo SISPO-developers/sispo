@@ -188,12 +188,12 @@ class Reconstructor():
                                  self.method,
                                  self.guided,
                                  self.cache_size)
-        self.oMVG.reconstruct_seq(self.first_img,
-                                  self.second_img,
-                                  self.cam_model,
-                                  self.refine_options,
-                                  self.use_prior,
-                                  self.match_file)
+        self.oMVG.reconstruct_multi(self.first_img,
+                                    self.second_img,
+                                    self.cam_model,
+                                    self.refine_options,
+                                    self.use_prior,
+                                    self.match_file)
 
     def densify_pointcloud(self):
         """Create a dense point cloud from images and point cloud."""
@@ -279,12 +279,12 @@ class Reconstructor():
                                  self.method,
                                  self.guided,
                                  self.cache_size)
-        self.oMVG.reconstruct_seq(self.first_img,
-                                  self.second_img,
-                                  self.cam_model,
-                                  self.refine_options,
-                                  self.use_prior,
-                                  self.match_file)
+        self.oMVG.reconstruct_multi(self.first_img,
+                                    self.second_img,
+                                    self.cam_model,
+                                    self.refine_options,
+                                    self.use_prior,
+                                    self.match_file)
         self.oMVG.export_MVS(self.num_threads)
 
     def densify_mesh_texture_model(self):
