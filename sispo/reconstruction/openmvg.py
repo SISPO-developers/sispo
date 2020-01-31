@@ -164,13 +164,13 @@ class OpenMVGController():
         if points[best] < 1:
             raise OpenMVGControllerError("Reconstruction unsuccessful!")
 
+        dst = self.reconstruct / "sfm_data.bin"
         if best == "seq1":
             src = self.reconstruction1_dir / "sfm_data.bin"
         elif best == "seq2":
             src = self.reconstruction2_dir / "sfm_data.bin"
         elif best == "glob":
             src = self.reconstruction3_dir / "sfm_data.bin"
-        dst = self.reconstruct / "sfm_data.bin"
         self.logger.debug(f"Copying {src} to {dst}")
         shutil.copyfile(src, dst)
 
@@ -279,11 +279,13 @@ class OpenMVGController():
         self.reconstruction3_dir = utils.check_dir(self.reconstruction3_dir)
 
         # Global reconstruction needs matches.e.bin file
+        dst = self.matches_dir / "matches.e.bin"
         if (self.matches_dir / "matches.f.bin").is_file():
             m_file = self.matches_dir / "matches.f.bin"
         elif (self.matches_dir / "matches.g.bin").is_file():
             m_file = self.matches_dir / "matches.g.bin"
-        shutil.copyfile(str(m_file), str(self.matches_dir / "matches.e.bin"))
+        if m_file.is_file():
+            shutil.copyfile(m_file, dst)
 
         args = [str(self.openMVG_dir / "openMVG_main_GlobalSfM")]
         args.extend(["-i", str(self.sfm_data)])
