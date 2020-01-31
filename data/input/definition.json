@@ -5,7 +5,7 @@
     "simulation":
     {
         "res_dir": "data/results/default/rendering",
-        "duration": 20,
+        "duration": 120,
         "encounter_date": 
         {
             "year": 2017,
@@ -15,7 +15,7 @@
             "minutes": 0,
             "seconds": 0.0
         },
-        "frames": 20,
+        "frames": 120,
         "encounter_distance": 1E5,
         "relative_velocity": 10000,
         "with_terminator": 0,
@@ -84,7 +84,6 @@
             "aperture_d": 4,
             "wavelength": 550,
             "quantum_eff": 0.25,
-            "chip_noise": 10,
             "color_depth": 8
         },
         "with_infobox": 0,
@@ -105,13 +104,17 @@
     {
         "res_dir": "data/results/default",
         "export_type": "obj",
-        "focal": 65437,
+        "focal": 66667,
+        "cam_model": 1,
+        "geo_model": "f",
+        "num_overlaps": 4,
         "use_prior": 1,
+        "use_upright": 0,
         "force_compute": 0,
         "descriptor": "SIFT",
         "d_preset": "ULTRA",
         "method": "FASTCASCADEHASHINGL2",
-        "refine_options": "ADJUST_ALL",
+        "refine_options": "NONE",
         "reduce_memory": 1
     }
 }
