@@ -82,6 +82,9 @@ parser.add_argument("--render-only",
 parser.add_argument("--compress-only",
                     action="store_true",
                     help="Will only compress images, not perform other steps.")
+parser.add_argument("--compress-reconstruct-only",
+                    action="store_true",
+                    help="Will only compress images and reconstruct 3D model, not perform other steps.")
 parser.add_argument("--reconstruct-only",
                     action="store_true",
                     help="Will only reconstruct 3D, not perform other steps.")
@@ -91,7 +94,20 @@ parser.add_argument("--profile",
 
 pr = cProfile.Profile()
 
+args = parser.parse_args()
+
 def read_input():
+    """Read input, either from CLI or from input file"""
+
+    if args.cli:
+        settings = read_input_cli()
+    else:
+        settings = read_input_file(args.i)
+
+    return settings
+
+
+def read_input_cli():
     """
     Reads input interactively from CLI.
     """
@@ -127,6 +143,8 @@ def parse_settings_file(settings):
     :type settings: dict
     :param settings: String based description of settings.
     """
+    global args
+    
     if "simulation" not in settings:
         logger.debug("No simulation settings provided!")
 
@@ -231,6 +249,18 @@ def main():
         logger.debug("Finished compressing")
         return
 
+    if args.compress_reconstruct_only:
+        logger.debug("Only compressing and reconstructing, no other step.")
+        logger.debug("Start compressing")
+        comp = Compressor(**comp_settings, ext_logger=logger)
+        comp.comp_decomp_series()
+        logger.debug("Finished compressing")
+        logger.debug("Start reconstructing")
+        recon = Reconstructor(**recon_settings, ext_logger=logger)
+        recon.reconstruct()
+        logger.debug("Finished reconstructing")
+        return
+
     if args.reconstruct_only:
         logger.debug("Only reconstructing, no other step")
         recon = Reconstructor(**recon_settings, ext_logger=logger)
@@ -288,18 +318,13 @@ def change_arg(arg):
         arg = [arg]
     parser.parse_args(args=arg, namespace=args)
 
-args = parser.parse_args()
-
 if args.v:
     stream_handler = logging.StreamHandler(sys.stdout)
     stream_handler.setLevel(logging.DEBUG)
     stream_handler.setFormatter(logger_formatter)
     logger.addHandler(stream_handler)
-    
-if args.cli:
-    settings = read_input()
-else:
-    settings = read_input_file(args.i)
+
+settings = read_input()
 
 now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
 filename = (now + "_sispo.log")

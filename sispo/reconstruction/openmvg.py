@@ -1,6 +1,7 @@
 """Class to control openMVG behaviour."""
 
 from pathlib import Path
+import shutil
 import subprocess
 
 from . import utils
@@ -119,24 +120,78 @@ class OpenMVGController():
 
         utils.execute(args, self.logger, OpenMVGControllerError)
 
-    def reconstruct_seq(self,
-                        first_image=None,
-                        second_image=None,
-                        cam_model=3,
-                        refine_options="ADJUST_ALL",
-                        prior=True,
-                        match_file=None):
+
+    def reconstruct_multi(self,
+                          first_image=None,
+                          second_image=None,
+                          cam_model=3,
+                          refine_options="ADJUST_ALL",
+                          prior=True,
+                          match_file=None):
+        """Reconstructs using all algorithms provided by OpenMVG."""
+        self.logger.debug("Do multi reconstruction and select best result")
+
+        self.reconstruct = utils.check_dir(self.res_dir / "reconstruct")
+
+        points = {}
+        points["seq1"] = self.reconstruct_seq1(first_image,
+                                               second_image,
+                                               cam_model,
+                                               refine_options,
+                                               prior,
+                                               match_file)
+
+        points["seq2"] = self.reconstruct_seq2(first_image,
+                                               second_image,
+                                               cam_model,
+                                               refine_options,
+                                               prior,
+                                               match_file)
+
+        points["glob"] = self.reconstruct_global(first_image,
+                                                 second_image,
+                                                 refine_options,
+                                                 prior,
+                                                 match_file)
+        
+        best = max(points, key=points.get, default="seq1")
+        self.logger.debug(f"########################################")
+        self.logger.debug(f"Best reconstruction is: {best}")
+        self.logger.debug(f"Number of points: {points[best]}")
+        self.logger.debug(f"All results: {points}")
+        self.logger.debug(f"########################################")
+
+        if points[best] < 1:
+            raise OpenMVGControllerError("Reconstruction unsuccessful!")
+
+        dst = self.reconstruct / "sfm_data.bin"
+        if best == "seq1":
+            src = self.reconstruction1_dir / "sfm_data.bin"
+        elif best == "seq2":
+            src = self.reconstruction2_dir / "sfm_data.bin"
+        elif best == "glob":
+            src = self.reconstruction3_dir / "sfm_data.bin"
+        self.logger.debug(f"Copying {src} to {dst}")
+        shutil.copyfile(src, dst)
+
+    def reconstruct_seq1(self,
+                         first_image=None,
+                         second_image=None,
+                         cam_model=3,
+                         refine_options="ADJUST_ALL",
+                         prior=True,
+                         match_file=None):
         """Reconstruct 3D models sequentially."""
         # set manually the initial pair to avoid the prompt question
         self.logger.debug("Do incremental/sequential reconstructions")
 
-        self.reconstruction_dir = self.res_dir / "sequential"
-        self.reconstruction_dir =utils.check_dir(self.reconstruction_dir)
+        self.reconstruction1_dir = self.reconstruct / "raw1"
+        self.reconstruction1_dir = utils.check_dir(self.reconstruction1_dir)
 
         args = [str(self.openMVG_dir / "openMVG_main_IncrementalSfM")]
         args.extend(["-i", str(self.sfm_data)])
         args.extend(["-m", str(self.matches_dir)])
-        args.extend(["-o", str(self.reconstruction_dir)])
+        args.extend(["-o", str(self.reconstruction1_dir)])
 
         if first_image is not None:
             args.extend(["-a", str(first_image)])
@@ -148,13 +203,125 @@ class OpenMVGController():
         if match_file is not None:
             args.extend(["-M", str(match_file)])
 
-        utils.execute(args, self.logger, OpenMVGControllerError)
+        
+        search_str = "#3D points: "
+        try:
+            ret = utils.execute(args, self.logger, OpenMVGControllerError)
+            text = ret.stdout + "\n" + ret.stderr
+            idx = text.rfind(search_str)
+            if idx > 0:
+                sub_str = text[idx:idx+20]
+                num_points = [int(s) for s in sub_str.split() if s.isdigit()][0]
+            else:
+                num_points = 0
+        except OpenMVGControllerError as e:
+            num_points = 0
+
+        return num_points
+
+
+    def reconstruct_seq2(self,
+                         first_image=None,
+                         second_image=None,
+                         cam_model=3,
+                         refine_options="ADJUST_ALL",
+                         prior=True,
+                         match_file=None):
+        """Reconstruct 3D models sequentially."""
+        # set manually the initial pair to avoid the prompt question
+        self.logger.debug("Do incremental/sequential reconstructions")
+
+        self.reconstruction2_dir = self.reconstruct / "raw2"
+        self.reconstruction2_dir = utils.check_dir(self.reconstruction2_dir)
+
+        args = [str(self.openMVG_dir / "openMVG_main_IncrementalSfM2")]
+        args.extend(["-i", str(self.sfm_data)])
+        args.extend(["-m", str(self.matches_dir)])
+        args.extend(["-o", str(self.reconstruction2_dir)])
+
+        if first_image is not None:
+            args.extend(["-a", str(first_image)])
+        if second_image is not None:
+            args.extend(["-b", str(second_image)])
+        args.extend(["-c", str(cam_model)])
+        args.extend(["-f", str(refine_options)])
+        args.extend(["-P", str(int(prior))])
+        if match_file is not None:
+            args.extend(["-M", str(match_file)])
+
+        
+        search_str = "#3D points: "
+        try:
+            ret = utils.execute(args, self.logger, OpenMVGControllerError)
+            text = ret.stdout + "\n" + ret.stderr
+            idx = text.rfind(search_str)
+            if idx > 0:
+                sub_str = text[idx:idx+20]
+                num_points = [int(s) for s in sub_str.split() if s.isdigit()][0]
+            else:
+                num_points = 0
+        except OpenMVGControllerError as e:
+            num_points = 0
+
+        return num_points
+
+    def reconstruct_global(self,
+                           first_image=None,
+                           second_image=None,
+                           refine_options="ADJUST_ALL",
+                           prior=True,
+                           match_file=None):
+        """Reconstruct 3D models globally."""
+        # set manually the initial pair to avoid the prompt question
+        self.logger.debug("Do global reconstructions")
+
+        self.reconstruction3_dir = self.reconstruct / "raw3"
+        self.reconstruction3_dir = utils.check_dir(self.reconstruction3_dir)
+
+        # Global reconstruction needs matches.e.bin file
+        dst = self.matches_dir / "matches.e.bin"
+        if (self.matches_dir / "matches.f.bin").is_file():
+            m_file = self.matches_dir / "matches.f.bin"
+        elif (self.matches_dir / "matches.g.bin").is_file():
+            m_file = self.matches_dir / "matches.g.bin"
+        if m_file.is_file():
+            shutil.copyfile(m_file, dst)
+
+        args = [str(self.openMVG_dir / "openMVG_main_GlobalSfM")]
+        args.extend(["-i", str(self.sfm_data)])
+        args.extend(["-m", str(self.matches_dir)])
+        args.extend(["-o", str(self.reconstruction3_dir)])
+
+        if first_image is not None:
+            args.extend(["-a", str(first_image)])
+        if second_image is not None:
+            args.extend(["-b", str(second_image)])
+        args.extend(["-f", str(refine_options)])
+        args.extend(["-P", str(int(prior))])
+        if match_file is not None:
+            args.extend(["-M", str(match_file)])
+        
+        search_str = "#3Dpoints: "
+        try:
+            ret = utils.execute(args, self.logger, OpenMVGControllerError)
+            text = ret.stdout + "\n" + ret.stderr
+            idx = text.rfind(search_str)
+            if idx > 0:
+                sub_str = text[idx:idx+20]
+                num_points = [int(s) for s in sub_str.split() if s.isdigit()][0]
+            else:
+                num_points = 0
+        except OpenMVGControllerError as e:
+            num_points = 0
+
+        return num_points
+
 
     def export_MVS(self, num_threads=0):
         """Export 3D model to MVS format."""
         self.logger.debug("Exporting MVG result to MVS format")
 
-        input_file = self.reconstruction_dir / "sfm_data.bin"
+        input_file = self.reconstruct / "sfm_data.bin"
         self.export_dir = utils.check_dir(self.res_dir / "export")
         self.export_scene = self.export_dir / "scene.mvs"
         self.undistorted_dir = utils.check_dir(self.export_dir / "undistorted")

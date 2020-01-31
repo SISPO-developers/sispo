@@ -67,7 +67,10 @@ class OpenMVSController():
         args.extend(["--estimate-normals", str(int(est_normals))])
         args.extend(["--sample-mesh", str(sample_mesh)])
 
-        utils.execute(args, self.logger, OpenMVSControllerError)
+        try:
+            utils.execute(args, self.logger, OpenMVSControllerError)
+        except OpenMVSControllerError as e:
+            pass
 
     def create_mesh(self,
                     export_type="obj",
@@ -88,8 +91,15 @@ class OpenMVSController():
         working_dir = utils.check_dir(self.res_dir / "mesh")
         self.mesh_scene = working_dir / "mesh.mvs"
 
+        # If no dense point cloud exists, use exported scene
         args = [str(self.openMVS_dir / "ReconstructMesh")]
-        args.extend(["-i", str(self.dense_scene)])
+        if self.dense_scene.is_file():
+            args.extend(["-i", str(self.dense_scene)])
+        elif self.export_scene.is_file():
+            self.logger.debug("Using exported scene instead of dense scene.")
+            args.extend(["-i", str(self.export_scene)])
+        else:
+            raise OpenMVSControllerError("No pointcloud found, will not mesh")
         args.extend(["-o", str(self.mesh_scene)])
         args.extend(["-w", str(working_dir)])
 
@@ -105,9 +115,9 @@ class OpenMVSController():
         args.extend(["--remove-spikes", str(int(remove_spikes))])
         args.extend(["--close-holes", str(close_holes)])
         args.extend(["--smooth", str(smooth)])
-
+        
         utils.execute(args, self.logger, OpenMVSControllerError)
-
+        
     def refine_mesh(self,
                     export_type="obj",
                     p_prio=-1,
@@ -166,7 +176,10 @@ class OpenMVSController():
         args.extend(["--planar-vertex-ratio", str(vertex_ratio)])
         args.extend(["--use-cuda", str(int(use_cuda))])
 
-        utils.execute(args, self.logger, OpenMVSControllerError)
+        try:
+            utils.execute(args, self.logger, OpenMVSControllerError)
+        except OpenMVSControllerError as e:
+            pass
 
     def texture_mesh(self,
                      export_type="obj",
@@ -188,6 +201,7 @@ class OpenMVSController():
         working_dir = utils.check_dir(self.res_dir / "textured_mesh")
         self.textured_obj = working_dir / "textured_model.obj"
 
+        # If no refined mesh exists, use regular mesh
         args = [str(self.openMVS_dir / "TextureMesh")]
         if self.refined_mesh.is_file():
             args.extend(["-i", str(self.refined_mesh)])
@@ -195,7 +209,7 @@ class OpenMVSController():
             self.logger.debug("Using regular mesh instead of refined mesh.")
             args.extend(["-i", str(self.mesh_scene)])
         else:
-            raise OpenMVSControllerError("No mesh was found, will not texture")
+            raise OpenMVSControllerError("No mesh found, will not texture")
         args.extend(["-o", str(self.textured_obj)])
         args.extend(["-w", str(working_dir)])
 
