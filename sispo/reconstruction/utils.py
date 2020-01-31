@@ -3,10 +3,11 @@
 from pathlib import Path
 import subprocess
 
+
 def check_dir(directory, create=True):
     """
     Resolves directory and creates it, if it doesn't existing.
-    
+
     :type directory: Path or str
     :param directory: Directory to be created if not existing
 
@@ -32,8 +33,10 @@ def check_dir(directory, create=True):
 
     return dir_resolved
 
+
 def execute(args, logger, exception):
     """Utility function to execute all terminal programs."""
+    logger.debug(f"{args[0]} is running with arguments {args[1:]}")
     ret = subprocess.run(args, capture_output=True, text=True)
     logger.debug(f"{args[0]} returned:\n{ret.stdout}\n{ret.stderr}")
 
@@ -42,4 +45,5 @@ def execute(args, logger, exception):
     except subprocess.CalledProcessError as e:
         logger.debug(f"{str(e)}")
         raise exception(e)
-    
+
+    return ret
