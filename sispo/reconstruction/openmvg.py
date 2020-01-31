@@ -67,7 +67,6 @@ class OpenMVGController():
 
         utils.execute(args, self.logger, OpenMVGControllerError)
 
-
     def compute_features(self,
                          force_compute=False,
                          descriptor="SIFT",
@@ -120,7 +119,6 @@ class OpenMVGController():
 
         utils.execute(args, self.logger, OpenMVGControllerError)
 
-
     def reconstruct_multi(self,
                           first_image=None,
                           second_image=None,
@@ -153,7 +151,7 @@ class OpenMVGController():
                                                  refine_options,
                                                  prior,
                                                  match_file)
-        
+
         best = max(points, key=points.get, default="seq1")
         self.logger.debug(f"########################################")
         self.logger.debug(f"Best reconstruction is: {best}")
@@ -203,22 +201,9 @@ class OpenMVGController():
         if match_file is not None:
             args.extend(["-M", str(match_file)])
 
-        
-        search_str = "#3D points: "
-        try:
-            ret = utils.execute(args, self.logger, OpenMVGControllerError)
-            text = ret.stdout + "\n" + ret.stderr
-            idx = text.rfind(search_str)
-            if idx > 0:
-                sub_str = text[idx:idx+20]
-                num_points = [int(s) for s in sub_str.split() if s.isdigit()][0]
-            else:
-                num_points = 0
-        except OpenMVGControllerError as e:
-            num_points = 0
+        num_points = self._reconstruct(args, "#3D points: ")
 
         return num_points
-
 
     def reconstruct_seq2(self,
                          first_image=None,
@@ -249,19 +234,7 @@ class OpenMVGController():
         if match_file is not None:
             args.extend(["-M", str(match_file)])
 
-        
-        search_str = "#3D points: "
-        try:
-            ret = utils.execute(args, self.logger, OpenMVGControllerError)
-            text = ret.stdout + "\n" + ret.stderr
-            idx = text.rfind(search_str)
-            if idx > 0:
-                sub_str = text[idx:idx+20]
-                num_points = [int(s) for s in sub_str.split() if s.isdigit()][0]
-            else:
-                num_points = 0
-        except OpenMVGControllerError as e:
-            num_points = 0
+        num_points = self._reconstruct(args, "#3D points: ")
 
         return num_points
 
@@ -300,22 +273,26 @@ class OpenMVGController():
         args.extend(["-P", str(int(prior))])
         if match_file is not None:
             args.extend(["-M", str(match_file)])
-        
-        search_str = "#3Dpoints: "
+
+        num_points = self._reconstruct(args, "#3Dpoints: ")
+
+        return num_points
+
+    def _reconstruct(self, args, search_str):
+        """Common interface for multi reconstruction approach."""
+        num_points = 0
         try:
             ret = utils.execute(args, self.logger, OpenMVGControllerError)
             text = ret.stdout + "\n" + ret.stderr
             idx = text.rfind(search_str)
             if idx > 0:
                 sub_str = text[idx:idx+20]
-                num_points = [int(s) for s in sub_str.split() if s.isdigit()][0]
-            else:
-                num_points = 0
+                num_points = [int(s) for s in sub_str.split() if s.isdigit()]
+                num_points = num_points[0]
         except OpenMVGControllerError as e:
-            num_points = 0
+            pass
 
         return num_points
-
 
     def export_MVS(self, num_threads=0):
         """Export 3D model to MVS format."""
