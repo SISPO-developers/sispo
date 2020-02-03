@@ -130,7 +130,7 @@ Additionally, several parameters to describe the instrument are required to prod
 \subsubsection{Blender}
 To render the \gls{sssb} and calibration images, Blender is used. A set of predefined settings is used for each scene while some parameters can be changed via the definition file. The rendering engine \textit{Cycles} is used to render photo-realistic, physics-based images from the Blender scenes.
 
-Blender is interfaced using its Python bindings which need to be compiled manually (cf. \ref{sec:setup}. To control the behaviour of Blender the BlenderController class is used. It handles setting all defaults such as a black background and the creation of the empty default scene, SssbOnly. In addition, the BlenderController interfaces to the star catalogue and the compositor.
+Blender is interfaced using its Python bindings which need to be compiled manually (cf. \ref{sec:setup}). To control the behaviour of Blender the BlenderController class is used. It handles setting all defaults such as a black background and the creation of the empty default scene, SssbOnly. In addition, the BlenderController interfaces to the star catalogue and the compositor.
 
 Since the images are composed and calibrated at a later step, described in \ref{sec:composition}, the settings shown in Table \ref{tab:color_space} are selected to not change the rendered raw images with Blender while saving.
 
