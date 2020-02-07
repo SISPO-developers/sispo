@@ -25,7 +25,7 @@ The \gls{iau} defines a \gls{sssb} as any object in the Solar System, that is no
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=\textwidth]{doc/thesis/0_figures/Euler_diagram_of_solar_system_bodies.png}
+    \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/Euler_diagram_of_solar_system_bodies.png}
     \caption{The group of \glspl{sssb} (grey box) include a part of minor planets, trans-Neptunian objects, comets and centaurs \cite{wiki:sssb}.}
     \label{fig:sssb_diagram}
 \end{figure}
@@ -43,14 +43,45 @@ The physical parameters of comets are not well known, since they are too small f
 \subsection{Computer Vision}
 \Gls{cv} is the science of extracting information from digital photos and videos by mimicking the human vision system using a computer. \Gls{cv} encompasses a wide field of activities, from image formation, processing, detecting and matching features, image segmentation and three-dimensional reconstruction \cite{szeliski2010computer}. \Gls{cv} is the computer based variant of photogrammetry which is tasked with obtaining information about physical objects and the environment from photographic images \cite{linder2009digital}. The most common approach for three-dimensional reconstruction is stereo-photogrammetry, also referred to as computer stereo vision when using computers. Stereo-photogrammetry applies the binocular vision principle of the human vision system to obtain structural information from images \cite{do2019review}. Since most, if not all, deep space missions have a visual imager instrument on-board, \gls{cv} constitutes a logical approach of obtaining the three-dimensional structure of an observation target. A similar problem is the \gls{sfm} approach where the motion of the camera creates the different perspective.
 
+For all \gls{cv} problems, it is relevant to have a model of a camera. The most commonly used model in \gls{cv} is the pinhole camera. Figure \ref{fig:pinhole_cam} gives a simple overview of the important parts of the pinhole model.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{doc/thesis/0_figures/sfm/pinholeCamera.png}
+    \caption{Overview of the components of the pinhole camera model \cite{openMVG}. The camera intrinsic parameters model the optics, the extrinsic parameters model the camera position and orientation. The image plane is the plane of the \gls{ccd} and the focal plane is the plane where the focus of the optical system lays.}
+    \label{fig:pinhole_cam}
+\end{figure}
+
+The pinhole camera model can be described using the $3\times4$ camera matrix $\textbf{K}$ defined as
+\begin{align}
+    \textbf{K} = \begin{bmatrix}
+        f\times k_u & 0           & c_u \\
+        0           & f\times k_v & c_v \\
+        0           & 0           & 1   \\
+    \end{bmatrix} 
+    \begin{bmatrix}
+        \textbf{R} & t
+    \end{bmatrix}, \label{eq:camera_m}
+\end{align}
+where $f$ is the distance between the focal plane and the image plane, $k_u$ and $k_v$ to are scaling factors, $c_u$ and $c_v$ are the coordinates of the principle point on the image plane, $R$ is a $3\times3$ rotation matrix and $t$ being a $3\times1$ translation vector. The first matrix of $\textbf{K}$ reflects the camera intrinsic parameters while the second matrix describes the extrinsic parameters.
+
 \subsubsection{Structure-from-Motion}
 \gls{sfm} uses multiple views of the same object from different camera positions to reconstruct the geometry of that object. \Gls{sfm} encompasses the recovery of the three-dimensional structure of an object as well as camera poses \cite{szeliski2010computer}. Depth information is obtained through the motion parallax created by the moving camera. Generic steps of a \gls{sfm} processing pipeline are shown in Figure \ref{fig:sfm_steps}.
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=.3\textwidth]{doc/thesis/0_figures/SfM.pdf}
+    \includegraphics[width=.25\textwidth]{doc/thesis/0_figures/sfm/SfM.pdf}
     \caption{Generic steps of a \gls{sfm} processing pipeline.}
     \label{fig:sfm_steps}
+\end{figure}
+
+Figure \ref{fig:sfm_geometry} shows a generic observation geometry. A camera at different positions with feature points on their respective image plane and the relation between this feature point and the object point are depicted. 
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{doc/thesis/0_figures/sfm/sfm_geometry.png}
+    \caption{Generic observation geometry in a \gls{sfm} problem \cite{andrews2019asteroid}. The 3D structure can be reconstructed from several point observations and intrinsic camera parameters.}
+    \label{fig:sfm_geometry}
 \end{figure}
 
 To reconstruct three-dimensional points from an image series, correspondence between images needs to be found. This is achieved by detecting features in an image that can be detected and matched in multiple images. A feature can be described as a local, meaningful and detectable part of an image. Features are being used because of their high information content. Features can be image regions of sudden change, shape features or texture contours. Commonly detected features are corners, edges, junctions, blobs and lines \cite{2018comparingfeatures}. These features are described using feature descriptors which assign a distinct identity to the described feature for later matching. A range of different feature detection algorithms  exist, sometimes with a ready to use algorithm. While most feature detectors are combined with a distinct feature descriptor, it is possible to interchange these. Feature detectors are tasked with detecting feature-points in an image. Feature points are also referred to as key-points or interest-points. A common requirement for good feature descriptors and detectors is that both should be scaling, rotation and affine invariant. The most commonly known feature detectors and descriptor pairs are \gls{sift}, \gls{surf}. \gls{orb}, KAZE and \gls{akaze} \cite{2018comparingfeatures}.
@@ -72,17 +103,15 @@ where $l'_i$ is the epipolar line, $\textbf{F}$ is the fundamental matrix and $x
 
 If additionally, the camera intrinsics are taken into account, the fundamental matrix becomes the essential matrix $\textbf{E}$ which is defined as
 \begin{align}
-    \textbf{E} = \textbf{{K'}^T}\textbf{F}\textbf{K}, \label{eq:essential_m}
+    \textbf{E} = \textbf{K}'^{T}\textbf{F}\textbf{K}, \label{eq:essential_m}
 \end{align}
-with $\textbf{E}$ being the essential matrix, \textbf{K'} being the camera matrix of the second view, \textbf{F} being the fundamental matrix as defined in Eq. \ref{eq:fundamental_m} and \textbf{K} being the camera matrix of the first view. Therefore, the essential matrix can only be used with calibrated images where the camera intrinsics are available.
+with $\textbf{E}$ being the essential matrix, $\textbf{K}'$ being the camera matrix of the second view, $\textbf{F}$ being the fundamental matrix as defined in Eq. \ref{eq:fundamental_m} and $\textbf{K}$ being the camera matrix of the first view. Therefore, the essential matrix is intended for use in conjunction with calibrated images where the camera intrinsics are available.
 If sufficient number of points are being mapped correctly using one of the transformation from Equations \ref{eq:homography_m}, \ref{eq:fundamental_m} or \ref{eq:essential_m}, the points are geometrically verified.
 
 However after geometric verification, there might still be outliers. Therefore, outlier rejection is performed as an additional step to remove incorrect matches. Several algorithms such as \gls{ransac} \cite{fischler1981random}, \gls{acransac} \cite{moisan2012automatic}, \gls{msac} \cite{wang2009generalized} and \gls{prosac} \cite{chum2005matching} are used for outlier removal. The result of this step is the view graph that relates the different views to each other with images as nodes and pairs as edges \cite{schonberger2016structure}.
 
 Using the view graph as an input, the reconstruction process produces a three-dimensional point cloud. There are two principle methods for reconstruction, incremental and global.
 
-Incremental starts with an initial pair of views. Selecting this initial pair is a critical step as the reconstruction algorithm might not converge after using a bad initial pair. Typically, starting with a scene with many overlapping camera views constitutes a robust initialisation and results in higher accuracy because of the redundant information from many images \cite{schonberger2016structure}.
+Incremental reconstruction starts with an initial pair of views. Selecting this initial pair is a critical step as the reconstruction algorithm might not converge after using a bad initial pair. Typically, starting with a scene with many overlapping camera views constitutes a robust initialisation and results in higher accuracy because of the redundant information from many images \cite{schonberger2016structure}.
 
-
-
-Features are also used to calibrate images and adjust camera intrinsics.
+Global reconstruction uses all images in a common reference frame. While incremental reconstruction accumulates errors through adding views step-by-step, global reconstruction attempts to distribute these residuals equally for all reconstructed points.
