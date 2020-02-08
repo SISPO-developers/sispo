@@ -16,7 +16,6 @@
 % - Small Spacecrafts -> small data budgets?
 %
 % Max Science?
-% Navigation/autonomy?
 %
 % Concepts to describe???
 
@@ -115,7 +114,15 @@ Using the view graph as an input, the reconstruction process produces a three-di
 
 Incremental reconstruction starts with an initial pair of views. Selecting this initial pair is a critical step as the reconstruction algorithm might not converge after using a bad initial pair. Typically, starting with a scene with many overlapping camera views constitutes a robust initialisation and results in higher accuracy because of the redundant information from many images \cite{schonberger2016structure}.
 Consequently, additional images are registered to the current model based on corresponding features which can be used to triangulate additional points in already registered images. This step can includes estimating the pose of a camera and also the camera intrinsic parameters for uncalibrated images. Triangulation is an essential step of making \gls{sfm} robust by adding redundant information about existing points in a model and adding additional points to increase the coverage of the model \cite{schonberger2016structure}. To help these algorithms to converge, it is possible to provide initial pose estimates, so called priors.
-Image registration and triangulation are separate process although their results have a strong link. Therefore, errors of can incrase the error in the other, i.e. if the pose estimation during image registration has an error, this error propagates to the position estimate of a triangulated point. To make this process more robust Bundle Adjustment is used. It is the combined refinement of camera pose and point position estimate. A commonly used algorithm is the Levenberg-Marquardt algorithm to minimise the error \cite{schonberger2016structure, moulon2012adaptive}.
+Image registration and triangulation are separate process although their results have a strong link. Therefore, errors of can increase the error in the other, i.e. if the pose estimation during image registration has an error, this error propagates to the position estimate of a triangulated point. To make this process more robust Bundle Adjustment is used. It is the combined refinement of camera pose and point position estimate. A commonly used algorithm is the Levenberg-Marquardt algorithm to minimise the error \cite{schonberger2016structure, moulon2012adaptive}.
 
 Global reconstruction uses all images in a common reference frame. While incremental reconstruction accumulates errors through adding views step-by-step, global reconstruction attempts to distribute these residuals equally for all reconstructed points. Therefore, global reconstruction pipelines try to get rid of the problem of accumulating error of incremental \gls{sfm} \cite{Moulon_2013_ICCV}.
 For using the global method, it is necessary to calculate the essential matrix for all image pairs as the initial step. Commonly, rotation estimation is separated from translation and structure estimation. First a consistent set of rotations are computed in a global frame based on relative rotations of input pairs. Second, camera translations are estimated as well as the structure of the object.
+
+
+\subsection{Compression}
+Data compression is tasked with encoding information using less bits than the original representation. Other terms for data compression are source coding or bit-rate \cite{mahdi2012implementing}. Two principle methods of compression exist, lossless and lossy compression. While it is possible to recover all information after lossless compression, lossy compression accepts a certain loss of information to achieve higher compression ratios.
+Lossless compression uses statistical redundancy to decrease the number of bits necessary to encode the same information. This process is completely reversible. There are many lossless compression algorithms such as LZ, LZW, run-length coding and entropy coding.
+Lossy compression is not a reversible process, i.e. information is lost that cannot be recovered. The idea of lossy compression is that different types of information are perceived differently and are therefore not equally important. Audio data can be encoded with a lossy scheme by decreasing the accuracy of acoustic components that are beyond the capabilities of most humans. Another example is, that the human eye is more sensitive to changes in luminance than it is to changes in colour. Therefore, compression can lose colour information without having a strong influence of the perceived image quality. Commonly known formats for lossy compression are MP3 or JPEG. Most lossy compression algorithms are based on transform coding.
+
+\subsubsection{Image compression}
