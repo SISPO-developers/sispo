@@ -123,6 +123,22 @@ For using the global method, it is necessary to calculate the essential matrix f
 \subsection{Compression}
 Data compression is tasked with encoding information using less bits than the original representation. Other terms for data compression are source coding or bit-rate \cite{mahdi2012implementing}. Two principle methods of compression exist, lossless and lossy compression. While it is possible to recover all information after lossless compression, lossy compression accepts a certain loss of information to achieve higher compression ratios.
 Lossless compression uses statistical redundancy to decrease the number of bits necessary to encode the same information. This process is completely reversible. There are many lossless compression algorithms such as LZ, LZW, run-length coding and entropy coding.
-Lossy compression is not a reversible process, i.e. information is lost that cannot be recovered. The idea of lossy compression is that different types of information are perceived differently and are therefore not equally important. Audio data can be encoded with a lossy scheme by decreasing the accuracy of acoustic components that are beyond the capabilities of most humans. Another example is, that the human eye is more sensitive to changes in luminance than it is to changes in colour. Therefore, compression can lose colour information without having a strong influence of the perceived image quality. Commonly known formats for lossy compression are MP3 or JPEG. Most lossy compression algorithms are based on transform coding.
+Lossy compression is not a reversible process, i.e. information is lost that cannot be recovered. The idea of lossy compression is that different types of information are perceived differently and are therefore not equally important. Audio data can be encoded with a lossy scheme by decreasing the accuracy of acoustic components that are beyond the capabilities of most humans. Another example is, that the human eye is more sensitive to changes in luminance than it is to changes in colour. Therefore, compression can lose colour information without having a strong influence of the perceived image quality. Commonly known formats for lossy compression are MP3 or JPEG. Most lossy compression algorithms are based on transform coding, especially \gls{dct}.
 
 \subsubsection{Image compression}
+Image compression is a sub-discipline of data compression. Two common types of image compression techniques are \gls{dct}, used for example in JPEG, and \gls{dwt}, used for example in JPEG 2000. 
+
+\Gls{dct} is a type of Fourier transform, hence it expresses finite data as a sum of cosines. In contrast to the Fourier transform itself, it employs however only real components. \Gls{dct} compresses data in form of discrete data blocks. For example, images can be compressed with differently sized image parts such as $8\times8$ pixels, commonly used in JPEG.
+
+\Gls{dwt} uses a wavelet transform, hence it expresses data using a sum of wavelets. \Gls{dwt} is particularly well suited to compress images with high frequency components, such as a star background. It is not well-suited to compress periodic data.
+
+\subsection{Image Processing}
+Digital image processing is the use of a digital computer to process digital images through algorithms.
+
+\subsubsection{Gaussian Filtering}
+Gaussian Filtering refers to convolving an image with the two-dimensional Gaussian function. It is used to blur images and remove noise. The two-dimensional Gaussian function is required is defined as
+\begin{align}
+    G(x,y) = \frac{1}{2\pi \sigma^{2}}e^{-\frac{x^2+y^2}{2\sigma^2}}, \label{eq:gauss_2d}
+\end{align}
+where $\sigma$ is the standard deviation of the Gaussian distribution, and $x$ and $y$ are the coordinates.
+
