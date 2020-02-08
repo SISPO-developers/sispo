@@ -48,9 +48,9 @@ For all \gls{cv} problems, it is relevant to have a model of a camera. The most 
 \begin{figure}[htb]
     \centering
     \includegraphics[width=\textwidth]{doc/thesis/0_figures/sfm/pinholeCamera.png}
-    \caption{Overview of the components of the pinhole camera model \cite{openMVG}. The camera intrinsic parameters model the optics, the extrinsic parameters model the camera position and orientation. The image plane is the plane of the \gls{ccd} and the focal plane is the plane where the focus of the optical system lays.}
+    \caption{Overview of the components of the pinhole camera model \cite{openMVG}. The camera intrinsic parameters model the optics, the extrinsic parameters model the camera position and orientation. The image plane is the plane of the \gls{ccd} and the focal plane is the plane where the focus of the optical system is.}
     \label{fig:pinhole_cam}
-\end{figure}
+\end{figure} 
 
 The pinhole camera model can be described using the $3\times4$ camera matrix $\textbf{K}$ defined as
 \begin{align}
@@ -64,6 +64,7 @@ The pinhole camera model can be described using the $3\times4$ camera matrix $\t
     \end{bmatrix}, \label{eq:camera_m}
 \end{align}
 where $f$ is the distance between the focal plane and the image plane, $k_u$ and $k_v$ to are scaling factors, $c_u$ and $c_v$ are the coordinates of the principle point on the image plane, $R$ is a $3\times3$ rotation matrix and $t$ being a $3\times1$ translation vector. The first matrix of $\textbf{K}$ reflects the camera intrinsic parameters while the second matrix describes the extrinsic parameters.
+More sophisticated pinhole camera models also include distortions. These can include one or more factors for radial and tangential distortions. A special case it the Brown T2 model which includes three radial and two tangential distortion factors.
 
 \subsubsection{Structure-from-Motion}
 \gls{sfm} uses multiple views of the same object from different camera positions to reconstruct the geometry of that object. \Gls{sfm} encompasses the recovery of the three-dimensional structure of an object as well as camera poses \cite{szeliski2010computer}. Depth information is obtained through the motion parallax created by the moving camera. Generic steps of a \gls{sfm} processing pipeline are shown in Figure \ref{fig:sfm_steps}.
@@ -108,10 +109,13 @@ If additionally, the camera intrinsics are taken into account, the fundamental m
 with $\textbf{E}$ being the essential matrix, $\textbf{K}'$ being the camera matrix of the second view, $\textbf{F}$ being the fundamental matrix as defined in Eq. \ref{eq:fundamental_m} and $\textbf{K}$ being the camera matrix of the first view. Therefore, the essential matrix is intended for use in conjunction with calibrated images where the camera intrinsics are available.
 If sufficient number of points are being mapped correctly using one of the transformation from Equations \ref{eq:homography_m}, \ref{eq:fundamental_m} or \ref{eq:essential_m}, the points are geometrically verified.
 
-However after geometric verification, there might still be outliers. Therefore, outlier rejection is performed as an additional step to remove incorrect matches. Several algorithms such as \gls{ransac} \cite{fischler1981random}, \gls{acransac} \cite{moisan2012automatic}, \gls{msac} \cite{wang2009generalized} and \gls{prosac} \cite{chum2005matching} are used for outlier removal. The result of this step is the view graph that relates the different views to each other with images as nodes and pairs as edges \cite{schonberger2016structure}.
+However after geometric verification, there might still be outliers. Therefore, outlier rejection is performed as an additional step to remove incorrect matches. Several algorithms such as \gls{ransac} \cite{fischler1981random}, \gls{acransac} \cite{moisan2012automatic}, \gls{msac} \cite{wang2009generalized} and \gls{prosac} \cite{chum2005matching} are used for outlier removal. All of these algorithms aim at robustly estimate the correct model and remove outliers. The result of this step is the view graph that relates the different views to each other with images as nodes and pairs as edges \cite{schonberger2016structure}.
 
-Using the view graph as an input, the reconstruction process produces a three-dimensional point cloud. There are two principle methods for reconstruction, incremental and global.
+Using the view graph as an input, the reconstruction process produces a three-dimensional point cloud. There are two principle methods for reconstruction, incremental and global. In case the image set is unordered, the more common approach is to use the incremental approach \cite{schonberger2016structure}.
 
 Incremental reconstruction starts with an initial pair of views. Selecting this initial pair is a critical step as the reconstruction algorithm might not converge after using a bad initial pair. Typically, starting with a scene with many overlapping camera views constitutes a robust initialisation and results in higher accuracy because of the redundant information from many images \cite{schonberger2016structure}.
+Consequently, additional images are registered to the current model based on corresponding features which can be used to triangulate additional points in already registered images. This step can includes estimating the pose of a camera and also the camera intrinsic parameters for uncalibrated images. Triangulation is an essential step of making \gls{sfm} robust by adding redundant information about existing points in a model and adding additional points to increase the coverage of the model \cite{schonberger2016structure}. To help these algorithms to converge, it is possible to provide initial pose estimates, so called priors.
+Image registration and triangulation are separate process although their results have a strong link. Therefore, errors of can incrase the error in the other, i.e. if the pose estimation during image registration has an error, this error propagates to the position estimate of a triangulated point. To make this process more robust Bundle Adjustment is used. It is the combined refinement of camera pose and point position estimate. A commonly used algorithm is the Levenberg-Marquardt algorithm to minimise the error \cite{schonberger2016structure, moulon2012adaptive}.
 
-Global reconstruction uses all images in a common reference frame. While incremental reconstruction accumulates errors through adding views step-by-step, global reconstruction attempts to distribute these residuals equally for all reconstructed points.
+Global reconstruction uses all images in a common reference frame. While incremental reconstruction accumulates errors through adding views step-by-step, global reconstruction attempts to distribute these residuals equally for all reconstructed points. Therefore, global reconstruction pipelines try to get rid of the problem of accumulating error of incremental \gls{sfm} \cite{Moulon_2013_ICCV}.
+For using the global method, it is necessary to calculate the essential matrix for all image pairs as the initial step. Commonly, rotation estimation is separated from translation and structure estimation. First a consistent set of rotations are computed in a global frame based on relative rotations of input pairs. Second, camera translations are estimated as well as the structure of the object.
