@@ -141,4 +141,20 @@ Gaussian Filtering refers to convolving an image with the two-dimensional Gaussi
     G(x,y) = \frac{1}{2\pi \sigma^{2}}e^{-\frac{x^2+y^2}{2\sigma^2}}, \label{eq:gauss_2d}
 \end{align}
 where $\sigma$ is the standard deviation of the Gaussian distribution, and $x$ and $y$ are the coordinates.
+In its theoretical version, the Gaussian distribution would extend to infinity. To be practically applied in a digital system, the Gaussian distribution needs to be cut at a certain distance from the center. The range over which the filter is applied is the kernel size which is normally related to its standard deviation, since \SI{99}{\percent} of the distribution falls within 3 standard deviations. In addition, the Gaussian distribution needs to be discretised to be usable in a digital system. The two-dimensional Gaussian filter is rotationally symmetric and larger standard deviation result in more blurring due to a wider peak.
 
+\subsubsection{Down-sample with local means}
+Down-sampling is the process of reducing the number of pixels in an image. When down-sampled with local means, it refers to taking the average of a small set of pixels and using it as the new value of a single pixel. For example, if an image shall be reduced by a factor of two, the value of four pixels of the input are averaged for a single pixel of the output. In the example below a $4\times4$ matrix is down-sampled by a scaling factor of two to give a $2\times2$ matrix.
+\begin{align*}
+    \begin{bmatrix}
+        1  & 2  & 3  & 4\\
+        5  & 6  & 7  & 8\\
+        9  & 10 & 11 & 12\\
+        13 & 14 & 15 & 16\\
+    \end{bmatrix} 
+    \rightarrow 
+    \begin{bmatrix}
+        3.5  & 5.5\\
+        11.5 & 13.5\\ 
+    \end{bmatrix}
+\end{align*}
