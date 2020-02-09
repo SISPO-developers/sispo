@@ -119,6 +119,10 @@ Image registration and triangulation are separate process although their results
 Global reconstruction uses all images in a common reference frame. While incremental reconstruction accumulates errors through adding views step-by-step, global reconstruction attempts to distribute these residuals equally for all reconstructed points. Therefore, global reconstruction pipelines try to get rid of the problem of accumulating error of incremental \gls{sfm} \cite{Moulon_2013_ICCV}.
 For using the global method, it is necessary to calculate the essential matrix for all image pairs as the initial step. Commonly, rotation estimation is separated from translation and structure estimation. First a consistent set of rotations are computed in a global frame based on relative rotations of input pairs. Second, camera translations are estimated as well as the structure of the object.
 
+Both, incremental and global \gls{sfm} methods produce a sparse point cloud as an output. Additionally, they estimate the intrinsic and extrinsic camera parameters. As a next step the sparse point cloud can be densified using \gls{mvs} techniques \cite{pagani2011dense}. Image pairs with their camera positions are being used to calculate depth maps. These depth maps can be fused to increase the number of points of the point cloud. This process mimicks human depth perception and uses this information to improve the accuracy of its point clouds.
+
+In the next step, the point cloud is converted into a 3D model by estimating a mesh surface from the point cloud. In addition, outliers are detected and removed from the scene. Different approaches can be used which yield different results.
+
 
 \subsection{Compression}
 Data compression is tasked with encoding information using less bits than the original representation. Other terms for data compression are source coding or bit-rate \cite{mahdi2012implementing}. Two principle methods of compression exist, lossless and lossy compression. While it is possible to recover all information after lossless compression, lossy compression accepts a certain loss of information to achieve higher compression ratios.
@@ -136,12 +140,12 @@ Image compression is a sub-discipline of data compression. Two common types of i
 Digital image processing is the use of a digital computer to process digital images through algorithms.
 
 \subsubsection{Gaussian Filtering}
-Gaussian Filtering refers to convolving an image with the two-dimensional Gaussian function. It is used to blur images and remove noise. The two-dimensional Gaussian function is required is defined as
+Gaussian Filtering refers to convolving an image with the two-dimensional Gaussian function. It is used to blur images and remove noise. The two-dimensional Gaussian function with a mean of zero is defined as
 \begin{align}
     G(x,y) = \frac{1}{2\pi \sigma^{2}}e^{-\frac{x^2+y^2}{2\sigma^2}}, \label{eq:gauss_2d}
 \end{align}
 where $\sigma$ is the standard deviation of the Gaussian distribution, and $x$ and $y$ are the coordinates.
-In its theoretical version, the Gaussian distribution would extend to infinity. To be practically applied in a digital system, the Gaussian distribution needs to be cut at a certain distance from the center. The range over which the filter is applied is the kernel size which is normally related to its standard deviation, since \SI{99}{\percent} of the distribution falls within 3 standard deviations. In addition, the Gaussian distribution needs to be discretised to be usable in a digital system. The two-dimensional Gaussian filter is rotationally symmetric and larger standard deviation result in more blurring due to a wider peak.
+In its theoretical version, the Gaussian distribution would extend to infinity. To be practically applied in a digital system, the Gaussian distribution needs to be cut at a certain distance from the centre. The range over which the filter is applied is the kernel size which is normally related to its standard deviation, since \SI{99}{\percent} of the distribution falls within 3 standard deviations. In addition, the Gaussian distribution needs to be discretised to be usable in a digital system. The two-dimensional Gaussian filter is rotationally symmetric and larger standard deviation result in more blurring due to a wider peak.
 
 \subsubsection{Down-sample with local means}
 Down-sampling is the process of reducing the number of pixels in an image. When down-sampled with local means, it refers to taking the average of a small set of pixels and using it as the new value of a single pixel. For example, if an image shall be reduced by a factor of two, the value of four pixels of the input are averaged for a single pixel of the output. In the example below a $4\times4$ matrix is down-sampled by a scaling factor of two to give a $2\times2$ matrix.
@@ -158,3 +162,17 @@ Down-sampling is the process of reducing the number of pixels in an image. When 
         11.5 & 13.5\\ 
     \end{bmatrix}
 \end{align*}
+
+\subsection{Rendering}
+Rendering is process of creating two-dimensional images from three-dimensional objects.
+
+\subsubsection{Path Tracing}
+Ray tracing is a rendering technique where the path of light rays is traced to generate pixels while simulating effects of encounters with objects. Ray tracing can simulate different effects, such as reflection, refraction, scattering and dispersion. While producing a high degree of realism in images, the computational costs are high as well. There are four types of rays: camera rays, reflection rays, transmission rays and shadow rays. Reflection and transmissions can be further categorised as either diffuse, glossy or singular. Ray tracing is a popular rendering technique where a high degree of realism is necessary since it is a realistic simulation of light transport.
+
+Path Tracing is a special form of Ray Tracing in which not individual light rays are followed which then branch into an exponentially growing number of rays when being reflected or refracted but only a single path is followed, cutting computation time dramatically in cases with a lot of reflection, refraction and shadow rays per pixel \cite{kajiya1986rendering}.
+
+\subsection{3D Models}
+Point clouds
+ -points
+Mesh
+ -Vertices, faces,
