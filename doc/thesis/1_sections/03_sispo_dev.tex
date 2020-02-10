@@ -240,13 +240,13 @@ The photon flux is defined as,
 \begin{align}
     F = F_0 \times \frac{d\lambda}{\lambda} \times 10^{-0.4 \times m}, \label{eq:comp_flux_0mag}
 \end{align}
-with $F_0$ being the flux at magnitude 0, $\frac{d\lambda}{\lambda}$ is a factor of 0.16 for the V-band, and $m$ is the object's magnitude. The V-band photon flux at magnitude $m = 0$ in SI units is \SI{5.4964e10}{\per\second \per\square\meter}. With a magnitude of $m_{\bigodot} = -26.74$ at a distance of \SI{1}{\astronomicalunit}, the solar photon flux becomes \SI{4.36715206e+20}{\per\second\per\square\meter}.
+with $F_0$ being the flux at magnitude 0, $\frac{d\lambda}{\lambda}$ is a factor of 0.16 for the V-band, and $m$ is the object's magnitude. The V-band photon flux at magnitude $m = 0$ in SI units is \SI{5.4964e10}{\per\second \per\square\meter}. With a magnitude of $m_{\odot} = -26.74$ at a distance of \SI{1}{\astronomicalunit}, the solar photon flux becomes \SI{4.36715206e+20}{\per\second\per\square\meter}.
 
 In the first step, the reference photon flux per pixel is calculated using,
 \begin{align}
-        F_{ref} = F \times \left(\frac{\SI{1}{\astronomicalunit}}{d_{\bigodot}}\right)^2 \times \frac{A \times pix_A}{f^2 \times \pi}, \label{eq:comp_ref_flux}
+        F_{ref} = F \times \left(\frac{\SI{1}{\astronomicalunit}}{d_{\odot}}\right)^2 \times \frac{A \times pix_A}{f^2 \times \pi}, \label{eq:comp_ref_flux}
 \end{align}
-where $F$ is the solar flux at \SI{1}{\astronomicalunit}, $d_{\bigodot}$ is the spacecraft distance from the Sun, $A$ is the aperture area, $pix_A$ is the area of a pixel and $f$ is the focal length.
+where $F$ is the solar flux at \SI{1}{\astronomicalunit}, $d_{\odot}$ is the spacecraft distance from the Sun, $A$ is the aperture area, $pix_A$ is the area of a pixel and $f$ is the focal length.
 
 For the star background, every pixel is calibrated according to Eq. \ref{eq:comp_cal_starmap}.
 \begin{align}
