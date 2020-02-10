@@ -66,25 +66,60 @@ Flyby scenarios in the Solar System are often closed orbits around the Sun, i.e.
 Most asteroids move on orbits with low eccentricity while comets often have high eccentricities. This stems from their origin, while asteroids mostly origin from the main belt which is nearly circular region, comets enter the inner Solar System from far out, i.e. there aphelion is still far from the Sun resulting in high eccentricities.
 
 \subsection{Rendering}
-Rendering is process of creating two-dimensional images from three-dimensional objects.
+Rendering is process of creating two-dimensional images from three-dimensional objects. For rendering, a virtual world is created where models reside. Light sources and cameras are there to create light and define which part of the world is being captured.
 
 \subsubsection{3D Models}
-a point cloud is a set of points with coordinates. Within this work, it refers to points in three-dimensional space.
+A point cloud is a set of points with coordinates. Within this work, it refers to points in three-dimensional space.
 A vertex is a corner of a polygon, i.e. every triangle has three vertices and every tetrahedron has four vertices. A face refers to the surfaces that make up a 3D model.
 
-\subsubsection{Shaders}
+\subsubsection{Shader}
+A shader is used to calculate effects during the rendering process. Shaders are meant to provide a flexible method to influence the rendering outcome during the rendering process. While shaders are not restricted to be executed on a \gls{gpu}, it is commonly done since a \gls{gpu}'s hardware is well suited for this task. Shaders can be used to change the positions of vertices, colours, lighting and surface properties by using equations. Through the interplay of these properties, it is possible to generate complex surface structure and texture procedurally generating details as needed.
 
+\subsubsection{Field of View}
+The \gls{fov} is the part of the 3D scene that is visible from the camera. From geometric considerations, vectors that represent the edges of the \gls{fov} can be constructed.
+
+\begin{align}
+    e_{i} = v_d \pm \frac{v_j \times s_k}{2 \times f}, \label{eq:fov_edge}
+\end{align}
+where $e_{i}$ is a vector for the $i^{th}$ edge of the \gls{fov}, $v_d$ is the direction vector of the camera, $v_j$ is the vector pointing right or up, $s_k$ is the camera sensor width or height and $f$ is the focal length.
 
 \subsubsection{Path Tracing}
 Ray tracing is a rendering technique where the path of light rays is traced to generate pixels while simulating effects of encounters with objects. Ray tracing can simulate different effects, such as reflection, refraction, scattering and dispersion. While producing a high degree of realism in images, the computational costs are high as well. There are four types of rays: camera rays, reflection rays, transmission rays and shadow rays. Reflection and transmissions can be further categorised as either diffuse, glossy or singular. Ray tracing is a popular rendering technique where a high degree of realism is necessary since it is a realistic simulation of light transport.
 
 Path Tracing is a special form of Ray Tracing in which not individual light rays are followed which then branch into an exponentially growing number of rays when being reflected or refracted but only a single path is followed, cutting computation time dramatically in cases with a lot of reflection, refraction and shadow rays per pixel \cite{kajiya1986rendering}.
 
-\subsubsection{Star Rendering}
+\subsubsection{Photometric calibration}
+Photometric calibration is the process of correcting raw images from a sensor to a common level of brightness. Differences might come from different exposure times, different gains or different cameras. Photometric calibration uses a photometric systems, such as the \gls{ubv}, which are reference systems with which star magnitude measurements can be compared for a given band of the system \cite{bessel1979ubvri}.
 
+Given the magnitude of a specific band, the photon flux of a reference object can be calculated using
+\begin{align}
+    F = F_0 \times \frac{d\lambda}{\lambda} \times 10^{-0.4 \times m}, \label{eq:comp_flux_0mag}
+\end{align}
+with $F_0$ being the flux at magnitude 0, $\frac{d\lambda}{\lambda}$ is a factor that depends on the band, and $m$ is the object's magnitude. The required constants to calculate the photon flux of an object from its magnitude in a given band are given in Table \ref{tab:ubv_constants}.
 
-\subsubsection{Composition}
+\begin{table}[htb]
+    \centering
+    \caption{Constants for calculating photon fluxes using the \gls{ubv} \cite{Bessell1979UBVRIPhotometry}.}
+    \label{tab:ubv_constants}
+    \begin{tabular}{l|l|l|l}
+        \textbf{Band} & \textbf{Center Wavelength [\SI{}{\nano\meter}]} & \textbf{$F_0$ [\SI{1e-26}{\watt\per\square\meter\per\hertz}]} & \textbf{$\frac{d\lambda}{\lambda}$}[~] \\ \hline
+        U             & 0.36                       & 1810        & 0.15             \\
+        B             & 0.44                       & 4260        & 0.22             \\
+        V             & 0.55                       & 3640        & 0.16            
+    \end{tabular}
+\end{table}
 
+The next step of photometric calibration is to calculate the reference number of photons per pixel of the \gls{ccd} $N_{ref}$ using
+\begin{align}
+    N_{ref} = F \times \frac{A \times A_{pixel}}{f^2 \times \pi}, \label{eq:comp_flux_pix}
+\end{align}
+where $F$ is the total photon flux, $A$ is the aperture area, $A_{pixel}$ is the area of a pixel and $f$ is the focal length of the instrument.
+
+In the last step, the calibration factor is calculated. It is defined as
+\begin{align}
+    f_c = \frac{N_{ref} \times \alpha}{I_{ref}}, \label{eq:comp_cal_fac}
+\end{align}
+where $F_{ref}$ is the reference flux, $\alpha$ is the geometric albedo and $I_{ref}$ is the reference intensity. Multiplying the image with $f_c$ produces the calibrated image.
 
 \subsection{Computer Vision}
 \Gls{cv} is the science of extracting information from digital photos and videos by mimicking the human vision system using a computer. \Gls{cv} encompasses a wide field of activities, from image formation, processing, detecting and matching features, image segmentation and three-dimensional reconstruction \cite{szeliski2010computer}. \Gls{cv} is the computer based variant of photogrammetry which is tasked with obtaining information about physical objects and the environment from photographic images \cite{linder2009digital}. The most common approach for three-dimensional reconstruction is stereo-photogrammetry, also referred to as computer stereo vision when using computers. Stereo-photogrammetry applies the binocular vision principle of the human vision system to obtain structural information from images \cite{do2019review}. Since most, if not all, deep space missions have a visual imager instrument on-board, \gls{cv} constitutes a logical approach of obtaining the three-dimensional structure of an observation target. A similar problem is the \gls{sfm} approach where the motion of the camera creates the different perspective.
@@ -174,23 +209,53 @@ To increase the accuracy of a rough surface model, the underlying mesh can be fu
 
 The final step in 3D reconstruction is texturing the surface model. Ideally, the camera poses and the surface model are exact which would make texturing simple. However, in most cases the texturing step requires dealing with inaccuracies in both, the camera poses and the surface model. Other effects such as differing illumination and exposure, unreconstructed occluding objects, varying image scales have to be overcome as well. Texturing is often separated in selecting the images to use for texturing and optimising the resulting image set for consistency \cite{Waechter2014LetReconstructions}.
 Image selection algorithms can be categorised by either blending multiple images per face to achieve consistent texture across patches. Another approach is to use only a single image per face. Both approaches come with advantages and disadvantages \cite{Waechter2014LetReconstructions}.
-Furthermore, colors need to be adjusted, especially because of differences in exposure and illumination. This process attempts to reduce the visibility of seams between patches by photometric adjustments. Colour adjustment can be split into local or global adjustments. Local adjustment tries to smooth the transition between texture patches by introducing gradients in the texture luminances for example by using heat diffusion equations \cite{Velho2007ProjectivePhotography}. For global adjustment, the luminance correction terms are calculated for a global optimum 15 \cite{Lempitsky2007SeamlessMaps}.
+Furthermore, colors need to be adjusted, especially because of differences in exposure and illumination. This process attempts to reduce the visibility of seams between patches by photometric adjustments. Colour adjustment can be split into local or global adjustments. Local adjustment tries to smooth the transition between texture patches by introducing gradients in the texture luminances for example by using heat diffusion equations \cite{Velho2007ProjectivePhotography}. For global adjustment, the luminance correction terms are calculated for a global optimum \cite{Lempitsky2007SeamlessMaps}.
 
 
 \subsection{Image Processing}
-Digital image processing is the use of a digital computer to process digital images through algorithms. Relevant to this work are compression (cf. Section \ref{sec:t_compress}), Gaussian filtering  (cf. Section \ref{sec:t_gauss}) and image down-sampling  (cf. Section \ref{sec:t_downsampl}).
+Digital image processing is the use of a digital computer to process digital images through algorithms. Relevant to this work are compression (cf. Section \ref{sec:t_compress}), Gaussian filtering  (cf. Section \ref{sec:t_gauss}) and image down-sampling  (cf. Section \ref{sec:t_downsample}).
 
 \subsubsection{Compression} \label{sec:t_compress}
 Data compression is tasked with encoding information using less bits than the original representation. Other terms for data compression are source coding or bit-rate \cite{mahdi2012implementing}. Two principle methods of compression exist, lossless and lossy compression. While it is possible to recover all information after lossless compression, lossy compression accepts a certain loss of information to achieve higher compression ratios.
 Lossless compression uses statistical redundancy to decrease the number of bits necessary to encode the same information. This process is completely reversible. There are many lossless compression algorithms such as Huffman coding, arithmetic coding or Ziv-Lempel algorithms \cite{Bocharova2009CompressionMultimedia}.
 Lossy compression is not a reversible process, i.e. information is lost and cannot be recovered. The idea of lossy compression is that different types of information are perceived differently and are therefore not equally important. Lossy compression need to trade-off between compression and data distortion. Audio data can be encoded with a lossy scheme by decreasing the accuracy of acoustic components that are beyond the capabilities of most humans. Another example is, that the human eye is more sensitive to changes in brightness (luminance) than it is to changes in colour (chrominance). Therefore, compression can lose colour information without having a strong influence of the perceived image quality. As a result, images for compression often use a luminance-chrominance representation. The components in such a representation are almost uncorrelated and it is easier to reduce colour information while keeping luminance information. Commonly known formats for lossy compression are MP3 or JPEG. Most lossy compression algorithms are based on transform coding, especially \gls{dct} \cite{Bocharova2009CompressionMultimedia}.
 
-Image compression is a sub-discipline of data compression. Two common types of image compression techniques are \gls{dct}, used for example in JPEG, and \gls{dwt}, used for example in JPEG 2000.
+Image compression is a sub-discipline of data compression. Two common types of image compression techniques are \gls{dct}, used for example in the \gls{jpeg} format, and \gls{dwt}, used for example in JPEG 2000 format.
 
-\Gls{dct} is a type of Fourier transform, hence it expresses finite data as a sum of cosines. In contrast to the Fourier transform itself, it employs however only real components. \Gls{dct} compresses data in form of discrete data blocks. For example, images can be compressed with differently sized image parts such as $8\times8$ pixels, commonly used in JPEG \cite{Bocharova2009CompressionMultimedia}.
+\Gls{dct} is a type of Fourier transform, hence it expresses finite data as a sum of cosines. In contrast to the Fourier transform itself, it employs however only real components. \Gls{dct} compresses data in form of discrete data blocks. Images can be compressed with differently sized image parts such as $8\times8$ pixels, commonly used in JPEG \cite{Bocharova2009CompressionMultimedia}.
+The frequency response of the \gls{dct} improves with longer harmonic functions. Hence, \gls{dct} does not have favourable compression characteristics if an image has many small details or contours \cite{Bocharova2009CompressionMultimedia}.
 
-\Gls{dwt} uses a wavelet transform, hence it expresses data using a sum of wavelets. \Gls{dwt} is particularly well suited to compress images with high frequency components, such as a star background. It is not well-suited to compress periodic data.
+\Gls{dwt} uses a wavelet transform, hence it expresses data using a set of wavelet base functions. \gls{dwt} has an advantage over \gls{dct} for finite, non-periodic or non-stationary signals. As a result, \gls{dwt}-based compression is particularly well suited to compress images with high frequency components, such as a star background \cite{Bocharova2009CompressionMultimedia}. Through the properties of wavelets, their use in a \gls{dwt} results in a hierarchical structure of the output data. Therefore, when transforming an image with a \gls{dwt}, the lowest lowpass subband of an image contains a rough approximation of a given image. Consequently, every additional higher frequency subband adds additional detail to the image. Additionally, only small parts of an image contain high frequency components, such as contours and sharp details, therefore these subbands can be strongly compressed using lossless algorithms since these subbands mostly contain zeros \cite{Bocharova2009CompressionMultimedia}.
 
+The hierarchical structure of an image transformed with \gls{dwt} is depicted in Figure 
+\begin{figure}[htb]
+    \centering
+        \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/jp2_jpeg/Jpeg2000_2-level_wavelet_transform-lichtenstein.png}
+        \caption{Hierarchical structure of an image transformed with 2-level \gls{dwt}.}
+        \label{fig:kepler_elements}
+\end{figure}
+
+A comparison of an image compressed with \gls{jpeg} and with \gls{jpeg}2000 compression with roughly similar compression ratio is shown in Figure \ref{fig:jpg_jp2_comparison}. It is clearly visible thatartefacts are created around the contours in the \gls{jpeg} image in contrast to the \gls{jpeg}2000 image, despite the higher compression ratio of the \gls{jpeg}2000 image.
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/jp2_jpeg/orig.png}
+        \caption{Original image without compression.}
+        \label{fig:kepler_elements}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/jp2_jpeg/proc_5.jpg}
+        \caption{\Gls{jpeg} compression with ratio 61.2:1.}
+        \label{fig:kepler_elements}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.32\textwidth}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/jp2_jpeg/proc_11.png}
+        \caption{\Gls{jpeg}2000 compression with ratio 64.3:1.}
+        \label{fig:kepler_elements}
+    \end{subfigure}
+    \caption{Comparison of \gls{dct} compression, using \gls{jpeg}, and \gls{dwt}, using \gls{jpeg}2000 compression. Despite having a higher compression ratio, the \gls{jpeg}2000 image produces a better result for a \gls{sssb} image.}
+    \label{fig:jpg_jp2_comparison}
+\end{figure}
 
 \subsubsection{Gaussian Filtering} \label{sec:t_gauss}
 Gaussian Filtering refers to convolving an image with the two-dimensional Gaussian function. It is used to blur images and remove noise. The two-dimensional Gaussian function with a mean of zero is defined as
