@@ -274,7 +274,7 @@ class OpenMVGController():
         if match_file is not None:
             args.extend(["-M", str(match_file)])
 
-        num_points = self._reconstruct(args, "#3Dpoints: ")
+        num_points = self._reconstruct(args, "#3DPoints: ")
 
         return num_points
 
