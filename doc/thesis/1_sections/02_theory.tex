@@ -31,13 +31,60 @@ The \gls{iau} defines a \gls{sssb} as any object in the Solar System, that is no
 
 Within this work, the term \gls{sssb} mostly refers to asteroids and comets. Therefore, general properties of asteroids and comets are explained in more detail.
 
-\subsection{Asteroids}
+\subsubsection{Asteroids}
 Asteroids are rocky bodies that mostly reside in an orbit between Mars and Jupiter, i.e. the asteroid main belt. The terms asteroid and minor planet are often used interchangeably. Since most asteroids are only observed remotely, only their ephemeris and absolute magnitude is observed which gives a rough estimate of its size. However, some asteroids also have physical parameters like rotation period, geometric albedo, colours, spectral type, mass and bulk density.
 
-\subsection{Comets}
+\subsubsection{Comets}
 Comets are small icy bodies and reside mostly in the outer Solar System. On long timescales, comets are perturbed by the gravity of other objects and leave their outer Solar System orbits to get closer to the Sun. In this process, the ices begin to evaporate. This creates the well known coma around the nucleus of a comet. In most cases the coma is several orders of magnitudes larger than the nucleus, the nucleus is on the order of a few kilometres while the coma can be on the order of hundreds of thousands of kilometres. Additionally, two tails are formed, a gas and a dust tail. The gas tail is formed from coma particles that move away from the nucleus and are then carried away by the solar wind. On the other hand, the dust tail is formed from dust particles in the coma which are carried away from the nucleus by the solar radiation pressure.
 
 The physical parameters of comets are not well known, since they are too small for ground observations and it is difficult to image the nucleus when they come closer to the Sun since the nucleus is surrounded by the coma. While the ephemeris and magnitude are known for most comets, only a few comets have known rotation periods and geometric albedos.
+
+\subsubsection{Orbit Mechanics}
+All objects in space move on trajectories, or orbits if closed, following the Kepler equations. Trajectories are commonly defined using six orbital elements.
+Semi-major axis $a$, eccentricity $e$, inclination $i$, right ascension of ascending node $\Omega$, argument of periapsis $\omega$ and the true anomaly $\nu$ or mean anomaly $M$ at a given epoch. This parameterisation is also called modified Keplerian elements \cite{Hintz2015FundamentalsAstrodynamics}.
+
+Figure \ref{fig:kepler_elements} shows the geometric relations of the angular Elements.
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/Orbit_elements.png}
+        \caption{Modified Keplerian elements \cite{Commons2019File:Orbit1.svgRepository}.}
+        \label{fig:kepler_elements}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/Hyperbolic_trajectory.png}
+        \caption{Closed orbit around the Sun (\astrosun) that becomes hyperbolic trajectory about \venus~\cite{Hintz2015FundamentalsAstrodynamics}.}
+        \label{fig:hyperbolic_orbit}
+    \end{subfigure}
+\end{figure}
+    
+
+Flyby scenarios in the Solar System are often closed orbits around the Sun, i.e. $e_{\astrosun} < 1$ while they are hyperbolic trajectories in the reference frame of the target, i.e. $e > 1$. An example is given in Figure \ref{fig:hyperbolic_orbit}. Because of the low mass of \glspl{sssb}, these trajectories resemble a straight line in the \gls{sssb} frame during a flyby.
+
+Most asteroids move on orbits with low eccentricity while comets often have high eccentricities. This stems from their origin, while asteroids mostly origin from the main belt which is nearly circular region, comets enter the inner Solar System from far out, i.e. there aphelion is still far from the Sun resulting in high eccentricities.
+
+\subsection{Rendering}
+Rendering is process of creating two-dimensional images from three-dimensional objects.
+
+\subsubsection{3D Models}
+a point cloud is a set of points with coordinates. Within this work, it refers to points in three-dimensional space.
+A vertex is a corner of a polygon, i.e. every triangle has three vertices and every tetrahedron has four vertices. A face refers to the surfaces that make up a 3D model.
+
+\subsubsection{Shaders}
+
+
+\subsubsection{Path Tracing}
+Ray tracing is a rendering technique where the path of light rays is traced to generate pixels while simulating effects of encounters with objects. Ray tracing can simulate different effects, such as reflection, refraction, scattering and dispersion. While producing a high degree of realism in images, the computational costs are high as well. There are four types of rays: camera rays, reflection rays, transmission rays and shadow rays. Reflection and transmissions can be further categorised as either diffuse, glossy or singular. Ray tracing is a popular rendering technique where a high degree of realism is necessary since it is a realistic simulation of light transport.
+
+Path Tracing is a special form of Ray Tracing in which not individual light rays are followed which then branch into an exponentially growing number of rays when being reflected or refracted but only a single path is followed, cutting computation time dramatically in cases with a lot of reflection, refraction and shadow rays per pixel \cite{kajiya1986rendering}.
+
+\subsubsection{Star Rendering}
+
+
+\subsubsection{Composition}
+
 
 \subsection{Computer Vision}
 \Gls{cv} is the science of extracting information from digital photos and videos by mimicking the human vision system using a computer. \Gls{cv} encompasses a wide field of activities, from image formation, processing, detecting and matching features, image segmentation and three-dimensional reconstruction \cite{szeliski2010computer}. \Gls{cv} is the computer based variant of photogrammetry which is tasked with obtaining information about physical objects and the environment from photographic images \cite{linder2009digital}. The most common approach for three-dimensional reconstruction is stereo-photogrammetry, also referred to as computer stereo vision when using computers. Stereo-photogrammetry applies the binocular vision principle of the human vision system to obtain structural information from images \cite{do2019review}. Since most, if not all, deep space missions have a visual imager instrument on-board, \gls{cv} constitutes a logical approach of obtaining the three-dimensional structure of an observation target. A similar problem is the \gls{sfm} approach where the motion of the camera creates the different perspective.
@@ -66,7 +113,7 @@ where $f$ is the distance between the focal plane and the image plane, $k_u$ and
 More sophisticated pinhole camera models also include distortions. These can include one or more factors for radial and tangential distortions. A special case it the Brown T2 model which includes three radial and two tangential distortion factors.
 
 \subsubsection{Structure-from-Motion}
-\gls{sfm} uses multiple views of the same object from different camera positions to reconstruct the geometry of that object. \Gls{sfm} encompasses the recovery of the three-dimensional structure of an object as well as camera poses \cite{szeliski2010computer}. Depth information is obtained through the motion parallax created by the moving camera. Generic steps of a \gls{sfm} processing pipeline are shown in Figure \ref{fig:sfm_steps}.
+\Gls{sfm} is in some sense, the reverse process of rendering, i.e. creating 3D models from 2D images. \gls{sfm} uses multiple views of the same object from different camera positions to reconstruct the geometry of that object. \Gls{sfm} encompasses the recovery of the three-dimensional structure of an object as well as camera poses \cite{szeliski2010computer}. Depth information is obtained through the motion parallax created by the moving camera. Generic steps of a \gls{sfm} processing pipeline are shown in Figure \ref{fig:sfm_steps}.
 
 \begin{figure}[htb]
     \centering
@@ -119,27 +166,33 @@ Image registration and triangulation are separate process although their results
 Global reconstruction uses all images in a common reference frame. While incremental reconstruction accumulates errors through adding views step-by-step, global reconstruction attempts to distribute these residuals equally for all reconstructed points. Therefore, global reconstruction pipelines try to get rid of the problem of accumulating error of incremental \gls{sfm} \cite{Moulon_2013_ICCV}.
 For using the global method, it is necessary to calculate the essential matrix for all image pairs as the initial step. Commonly, rotation estimation is separated from translation and structure estimation. First a consistent set of rotations are computed in a global frame based on relative rotations of input pairs. Second, camera translations are estimated as well as the structure of the object.
 
-Both, incremental and global \gls{sfm} methods produce a sparse point cloud as an output. Additionally, they estimate the intrinsic and extrinsic camera parameters. As a next step the sparse point cloud can be densified using \gls{mvs} techniques \cite{pagani2011dense}. Image pairs with their camera positions are being used to calculate depth maps. These depth maps can be fused to increase the number of points of the point cloud. This process mimicks human depth perception and uses this information to improve the accuracy of its point clouds.
+Both, incremental and global \gls{sfm} methods produce a sparse point cloud as an output. Additionally, they estimate the intrinsic and extrinsic camera parameters. As a next step the sparse point cloud can be densified using \gls{mvs} techniques \cite{pagani2011dense}. Image pairs with their camera positions are being used to calculate depth maps. These depth maps are fused and filtered to increase the number of points of the point cloud. This process mimicks human depth perception and uses this information to improve the accuracy of its point clouds.
 
-In the next step, the point cloud is converted into a 3D model by estimating a mesh surface from the point cloud. In addition, outliers are detected and removed from the scene. Different approaches can be used which yield different results.
+In the next step, the point cloud is converted into a 3D model by estimating a mesh surface from the point cloud. In addition, outliers are detected and removed from the scene. Different approaches can be used which yield different results. while some techniques only use strongly supported faces, i.e. faces that are supported by many points of the point cloud, other methods also include weakly supported surfaces due to e.g. obstructions \cite{Jancosek2014ExploitingSurfaces}. The output of these methods are a rough surface model of a 3D object.
+A common algorithm for creating a mesh from a point cloud is the Delaunay Tetrahedralisation. For this algorithm, a set of 3D points $P$ is triangulated to not contain any point of $P$ within the circumsphere of any tetrahedron (3-simplex). The Delaunay tetrahedralisation is often used since it provides a unique solution to the triangulation problem \cite{vu2012high}.
+To increase the accuracy of a rough surface model, the underlying mesh can be further refined. Especially in cases where only a sparse point cloud was used to create the rough mesh, refinement can improve the model accuracy substantially. One such algorithm for mesh refinement is variational multiview stereovision. It is a local optimisation approach, which can be used since the initial mesh captures the main features of the final structure and thus local optimisation is unlikely to be trapped in local minima \cite{Faugeras1998VariationalProblem, vu2012high}.
+
+The final step in 3D reconstruction is texturing the surface model. Ideally, the camera poses and the surface model are exact which would make texturing simple. However, in most cases the texturing step requires dealing with inaccuracies in both, the camera poses and the surface model. Other effects such as differing illumination and exposure, unreconstructed occluding objects, varying image scales have to be overcome as well. Texturing is often separated in selecting the images to use for texturing and optimising the resulting image set for consistency \cite{Waechter2014LetReconstructions}.
+Image selection algorithms can be categorised by either blending multiple images per face to achieve consistent texture across patches. Another approach is to use only a single image per face. Both approaches come with advantages and disadvantages \cite{Waechter2014LetReconstructions}.
+Furthermore, colors need to be adjusted, especially because of differences in exposure and illumination. This process attempts to reduce the visibility of seams between patches by photometric adjustments. Colour adjustment can be split into local or global adjustments. Local adjustment tries to smooth the transition between texture patches by introducing gradients in the texture luminances for example by using heat diffusion equations \cite{Velho2007ProjectivePhotography}. For global adjustment, the luminance correction terms are calculated for a global optimum 15 \cite{Lempitsky2007SeamlessMaps}.
 
 
-\subsection{Compression}
+\subsection{Image Processing}
+Digital image processing is the use of a digital computer to process digital images through algorithms. Relevant to this work are compression (cf. Section \ref{sec:t_compress}), Gaussian filtering  (cf. Section \ref{sec:t_gauss}) and image down-sampling  (cf. Section \ref{sec:t_downsampl}).
+
+\subsubsection{Compression} \label{sec:t_compress}
 Data compression is tasked with encoding information using less bits than the original representation. Other terms for data compression are source coding or bit-rate \cite{mahdi2012implementing}. Two principle methods of compression exist, lossless and lossy compression. While it is possible to recover all information after lossless compression, lossy compression accepts a certain loss of information to achieve higher compression ratios.
-Lossless compression uses statistical redundancy to decrease the number of bits necessary to encode the same information. This process is completely reversible. There are many lossless compression algorithms such as LZ, LZW, run-length coding and entropy coding.
-Lossy compression is not a reversible process, i.e. information is lost that cannot be recovered. The idea of lossy compression is that different types of information are perceived differently and are therefore not equally important. Audio data can be encoded with a lossy scheme by decreasing the accuracy of acoustic components that are beyond the capabilities of most humans. Another example is, that the human eye is more sensitive to changes in luminance than it is to changes in colour. Therefore, compression can lose colour information without having a strong influence of the perceived image quality. Commonly known formats for lossy compression are MP3 or JPEG. Most lossy compression algorithms are based on transform coding, especially \gls{dct}.
+Lossless compression uses statistical redundancy to decrease the number of bits necessary to encode the same information. This process is completely reversible. There are many lossless compression algorithms such as Huffman coding, arithmetic coding or Ziv-Lempel algorithms \cite{Bocharova2009CompressionMultimedia}.
+Lossy compression is not a reversible process, i.e. information is lost and cannot be recovered. The idea of lossy compression is that different types of information are perceived differently and are therefore not equally important. Lossy compression need to trade-off between compression and data distortion. Audio data can be encoded with a lossy scheme by decreasing the accuracy of acoustic components that are beyond the capabilities of most humans. Another example is, that the human eye is more sensitive to changes in brightness (luminance) than it is to changes in colour (chrominance). Therefore, compression can lose colour information without having a strong influence of the perceived image quality. As a result, images for compression often use a luminance-chrominance representation. The components in such a representation are almost uncorrelated and it is easier to reduce colour information while keeping luminance information. Commonly known formats for lossy compression are MP3 or JPEG. Most lossy compression algorithms are based on transform coding, especially \gls{dct} \cite{Bocharova2009CompressionMultimedia}.
 
-\subsubsection{Image compression}
-Image compression is a sub-discipline of data compression. Two common types of image compression techniques are \gls{dct}, used for example in JPEG, and \gls{dwt}, used for example in JPEG 2000. 
+Image compression is a sub-discipline of data compression. Two common types of image compression techniques are \gls{dct}, used for example in JPEG, and \gls{dwt}, used for example in JPEG 2000.
 
-\Gls{dct} is a type of Fourier transform, hence it expresses finite data as a sum of cosines. In contrast to the Fourier transform itself, it employs however only real components. \Gls{dct} compresses data in form of discrete data blocks. For example, images can be compressed with differently sized image parts such as $8\times8$ pixels, commonly used in JPEG.
+\Gls{dct} is a type of Fourier transform, hence it expresses finite data as a sum of cosines. In contrast to the Fourier transform itself, it employs however only real components. \Gls{dct} compresses data in form of discrete data blocks. For example, images can be compressed with differently sized image parts such as $8\times8$ pixels, commonly used in JPEG \cite{Bocharova2009CompressionMultimedia}.
 
 \Gls{dwt} uses a wavelet transform, hence it expresses data using a sum of wavelets. \Gls{dwt} is particularly well suited to compress images with high frequency components, such as a star background. It is not well-suited to compress periodic data.
 
-\subsection{Image Processing}
-Digital image processing is the use of a digital computer to process digital images through algorithms.
 
-\subsubsection{Gaussian Filtering}
+\subsubsection{Gaussian Filtering} \label{sec:t_gauss}
 Gaussian Filtering refers to convolving an image with the two-dimensional Gaussian function. It is used to blur images and remove noise. The two-dimensional Gaussian function with a mean of zero is defined as
 \begin{align}
     G(x,y) = \frac{1}{2\pi \sigma^{2}}e^{-\frac{x^2+y^2}{2\sigma^2}}, \label{eq:gauss_2d}
@@ -147,7 +200,7 @@ Gaussian Filtering refers to convolving an image with the two-dimensional Gaussi
 where $\sigma$ is the standard deviation of the Gaussian distribution, and $x$ and $y$ are the coordinates.
 In its theoretical version, the Gaussian distribution would extend to infinity. To be practically applied in a digital system, the Gaussian distribution needs to be cut at a certain distance from the centre. The range over which the filter is applied is the kernel size which is normally related to its standard deviation, since \SI{99}{\percent} of the distribution falls within 3 standard deviations. In addition, the Gaussian distribution needs to be discretised to be usable in a digital system. The two-dimensional Gaussian filter is rotationally symmetric and larger standard deviation result in more blurring due to a wider peak.
 
-\subsubsection{Down-sample with local means}
+\subsubsection{Down-sample with local means} \label{sec:t_downsample}
 Down-sampling is the process of reducing the number of pixels in an image. When down-sampled with local means, it refers to taking the average of a small set of pixels and using it as the new value of a single pixel. For example, if an image shall be reduced by a factor of two, the value of four pixels of the input are averaged for a single pixel of the output. In the example below a $4\times4$ matrix is down-sampled by a scaling factor of two to give a $2\times2$ matrix.
 \begin{align*}
     \begin{bmatrix}
@@ -162,17 +215,3 @@ Down-sampling is the process of reducing the number of pixels in an image. When 
         11.5 & 13.5\\ 
     \end{bmatrix}
 \end{align*}
-
-\subsection{Rendering}
-Rendering is process of creating two-dimensional images from three-dimensional objects.
-
-\subsubsection{Path Tracing}
-Ray tracing is a rendering technique where the path of light rays is traced to generate pixels while simulating effects of encounters with objects. Ray tracing can simulate different effects, such as reflection, refraction, scattering and dispersion. While producing a high degree of realism in images, the computational costs are high as well. There are four types of rays: camera rays, reflection rays, transmission rays and shadow rays. Reflection and transmissions can be further categorised as either diffuse, glossy or singular. Ray tracing is a popular rendering technique where a high degree of realism is necessary since it is a realistic simulation of light transport.
-
-Path Tracing is a special form of Ray Tracing in which not individual light rays are followed which then branch into an exponentially growing number of rays when being reflected or refracted but only a single path is followed, cutting computation time dramatically in cases with a lot of reflection, refraction and shadow rays per pixel \cite{kajiya1986rendering}.
-
-\subsection{3D Models}
-Point clouds
- -points
-Mesh
- -Vertices, faces,
