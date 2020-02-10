@@ -23,7 +23,7 @@ To ease development, numerous parameters are silently assigned default values if
 \subsection{User Interface}
 The \gls{sispo} package can be installed using pip and the GitHub project. If done, it will be installed into the site-packages folder of the used python environment. Additionally, an executable is installed, providing a \gls{cli} as user interface. The most recent possible input arguments are documented in the repository or by using the --help input. The most important arguments for the \gls{cli} are seen in Table \ref{tab:cli_args}.
 
-\begin{table}[htpb]
+\begin{table}[htb]
     \centering
     \caption{Input arguments for sispo \gls{cli}}
     \label{tab:cli_args}
@@ -62,7 +62,7 @@ The timesampler mode determines whether the steps are distributed linear in time
 
 The Orekit library runs a \gls{vm} to execute its Java code. Additionally, physical data is required which is currently distributed with the \textit{sim} sub-package. The \gls{vm} and physical data are initialised in the \textit{sim} main module and only afterwards other modules are imported which is why other modules do not include the Orekit initialisation. This approach was taken in order to reduce resource consumption by not having several instances of the \gls{vm} running. Propagation is based on Orekit's KeplerianOrbit and KeplerianPropagator classes. Thus the input required to define the \gls{sssb} trajectory are as presented in Table \ref{tab:keplerorbit_params}.
 
-\begin{table}[htpb]
+\begin{table}[htb]
     \centering
     \caption{Parameters that define a \gls{sssb} orbit.}
     \label{tab:keplerorbit_params}
@@ -80,7 +80,7 @@ The Orekit library runs a \gls{vm} to execute its Java code. Additionally, physi
 
 The initial state of the spacecraft is calculated based on the input parameters presented in Table \ref{tab:sc_enc_paras}. Only the three first parameters need to be given as input in the definition file. The \textit{sssb\_state} is calculated based on the \gls{sssb} input data. Additional input parameters that define the simulation are given in Table \ref{tab:sim_input_params}.
 
-\begin{table}[htpb]
+\begin{table}[htb]
     \centering
     \caption{Parameters that define the encounter state of the spacecraft.}
     \label{tab:sc_enc_paras}
@@ -94,7 +94,7 @@ The initial state of the spacecraft is calculated based on the input parameters 
     \end{tabular}
 \end{table}
 
-\begin{table}[htpb]
+\begin{table}[htb]
     \centering
     \caption{Additional input parameters for simulation.}
     \label{tab:sim_input_params}
@@ -110,7 +110,7 @@ For rendering it is necessary to provide 3D models to the simulation. Since Blen
 
 Additionally, several parameters to describe the instrument are required to produce realistic output. The parameters are given in Table \ref{tab:inst_input}. The current implementation of rendering and compositing assumes an instrument with \gls{rgb} channels.
 
-\begin{table}[htpb]
+\begin{table}[htb]
     \centering
     \caption{Input parameters to describe an instrument.}
     \label{tab:inst_input}
@@ -136,7 +136,7 @@ Since the images are composed and calibrated at a later step, described in \ref{
 
 The interface of the BlenderController class is usable with a scene name (string), a list of scene names (list of strings), a scene object (bpy.types.Scene) or a list of scene objects (list of bpy.types.Scene). This provides flexibility when using the BlenderController class in the simulation module.
 
-\begin{table}[htpb]
+\begin{table}[htb]
     \centering
     \caption{Blender settings relevant to color space and are fixed to get raw images out of the Blender rendering process.}
     \label{tab:color_space}
@@ -150,7 +150,7 @@ The interface of the BlenderController class is usable with a scene name (string
     \end{tabular}
 \end{table}
 
-\begin{table}[htpb]
+\begin{table}[htb]
     \centering
     \caption{Blender settings that can be changed.}
     \label{tab:blender_settings_input}
@@ -190,7 +190,7 @@ where $\delta$ is the declination and $\alpha$ the right ascension. The \gls{fov
 
 The star background is created by generating an image with four times the size of final image. The coordinates are converted from the right ascension and declination of each star into pixel coordinates. Afterwards, setting the pixel value of each colour channel to the flux calculated from the magnitude. The resulting image is Gaussian filtered and downscaled to the final image size using local means, i.e. the average value of four pixels is assigned to the final pixel of the image to achieve the final resolution. The alpha values of the entire image are set to one. Star background images are stored in the OpenEXR format. An example image is presented in Fig. \ref{fig:star_rendering}.
 
-\begin{figure}[htpb]
+\begin{figure}[htb]
     \centering
     \includegraphics[width=\textwidth]{doc/thesis/0_figures/star_rendering/Stars_2017-08-15T115856-171000.png}
     \caption{Star background rendering.}
@@ -237,14 +237,12 @@ The starting point for composition is a set of four images with the prefixes Sss
 The reference used for photometric calibration is the solar photon flux in the V-band at \SI{1}{\astronomicalunit} calculated based on \cite{wirth}.
 
 The photon flux is defined as,
-\begin{align}
-    F = F_0 \times \frac{d\lambda}{\lambda} \times 10^{-0.4 \times m}, \label{eq:comp_flux_0mag}
-\end{align}
-with $F_0$ being the flux at magnitude 0, $\frac{d\lambda}{\lambda}$ is a factor of 0.16 for the V-band, and $m$ is the object's magnitude. The V-band photon flux at magnitude $m = 0$ in SI units is \SI{5.4964e10}{\per\second \per\square\meter}. With a magnitude of $m_{\odot} = -26.74$ at a distance of \SI{1}{\astronomicalunit}, the solar photon flux becomes \SI{4.36715206e+20}{\per\second\per\square\meter}.
+
+ The V-band photon flux at magnitude $m = 0$ in SI units is \SI{5.4964e10}{\per\second \per\square\meter}. With a magnitude of $m_{\odot} = -26.74$ at a distance of \SI{1}{\astronomicalunit}, the solar photon flux becomes \SI{4.36715206e+20}{\per\second\per\square\meter}.
 
 In the first step, the reference photon flux per pixel is calculated using,
 \begin{align}
-        F_{ref} = F \times \left(\frac{\SI{1}{\astronomicalunit}}{d_{\odot}}\right)^2 \times \frac{A \times pix_A}{f^2 \times \pi}, \label{eq:comp_ref_flux}
+        F_{ref} = F \times \left(\frac{\SI{1}{\astronomicalunit}}{d_{\odot}}\right)^2 \times , \label{eq:comp_ref_flux}
 \end{align}
 where $F$ is the solar flux at \SI{1}{\astronomicalunit}, $d_{\odot}$ is the spacecraft distance from the Sun, $A$ is the aperture area, $pix_A$ is the area of a pixel and $f$ is the focal length.
 
@@ -260,11 +258,7 @@ The point source image is created by Gaussian filtering a single white pixel at 
 
 If the \gls{sssb} image is used, the reference intensity of the image is calculated as the mean intensity of $\SI{70}{}\times\SI{70}{}$ pixels of the centre of the light reference image.
 
-Using the calibration factor defined as
-\begin{align}
-    f_c = \frac{F_{ref} \times I_{ref}}{\alpha}, \label{eq:comp_cal_fac}
-\end{align}
-where $F_{ref}$ is the reference flux, $I_{ref}$ is the reference intensity and $\alpha$ is the geometric albedo. Every pixel of the image is multiplied with this factor to produce the calibrated \gls{sssb} image. The star background and the calibrated \gls{sssb} image are merged taking the alpha channels into account. Using the alpha channel information provides proper occultation of the star background by the nucleus. For this, the \textit{film\_transparent} option of the Cycles rendering engine is activated.
+Every pixel of the image is multiplied with this factor to produce the calibrated \gls{sssb} image. The star background and the calibrated \gls{sssb} image are merged taking the alpha channels into account. Using the alpha channel information provides proper occultation of the star background by the nucleus. For this, the \textit{film\_transparent} option of Blender is activated which makes the scene background transparent.
 
 The composed image is then multiplied by the quantum efficiency of the \gls{ccd}. This quantum efficiency currently includes all efficiencies to convert incoming photon flux into an electrical signal (pixel value). Afterwards, the image is Gaussian filtered and noise based on a Poisson distribution is added. The standard deviation for Gaussian filtering is calculated to approximate the diffraction pattern, defined as
 \begin{align}
@@ -286,7 +280,7 @@ An additional feature is to add an information box in the lower right corner of 
 \subsection{Compression Module}
 The compression module provides compression and decompression algorithms. These can be tested against different mission scenarios and image series to investigate the impact of compression and decompression on the scientific quality of the images. Table \ref{tab:compression_format} shows the available compression and decompression algorithms.
 
-\begin{table}[htpb]
+\begin{table}[htb]
     \centering
     \caption{Lossless and lossy compression algorithms provided within \gls{sispo}.}
     \label{tab:compression_format}
@@ -307,7 +301,7 @@ The formats png, jpeg, jpeg2000 and tiff are implemented using \textit{OpenCV}. 
 
 The most important input parameter that is relevant to all algorithms is the "level" argument in "settings" which describes either the compression level (from 1 to 9 for bz2, gzip, lzma, zlib and png, higher meaning more compression) or the quality level (from 1 to 10 for jpeg and jpeg2000, higher meaning better quality and less compression). Other input parameters to the compression package are presented in Table \ref{tab:compression_settings}.
 
-\begin{table}[htpb]
+\begin{table}[htb]
     \centering
     \caption{Input parameters of compression package.}
     \label{tab:compression_settings}
