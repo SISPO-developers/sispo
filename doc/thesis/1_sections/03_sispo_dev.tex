@@ -165,9 +165,9 @@ The interface of the BlenderController class is usable with a scene name (string
 
 Within a Blender scene, the \gls{sssb} is kept at the origin. Only the Sun object and the cameras change position. In total there are three scenes with one camera each. These scenes are called \textit{SssbOnly} with the \textit{ScCam} camera, the \textit{SssbConstDist} scene with the \textit{SssbConstDistCam} and the \textit{LightRef} scene with the \textit{LightRefCam} camera. Each camera is configured equally, using the Instrument data from the input file. This is necessary for the composition step. All cameras are perspective cameras with a distance of $[\SI{1e-5}{},\SI{1e32}{}]$. The \gls{fov} of the \textit{SssbOnly} camera is also used for rendering stars (cf. \ref{sec:stars}).
 
-Due to problems during rendering, the Blender scene is scaled to kilometers instead of meters. I.e. one Blender unit corresponds to \SI{1}{\kilo\meter}. This is the only deviation from SI base units within the software.
+Due to problems during rendering, the Blender scene is scaled to kilometres instead of metres. I.e. one Blender unit corresponds to \SI{1}{\kilo\meter}. This is the only deviation from SI base units within the software.
 
-The precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. Blender shader nodes are used to create these during rendering. This approach of procedural terrain generation allows to use the same model on a large range of distances since the details are generated as needed. 
+The precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. Blender shader nodes are used to create these during rendering. This approach of procedural terrain generation allows to use the same model on a large range of distances since the details are generated as needed.
 
 DESCRIBE SHADER IMPLEMENTATION
 
@@ -179,16 +179,11 @@ The conversion of the vectors into their respective right ascension and declinat
     \delta = \arcsin{(z)}, \label{eq:declination} \\
     \alpha = \arccos{\left(\frac{x}{\cos{\delta}}\right)} + \pi, \label{eq:right_ascension}
 \end{align}
-where $\delta$ is the declination and $\alpha$ the right ascension. Using this information the star catalogue returns a list of visible stars with their right ascension and declination as well as their magnitude.
+where $\delta$ is the declination, $\alpha$ the right ascension, $x$ is the x-coordinate and $y$ is the y-coordinate. Using this information the star catalogue returns a list of visible stars with their right ascension and declination as well as their magnitude.
 
-The star background is created by generating an image with four times the size of final image. The coordinates are converted from the right ascension and declination of each star into pixel coordinates of the image frame. The conversion is defined as
-\begin{align}
-    x_{pix} = \frac{f}{s_w} \times \frac{|v_r| \cdot p}{v_d \cdot p + 1} \times \frac{(s_w - 1)}{2}, \label{eq:pix_conversion} 
-\end{align}
-%x_pix = ss * (f_over_w_ccd_2 * np.dot(right_norm, vec) / np.dot(direction, vec) + 1.) * (res_x - 1) / 2.
-where $x_{pix}$ is the x-coordinate of the pixel in the image frame, $f$ is the focal length, $s_w$ is the sensor width, $v_r$ is the vector pointing right in the image plane, $p$ is the Cartesian coordinate vector of a star, $v_d$ is the direction vector of the \gls{fov} and $s_w$ is the number of pixels of the sensor width.
+The star background is created by generating an image with four times the size of final image. The coordinates are converted from the right ascension and declination of each star into pixel coordinates of the image frame using Equation \ref{eq:pix_conversion}. The pixel coordinates are multiplied with two to fit the oversized image.
 
-The pixel value of each colour channel is set to the flux calculated from the magnitude as defined in Equation \ref{eq:mag_flux}. The resulting image is Gaussian filtered and downscaled to the final image size using local means (cf. Section \ref{sec:t_downsample}). Star background images are stored in the OpenEXR format with all alpha channel values equal to one. An example image is presented in Fig. \ref{fig:star_rendering}.
+The pixel value of each colour channel is set to the flux calculated from the magnitude as defined in Equation \ref{eq:mag_flux}. The resulting image is Gaussian filtered and down-sampled to the final image size using local means (cf. Section \ref{sec:t_downsample}). Star background images are stored in the OpenEXR format with all alpha channel values equal to one. An example image is presented in Fig. \ref{fig:star_rendering}.
 
 \begin{figure}[htb]
     \centering
@@ -196,7 +191,6 @@ The pixel value of each colour channel is set to the flux calculated from the ma
     \caption{Star background rendering.}
     \label{fig:star_rendering}
 \end{figure}
-
 
 \subsubsection{Composition} \label{sec:composition}
 Rendered images of Blender vary in absolute light intensity thus requiring calibration. Since the star maps are not rendered in Blender, the raw images need to be combined. Optionally, the combined images can be transformed to the bit depth of a \gls{ccd}. Hence, the composition process has two steps and an optional third step. 
@@ -258,11 +252,11 @@ with $v_0$ being the original pixel value, $F_0$ being the flux at a magnitude $
 
 The star background and the calibrated \gls{sssb} image are merged taking the alpha channels into account. Using the alpha channel information provides proper occultation of the star background by the nucleus. For this, the \textit{film\_transparent} option of Blender is activated which makes the scene background transparent, i.e. alpha values are zero.
 
-The composed image is then multiplied by the efficiency of the instrument. This efficiency includes all efficiencies to convert incoming photon flux into pixel value, not only the \gls{ccd} quantum efficiency. Additionally, a diffraction pattern is added as well as noise which is based on a Poisson distribution. The diffraction pattern can be approximated with a Gaussian filter. The standard deviation $\sigma$ for Gaussian filtering is calculated to defined as
+The composed image is then multiplied by the efficiency of the instrument. This efficiency includes all efficiencies to convert incoming photon flux into pixel value, not only the \gls{ccd} quantum efficiency. Additionally, a diffraction pattern is added as well as noise which is based on a Poisson distribution. The diffraction pattern can be approximated with a Gaussian filter. The standard deviation for the Gaussian approximation of a diffraction pattern was found to be $\sigma \approx 0.45 \times \frac{\lambda \times f}{D}$ when the Gaussian profile should contain the same energy as the diffraction pattern \cite{Zhang2007GaussianModels}. Using this result, the standard deviation $\sigma$ for Gaussian filtering is defined as
 \begin{align}
-    \sigma = 0.45 \times \lambda \times \frac{f}{D}\times \frac{1}{pix_l} \times m, \label{eq:comp_sigma}
+    \sigma = 0.45 \times \frac{\lambda \times f}{D} \times \frac{1}{l_{pix}} \times m, \label{eq:comp_sigma}
 \end{align}
-where $\lambda$ is the observed wavelength, $f$ is the focal length, $D$ is the aperture diameter, $pix_l$ is the length of one side of a pixel and $m$ is a multiplier for systems that are not diffraction limited (in our case $m = 2$, a perfectly diffraction limited system would have $m = 1$). The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Fig. \ref{fig:comp_imageset} is presented Fig. \ref{fig:comp_composed}.
+where $\lambda$ is the observed wavelength, $f$ is the focal length, $D$ is the aperture diameter, $l_{pix}$ is the length of one side of a pixel and $m$ is a multiplier for systems that are not diffraction limited (in our case $m = 2$, a perfectly diffraction limited system would have $m = 1$). The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Fig. \ref{fig:comp_imageset} is presented Figure~\ref{fig:comp_composed}.
 
 \begin{figure}[htb]
     \centering
@@ -297,7 +291,7 @@ Independent of the algorithm, files are handled equally. The images are loaded i
 
 The formats png, jpeg, jpeg2000 and tiff are implemented using \textit{OpenCV}. There are various settings for each format\footnote{A description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
 
-The most important input parameter that is relevant to all algorithms is the "level" argument in "settings" which describes either the compression level (from 1 to 9 for bz2, gzip, lzma, zlib and png, higher meaning more compression) or the quality level (from 1 to 10 for jpeg and jpeg2000, higher meaning better quality and less compression). Other input parameters to the compression package are presented in Table \ref{tab:compression_settings}.
+The most important input parameter that is relevant to all algorithms is the "level" argument in "settings" which describes either the compression level (from 1 to 9 for bz2, gzip, lzma, zlib and png, higher meaning more compression) or the quality level (from 1 to 10 for jpeg and jpeg2000, higher meaning better quality and less compression). Other input parameters to the compression package are presented in Table~\ref{tab:compression_settings}.
 
 \begin{table}[htb]
     \centering
