@@ -52,7 +52,7 @@ The default interface is a \textit{definition.json} file which provides all inpu
 \gls{sispo} can be imported as a Python module. Execution is then started either by sispo.run() or sispo.main(), which are equivalent.
 
 \subsection{Simulation Module}
-The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using Orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4} \cite{zacharias2013fourthUCAC4}. Additionally, the date, the spacecraft position, \gls{sssb} position and their distance is stored as metadata. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system \cite{bessel1979ubvri}. The composition process is explained in more detail in section \ref{sec:composition}.
+The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using Orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4} \cite{zacharias2013fourthUCAC4}. Additionally, the date, the spacecraft position, \gls{sssb} position and their distance is stored as metadata. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system \cite{Bessell1979UBVRIPhotometry}. The composition process is explained in more detail in section \ref{sec:composition}.
 
 The \textit{sim} sub-package was developed to contain all general information about the environment in the Environment class in order to have one consistent instance for constants and parameters. To minimise the loss of information in intermediate steps, all images during the rendering and calibration process use the OpenEXR format. Additionally, rendered images are stored as png files to allow a quick preview of the images. The most data is produced as all Blender scenes are being stored in each time step. This is done to allow later in-depth analysis of the raw Blender scenes, in case there are problems during the rendering process.
 
@@ -130,9 +130,9 @@ Additionally, several parameters to describe the instrument are required to prod
 \subsubsection{Blender}
 To render the \gls{sssb} and calibration images, Blender is used. A set of predefined settings is used for each scene while some parameters can be changed via the definition file. The rendering engine \textit{Cycles} is used to render photo-realistic, physics-based images from the Blender scenes.
 
-Blender is interfaced using its Python bindings which need to be compiled manually (cf. \ref{sec:setup}). To control the behaviour of Blender the BlenderController class is used. It handles setting all defaults such as a black background and the creation of the empty default scene, SssbOnly. In addition, the BlenderController interfaces to the star catalogue and the compositor.
+Blender is interfaced using its Python bindings which need to be compiled manually (cf. Appendix~\ref{sec:app_setup} for setup instructions). To control the behaviour of Blender the BlenderController class is used. It handles setting all defaults such as a black background and the creation of the empty default scene, SssbOnly. In addition, the BlenderController interfaces to the star catalogue and the compositor.
 
-Since the images are composed and calibrated at a later step, described in \ref{sec:composition}, the settings shown in Table \ref{tab:color_space} are selected to not change the rendered raw images with Blender while saving.
+Since the images are composed and calibrated at a later step, described in Section~\ref{sec:composition}, the settings shown in Table~\ref{tab:color_space} are selected to not change the rendered raw images with Blender while saving.
 
 The interface of the BlenderController class is usable with a scene name (string), a list of scene names (list of strings), a scene object (bpy.types.Scene) or a list of scene objects (list of bpy.types.Scene). This provides flexibility when using the BlenderController class in the simulation module.
 
@@ -264,7 +264,7 @@ The composed image is then multiplied by the efficiency of the instrument. This 
 \end{align}
 where $\lambda$ is the observed wavelength, $f$ is the focal length, $D$ is the aperture diameter, $pix_l$ is the length of one side of a pixel and $m$ is a multiplier for systems that are not diffraction limited (in our case $m = 2$, a perfectly diffraction limited system would have $m = 1$). The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Fig. \ref{fig:comp_imageset} is presented Fig. \ref{fig:comp_composed}.
 
-\begin{figure}
+\begin{figure}[htb]
     \centering
     \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/Comp_2017-08-15T115854-575000.png}
     \caption{Composed image of the four images shown in Fig. \ref{fig:comp_imageset}}
@@ -331,97 +331,6 @@ The common steps for the complete pipeline is comprised of the following steps:
 \gls{omvg} and \gls{omvs} can be controlled with numerous parameters. All parameters have default values in \gls{sispo} itself which sometimes differ from the default settings of the software packages. These were adapted since they provide better results in the relevant scenarios.
 
 The reconstruction is based on two incremental and one global \gls{sfm} approach that \gls{omvg} provides. All three algorithms are run and the number of reconstructed points are compared. The result containing the most points is exported to the \gls{omvs} format for further processing. None of the residuals are taken into account which is why this selection method might choose the highest quality point cloud due to a possible high number of outliers. Hence, if the result of the reconstruction is considered bad, it can be attempted to use one of the other results.
-
-\subsection{Setup} \label{sec:setup}
-\gls{sispo} can be setup with Linux and Windows. The default case used in this description is a Windows setup. It is recommended to set \gls{sispo} up in a Windows environment since e.g. the reconstruction algorithms seemed to be more stable. Known differences or problems under Linux will be pointed out. While it should be possible to use a plain Python environment and pip, a miniconda environment manager was used for development. Also a C compiler is necessary. Linux provides the GCC, for Windows it is easiest to install Microsoft Visual Studio with \gls{msvc} and \gls{msbuild}. Another possibility when using Windows is to use vcpkg\footnote{Found at \url{https://github.com/microsoft/vcpkg}}. However, previously the openMVG and openMVS ports in vcpkg did not work. Vcpkg can also be used with Linux. However, there were unsolvable problems when using vcpkg so everything was installed natively.
-
-For \gls{omvg}, \gls{omvs} and star\_cats it is necessary to have the executables in the correct folder for \gls{sispo} to function.\newline
-
-\begin{figure}
-    \dirtree{%
-        .1 sispo.
-            .2 build.
-            .2 data.
-                .3 input.
-                .3 models.
-                .3 sensor\_database.
-                .3 UCAC4.
-                    .4 u4b.
-                    .4 u4i.
-            .2 doc.
-            .2 sispo.
-                .3 compression.
-                .3 reconstruction.
-                .3 sim.
-            .2 software.
-                .3 blender.
-                .3 miniconda.
-                .3 openMVG.
-                    .4 build\_openMVG.
-                        .5 install.
-                    .4 openMVG.
-                .3 openMVS.
-                    .4 build\_openMVS.
-                        .5 install.
-                    .4 openMVS.
-                .3 star\_cats.
-                    .4 build\_star\_cats.
-                    .4 star\_cats.
-                .3 vcpkg.
-    }
-    \caption{Directory structure after setup. No files are shown.}
-    \label{fig:dir_tree}
-\end{figure}
-Figure \ref{fig:dir_tree} shows the assumed overall folder structure after installation. No sub-folders of the build folder or any files are shown.
-
-To make \gls{sispo} perform well, it is beneficial to install the Nvidia CUDA Toolkit (https://developer.nvidia.com/cuda-downloads) in case an Nvidia graphics card is available.
-
-In the following enumeration, commands intended to be run in a shell are highlighted with a grey box.
-
-\begin{enumerate}
-    \item Clone the GitHub repository onto the local machine \\ \shellcmd{git clone https://github.com/YgabrielsY/sispo.git}. The project provides a software folder which is intended to be used to install all following software.
-    \item Setup (conda) environment with dependencies (to software/miniconda folder):
-    \begin{enumerate}
-        \item orekit 9.3.1, the current version 10.0 had issues when attempted to install. Also orekit needs a data package to function, it is distributed with \gls{sispo} in the sim module folder.
-        \item astropy
-        \item opencv
-        \item OpenEXR\footnote{For Windows the pre-compiled package found at \url{https://www.lfd.uci.edu/~gohlke/pythonlibs/\#openexr} needs to be used because the pip or conda version do not work.}
-        \item \textit{NumPy}
-        \item Python\footnote{During development Python version 3.7 was used.}
-    \end{enumerate}{}
-    \item (Especially Windows) Install vcpkg to software/vcpkg folder, follow instructions at \url{https://github.com/microsoft/vcpkg}
-    \item Install Blender as a python module (bpy)\footnote{During development Blender version 2.8 was used.}
-    \begin{enumerate}
-        \item Clone Blender git repository to software/blender/blender \\ \shellcmd{git clone git://git.blender.org/blender.git}
-        \item Compile target bpy \shellcmd{make bpy}, this works also for Windows through the make.bat file provided with Blender
-        \item When available: Activate CUDA in the cmake project and recompile
-        \item Install bpy to python environment\footnote{Follow these instructions \url{https://blender.stackexchange.com/questions/117200/how-to-build-blender-as-a-python-module}}
-    \end{enumerate}{}
-    \item Install OpenMVG, follow instructions at \\ \url{https://github.com/openMVG/openMVG/blob/master/BUILD.md} or look for hints in the OpenMVG install script in the build folder.
-    \begin{enumerate}
-        \item Install dependencies according to instructions
-        \item Clone OpenMVG GitHub repository to software/openMVG/openMVG \shellcmd{git clone --recursive https://github.com/openMVG/openMVG.git}
-        \item Build to software/openMVG/build\_openMVG folder
-        \item Install to software/openMVG/build\_openMVG/install folder
-    \end{enumerate}
-    \item Install OpenMVS, follow instructions at \\ \url{https://github.com/cdcseacave/openMVS/wiki/Building} or look at the OpenMVS install script in the build folder for hints.
-    \begin{enumerate}
-        \item Install dependencies according to instructions
-        \item Clone OpenMVS GitHub repository to software/openMVS/openMVS \shellcmd{git clone https://github.com/cdcseacave/openMVS.git}
-        \item Build to software/openMVS/build\_openMVS folder
-        \item Install to software/openMVS/build\_openMVS/install folder
-    \end{enumerate}
-    \item Install star\_cats
-    \begin{enumerate}
-        \item Clone star\_cats GitHub repository to software/star\_cats/star\_cats \\ \shellcmd{git clone https://github.com/Bill-Gray/star\_cats.git}
-        \item Build to software/star\_cats/build\_star\_cats \shellcmd{make}
-    \end{enumerate}
-    \item Download UCAC4 star catalog to data/UCAC4, use either:
-    \begin{enumerate}
-        \item the build/data/download\_ucac4.sh script
-        \item download the folder u4b and u4i directly from \\ \url{http://casdc.china-vo.org/mirror/UCAC/UCAC4/}
-    \end{enumerate}
-\end{enumerate}{}
 
 \subsection{Performance}
 \subsubsection{Image processing benchmark} \label{sec:cvskimage}

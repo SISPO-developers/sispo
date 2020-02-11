@@ -182,26 +182,26 @@ The composition process uses raw images rendered with Blender and produces photo
     \centering
         \begin{subfigure}[b]{0.48\textwidth}
             \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/SssbOnly_2017-08-15T115858-281000.jpg}
                 \caption{Image 1 before calibration.}
                 \label{fig:composition_before_1}
         \end{subfigure}
         \begin{subfigure}[b]{0.48\textwidth}
             \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/SssbOnly_2017-08-15T115859-288000.jpg}
                 \caption{Image 2 before calibration.}
                 \label{fig:composition_before_2}
         \end{subfigure}
         \\
         \begin{subfigure}[b]{0.48\textwidth}
             \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/Inst_2017-08-15T115858-281000.png}
                 \caption{Image 1 after calibration.}
                 \label{fig:composition_after_1}
         \end{subfigure}
         \begin{subfigure}[b]{0.48\textwidth}
             \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/Inst_2017-08-15T115859-288000.png}
                 \caption{Image 2 after calibration.}
                 \label{fig:composition_after_2}
         \end{subfigure}
@@ -214,21 +214,26 @@ The composition process uses raw images rendered with Blender and produces photo
 When using a \SI{10}{\kilo\meter} \gls{sssb}, 
 \begin{figure}[htb]
     \centering
-        \begin{subfigure}[b]{0.75\textwidth}
+        \begin{subfigure}[b]{0.32\textwidth}
             \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
-            \caption{\SI{400}{\kilo\meter}.}
-            \label{fig:img_procedural_500}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/50_10_SssbOnly_2017-08-15T115845-190000.jpg}
+            \caption{\SI{50}{\kilo\meter}.}
+            \label{fig:render_artefacts_50}
         \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.75\textwidth}
+        \begin{subfigure}[b]{0.32\textwidth}
             \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/200_10_SssbOnly_2017-08-15T115845-190000.jpg}
             \caption{\SI{200}{\kilo\meter}.}
-            \label{fig:img_procedural_100}
+            \label{fig:render_artefacts_200}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/400_10_SssbOnly_2017-08-15T115845-190000.jpg}
+            \caption{\SI{400}{\kilo\meter}.}
+            \label{fig:render_artefacts_400}
         \end{subfigure}
     \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for flybys with the given closest approach distance. Rendering artefacts, the ribbons, are clearly visible in both images.}
-    \label{fig:img_procedural_10k}
+    \label{fig:render_artefacts}
 \end{figure}
 
 \subsection{Reconstruction}
