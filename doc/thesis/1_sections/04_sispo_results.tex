@@ -98,9 +98,8 @@ Default & 1                                                                     
 To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by surface features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. To better show the artefacts created by compression, the area highlighted by the red box in Figure \ref{fig:img_quality_frame} was studied up closer.
 
 \begin{figure}[htb]
-    \begin{center}
-        \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_1000_frame.png}
-    \end{center}
+    \centering
+    \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_1000_frame.png}
     \caption{Scene used for quality comparison. Highlighted in red is the area studied up closer.}
     \label{fig:img_quality_frame}
 \end{figure}
@@ -108,53 +107,46 @@ To compare the image quality after different levels of compression, a specific i
 Figure \ref{fig:img_quality_comp}
 
 \begin{figure}[htb]
-    \begin{center}
+    \centering
         \begin{subfigure}[b]{0.47\textwidth}
-            \begin{center}
+            \centering
                 \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_1_center.png}
-            \end{center}
             \caption{Quality 1.}
             \label{fig:img_quality_1}
         \end{subfigure}
         \begin{subfigure}[b]{0.47\textwidth}
-            \begin{center}
+            \centering
                 \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_4_center.png}
-            \end{center}
             \caption{Quality 4.}
             \label{fig:img_quality_4}
         \end{subfigure}
         \\
         \begin{subfigure}[b]{0.47\textwidth}
-            \begin{center}
+            \centering
                 \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_5_center.png}
-            \end{center}
             \caption{Quality 5.}
             \label{fig:img_quality_5}
         \end{subfigure}
         \begin{subfigure}[b]{0.47\textwidth}
-            \begin{center}
+            \centering
                 \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_10_center.png}
-            \end{center}
             \caption{Quality 10.}
             \label{fig:img_quality_10}
         \end{subfigure}
         \\
         \begin{subfigure}[b]{0.47\textwidth}
-            \begin{center}
+            \centering
                 \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_100_center.png}
-            \end{center}
             \caption{Quality 100.}
             \label{fig:img_quality_100}
         \end{subfigure}
         \begin{subfigure}[b]{0.47\textwidth}
-            \begin{center}
+            \centering
                 \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_1000_center.png}
-            \end{center}
             \caption{Quality 1000.}
             \label{fig:img_quality_1000}
         \end{subfigure}
-    \end{center}
-    \caption{Comparison of images with different level of compression using jp2000.}
+    \caption{Comparison of images with different level of compression using \gls{jpeg}2000.}
     \label{fig:img_quality_comp}
 \end{figure}
 
@@ -162,31 +154,82 @@ Figure \ref{fig:img_quality_comp}
 Through procedural terrain generation, \gls{sispo} produces results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are shown in Figure \ref{fig:img_procedural_10k}.
 
 \begin{figure}[htb]
-    \begin{center}
+    \centering
         \begin{subfigure}[b]{0.75\textwidth}
-            \begin{center}
+            \centering
                 \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
-            \end{center}
             \caption{\SI{566}{\kilo\meter}.}
             \label{fig:img_procedural_500}
         \end{subfigure}
         \\
         \begin{subfigure}[b]{0.75\textwidth}
-            \begin{center}
+            \centering
                 \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
-            \end{center}
             \caption{\SI{106}{\kilo\meter}.}
             \label{fig:img_procedural_100}
         \end{subfigure}
-    \end{center}
     \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} at the given distances.}
     \label{fig:img_procedural_10k}
 \end{figure}
 
 It is visible from Figure \ref{fig:img_procedural_10k} that surface features and details do not degrade visually. In addition, moving closer reveals more details, such as tiny bumps between larger structures which are not visible from larger distances.
 
-\subsection{Rendering Problems}
 
+\subsection{Composition}
+The composition process uses raw images rendered with Blender and produces photometrically calibrated images. An example set of four images consisting of two images before and after calibration is shown in Figure \ref{fig:composition_before_after}. All four images were converted to \SI{8}{\bit} images. Two effects can be seen. First, the original images differ in there overall brightness. This difference is removed by the calibration. Secondly, images become brighter by the calibration process. 
+
+\begin{figure}[htb]
+    \centering
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+                \caption{Image 1 before calibration.}
+                \label{fig:composition_before_1}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+                \caption{Image 2 before calibration.}
+                \label{fig:composition_before_2}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+                \caption{Image 1 after calibration.}
+                \label{fig:composition_after_1}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
+                \caption{Image 2 after calibration.}
+                \label{fig:composition_after_2}
+        \end{subfigure}
+        \caption{Two images of a flyby, image 2 is one second after image 1, before and after the composition process. The nucleus is much brighter than background stars thus no stars visible in these images after calibration.}
+        \label{fig:composition_before_after}
+\end{figure}
+
+
+\subsection{Rendering Problems}
+When using a \SI{10}{\kilo\meter} \gls{sssb}, 
+\begin{figure}[htb]
+    \centering
+        \begin{subfigure}[b]{0.75\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+            \caption{\SI{400}{\kilo\meter}.}
+            \label{fig:img_procedural_500}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{0.75\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
+            \caption{\SI{200}{\kilo\meter}.}
+            \label{fig:img_procedural_100}
+        \end{subfigure}
+    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for flybys with the given closest approach distance. Rendering artefacts, the ribbons, are clearly visible in both images.}
+    \label{fig:img_procedural_10k}
+\end{figure}
 
 \subsection{Reconstruction}
 \gls{sispo} is choosing which result of which reconstruction method to use based on the number of reconstructed points. Comparing the chosen algorithm with the input parameter reveals that the first incremental \gls{sfm} reconstruction performs better when the flyby distance is smaller while the second incremental \gls{sfm} algorithms performs better with farther flyby distances.
