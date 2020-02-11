@@ -2,7 +2,7 @@
 
 \subsection{Simulation} \label{sec:results_sim}
 
-A subset of all settings was kept constant for all simulations. The instrument settings are presented in Table \ref{tab:inst_settings} and the settings for the \gls{sssb} in Table \ref{tab:sssb_settings}. The specific values were chosen in order to mimic the hardware design in \cite{Pajusalu2019CharacterizationMapping}.
+A subset of all settings was kept constant for all simulations. The instrument settings are presented in Table \ref{tab:inst_settings} and the settings for the \gls{sssb} in Table \ref{tab:sssb_settings}. The specific values were chosen in order to mimic the scenario in \cite{Pajusalu2019CharacterizationMapping}.
 
 \begin{table}[htb]
     \centering
@@ -22,7 +22,7 @@ A subset of all settings was kept constant for all simulations. The instrument s
 
 \begin{table}[htb]
     \centering
-    \caption{\gls{sssb} Settings}
+    \caption{\gls{sssb} settings.}
     \label{tab:sssb_settings}
     \begin{tabular}{l|l}
         \textbf{Parameter Name} & \textbf{Value} \\ \hline
@@ -42,7 +42,7 @@ A subset of all settings was kept constant for all simulations. The instrument s
 
 \begin{table}[htb]
     \centering
-    \caption{Simulation Settings}
+    \caption{Simulation settings.}
     \label{tab:sim_settings}
     \begin{tabular}{l|l}
         \textbf{Parameter Name} & \textbf{Value} \\ \hline
@@ -158,7 +158,7 @@ Figure \ref{fig:img_quality_comp}
     \label{fig:img_quality_comp}
 \end{figure}
 
-\subsection{Different Ranges}
+\subsection{Different Distances}
 Through procedural terrain generation, \gls{sispo} produces results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are shown in Figure \ref{fig:img_procedural_10k}.
 
 \begin{figure}[htb]
@@ -167,7 +167,7 @@ Through procedural terrain generation, \gls{sispo} produces results for a large 
             \begin{center}
                 \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
             \end{center}
-            \caption{\SI{566}{\kilo\meter}}
+            \caption{\SI{566}{\kilo\meter}.}
             \label{fig:img_procedural_500}
         \end{subfigure}
         \\
@@ -175,13 +175,17 @@ Through procedural terrain generation, \gls{sispo} produces results for a large 
             \begin{center}
                 \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
             \end{center}
-            \caption{\SI{106}{\kilo\meter}}
+            \caption{\SI{106}{\kilo\meter}.}
             \label{fig:img_procedural_100}
         \end{subfigure}
     \end{center}
     \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} at the given distances.}
     \label{fig:img_procedural_10k}
 \end{figure}
+
+It is visible from Figure \ref{fig:img_procedural_10k} that surface features and details do not degrade visually. In addition, moving closer reveals more details, such as tiny bumps between larger structures which are not visible from larger distances.
+
+\subsection{Rendering Problems}
 
 
 \subsection{Reconstruction}

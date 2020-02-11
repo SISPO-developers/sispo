@@ -81,17 +81,21 @@ The \gls{fov} is the part of the 3D scene that is visible from the camera. From 
 \begin{align}
     e_{i} = v_d \pm \frac{v_j \times s_k}{2 \times f}, \label{eq:fov_edge}
 \end{align}
-where $e_{i}$ is a vector for the $i^{th}$ edge of the \gls{fov}, $v_d$ is the direction vector of the camera, $v_j$ is the vector pointing right or up, $s_k$ is the camera sensor width or height and $f$ is the focal length.
+where $e_{i}$ is a vector for the $i^{th}$ edge of the \gls{fov}, $v_d$ is the direction vector of the camera, $v_j$ is the vector pointing right or up in the \gls{fov} plane, $s_k$ is the camera sensor width or height and $f$ is the focal length. The left and right edges are calculated with the vector  $v_r$ pointing right in the \gls{fov} plane and the sensor width $s_w$. The upper and lower edges are calculated with the vector $v_r$ pointing up in the \gls{fov} plane and the sensor height $s_h$.
 
 \subsubsection{Path Tracing}
 Ray tracing is a rendering technique where the path of light rays is traced to generate pixels while simulating effects of encounters with objects. Ray tracing can simulate different effects, such as reflection, refraction, scattering and dispersion. While producing a high degree of realism in images, the computational costs are high as well. There are four types of rays: camera rays, reflection rays, transmission rays and shadow rays. Reflection and transmissions can be further categorised as either diffuse, glossy or singular. Ray tracing is a popular rendering technique where a high degree of realism is necessary since it is a realistic simulation of light transport.
 
 Path Tracing is a special form of Ray Tracing in which not individual light rays are followed which then branch into an exponentially growing number of rays when being reflected or refracted but only a single path is followed, cutting computation time dramatically in cases with a lot of reflection, refraction and shadow rays per pixel \cite{kajiya1986rendering}.
 
-\subsubsection{Photometric calibration}
+\subsubsection{Photometric calibration} \label{sec:photo_cal}
 Photometric calibration is the process of correcting raw images from a sensor to a common level of brightness. Differences might come from different exposure times, different gains or different cameras. Photometric calibration uses a photometric systems, such as the \gls{ubv}, which are reference systems with which star magnitude measurements can be compared for a given band of the system \cite{bessel1979ubvri}.
-
-Given the magnitude of a specific band, the photon flux of a reference object can be calculated using
+The apparent magnitude of a star is converted into photon flux density relative to magnitude 0 by using,
+\begin{align}
+    F = 10^{-0.4 \times m}, \label{eq:mag_flux}
+\end{align}
+where $m$ is the apparent star magnitude. 
+Given the apparent magnitude of a specific band, the photon flux density of a reference object can be calculated using
 \begin{align}
     F = F_0 \times \frac{d\lambda}{\lambda} \times 10^{-0.4 \times m}, \label{eq:comp_flux_0mag}
 \end{align}
@@ -109,15 +113,15 @@ with $F_0$ being the flux at magnitude 0, $\frac{d\lambda}{\lambda}$ is a factor
     \end{tabular}
 \end{table}
 
-The next step of photometric calibration is to calculate the reference number of photons per pixel of the \gls{ccd} $N_{ref}$ using
+The next step of photometric calibration is to calculate the reference photon flux for one pixel of the \gls{ccd} $F_{ref}$ using
 \begin{align}
-    N_{ref} = F \times \frac{A \times A_{pixel}}{f^2 \times \pi}, \label{eq:comp_flux_pix}
+    F_{ref} = F \times \frac{A \times A_{pixel}}{f^2 \times \pi}, \label{eq:comp_flux_pix}
 \end{align}
-where $F$ is the total photon flux, $A$ is the aperture area, $A_{pixel}$ is the area of a pixel and $f$ is the focal length of the instrument.
+where $F$ is the photon flux density, $A$ is the aperture area, $A_{pixel}$ is the area of a pixel and $f$ is the focal length of the instrument.
 
 In the last step, the calibration factor is calculated. It is defined as
 \begin{align}
-    f_c = \frac{N_{ref} \times \alpha}{I_{ref}}, \label{eq:comp_cal_fac}
+    f_c = \frac{F_{ref} \times \alpha}{I_{ref}}, \label{eq:comp_cal_fac}
 \end{align}
 where $F_{ref}$ is the reference flux, $\alpha$ is the geometric albedo and $I_{ref}$ is the reference intensity. Multiplying the image with $f_c$ produces the calibrated image.
 
@@ -235,20 +239,21 @@ The hierarchical structure of an image transformed with \gls{dwt} is depicted in
         \label{fig:kepler_elements}
 \end{figure}
 
-A comparison of an image compressed with \gls{jpeg} and with \gls{jpeg}2000 compression with roughly similar compression ratio is shown in Figure \ref{fig:jpg_jp2_comparison}. It is clearly visible thatartefacts are created around the contours in the \gls{jpeg} image in contrast to the \gls{jpeg}2000 image, despite the higher compression ratio of the \gls{jpeg}2000 image.
+A comparison of an image compressed with \gls{jpeg} and with \gls{jpeg}2000 with roughly similar compression ratio is shown in Figure \ref{fig:jpg_jp2_comparison}. It is clearly visible thatartefacts are created around the contours in the \gls{jpeg} image in contrast to the \gls{jpeg}2000 image, despite the higher compression ratio of the \gls{jpeg}2000 image.
 \begin{figure}[htb]
     \centering
-    \begin{subfigure}[b]{0.32\textwidth}
+    \begin{subfigure}[b]{0.7\textwidth}
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/jp2_jpeg/orig.png}
         \caption{Original image without compression.}
         \label{fig:kepler_elements}
     \end{subfigure}
-    \begin{subfigure}[b]{0.32\textwidth}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/jp2_jpeg/proc_5.jpg}
         \caption{\Gls{jpeg} compression with ratio 61.2:1.}
         \label{fig:kepler_elements}
     \end{subfigure}
-    \begin{subfigure}[b]{0.32\textwidth}
+    \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/jp2_jpeg/proc_11.png}
         \caption{\Gls{jpeg}2000 compression with ratio 64.3:1.}
         \label{fig:kepler_elements}

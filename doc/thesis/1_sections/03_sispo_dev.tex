@@ -167,28 +167,28 @@ Within a Blender scene, the \gls{sssb} is kept at the origin. Only the Sun objec
 
 Due to problems during rendering, the Blender scene is scaled to kilometers instead of meters. I.e. one Blender unit corresponds to \SI{1}{\kilo\meter}. This is the only deviation from SI base units within the software.
 
-The precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. A Blender shader is used to create these during rendering. This approach of procedural terrain generation allows to use the same model on a large range of distances since the details are generated as needed. 
+The precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. Blender shader nodes are used to create these during rendering. This approach of procedural terrain generation allows to use the same model on a large range of distances since the details are generated as needed. 
 
 DESCRIBE SHADER IMPLEMENTATION
 
 \subsubsection{Star Rendering} \label{sec:stars}
-The background stars are rendered based on the star catalogue \gls{ucac4}. This catalogue includes stars up to magnitude 16. The \gls{fov} is determined based on the spacecraft camera in the SssbOnly scene. The edges of the \gls{fov} are calculated using the following equations
-
-\begin{align}
-    e_{right} = v_d + \frac{v_r \times s_w}{2 \times f}, \label{eq:edge_right} \\
-    e_{left} = v_d - \frac{v_r \times s_w}{2 \times f}, \label{eq:edge_left} \\
-    e_{upper} = v_d + \frac{v_u \times s_h}{2 \times f}, \label{eq:edge_upper} \\
-    e_{lower} = v_d - \frac{v_u \times s_h}{2 \times f}, \label{eq:edge_lower}
-\end{align}
-where $e_{i}$ is a vector for the $i^{th}$ edge of the \gls{fov}, $v_d$ is the direction vector of the camera, $v_r$ is the vector pointing right, $s_w$ is the camera sensor width, $s_h$ is the camera sensor height and $f$ is the focal length. These vectors are converted into their respective right ascension and declination using
-
+The background stars are rendered based on the star catalogue \gls{ucac4}. This catalogue includes stars up to magnitude 16. The \gls{fov} is determined based on the spacecraft camera in the SssbOnly scene since this camera provides the \gls{fov} of the spacecraft instrument. The edges of the \gls{fov} are calculated using Equation \ref{eq:fov_edge}. 
+In the next step, we retrieve the list of stars that are visible in the \gls{fov}. The interface for the \gls{ucac4} is a commandline tool u4test.exe \cite{gray}. This interface however requires that the \gls{fov} is input as right ascension $\alpha$, declination $\delta$ and width and height.
+The conversion of the vectors into their respective right ascension and declination is a transform between Cartesian coordinates to spherical coordinates. Their relation is defined as
 \begin{align}
     \delta = \arcsin{(z)}, \label{eq:declination} \\
     \alpha = \arccos{\left(\frac{x}{\cos{\delta}}\right)} + \pi, \label{eq:right_ascension}
 \end{align}
-where $\delta$ is the declination and $\alpha$ the right ascension. The \gls{fov} is then defined as the right ascension and declination of the center point as well as the width and height. Using this information the star catalogue returns a list of visible stars with their right ascension and declination as well as their magnitude.
+where $\delta$ is the declination and $\alpha$ the right ascension. Using this information the star catalogue returns a list of visible stars with their right ascension and declination as well as their magnitude.
 
-The star background is created by generating an image with four times the size of final image. The coordinates are converted from the right ascension and declination of each star into pixel coordinates. Afterwards, setting the pixel value of each colour channel to the flux calculated from the magnitude. The resulting image is Gaussian filtered and downscaled to the final image size using local means, i.e. the average value of four pixels is assigned to the final pixel of the image to achieve the final resolution. The alpha values of the entire image are set to one. Star background images are stored in the OpenEXR format. An example image is presented in Fig. \ref{fig:star_rendering}.
+The star background is created by generating an image with four times the size of final image. The coordinates are converted from the right ascension and declination of each star into pixel coordinates of the image frame. The conversion is defined as
+\begin{align}
+    x_{pix} = \frac{f}{s_w} \times \frac{|v_r| \cdot p}{v_d \cdot p + 1} \times \frac{(s_w - 1)}{2}, \label{eq:pix_conversion} 
+\end{align}
+%x_pix = ss * (f_over_w_ccd_2 * np.dot(right_norm, vec) / np.dot(direction, vec) + 1.) * (res_x - 1) / 2.
+where $x_{pix}$ is the x-coordinate of the pixel in the image frame, $f$ is the focal length, $s_w$ is the sensor width, $v_r$ is the vector pointing right in the image plane, $p$ is the Cartesian coordinate vector of a star, $v_d$ is the direction vector of the \gls{fov} and $s_w$ is the number of pixels of the sensor width.
+
+The pixel value of each colour channel is set to the flux calculated from the magnitude as defined in Equation \ref{eq:mag_flux}. The resulting image is Gaussian filtered and downscaled to the final image size using local means (cf. Section \ref{sec:t_downsample}). Star background images are stored in the OpenEXR format with all alpha channel values equal to one. An example image is presented in Fig. \ref{fig:star_rendering}.
 
 \begin{figure}[htb]
     \centering
@@ -199,9 +199,11 @@ The star background is created by generating an image with four times the size o
 
 
 \subsubsection{Composition} \label{sec:composition}
-Rendered images of Blender vary in absolute light intensity thus requiring calibration. For calibration, the Blender output is normalised by comparing the theoretical and real intensity of a calibration disk in the same conditions. This calibration is based on the Johnson magnitude system, also called the UBV photometric system \cite{bessel1979ubvri}. The V-band is used which is centered around \SI{550}{\nano\meter}.
+Rendered images of Blender vary in absolute light intensity thus requiring calibration. Since the star maps are not rendered in Blender, the raw images need to be combined. Optionally, the combined images can be transformed to the bit depth of a \gls{ccd}. Hence, the composition process has two steps and an optional third step. 
 
-The starting point for composition is a set of four images with the prefixes SssbOnly (cf. Fig. \ref{fig:comp_sssbonly}), SssbConstDist (cf. Fig. \ref{fig:comp_sssbconstdist}), LightRef (cf. Fig. \ref{fig:comp_lightref}) and Stars (cf. Fig. \ref{fig:comp_stars}). SssbOnly represents the view from the instrument. SssbConstDist is a follower camera at a constant distance of \SI{1000}{\kilo\meter} from the \gls{sssb}. LightRef is a defined reference model. Stars is an image of the star background. These images are then composed to a single final image.
+First, the \gls{sssb} image and the star background are calibrated. In the second step, these images are combined to create a \gls{sssb} image with star background where stars are occluded by the \gls{sssb} nucleus. For calibration, the Blender output is normalised by comparing the theoretical and rendered intensity of a calibration disk in the same conditions.
+
+The starting point for composition is a set of four images with the prefixes SssbOnly, SssbConstDist, LightRef and Stars. An example set is shown in Figure \ref{fig:comp_imageset}. SssbOnly represents the view from the spacecraft instrument. SssbConstDist is a follower camera at a constant distance of \SI{1000}{\kilo\meter} from the \gls{sssb}. LightRef is a defined reference model. Stars is an image of the star background. These images are then composed to a single final image.
 
 \begin{figure}[htb]
     \centering
@@ -234,37 +236,33 @@ The starting point for composition is a set of four images with the prefixes Sss
     \label{fig:comp_imageset}
 \end{figure}
 
-The reference used for photometric calibration is the solar photon flux in the V-band at \SI{1}{\astronomicalunit} calculated based on \cite{wirth}.
-
-The photon flux is defined as,
-
- The V-band photon flux at magnitude $m = 0$ in SI units is \SI{5.4964e10}{\per\second \per\square\meter}. With a magnitude of $m_{\odot} = -26.74$ at a distance of \SI{1}{\astronomicalunit}, the solar photon flux becomes \SI{4.36715206e+20}{\per\second\per\square\meter}.
-
-In the first step, the reference photon flux per pixel is calculated using,
+Photometric calibration is based on the V-band of the \gls{ubv} as described in Section \ref{sec:photo_cal}. The calibration reference is the solar photon flux in the V-band. The Sun has a magnitude $m_{\odot} = -26.74$ at a distance of \SI{1}{\astronomicalunit}. Using Equation \ref{eq:comp_flux_0mag} and the constants for the V-band from Table \ref{tab:ubv_constants}, the solar photon flux density at \SI{1}{\astronomicalunit} becomes \SI{4.36715206e+20}{\per\second\per\square\meter}.
+ 
+Since the spacecraft is normally not at exactly \SI{1}{\astronomicalunit}, this flux density is scaled using an inverse square law defined as
 \begin{align}
-        F_{ref} = F \times \left(\frac{\SI{1}{\astronomicalunit}}{d_{\odot}}\right)^2 \times , \label{eq:comp_ref_flux}
+    F_d = F \times \left(\frac{\SI{1}{\astronomicalunit}}{d}\right)^2, \label{eq:inverse_square}
 \end{align}
-where $F$ is the solar flux at \SI{1}{\astronomicalunit}, $d_{\odot}$ is the spacecraft distance from the Sun, $A$ is the aperture area, $pix_A$ is the area of a pixel and $f$ is the focal length.
+where $F_d$ is the scaled photon flux density, $F$ is the flux density at \SI{1}{\astronomicalunit} and $d$ is the spacecraft's distance from the Sun in \SI{}{\astronomicalunit}.
 
-For the star background, every pixel is calibrated according to Eq. \ref{eq:comp_cal_starmap}.
+In the next step, the reference photon flux for one pixel is calculated using Equation \ref{eq:comp_flux_pix} and the scaled photon flux density $F_d$.
+
+To obtain the calibration factor for each pixel of the \gls{sssb} image, Equation \ref{eq:comp_cal_fac} is used. The reference intensity of the image is calculated as the mean intensity of $\SI{70}{}\times\SI{70}{}$ pixels of the centre of the light reference image.
+
+In case the rendered image is far away from the \gls{sssb} nucleus, the visible size of the \gls{sssb} on the image is too small to be used for calibration. In such a case, a point source \gls{sssb} image is generated and used for calibration along with the SssbConstDist image. The point source is necessary if the \gls{sssb}'s nucleus is only a few pixels of the image, since then intensities are not rendered correctly. The point source image is created by Gaussian filtering a single white pixel at the centre of an oversized image. The image is oversized by a factor of five, and then down-sampled to the original size using local means as described in Section \ref{sec:t_downsample}. In this case the l
+
+For the star background, every pixel value $v$ is calibrated using
 \begin{align}
-        pix = pix_0 \times F_0 \times A \times \frac{F_{stars}}{S_{stars}}, \label{eq:comp_cal_starmap}
+        v = v_0 \times F_0 \times A \times \frac{F_{stars}}{S_{stars}}, \label{eq:comp_cal_starmap}
 \end{align}
-with $pix_0$ being the original pixel value, $F_0$ being the flux at a magnitude $m = 0$, $A$ being the aperture area, $F_{stars}$ being the total flux of visible stars, and $S_{stars}$ being the summed pixel value of one channel of a star map.
+with $v_0$ being the original pixel value, $F_0$ being the flux at a magnitude $m = 0$, $A$ being the aperture area, $F_{stars}$ being the total flux of visible stars, and $S_{stars}$ being the summed pixel value of one channel of a star map.
 
-Depending on the visible size of the \gls{sssb} in the image, either a point source \gls{sssb} image is generated and used or the \gls{sssb} image is calibrated. The point source is necessary if the \gls{sssb}'s nucleus is smaller than a pixel outputting wrong intensities.
+The star background and the calibrated \gls{sssb} image are merged taking the alpha channels into account. Using the alpha channel information provides proper occultation of the star background by the nucleus. For this, the \textit{film\_transparent} option of Blender is activated which makes the scene background transparent, i.e. alpha values are zero.
 
-The point source image is created by Gaussian filtering a single white pixel at the center of an image, oversized by a factor of five, and then downscaled to the original size using local means.
-
-If the \gls{sssb} image is used, the reference intensity of the image is calculated as the mean intensity of $\SI{70}{}\times\SI{70}{}$ pixels of the centre of the light reference image.
-
-Every pixel of the image is multiplied with this factor to produce the calibrated \gls{sssb} image. The star background and the calibrated \gls{sssb} image are merged taking the alpha channels into account. Using the alpha channel information provides proper occultation of the star background by the nucleus. For this, the \textit{film\_transparent} option of Blender is activated which makes the scene background transparent.
-
-The composed image is then multiplied by the quantum efficiency of the \gls{ccd}. This quantum efficiency currently includes all efficiencies to convert incoming photon flux into an electrical signal (pixel value). Afterwards, the image is Gaussian filtered and noise based on a Poisson distribution is added. The standard deviation for Gaussian filtering is calculated to approximate the diffraction pattern, defined as
+The composed image is then multiplied by the efficiency of the instrument. This efficiency includes all efficiencies to convert incoming photon flux into pixel value, not only the \gls{ccd} quantum efficiency. Additionally, a diffraction pattern is added as well as noise which is based on a Poisson distribution. The diffraction pattern can be approximated with a Gaussian filter. The standard deviation $\sigma$ for Gaussian filtering is calculated to defined as
 \begin{align}
     \sigma = 0.45 \times \lambda \times \frac{f}{D}\times \frac{1}{pix_l} \times m, \label{eq:comp_sigma}
 \end{align}
-where $\sigma$ is the standard deviation, $\lambda$ is the instrument wavelength, $f$ is the focal length, $D$ is the aperture diameter, $pix_l$ is the length of one side of a pixel and $m$ is a multiplier for systems that are not diffraction limited (in our case $m = 2$, a perfectly diffraction limited system would have $m = 1$). The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Fig. \ref{fig:comp_imageset} is presented Fig. \ref{fig:comp_composed}.
+where $\lambda$ is the observed wavelength, $f$ is the focal length, $D$ is the aperture diameter, $pix_l$ is the length of one side of a pixel and $m$ is a multiplier for systems that are not diffraction limited (in our case $m = 2$, a perfectly diffraction limited system would have $m = 1$). The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Fig. \ref{fig:comp_imageset} is presented Fig. \ref{fig:comp_composed}.
 
 \begin{figure}
     \centering
@@ -273,7 +271,7 @@ where $\sigma$ is the standard deviation, $\lambda$ is the instrument wavelength
     \label{fig:comp_composed}
 \end{figure}
 
-In a final step, the image values are scaled to the bit depth of the \gls{ccd}. The current maximum permissible bit depth is \SI{16}{bit} due to a substantial increase in code complexity for higher bit depths. This feature can be turned off by setting the \textit{with\_clipping} parameter to false.
+In the additional third step, the image values are scaled to the bit depth of the \gls{ccd}. The current maximum permissible bit depth is \SI{16}{bit} due to an increase in code complexity for higher bit depths. This feature can be turned off by setting the \textit{with\_clipping} parameter to false. This feature is used by default, since the aim is to realistically simulate the imaging capabilities of a spacecraft.
 
 An additional feature is to add an information box in the lower right corner of the image including the distance to the \gls{sssb} and the date. This feature can be turned off by setting the \textit{with\_infobox} parameter to false.
 
@@ -295,7 +293,7 @@ The compression module provides compression and decompression algorithms. These 
     \end{tabular}
 \end{table}
 
-Independent of the algorithm, files are handled equally to. The images are loaded into \textit{NumPy} arrays inside Python to have a common raw format. Before encoding, the information is reduced to \SI{8}{\bit} since the reconstruction module only reads images with \SI{8}{\bit} colour depth correctly. Images are encoded with the respective algorithm and converted into a binary stream. A copy of this data is saved as a file in the raw folder. The raw binary data is then converted back to a \textit{NumPy} array and decoded to retrieve as much information as possible. Finally, the compressed and decompressed data is stored as a png file to not lose any further information.
+Independent of the algorithm, files are handled equally. The images are loaded into \textit{NumPy} arrays inside Python to have a common raw format. Before encoding, the information is reduced to \SI{8}{\bit} since the reconstruction module only reads images with \SI{8}{\bit} colour depth correctly. Images are encoded with the respective algorithm and converted into a binary stream. A copy of this data is saved as a file in the raw folder. The raw binary data is then converted back to a \textit{NumPy} array and decoded to retrieve as much information as possible. Finally, the compressed and decompressed data is stored as a png file to not lose any further information.
 
 The formats png, jpeg, jpeg2000 and tiff are implemented using \textit{OpenCV}. There are various settings for each format\footnote{A description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
 
@@ -332,7 +330,7 @@ The common steps for the complete pipeline is comprised of the following steps:
 
 \gls{omvg} and \gls{omvs} can be controlled with numerous parameters. All parameters have default values in \gls{sispo} itself which sometimes differ from the default settings of the software packages. These were adapted since they provide better results in the relevant scenarios.
 
-The reconstruction is based on two incremental and one global \gls{sfm} approach that \gls{omvg} provides. All three algorithms are run and the number of reconstructed points are compared. The result containing the most points is exported to the \gls{omvs} format for further processing. None of the residuals are taken into account which is why this selection method might choose the wrong result due to a possible high number of outliers. Hence, if the result of the reconstruction is considered bad, it can be attempted to use one of the other results.
+The reconstruction is based on two incremental and one global \gls{sfm} approach that \gls{omvg} provides. All three algorithms are run and the number of reconstructed points are compared. The result containing the most points is exported to the \gls{omvs} format for further processing. None of the residuals are taken into account which is why this selection method might choose the highest quality point cloud due to a possible high number of outliers. Hence, if the result of the reconstruction is considered bad, it can be attempted to use one of the other results.
 
 \subsection{Setup} \label{sec:setup}
 \gls{sispo} can be setup with Linux and Windows. The default case used in this description is a Windows setup. It is recommended to set \gls{sispo} up in a Windows environment since e.g. the reconstruction algorithms seemed to be more stable. Known differences or problems under Linux will be pointed out. While it should be possible to use a plain Python environment and pip, a miniconda environment manager was used for development. Also a C compiler is necessary. Linux provides the GCC, for Windows it is easiest to install Microsoft Visual Studio with \gls{msvc} and \gls{msbuild}. Another possibility when using Windows is to use vcpkg\footnote{Found at \url{https://github.com/microsoft/vcpkg}}. However, previously the openMVG and openMVS ports in vcpkg did not work. Vcpkg can also be used with Linux. However, there were unsolvable problems when using vcpkg so everything was installed natively.
@@ -427,7 +425,7 @@ In the following enumeration, commands intended to be run in a shell are highlig
 
 \subsection{Performance}
 \subsubsection{Image processing benchmark} \label{sec:cvskimage}
-The original codebase used the \gls{skimage} and OpenCV libraries. In order to reduce the number of dependencies, the relevant functions of the two libraries were benchmarked. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of five images is selected and are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance in the number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
+The original codebase used the \gls{skimage} and OpenCV libraries in parallel. In order to reduce the number of dependencies, the relevant functions of the two libraries were benchmarked. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of five images is selected and are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance in the number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
 
 Two computers are used for the benchmark. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu 18.04.3 LTS.
 
@@ -461,19 +459,3 @@ Figure \ref{fig:bm_comparison} shows the execution time ratios with their averag
 \end{figure}
 
 For our case, OpenCV has a clear performance advantage over the \gls{skimage} library, hence only OpenCV is being used. In addition to the performance advantages, OpenCV might also be used to replace the OpenEXR dependency in the future, if OpenCV's OpenEXR implementation includes alpha channel support\footnote{A GitHub issue was created at \url{https://github.com/YgabrielsY/sispo/issues/128} that links to the relevant OpenCV GitHub issue.}.
-
-\subsection{Future Developments}
-There are several issues left open within the \gls{sispo} software package. First, there is currently no realistic model of spacecraft attitude motion and control implemented. The camera of the simulation environment is perfectly oriented towards the centre of the \gls{sssb}'s nucleus during the entire simulation. Realistic rotation should cover at least two effects, motion blur due to instantaneous rotation velocities of spacecraft and off-centre pointing due to control inaccuracies. Furthermore, it is necessary to include  image distortions such as astigmatism, bokeh, coma, field curvature, glare.
-Currently, \gls{sispo} assumes that an instrument always has \gls{rgb} channels. Since many \gls{ccd}s used in deep space are only \gls{bw} cameras, a possibility to choose either \gls{rgb} or \gls{bw} should be implemented.
-Moreover, it is necessary to include a gas and dust environment around the nucleus. From a technical perspective, a proper simulation of the data transmission should be included. For example, a realistic simulation for packet loss. The ultimate goal is to develop a prioritisation algorithm for the images which should prioritise data transmission on packet level.
-Moreover, multi-instumrent capability was intended as well as including multiple \gls{sssb}s in the future to allow more complex simulations including e.g. a binary system.
-Furthermore, the shader used to create the \gls{sssb} models should be developed further. The interface for it should be included into \gls{sispo} and restricted to values that create reasonable shaped outputs.
-An attempt to include a HAPKE model via the synthspace package \url{https://github.com/oknuutti/synthspace} was unsuccessful. However, it would be interesting to compare the results of Blender and the HAPKE model. A HAPKE model is substantially faster while providing less detail though possibly still sufficient for some cases.
-To improve computational performance and make image compression and possible data transmission more realistic, image cropping should be added. A substantial part of an image close to a nucleus is black which could be cropped away to reduce the amount of data for the computation and the system itself.
-
-THOUGHTS:\\
--default data set, different compression and reconstruction\\
-    -compressions: png, jpg2000 quality 1000, jpg2000 quality 500, jpg2000 quality 100, jpg2000 quality 10\\
--different trajectories: default : 400 km, 100km, 1000km\\
--different lighting situations\\
--different models 100m, 1km, 10km
