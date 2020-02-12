@@ -1,8 +1,8 @@
 \section{Results} \label{sec:results}
 
-\subsection{Simulation} \label{sec:results_sim}
-
+\subsection{Rendering} \label{sec:results_sim}
 A subset of all settings was kept constant for all simulations. The instrument settings are presented in Table \ref{tab:inst_settings} and the settings for the \gls{sssb} in Table \ref{tab:sssb_settings}. The specific values were chosen in order to mimic the scenario in \cite{Pajusalu2019CharacterizationMapping}.
+
 
 \begin{table}[htb]
     \centering
@@ -61,6 +61,128 @@ A subset of all settings was kept constant for all simulations. The instrument s
     \end{tabular}
 \end{table}
 
+\subsubsection{Image Comparison}
+In a first step, the overall image quality is compared visually to real images. A set of images at different distances of nuclei with different sizes is depicted in Figure \ref{fig:render_quali_comparison}. A set of five images from asteroid Bennu taken by the PolyCam aboard the \textit{OSIRIS-REx} mission is shown in Figure \ref{fig:render_quali_bennu}. Additionally, the rendered images are compared to images of comet \gls{67p} taken by the OSIRIS imager aboard the \textit{Rosetta} spacecraft. Figure \ref{fig:render_quali_67p} shows one image that represents all important features of \gls{67p}.
+
+\begin{figure}[htb]
+    \centering
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+            \caption{\SI{566}{\kilo\meter}.}
+            \label{fig:render_quali_comparison_1}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
+            \caption{\SI{106}{\kilo\meter}.}
+            \label{fig:render_quali_comparison_2}
+        \end{subfigure}
+    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} at the given distances.}
+    \label{fig:render_quali_comparison}
+\end{figure}
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=.8\textwidth]{doc/thesis/0_figures/procedural_terrain/2963_Bennu.png}
+    \caption{Four images of asteroid Bennu and a global surface mosaic. These images were taken by the PolyCam aboard the \textit{OSIRIS-REx} mission \cite{FourExploration}.}
+    \label{fig:render_quali_bennu}
+\end{figure}
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=.8\textwidth]{doc/thesis/0_figures/procedural_terrain/67P_CG.PNG}
+    \caption{Representative image of comet \acrlong{67p}. This image was taken by the OSIRIS imager aboard the \textit{Rosetta} mission \cite{OSIRISArchiveb}}.
+    \label{fig:render_quali_67p}
+\end{figure}
+
+While all images exhibit show impact craters, the overall appearance of the rendered images resembles the smoother cratering of Bennu better than rougher carters of \gls{67p}.
+The overall looks of the rendered images resemble the real images of Bennu well. The rubble pile characteristic present on Bennu's surface is also visible in the rendered images. When comparing the rendered images to the image of \gls{67p}, the most notable difference is the missing jet. This is because \gls{sispo} does not contain a gas and dust model yet that would produce a coma or jets. While the surface of 67P also features some rocks and boulders, it is more defined by a ridge-like structures. This type of features are missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
+
+\subsubsection{Different Distances}
+Through procedural terrain generation, \gls{sispo} produces results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are shown in Figure \ref{fig:img_procedural_10k}.
+
+\begin{figure}[htb]
+    \centering
+        \begin{subfigure}[b]{0.75\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+            \caption{\SI{566}{\kilo\meter}.}
+            \label{fig:img_procedural_500}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{0.75\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
+            \caption{\SI{106}{\kilo\meter}.}
+            \label{fig:img_procedural_100}
+        \end{subfigure}
+    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} at the given distances.}
+    \label{fig:img_procedural_10k}
+\end{figure}
+
+It is visible from Figure \ref{fig:img_procedural_10k} that surface features and details do not degrade visually. Moving closer to the surface reveals more details, such as tiny bumps between larger structures which are not visible from larger distances. The visible quality of surface features is defined by the shader implementation. 
+
+\subsubsection{Composition}
+The composition process uses raw images rendered with Blender and produces photometrically calibrated images. An example set of four images consisting of two images before and after calibration is shown in Figure \ref{fig:composition_before_after}. All four images were converted to \SI{8}{\bit} images. Two effects can be seen. First, the original images differ in there overall brightness. This difference is removed by the calibration. Secondly, images become brighter by the calibration process. 
+
+\begin{figure}[htb]
+    \centering
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/SssbOnly_2017-08-15T115858-281000.jpg}
+                \caption{Image 1 before calibration.}
+                \label{fig:composition_before_1}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/SssbOnly_2017-08-15T115859-288000.jpg}
+                \caption{Image 2 before calibration.}
+                \label{fig:composition_before_2}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/Inst_2017-08-15T115858-281000.png}
+                \caption{Image 1 after calibration.}
+                \label{fig:composition_after_1}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.48\textwidth}
+            \centering
+                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/Inst_2017-08-15T115859-288000.png}
+                \caption{Image 2 after calibration.}
+                \label{fig:composition_after_2}
+        \end{subfigure}
+        \caption{Two images of a flyby, image 2 is one second after image 1, before and after the composition process. The nucleus is much brighter than background stars thus no stars visible in these images after calibration.}
+        \label{fig:composition_before_after}
+\end{figure}
+
+\subsubsection{Rendering Problems}
+Rendering a fly-by scenario with a \SI{10}{\kilo\meter} \gls{sssb} created artefacts in the images. Figure \ref{fig:render_artefacts} shows renders from flybys with different closest distances from the nucleus. All three images are the raw output from rendering, before composition. The images show a darker patch across the \gls{sssb} with sharp brightness transitions. Moreover, the stripe is at the same location across the \gls{sssb} in all three images. This type of artefact does not appear for other \gls{sssb} sizes. The most likely explanation are errors while scaling the nucleus from the original \SI{1}{\kilo\meter} to the \SI{10}{\kilo\meter} model.
+\begin{figure}[htb]
+    \centering
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/50_10_SssbOnly_2017-08-15T115845-190000.jpg}
+            \caption{\SI{50}{\kilo\meter}.}
+            \label{fig:render_artefacts_50}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/200_10_SssbOnly_2017-08-15T115845-190000.jpg}
+            \caption{\SI{200}{\kilo\meter}.}
+            \label{fig:render_artefacts_200}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/400_10_SssbOnly_2017-08-15T115845-190000.jpg}
+            \caption{\SI{400}{\kilo\meter}.}
+            \label{fig:render_artefacts_400}
+        \end{subfigure}
+    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for flybys with the given closest approach distance. Rendering artefacts, the stripes, are clearly visible in all three images.}
+    \label{fig:render_artefacts}
+\end{figure}
 
 \subsection{Compression} \label{sec:results_comp}
 The \gls{sispo} software package was used to study the effects of compression in different scenarios. The scenarios are presented in Table \ref{tab:sim_params}. Mainly the effects of two parameters were studied, the size of an \gls{sssb} and the flyby distance. Comparison of the different compression algorithms is based on several output parameters. The data size of the compressed image series, the number of points that could be reconstructed, the number of vertices that could be reconstructed and the number of faces. These outputs relate well to the level of detail of the rendered images, since \gls{sfm} algorithms rely on surface details for reconstruction.
@@ -94,7 +216,7 @@ Default & 1                                                                     
 \end{tabular}
 \end{table}
 
-\subsection{Image Quality Comparison}
+\subsubsection{Image Quality Comparison}
 To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by surface features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. To better show the artefacts created by compression, the area highlighted by the red box in Figure \ref{fig:img_quality_frame} was studied up closer.
 
 \begin{figure}[htb]
@@ -150,91 +272,6 @@ Figure \ref{fig:img_quality_comp}
     \label{fig:img_quality_comp}
 \end{figure}
 
-\subsection{Different Distances}
-Through procedural terrain generation, \gls{sispo} produces results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are shown in Figure \ref{fig:img_procedural_10k}.
-
-\begin{figure}[htb]
-    \centering
-        \begin{subfigure}[b]{0.75\textwidth}
-            \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
-            \caption{\SI{566}{\kilo\meter}.}
-            \label{fig:img_procedural_500}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.75\textwidth}
-            \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
-            \caption{\SI{106}{\kilo\meter}.}
-            \label{fig:img_procedural_100}
-        \end{subfigure}
-    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} at the given distances.}
-    \label{fig:img_procedural_10k}
-\end{figure}
-
-It is visible from Figure \ref{fig:img_procedural_10k} that surface features and details do not degrade visually. In addition, moving closer reveals more details, such as tiny bumps between larger structures which are not visible from larger distances.
-
-
-\subsection{Composition}
-The composition process uses raw images rendered with Blender and produces photometrically calibrated images. An example set of four images consisting of two images before and after calibration is shown in Figure \ref{fig:composition_before_after}. All four images were converted to \SI{8}{\bit} images. Two effects can be seen. First, the original images differ in there overall brightness. This difference is removed by the calibration. Secondly, images become brighter by the calibration process. 
-
-\begin{figure}[htb]
-    \centering
-        \begin{subfigure}[b]{0.48\textwidth}
-            \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/SssbOnly_2017-08-15T115858-281000.jpg}
-                \caption{Image 1 before calibration.}
-                \label{fig:composition_before_1}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-            \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/SssbOnly_2017-08-15T115859-288000.jpg}
-                \caption{Image 2 before calibration.}
-                \label{fig:composition_before_2}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.48\textwidth}
-            \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/Inst_2017-08-15T115858-281000.png}
-                \caption{Image 1 after calibration.}
-                \label{fig:composition_after_1}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.48\textwidth}
-            \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/Inst_2017-08-15T115859-288000.png}
-                \caption{Image 2 after calibration.}
-                \label{fig:composition_after_2}
-        \end{subfigure}
-        \caption{Two images of a flyby, image 2 is one second after image 1, before and after the composition process. The nucleus is much brighter than background stars thus no stars visible in these images after calibration.}
-        \label{fig:composition_before_after}
-\end{figure}
-
-
-\subsection{Rendering Problems}
-When using a \SI{10}{\kilo\meter} \gls{sssb}, 
-\begin{figure}[htb]
-    \centering
-        \begin{subfigure}[b]{0.32\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/50_10_SssbOnly_2017-08-15T115845-190000.jpg}
-            \caption{\SI{50}{\kilo\meter}.}
-            \label{fig:render_artefacts_50}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.32\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/200_10_SssbOnly_2017-08-15T115845-190000.jpg}
-            \caption{\SI{200}{\kilo\meter}.}
-            \label{fig:render_artefacts_200}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.32\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/400_10_SssbOnly_2017-08-15T115845-190000.jpg}
-            \caption{\SI{400}{\kilo\meter}.}
-            \label{fig:render_artefacts_400}
-        \end{subfigure}
-    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for flybys with the given closest approach distance. Rendering artefacts, the ribbons, are clearly visible in both images.}
-    \label{fig:render_artefacts}
-\end{figure}
 
 \subsection{Reconstruction}
 \gls{sispo} is choosing which result of which reconstruction method to use based on the number of reconstructed points. Comparing the chosen algorithm with the input parameter reveals that the first incremental \gls{sfm} reconstruction performs better when the flyby distance is smaller while the second incremental \gls{sfm} algorithms performs better with farther flyby distances.
@@ -261,6 +298,6 @@ When using a \SI{10}{\kilo\meter} \gls{sssb},
     \end{tabular}
 \end{table}
 
-\subsection{Performance}
+\subsection{Overall Performance}
 \gls{sispo} was executed on a machine running Linux Ubuntu 18.04.03 LTS, \SI{16}{\giga\byte} of \gls{ram}, Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores and an NVIDIA\textsuperscript{\textregistered}~GeForce GTX 1080 with \SI{8}{\giga\byte} memory. The performance assessment of a complete \gls{sispo} run shows that the most time consuming part is rendering. 
 A test case with an encounter distance of \SI{50}{\kilo\meter}, a relative velocity of \SI{30}{\kilo\meter\per\second} and \SI{120}{} images is investigated. The complete statistics are presented in Appendix \ref{sec:app_performance}. The total execution time is \SI{41849.938}{\second}. The time spent rendering is \SI{40617.382}{\second}, approximately \SI{97}{\percent} of the overall total. The time spent reconstructing was \SI{785.949}{\second}, approximately \SI{2}{\percent} of the overall total. Hence, the Python code was not improved to reduce execution time since \SI{99}{\percent} of the execution time stem from time spent outside the Python code.
