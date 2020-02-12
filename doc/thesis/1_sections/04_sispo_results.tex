@@ -3,7 +3,6 @@
 \subsection{Rendering} \label{sec:results_sim}
 A subset of all settings was kept constant for all simulations. The instrument settings are presented in Table \ref{tab:inst_settings} and the settings for the \gls{sssb} in Table \ref{tab:sssb_settings}. The specific values were chosen in order to mimic the scenario in \cite{Pajusalu2019CharacterizationMapping}.
 
-
 \begin{table}[htb]
     \centering
     \caption{Instrument Settings}
@@ -97,8 +96,7 @@ In a first step, the overall image quality is compared visually to real images. 
     \label{fig:render_quali_67p}
 \end{figure}
 
-While all images exhibit show impact craters, the overall appearance of the rendered images resembles the smoother cratering of Bennu better than rougher carters of \gls{67p}.
-The overall looks of the rendered images resemble the real images of Bennu well. The rubble pile characteristic present on Bennu's surface is also visible in the rendered images. When comparing the rendered images to the image of \gls{67p}, the most notable difference is the missing jet. This is because \gls{sispo} does not contain a gas and dust model yet that would produce a coma or jets. While the surface of 67P also features some rocks and boulders, it is more defined by a ridge-like structures. This type of features are missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
+While all images exhibit show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than rougher pits of \gls{67p}. The overall looks of the rendered images resemble the real images of Bennu well. The rubble pile characteristic present on Bennu's surface is also visible in the rendered images. When comparing the rendered images to the image of \gls{67p}, the most pronounced difference is the jet. \Gls{sispo} does not contain a gas and dust model yet that would produce a coma or jets and therefore it is missing in the rendered images. While the surface of 67P also features some rocks and boulders, it is more defined by ridge-like structures. This type of features are missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
 
 \subsubsection{Different Distances}
 Through procedural terrain generation, \gls{sispo} produces results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are shown in Figure \ref{fig:img_procedural_10k}.
@@ -185,8 +183,8 @@ Rendering a fly-by scenario with a \SI{10}{\kilo\meter} \gls{sssb} created artef
 \end{figure}
 
 \subsection{Compression} \label{sec:results_comp}
-The \gls{sispo} software package was used to study the effects of compression in different scenarios. The scenarios are presented in Table \ref{tab:sim_params}. Mainly the effects of two parameters were studied, the size of an \gls{sssb} and the flyby distance. Comparison of the different compression algorithms is based on several output parameters. The data size of the compressed image series, the number of points that could be reconstructed, the number of vertices that could be reconstructed and the number of faces. These outputs relate well to the level of detail of the rendered images, since \gls{sfm} algorithms rely on surface details for reconstruction.
-
+The \gls{sispo} software package was used to study the effects of compression in different scenarios. The scenarios are presented in Table \ref{tab:sim_params}. Two compression algorithms were used to study compression effects. The \gls{png} format was used because of its wide support among different software packages and \gls{jpeg}2000. Scenarios with varying \gls{sssb} nucleus sizes and flyby distance were simulated. 
+Comparison of the different compression algorithms is based on several output parameters. The data size of the compressed image series, the number of points in the dense reconstructed point cloud, the number of vertices and the number of faces of the refined reconstructed model. These outputs relate well to the level of detail of the rendered images, since \gls{sfm} algorithms rely on surface details for reconstruction.
 
 \begin{table}[htb]
 \caption{Simulation parameters}
@@ -217,16 +215,16 @@ Default & 1                                                                     
 \end{table}
 
 \subsubsection{Image Quality Comparison}
-To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by surface features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. To better show the artefacts created by compression, the area highlighted by the red box in Figure \ref{fig:img_quality_frame} was studied up closer.
+To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by surface features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. To better show the artefacts created by compression, the highlighted area in Figure \ref{fig:img_quality_frame} was studied up closer.
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_1000_frame.png}
-    \caption{Scene used for quality comparison. Highlighted in red is the area studied up closer.}
+    \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/quality_compare/jp2_1000_frame.png}
+    \caption{Scene used for quality comparison. Highlighted in red is the area studied up closer. The specific area was selected since it includes a wide range of colours and various sized surface features.}
     \label{fig:img_quality_frame}
 \end{figure}
 
-Figure \ref{fig:img_quality_comp}
+Figure \ref{fig:img_quality_comp} shows series of close-up views of rendered images at different levels of compression. At higher quality levels only few samples are shown since the differences are small.
 
 \begin{figure}[htb]
     \centering
@@ -272,6 +270,7 @@ Figure \ref{fig:img_quality_comp}
     \label{fig:img_quality_comp}
 \end{figure}
 
+Visual comparison of the different images reveals that quality 1000 is indistinguishable from quality 100. Also quality 10 resembles quality 1000 quite well. When comparing quality 5 to quality 1000 the images are still similar though quality 5 looks blurred. When looking at the quality 1 image, the overall surface colouring and main surface features are still visible. However, compression artefacts become strongly visible.
 
 \subsection{Reconstruction}
 \gls{sispo} is choosing which result of which reconstruction method to use based on the number of reconstructed points. Comparing the chosen algorithm with the input parameter reveals that the first incremental \gls{sfm} reconstruction performs better when the flyby distance is smaller while the second incremental \gls{sfm} algorithms performs better with farther flyby distances.
@@ -297,6 +296,22 @@ Figure \ref{fig:img_quality_comp}
         reduce\_memory & 1
     \end{tabular}
 \end{table}
+
+\subsubsection{Reconstructed Model Comparison}
+Several models were reconstructed etc.
+
+Number of reconstructed points increases with increasing \gls{sssb} size and decreasing encounter distance.
+
+
+\subsubsection{Reconstruction Limits}
+Reconstructing the \gls{sssb} nucleus for a range of flyby scenarios allows to show some of the limits of the reconstruction pipeline.
+
+Closer seems not to be a problem, farther away means less and less features. \SI{400}{\kilo\meter} worked with \SI{1}{\kilo\meter} \gls{sssb}. 
+\SI{0.1}{\kilo\meter} worked until \SI{100}{\kilo\meter} closest approach.
+
+
+\subsubsection{Reconstruction Algorithms}
+Since \gls{sispo} uses three different \gls{sfm} algorithms, it is investigated which algorithm is most successful under which parameter set.
 
 \subsection{Overall Performance}
 \gls{sispo} was executed on a machine running Linux Ubuntu 18.04.03 LTS, \SI{16}{\giga\byte} of \gls{ram}, Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores and an NVIDIA\textsuperscript{\textregistered}~GeForce GTX 1080 with \SI{8}{\giga\byte} memory. The performance assessment of a complete \gls{sispo} run shows that the most time consuming part is rendering. 

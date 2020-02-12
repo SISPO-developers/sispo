@@ -1,4 +1,4 @@
-\section{\Acrlong{sispo}} \label{sec:sispo}
+\section{Space Imaging Simulator for Proximity Operations} \label{sec:sispo}
 
 \gls{sispo} is a software package developed in python. It is separated in different sub-packages. The two main sub-packages are the \textit{sim} and the \textit{reconstruction} package. The third sub-package provides several image compression algorithms to test effects on reconstruction.
 
@@ -324,7 +324,9 @@ The common steps for the complete pipeline is comprised of the following steps:
 
 \gls{omvg} and \gls{omvs} can be controlled with numerous parameters. All parameters have default values in \gls{sispo} itself which sometimes differ from the default settings of the software packages. These were adapted since they provide better results in the relevant scenarios.
 
-The reconstruction is based on two incremental and one global \gls{sfm} approach that \gls{omvg} provides. All three algorithms are run and the number of reconstructed points are compared. The result containing the most points is exported to the \gls{omvs} format for further processing. None of the residuals are taken into account which is why this selection method might choose the highest quality point cloud due to a possible high number of outliers. Hence, if the result of the reconstruction is considered bad, it can be attempted to use one of the other results.
+The reconstruction is based on two incremental and one global \gls{sfm} approach that \gls{omvg} provides. All three algorithms are executed and the number of reconstructed points are compared. The result containing the most points is exported to the \gls{omvs} format for further processing. None of the residuals are taken into account which is why this selection method might choose the highest quality point cloud due to a possible high number of outliers. Hence, if the result of the reconstruction is considered bad, it can be attempted to use one of the other results.
+
+The algorithm used for reconstruction by IncrementalSfM2 is non-deterministic, i.e. results differ between runs on the same data sets. Hence, IncrementalSfM2 should be executed several times and the best result selected \cite{Pajusalu2019CharacterizationMapping}.
 
 \subsection{Performance}
 \subsubsection{Image processing benchmark} \label{sec:cvskimage}
