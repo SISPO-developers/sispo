@@ -167,16 +167,29 @@ Within a Blender scene, the \gls{sssb} is kept at the origin. Only the Sun objec
 
 Due to problems during rendering, the Blender scene is scaled to kilometres instead of metres. I.e. one Blender unit corresponds to \SI{1}{\kilo\meter}. This is the only deviation from SI base units within the software.
 
-The precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. Blender shader nodes are used to create these during rendering. These shader nodes are combined in a tree (cf. Figure \ref{fig:shader_nodes}). The tree consists of two main trees, one for shading and one for displacement, which are interlinked, i.e. displacement influences surface colour and vice-versa. This approach of procedural terrain generation allows to use the same model on a large range of distances since the details are generated as needed.
+The precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. The raw Blender model is a smooth body without any textures as shown in Figure~\ref{fig:smooth_model}. Blender shader nodes are used to create these during rendering. Blender nodes are a method of programming complex algorithms graphically. These shader nodes are combined in a network or tree. An overview of the shader node network used in our rendering process can be seen in  Figure~\ref{fig:shader_nodes}. The tree consists of two main trees, one for shading and one for displacement, which are interlinked, i.e. displacement influences surface colour and vice-versa. This approach of procedural terrain generation allows to use the same model on a large range of distances since the details are generated as needed.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=.4\textwidth]{doc/thesis/0_figures/procedural_terrain/smooth_model.png}
+    \caption{Smooth model of a \gls{sssb}. This model shows the raw \gls{3d} model before applying surface and displacement shaders.}
+    \label{fig:smooth_model}
+\end{figure}
 
 \begin{figure}[htb]
     \centering
     \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/node_network.png}
-    \caption{Overview of the shader nodes tree in the Blender model used for creating a \gls{sssb} surface and terrain. Two main trees are visible in the network that are combined in the output, one for shading and the other for displacement. The two main trees are interlinked.}
+    \caption{Overview of the shader node network in the Blender model used for creating a \gls{sssb} surface and terrain. Two main trees are visible in the network that are combined in the output, one for shading and the other for displacement. The two main trees are interlinked.}
     \label{fig:shader_nodes}
 \end{figure}
 
 The shader implementation creates a material that combines surface shading and displacement. The used nodes are: 
+arithmetic nodes: add, subtract, multiply, greater than, maximum 
+texture node: noise, Voronoi
+colouring: RGB curves, Mix
+vector: displacement
+shader: Principled BSDF, Diffuse BSDF, mix
+
 Surface subtree
 
 Displacement subtree
