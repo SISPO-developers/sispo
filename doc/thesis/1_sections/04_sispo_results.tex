@@ -164,31 +164,28 @@ The composition process uses raw images rendered with Blender and produces photo
         \label{fig:composition_before_after}
 \end{figure}
 
-As Figures \ref{fig:composition_after_1} and \ref{fig:composition_after_2} show, the composition properly calibrates the overall brightness of different images. However, there are sometimes darker and brighter patches within images that are not yet calibrated properly. Figure 
+% As Figures \ref{fig:composition_after_1} and \ref{fig:composition_after_2} show, the composition properly calibrates the overall brightness of different images. However, there are sometimes darker and brighter patches within images that are not yet calibrated properly. Figure 
 
-\begin{figure}[htb]
-    \centering
-        \begin{subfigure}[b]{0.32\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/50_10_SssbOnly_2017-08-15T115845-190000.jpg}
-            \caption{\SI{50}{\kilo\meter}.}
-            \label{fig:render_artefacts_50}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.32\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/200_10_SssbOnly_2017-08-15T115845-190000.jpg}
-            \caption{\SI{200}{\kilo\meter}.}
-            \label{fig:render_artefacts_200}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.32\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/400_10_SssbOnly_2017-08-15T115845-190000.jpg}
-            \caption{\SI{400}{\kilo\meter}.}
-            \label{fig:render_artefacts_400}
-        \end{subfigure}
-    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for flybys with the given closest approach distance. Rendering artefacts, the stripes, are clearly visible in all three images.}
-    \label{fig:render_artefacts}
-\end{figure}
+% \begin{figure}[htb]
+%     \centering
+%         \begin{subfigure}[b]{0.32\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_varying_brightness/Inst_2017-08-15T115803-901000.png}
+%             \label{fig:composition_varying_1}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.32\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_varying_brightness/Inst_2017-08-15T115804-908000.png}
+%             \label{fig:composition_varying_2}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.32\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_varying_brightness/Inst_2017-08-15T115805-915000.png}
+%             \label{fig:composition_varying_3}
+%         \end{subfigure}
+%     \caption{Varying brightness of patches on the \gls{sssb} surface.}
+%     \label{fig:composition_varying}
+% \end{figure}
 
 \subsubsection{Rendering Problems}
 Rendering a fly-by scenario with a \SI{10}{\kilo\meter} \gls{sssb} created artefacts in the images. Figure \ref{fig:render_artefacts} shows renders from flybys with different closest distances from the nucleus. All three images are the raw output from rendering, before composition. The images show a darker patch across the \gls{sssb} with sharp brightness transitions. Moreover, the stripe is at the same location across the \gls{sssb} in all three images. This type of artefact does not appear for other \gls{sssb} sizes. The most likely explanation are errors while scaling the nucleus from the original \SI{1}{\kilo\meter} to the \SI{10}{\kilo\meter} model.
@@ -214,6 +211,29 @@ Rendering a fly-by scenario with a \SI{10}{\kilo\meter} \gls{sssb} created artef
         \end{subfigure}
     \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for flybys with the given closest approach distance. Rendering artefacts, the stripes, are clearly visible in all three images.}
     \label{fig:render_artefacts}
+\end{figure}
+
+A second problem was found in a scenario with \SI{50}{\kilo\meter} minimum distance and a \SI{1}{\kilo\meter} \gls{sssb}. A single image was found to be darker than all other images in the series.
+
+\begin{figure}[htb]
+    \centering
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/50km_Inst_2017-08-15T115816-993000.png}
+            \label{fig:composition_dark_1}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/Inst_2017-08-15T115818-000000.png}
+            \label{fig:composition_dark_2}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/Inst_2017-08-15T115819-007000.png}
+            \label{fig:composition_dark_3}
+        \end{subfigure}
+    \caption{Darkening of overall \gls{sssb} body. A single}
+    \label{fig:composition_dark}
 \end{figure}
 
 \subsection{Compression} \label{sec:results_comp}
@@ -288,7 +308,7 @@ Figure \ref{fig:img_quality_comp} shows series of close-up views of rendered ima
             \centering
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/png_center.png}
             \caption{\gls{png}}
-            \label{fig:img_quality_1000}
+            \label{fig:img_quality_png}
         \end{subfigure}
     \caption{Comparison of images with different level of compression using \gls{jpeg}2000.}
     \label{fig:img_quality_comp}
