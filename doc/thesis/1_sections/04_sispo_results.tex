@@ -164,7 +164,31 @@ The composition process uses raw images rendered with Blender and produces photo
         \label{fig:composition_before_after}
 \end{figure}
 
+As Figures \ref{fig:composition_after_1} and \ref{fig:composition_after_2} show, the composition properly calibrates the overall brightness of different images. However, there are sometimes darker and brighter patches within images that are not yet calibrated properly. Figure 
 
+\begin{figure}[htb]
+    \centering
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/50_10_SssbOnly_2017-08-15T115845-190000.jpg}
+            \caption{\SI{50}{\kilo\meter}.}
+            \label{fig:render_artefacts_50}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/200_10_SssbOnly_2017-08-15T115845-190000.jpg}
+            \caption{\SI{200}{\kilo\meter}.}
+            \label{fig:render_artefacts_200}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/400_10_SssbOnly_2017-08-15T115845-190000.jpg}
+            \caption{\SI{400}{\kilo\meter}.}
+            \label{fig:render_artefacts_400}
+        \end{subfigure}
+    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for flybys with the given closest approach distance. Rendering artefacts, the stripes, are clearly visible in all three images.}
+    \label{fig:render_artefacts}
+\end{figure}
 
 \subsubsection{Rendering Problems}
 Rendering a fly-by scenario with a \SI{10}{\kilo\meter} \gls{sssb} created artefacts in the images. Figure \ref{fig:render_artefacts} shows renders from flybys with different closest distances from the nucleus. All three images are the raw output from rendering, before composition. The images show a darker patch across the \gls{sssb} with sharp brightness transitions. Moreover, the stripe is at the same location across the \gls{sssb} in all three images. This type of artefact does not appear for other \gls{sssb} sizes. The most likely explanation are errors while scaling the nucleus from the original \SI{1}{\kilo\meter} to the \SI{10}{\kilo\meter} model.
@@ -219,7 +243,7 @@ To compare the image quality after different levels of compression, a specific i
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/quality_compare/jp2_1000_frame.png}
+    \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/compare_quality/set1/framed/jp2_1000_frame.png}
     \caption{Scene used for quality comparison. Highlighted in red is the area studied up closer. The specific area was selected since it includes a wide range of colours and various sized surface features.}
     \label{fig:img_quality_frame}
 \end{figure}
@@ -230,40 +254,40 @@ Figure \ref{fig:img_quality_comp} shows series of close-up views of rendered ima
     \centering
         \begin{subfigure}[b]{0.47\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_1_center.png}
-            \caption{Quality 1.}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/jp2_1_center.png}
+            \caption{\gls{jp2} Quality 1.}
             \label{fig:img_quality_1}
         \end{subfigure}
         \begin{subfigure}[b]{0.47\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_4_center.png}
-            \caption{Quality 4.}
-            \label{fig:img_quality_4}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.47\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_5_center.png}
-            \caption{Quality 5.}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/jp2_5_center.png}
+            \caption{\gls{jp2} Quality 5.}
             \label{fig:img_quality_5}
         \end{subfigure}
+        \\
         \begin{subfigure}[b]{0.47\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_10_center.png}
-            \caption{Quality 10.}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/jp2_10_center.png}
+            \caption{\gls{jp2} Quality 10.}
             \label{fig:img_quality_10}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.47\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/jp2_100_center.png}
+            \caption{\gls{jp2} Quality 100.}
+            \label{fig:img_quality_100}
         \end{subfigure}
         \\
         \begin{subfigure}[b]{0.47\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_100_center.png}
-            \caption{Quality 100.}
-            \label{fig:img_quality_100}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/jp2_1000_center.png}
+            \caption{\gls{jp2} Quality 1000.}
+            \label{fig:img_quality_1000}
         \end{subfigure}
         \begin{subfigure}[b]{0.47\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/quality_compare/jp2_1000_center.png}
-            \caption{Quality 1000.}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/png_center.png}
+            \caption{\gls{png}}
             \label{fig:img_quality_1000}
         \end{subfigure}
     \caption{Comparison of images with different level of compression using \gls{jpeg}2000.}
