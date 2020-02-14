@@ -213,27 +213,27 @@ Rendering a fly-by scenario with a \SI{10}{\kilo\meter} \gls{sssb} created artef
     \label{fig:render_artefacts}
 \end{figure}
 
-A second problem was found in a scenario with \SI{50}{\kilo\meter} minimum distance and a \SI{1}{\kilo\meter} \gls{sssb}. A single image was found to be darker than all other images in the series.
+A second problem was found in a scenario with \SI{50}{\kilo\meter} minimum distance and a \SI{1}{\kilo\meter} \gls{sssb}. A single image was found to be darker than all other images in the data set. A series of three images is shown in Figure \ref{fig:render_dark}. In total, three pixels are much brighter than any other pixel in the image. These are composed images for better visibility of the artefact. However, artefact exists in the raw OpenEXR SssbOnly image hence it is not introduced by the composition process. No second image with the same issue was found in any other data set.
 
 \begin{figure}[htb]
     \centering
         \begin{subfigure}[b]{0.32\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/50km_Inst_2017-08-15T115816-993000.png}
-            \label{fig:composition_dark_1}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/50km_Inst_2017-08-15T115816-993000_center.png}
+            \label{fig:render_dark_1}
         \end{subfigure}
         \begin{subfigure}[b]{0.32\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/Inst_2017-08-15T115818-000000.png}
-            \label{fig:composition_dark_2}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/Inst_2017-08-15T115818-000000_center.png}
+            \label{fig:render_dark_2}
         \end{subfigure}
         \begin{subfigure}[b]{0.32\textwidth}
             \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/Inst_2017-08-15T115819-007000.png}
-            \label{fig:composition_dark_3}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/Inst_2017-08-15T115819-007000_center.png}
+            \label{fig:render_dark_3}
         \end{subfigure}
-    \caption{Darkening of overall \gls{sssb} body. A single}
-    \label{fig:composition_dark}
+    \caption{Darkening of overall \gls{sssb} body due to three pixel being much brighter. All three images are composed images for better visibility of the artefact. The images are cropped to show the \gls{sssb} nucleus up close.}
+    \label{fig:render_dark}
 \end{figure}
 
 \subsection{Compression} \label{sec:results_comp}
@@ -268,56 +268,146 @@ To compare the image quality after different levels of compression, a specific i
     \label{fig:img_quality_frame}
 \end{figure}
 
-Figure \ref{fig:img_quality_comp} shows series of close-up views of rendered images at different levels of compression. At higher quality levels only few samples are shown since the differences are small.
+Figure \ref{fig:img_quality_comp} shows series of close-up views of rendered images at different levels of compression and one \gls{png} image as reference. The high quality level images do not show any difference to the \gls{png} image. Figure \ref{fig:img_quality_5} shows a minor visible difference to the lossless compressed image. Only image \ref{fig:img_quality_1} contains clearly visible compression artefacts.
 
 \begin{figure}[htb]
     \centering
-        \begin{subfigure}[b]{0.47\textwidth}
+        \begin{subfigure}[b]{0.44\textwidth}
             \centering
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/jp2_1_center.png}
             \caption{\gls{jp2} Quality 1.}
             \label{fig:img_quality_1}
         \end{subfigure}
-        \begin{subfigure}[b]{0.47\textwidth}
+        \begin{subfigure}[b]{0.44\textwidth}
             \centering
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/jp2_5_center.png}
             \caption{\gls{jp2} Quality 5.}
             \label{fig:img_quality_5}
         \end{subfigure}
         \\
-        \begin{subfigure}[b]{0.47\textwidth}
+        \begin{subfigure}[b]{0.44\textwidth}
             \centering
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/jp2_10_center.png}
             \caption{\gls{jp2} Quality 10.}
             \label{fig:img_quality_10}
         \end{subfigure}
-        \begin{subfigure}[b]{0.47\textwidth}
+        \begin{subfigure}[b]{0.44\textwidth}
             \centering
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/jp2_100_center.png}
             \caption{\gls{jp2} Quality 100.}
             \label{fig:img_quality_100}
         \end{subfigure}
         \\
-        \begin{subfigure}[b]{0.47\textwidth}
+        \begin{subfigure}[b]{0.44\textwidth}
             \centering
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/jp2_1000_center.png}
             \caption{\gls{jp2} Quality 1000.}
             \label{fig:img_quality_1000}
         \end{subfigure}
-        \begin{subfigure}[b]{0.47\textwidth}
+        \begin{subfigure}[b]{0.44\textwidth}
             \centering
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/center/png_center.png}
             \caption{\gls{png}}
             \label{fig:img_quality_png}
         \end{subfigure}
-    \caption{Comparison of images with different level of compression using \gls{jpeg}2000.}
+    \caption{Images with different level of compression using \gls{jpeg}2000 and one \gls{png}.}
     \label{fig:img_quality_comp}
 \end{figure}
 
-Visual comparison of the different images reveals that quality 1000 is indistinguishable from quality 100. Also quality 10 resembles quality 1000 quite well. When comparing quality 5 to quality 1000 the images are still similar though quality 5 looks blurred. When looking at the quality 1 image, the overall surface colouring and main surface features are still visible. However, compression artefacts become strongly visible.
+Difference images and histograms are used to show the effects of compression further. Difference images take the L2-norm of the \gls{rgb} values of each pixel and subtract them from the raw image. The result is a heat map showing differences through a colour scale. The heat maps for the different quality levels are shown in Figure \ref{fig:img_quality_heatmap}. The respective histograms are shown in Figure \ref{fig:img_quality_histogram}.
+
+\begin{figure}[htb]
+    \centering
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/heatmap/jp2_1_center_diff_heatmap.png}
+            \caption{\gls{jp2} Quality 1.}
+            \label{fig:img_quality_heatmap_1}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/heatmap/jp2_5_center_diff_heatmap.png}
+            \caption{\gls{jp2} Quality 5.}
+            \label{fig:img_quality_heatmap_5}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/heatmap/jp2_10_center_diff_heatmap.png}
+            \caption{\gls{jp2} Quality 10.}
+            \label{fig:img_quality_heatmap_10}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/heatmap/jp2_100_center_diff_heatmap.png}
+            \caption{\gls{jp2} Quality 100.}
+            \label{fig:img_quality_heatmap_100}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/heatmap/jp2_1000_center_diff_heatmap.png}
+            \caption{\gls{jp2} Quality 1000.}
+            \label{fig:img_quality_heatmap_1000}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/heatmap/png_center_diff_heatmap.png}
+            \caption{\gls{png}}
+            \label{fig:img_quality_heatmap_png}
+        \end{subfigure}
+    \caption{Images with different level of compression using \gls{jpeg}2000 and one \gls{png}.}
+    \label{fig:img_quality_heatmap}
+\end{figure}
+
+\begin{figure}[htb]
+    \centering
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/histograms/jp2_1_center_diff_histogram.png}
+            \caption{\gls{jp2} Quality 1.}
+            \label{fig:img_quality_histogram_1}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/histograms/jp2_5_center_diff_histogram.png}
+            \caption{\gls{jp2} Quality 5.}
+            \label{fig:img_quality_histogram_5}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/histograms/jp2_10_center_diff_histogram.png}
+            \caption{\gls{jp2} Quality 10.}
+            \label{fig:img_quality_histogram_10}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/histograms/jp2_100_center_diff_histogram.png}
+            \caption{\gls{jp2} Quality 100.}
+            \label{fig:img_quality_histogram_100}
+        \end{subfigure}
+        \\
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/histograms/jp2_1000_center_diff_histogram.png}
+            \caption{\gls{jp2} Quality 1000.}
+            \label{fig:img_quality_histogram_1000}
+        \end{subfigure}
+        \begin{subfigure}[b]{0.49\textwidth}
+            \centering
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/histograms/png_center_diff_histogram.png}
+            \caption{\gls{png}}
+            \label{fig:img_quality_histogram_png}
+        \end{subfigure}
+    \caption{Images with different level of compression using \gls{jpeg}2000 and one \gls{png}.}
+    \label{fig:img_quality_histogram}
+\end{figure}
+
+Figures \ref{fig:img_quality_heatmap} and \ref{fig:img_quality_histogram} that the \gls{jp2} quality levels 1000 does not differ from the  
 
 \subsection{Reconstruction}
-\gls{sispo} is choosing which result of which reconstruction method to use based on the number of reconstructed points. Comparing the chosen algorithm with the input parameter reveals that the first incremental \gls{sfm} reconstruction performs better when the flyby distance is smaller while the second incremental \gls{sfm} algorithms performs better with farther flyby distances.
+\gls{sispo} reconstructs using default parameters given in Table \ref{tab:comp_settings}. Refine options is set to NONE to make \gls{sfm} algorithms more likely to converge. It is assumed that in space missions, the intrinsic camera parameters can determined with sufficient accuracy before launch and therefore the parameters do not need to be optimised anymore.
 
 \begin{table}[htb]
     \centering
@@ -340,6 +430,8 @@ Visual comparison of the different images reveals that quality 1000 is indisting
         reduce\_memory & 1
     \end{tabular}
 \end{table}
+
+\gls{sispo} is choosing which result of which reconstruction method to use based on the number of reconstructed points. Comparing the chosen algorithm with the input parameter reveals that the first incremental \gls{sfm} reconstruction performs better when the flyby distance is smaller while the second incremental \gls{sfm} algorithms performs better with farther flyby distances.
 
 \subsubsection{Reconstructed Model Comparison}
 Several models were reconstructed etc.
