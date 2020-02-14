@@ -309,9 +309,9 @@ The compression module provides compression and decompression algorithms. These 
 
 Independent of the algorithm, files are handled equally. The images are loaded into \textit{NumPy} arrays inside Python to have a common raw format. Before encoding, the information is reduced to \SI{8}{\bit} since the reconstruction module only reads images with \SI{8}{\bit} colour depth correctly. Images are encoded with the respective algorithm and converted into a binary stream. A copy of this data is saved as a file in the raw folder. The raw binary data is then converted back to a \textit{NumPy} array and decoded to retrieve as much information as possible. Finally, the compressed and decompressed data is stored as a png file to not lose any further information.
 
-The formats png, jpeg, jpeg2000 and tiff are implemented using \textit{OpenCV}. There are various settings for each format\footnote{A description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
+The formats png, jpeg, \gls{jp2} and tiff are implemented using \textit{OpenCV}. There are various settings for each format\footnote{A description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
 
-The most important input parameter that is relevant to all algorithms is the "level" argument in "settings" which describes either the compression level (from 1 to 9 for bz2, gzip, lzma, zlib and png, higher meaning more compression) or the quality level (from 1 to 10 for jpeg and jpeg2000, higher meaning better quality and less compression). Other input parameters to the compression package are presented in Table~\ref{tab:compression_settings}.
+The most important input parameter that is relevant to all algorithms is the "level" argument in "settings" which describes either the compression level (from 1 to 9 for bz2, gzip, lzma, zlib and png, higher meaning more compression) or the quality level (from 1 to 10 for jpeg and 0.01 to 10 for jpeg2000, higher meaning better quality and less compression). Other input parameters to the compression package are presented in Table~\ref{tab:compression_settings}.
 
 \begin{table}[htb]
     \centering
