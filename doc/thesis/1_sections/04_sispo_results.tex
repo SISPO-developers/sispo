@@ -1,4 +1,5 @@
 \section{Results} \label{sec:results}
+Several simulations were run with \gls{sispo} in order to assess the capabilities and quality of the output of the three stages, i.e. rendering, compression and reconstruction. Furthermore, the effects of compression using the \gls{jp2} standard on the quality of \gls{3d} model reconstruction.
 
 \subsection{Rendering} \label{sec:results_sim}
 A subset of all settings was kept constant for all simulations. The instrument settings are presented in Table \ref{tab:inst_settings} and the settings for the \gls{sssb} in Table \ref{tab:sssb_settings}. The specific values were chosen in order to mimic the scenario in \cite{Pajusalu2019CharacterizationMapping}.
@@ -61,7 +62,7 @@ A subset of all settings was kept constant for all simulations. The instrument s
 \end{table}
 
 \subsubsection{Image Comparison}
-In a first step, the overall image quality is compared visually to real images. A set of images at different distances of nuclei with different sizes is depicted in Figure \ref{fig:render_quali_comparison}. A set of five images from asteroid Bennu taken by the PolyCam aboard the \textit{OSIRIS-REx} mission is shown in Figure \ref{fig:render_quali_bennu}. Additionally, the rendered images are compared to images of comet \gls{67p} taken by the OSIRIS imager aboard the \textit{Rosetta} spacecraft. Figure \ref{fig:render_quali_67p} shows one image that represents all important features of \gls{67p}.
+In a first step, the overall image quality is compared visually to real images. A set of images at different distances of nuclei with different sizes is depicted in Figure \ref{fig:render_quali_comparison}. A set of five images from asteroid Bennu taken by the PolyCam aboard the \textit{OSIRIS-REx} mission is shown in Figure \ref{fig:render_quali_bennu}. Additionally, the rendered images are compared to images of comet \gls{67p} taken by the OSIRIS imager aboard the \textit{Rosetta} spacecraft. Figure \ref{fig:render_quali_67p} shows one image that represents all important features of \gls{67p}. A collection of several views of the comet \gls{81p}, also known as Wild 2, are shown in Figure \ref{fig:render_quali_81p}. \Gls{81p} was visited during the \textit{Stardust} mission \cite{Brownlee2003Stardust:Mission}.
 
 \begin{figure}[htb]
     \centering
@@ -96,7 +97,14 @@ In a first step, the overall image quality is compared visually to real images. 
     \label{fig:render_quali_67p}
 \end{figure}
 
-While all images exhibit show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than rougher pits of \gls{67p}. The overall looks of the rendered images resemble the real images of Bennu well. The rubble pile characteristic present on Bennu's surface is also visible in the rendered images. When comparing the rendered images to the image of \gls{67p}, the most pronounced difference is the jet. \Gls{sispo} does not contain a gas and dust model yet that would produce a coma or jets and therefore it is missing in the rendered images. While the surface of 67P also features some rocks and boulders, it is more defined by ridge-like structures. This type of features are missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=.8\textwidth]{doc/thesis/0_figures/procedural_terrain/Wild2.jpg}
+    \caption{Collection of images of comet \acrlong{81p} taken during the \textit{Stardust} mission by its navigation camera \cite{StardustImages}.}
+    \label{fig:render_quali_81p}
+\end{figure}
+
+While all images exhibit show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The overall looks of the rendered images resemble the real images of Bennu well. The rocks and boulders present on Bennu's surface are also visible in the rendered images. When comparing the rendered images to the image of \gls{67p} or \gls{81p}, the most pronounced difference are the jets. \Gls{sispo} does not contain a gas and dust model that would produce a coma or jets and therefore these are missing in the rendered images. While the surface of both comets also feature some rocks and boulders, it is more defined by ridge-like structures. This type of feature is missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
 
 \subsubsection{Different Distances}
 Through procedural terrain generation, \gls{sispo} produces results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are shown in Figure \ref{fig:img_procedural_10k}.
@@ -105,14 +113,14 @@ Through procedural terrain generation, \gls{sispo} produces results for a large 
     \centering
         \begin{subfigure}[b]{0.75\textwidth}
             \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
             \caption{\SI{566}{\kilo\meter}.}
             \label{fig:img_procedural_500}
         \end{subfigure}
         \\
         \begin{subfigure}[b]{0.75\textwidth}
             \centering
-                \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
+            \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
             \caption{\SI{106}{\kilo\meter}.}
             \label{fig:img_procedural_100}
         \end{subfigure}
@@ -156,6 +164,8 @@ The composition process uses raw images rendered with Blender and produces photo
         \label{fig:composition_before_after}
 \end{figure}
 
+
+
 \subsubsection{Rendering Problems}
 Rendering a fly-by scenario with a \SI{10}{\kilo\meter} \gls{sssb} created artefacts in the images. Figure \ref{fig:render_artefacts} shows renders from flybys with different closest distances from the nucleus. All three images are the raw output from rendering, before composition. The images show a darker patch across the \gls{sssb} with sharp brightness transitions. Moreover, the stripe is at the same location across the \gls{sssb} in all three images. This type of artefact does not appear for other \gls{sssb} sizes. The most likely explanation are errors while scaling the nucleus from the original \SI{1}{\kilo\meter} to the \SI{10}{\kilo\meter} model.
 \begin{figure}[htb]
@@ -187,31 +197,21 @@ The \gls{sispo} software package was used to study the effects of compression in
 Comparison of the different compression algorithms is based on several output parameters. The data size of the compressed image series, the number of points in the dense reconstructed point cloud, the number of vertices and the number of faces of the refined reconstructed model. These outputs relate well to the level of detail of the rendered images, since \gls{sfm} algorithms rely on surface details for reconstruction.
 
 \begin{table}[htb]
-\caption{Simulation parameters}
-\label{tab:sim_params}
-\begin{tabular}{l|lll}
-ID      & \gls{sssb} Size \SI{}{\kilo\meter} & Encounter Distance \SI{}{\kilo\meter} & Compression Method      \\
-Default & 1                                                                                                        & 400                                                                                          & png                     \\
-1       & 1                                                                                                        & 400                                                                                          & jpeg2000: quality 1000  \\
-2       & 1                                                                                                        & 400                                                                                          & jpeg2000: quality 100   \\
-3       & 1                                                                                                        & 400                                                                                          & jpeg2000: quality 10    \\
-4       & 1                                                                                                        & 100                                                                                          & png                     \\
-5       & 1                                                                                                        & 100                                                                                          & jpeg2000 : quality 1000 \\
-6       & 1                                                                                                        & 100                                                                                          & jpeg2000: quality 100   \\
-7       & 1                                                                                                        & 100                                                                                          & jpeg200: quality 10     \\
-8       & 1                                                                                                        & 1000                                                                                         & png                     \\
-9       & 1                                                                                                        & 1000                                                                                         & jpeg2000 : quality 1000 \\
-10      & 1                                                                                                        & 1000                                                                                         & jpeg2000 : quality 100  \\
-11      & 1                                                                                                        & 1000                                                                                         & jpeg2000 : quality 10   \\
-12      & 10                                                                                                       & 400                                                                                          & png                     \\
-13      & 10                                                                                                       & 400                                                                                          & jpeg2000 : quality 1000 \\
-14      & 10                                                                                                       & 400                                                                                          & jpeg2000 : quality 100  \\
-15      & 10                                                                                                       & 400                                                                                          & jpeg2000 : quality 10   \\
-16      & 0.1                                                                                                      & 400                                                                                          & png                     \\
-17      & 0.1                                                                                                      & 400                                                                                          & jpeg2000 : quality 1000 \\
-18      & 0.1                                                                                                      & 400                                                                                          & jpeg2000 : quality 100  \\
-19      & 0.1                                                                                                      & 400                                                                                          & jpeg2000 : quality 10  
-\end{tabular}
+    \centering
+    \caption{Simulation parameters used for investigating capabilities of \gls{sispo}. For each scenario \gls{png}, \gls{jp2} quality 1000, quality 100, quality 10 and quality 1 compression methods were used to investigate the effects of compression.}
+    \label{tab:sim_params}
+    \begin{tabular}{l|lll}
+        ID      & \gls{sssb} Size \SI{}{\kilo\meter} & Encounter Distance \SI{}{\kilo\meter} & Number of Images \\ \hline
+        Default & 1  & 50  & 120\\
+        Default & 1  & 100 & 120\\
+        Default & 1  & 200 & 120\\
+        Default & 1  & 400 & 120\\
+        Default & 1  & 50  & 30\\
+        Default & 1  & 100 & 30\\
+        Default & 1  & 200 & 30\\
+        Default & 1  & 400 & 30\\
+        Default & 10 & 50  & 30\\
+    \end{tabular}
 \end{table}
 
 \subsubsection{Image Quality Comparison}
@@ -312,6 +312,8 @@ Closer seems not to be a problem, farther away means less and less features. \SI
 
 \subsubsection{Reconstruction Algorithms}
 Since \gls{sispo} uses three different \gls{sfm} algorithms, it is investigated which algorithm is most successful under which parameter set.
+
+While the global \gls{sfm} algorithm was able to reconstruct a point cloud in various cases, it never created the best output. The number of points in the reconstructed point cloud of the incremental \gls{sfm} algorithms always exceeded those of the global \gls{sfm} algorithm.
 
 \subsection{Overall Performance}
 \gls{sispo} was executed on a machine running Linux Ubuntu 18.04.03 LTS, \SI{16}{\giga\byte} of \gls{ram}, Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores and an NVIDIA\textsuperscript{\textregistered}~GeForce GTX 1080 with \SI{8}{\giga\byte} memory. The performance assessment of a complete \gls{sispo} run shows that the most time consuming part is rendering. 
