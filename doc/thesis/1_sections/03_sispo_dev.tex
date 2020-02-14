@@ -167,20 +167,20 @@ Within a Blender scene, the \gls{sssb} is kept at the origin. Only the Sun objec
 
 Due to problems during rendering, the Blender scene is scaled to kilometres instead of metres. I.e. one Blender unit corresponds to \SI{1}{\kilo\meter}. This is the only deviation from SI base units within the software.
 
-The precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. Blender shader nodes are used to create these during rendering. These shader nodes are combined in a network (cf. Figure \ref{fig:shader_nodes}). This approach of procedural terrain generation allows to use the same model on a large range of distances since the details are generated as needed.
+The precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. Blender shader nodes are used to create these during rendering. These shader nodes are combined in a tree (cf. Figure \ref{fig:shader_nodes}). The tree consists of two main trees, one for shading and one for displacement, which are interlinked, i.e. displacement influences surface colour and vice-versa. This approach of procedural terrain generation allows to use the same model on a large range of distances since the details are generated as needed.
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=\textwidth]{doc/thesis/0_figures/star_rendering/Stars_2017-08-15T115856-171000.png}
-    \caption{Overview of the shader nodes network in the Blender model used for creating a \gls{sssb} surface and terrain. Two main trees are visible in the network that are combined in the output, one for the shading and the other for displacement. Two main trees are interlinked.}
+    \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/node_network.png}
+    \caption{Overview of the shader nodes tree in the Blender model used for creating a \gls{sssb} surface and terrain. Two main trees are visible in the network that are combined in the output, one for shading and the other for displacement. The two main trees are interlinked.}
     \label{fig:shader_nodes}
 \end{figure}
 
-The shader implementation creates a material that combines surface shading and displacement.
+The shader implementation creates a material that combines surface shading and displacement. The used nodes are: 
 Surface subtree
 
 Displacement subtree
-Add, Subtract, Mix Shader, Diffuse BSDF
+Add, Subtract, multiply, Mix Shader, Diffuse BSDF, RGB Curves, Noise texture, Voronoi texture, Mix, Principled BSDF, greater than, maximum, 
 
 \subsubsection{Star Rendering} \label{sec:stars}
 The background stars are rendered based on the star catalogue \gls{ucac4}. This catalogue includes stars up to magnitude 16. The \gls{fov} is determined based on the spacecraft camera in the SssbOnly scene since this camera provides the \gls{fov} of the spacecraft instrument. The edges of the \gls{fov} are calculated using Equation \ref{eq:fov_edge}. 
