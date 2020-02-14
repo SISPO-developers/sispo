@@ -7,9 +7,9 @@ The software package is hosted on GitHub using a git version control system. Fur
 The most important python dependencies of \gls{sispo} are:
 \begin{itemize}
     \item astropy: Astronomy package developed by \cite{robitaille2013astropy} and \cite{price2018astropy}
-    \item Blender: 3D creation suite \cite{blender}
+    \item Blender: \gls{3d} creation suite \cite{blender}
     \item \textit{NumPy}: Scientific computing for python \cite{oliphant2006guideNumPy}
-    \item opencv: Computer vision library used for image processing \cite{opencv_library}
+    \item OpenCV: Computer vision library used for image processing \cite{opencv_library}
     \item OpenEXR: \gls{hdr} image reading and writing \cite{openexr}
     \item Orekit: Space dynamics library \cite{orekit}
 \end{itemize}
@@ -106,7 +106,7 @@ The initial state of the spacecraft is calculated based on the input parameters 
     \end{tabular}
 \end{table}
 
-For rendering it is necessary to provide 3D models to the simulation. Since Blender is used, the path to ".blend" files needs to be given. Within a given ".blend" file, the object is identified by its name.
+For rendering it is necessary to provide \gls{3d} models to the simulation. Since Blender is used, the path to ".blend" files needs to be given. Within a given ".blend" file, the object is identified by its name.
 
 Additionally, several parameters to describe the instrument are required to produce realistic output. The parameters are given in Table \ref{tab:inst_input}. The current implementation of rendering and compositing assumes an instrument with \gls{rgb} channels.
 
@@ -167,9 +167,20 @@ Within a Blender scene, the \gls{sssb} is kept at the origin. Only the Sun objec
 
 Due to problems during rendering, the Blender scene is scaled to kilometres instead of metres. I.e. one Blender unit corresponds to \SI{1}{\kilo\meter}. This is the only deviation from SI base units within the software.
 
-The precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. Blender shader nodes are used to create these during rendering. This approach of procedural terrain generation allows to use the same model on a large range of distances since the details are generated as needed.
+The precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. Blender shader nodes are used to create these during rendering. These shader nodes are combined in a network (cf. Figure \ref{fig:shader_nodes}). This approach of procedural terrain generation allows to use the same model on a large range of distances since the details are generated as needed.
 
-DESCRIBE SHADER IMPLEMENTATION
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{doc/thesis/0_figures/star_rendering/Stars_2017-08-15T115856-171000.png}
+    \caption{Overview of the shader nodes network in the Blender model used for creating a \gls{sssb} surface and terrain. Two main trees are visible in the network that are combined in the output, one for the shading and the other for displacement. Two main trees are interlinked.}
+    \label{fig:shader_nodes}
+\end{figure}
+
+The shader implementation creates a material that combines surface shading and displacement.
+Surface subtree
+
+Displacement subtree
+Add, Subtract, Mix Shader, Diffuse BSDF
 
 \subsubsection{Star Rendering} \label{sec:stars}
 The background stars are rendered based on the star catalogue \gls{ucac4}. This catalogue includes stars up to magnitude 16. The \gls{fov} is determined based on the spacecraft camera in the SssbOnly scene since this camera provides the \gls{fov} of the spacecraft instrument. The edges of the \gls{fov} are calculated using Equation \ref{eq:fov_edge}. 
@@ -252,11 +263,11 @@ with $v_0$ being the original pixel value, $F_0$ being the flux at a magnitude $
 
 The star background and the calibrated \gls{sssb} image are merged taking the alpha channels into account. Using the alpha channel information provides proper occultation of the star background by the nucleus. For this, the \textit{film\_transparent} option of Blender is activated which makes the scene background transparent, i.e. alpha values are zero.
 
-The composed image is then multiplied by the efficiency of the instrument. This efficiency includes all efficiencies to convert incoming photon flux into pixel value, not only the \gls{ccd} quantum efficiency. Additionally, a diffraction pattern is added as well as noise which is based on a Poisson distribution. The diffraction pattern can be approximated with a Gaussian filter. The standard deviation for the Gaussian approximation of a diffraction pattern was found to be $\sigma \approx 0.45 \times \frac{\lambda \times f}{D}$ when the Gaussian profile should contain the same energy as the diffraction pattern \cite{Zhang2007GaussianModels}. Using this result, the standard deviation $\sigma$ for Gaussian filtering is defined as
+The composed image is then multiplied by the efficiency of the instrument. This efficiency includes all efficiencies to convert incoming photon flux into pixel value, not only the \gls{ccd} quantum efficiency. Additionally, a diffraction pattern is added as well as noise which is based on a Poisson distribution. The diffraction pattern can be approximated with a Gaussian filter. The standard deviation for the Gaussian approximation of a diffraction pattern was found to be $\sigma \approx 0.45 \times \lambda \times \frac{f}{D}$ when the Gaussian profile should contain the same energy as the diffraction pattern \cite{Zhang2007GaussianModels}. Using this result, the standard deviation $\sigma$ for Gaussian filtering is defined as
 \begin{align}
-    \sigma = 0.45 \times \frac{\lambda \times f}{D} \times \frac{1}{l_{pix}} \times m, \label{eq:comp_sigma}
+    \sigma = 0.45 \times \lambda \times \frac{f}{D} \times \frac{m}{l_{pix}}, \label{eq:comp_sigma}
 \end{align}
-where $\lambda$ is the observed wavelength, $f$ is the focal length, $D$ is the aperture diameter, $l_{pix}$ is the length of one side of a pixel and $m$ is a multiplier for systems that are not diffraction limited (in our case $m = 2$, a perfectly diffraction limited system would have $m = 1$). The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Fig. \ref{fig:comp_imageset} is presented Figure~\ref{fig:comp_composed}.
+where $\lambda$ is the observed wavelength, $f$ is the focal length, $D$ is the aperture diameter, $l_{pix}$ is the length of one side of a pixel and $m$ is a multiplier for systems that are not diffraction limited (in our case $m = 2$, a perfectly diffraction limited system would have $m = 1$). The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. In case a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the reference if the maximum value of the merged image is above this threshold. The composed image using the data set shown in Figure~\ref{fig:comp_imageset} is presented Figure~\ref{fig:comp_composed}.
 
 \begin{figure}[htb]
     \centering
@@ -308,7 +319,7 @@ The most important input parameter that is relevant to all algorithms is the "le
 The compression and decompression has a simple implementation of multi-threading to run several image compression and decompression runs concurrently to reduce execution time. Images are only loaded during the compression and decompression process and are removed from memory directly afterwards.
 
 \subsection{Reconstruction Module}
-The reconstruction module can be used to generate a 3D model of an object using a series of images. It provides a full Multi-View Stereo reconstruction data process pipeline. To achieve this, two libraries are used and combined and called using python. The first library is \gls{omvg} \cite{openMVG}. The second library is \gls{omvs} \cite{openMVS}. 
+The reconstruction module can be used to generate a \gls{3d} model of an object using a series of images. It provides a full Multi-View Stereo reconstruction data process pipeline. To achieve this, two libraries are used and combined and called using python. The first library is \gls{omvg} \cite{openMVG}. The second library is \gls{omvs} \cite{openMVS}. 
 The common steps for the complete pipeline is comprised of the following steps:
 \begin{enumerate}
     \item Read in images [ImageListing in \gls{omvg}]
@@ -319,7 +330,7 @@ The common steps for the complete pipeline is comprised of the following steps:
     \item Increase number of points in point cloud [DensifyPointCloud in \gls{omvs}]
     \item Create a mesh from the point cloud [ReconstructMesh in \gls{omvs}]
     \item Refine the generated mesh [RefineMesh in \gls{omvs}]
-    \item Apply texture to mesh to create final 3D model [TextureMesh in \gls{omvs}]
+    \item Apply texture to mesh to create final \gls{3d} model [TextureMesh in \gls{omvs}]
 \end{enumerate}
 
 \gls{omvg} and \gls{omvs} can be controlled with numerous parameters. All parameters have default values in \gls{sispo} itself which sometimes differ from the default settings of the software packages. These were adapted since they provide better results in the relevant scenarios.
