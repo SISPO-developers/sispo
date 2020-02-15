@@ -7,9 +7,14 @@ It was possible to show the influence of compression on images. However, quantif
 
 \subsection{Future Developments}
 There are several issues left open within the \gls{sispo} software package. First, there is currently no realistic model of spacecraft attitude motion and control implemented. The camera of the simulation environment is perfectly oriented towards the centre of the \gls{sssb}'s nucleus during the entire simulation. Realistic rotation should cover at least two effects, motion blur due to instantaneous rotation velocities of spacecraft and off-centre pointing due to control inaccuracies. Furthermore, it is necessary to include  image distortions such as astigmatism, bokeh, coma, field curvature, glare.
+
 Currently, \gls{sispo} assumes that an instrument always has \gls{rgb} channels. Since many \gls{ccd}s used in deep space are only \gls{bw} cameras, a possibility to choose either \gls{rgb} or \gls{bw} should be implemented.
+
 Moreover, it is necessary to include a gas and dust environment around the nucleus. From a technical perspective, a proper simulation of the data transmission should be included. For example, a realistic simulation for packet loss. The ultimate goal is to develop a prioritisation algorithm for the images which should prioritise data transmission on packet level.
 Moreover, multi-instrument capability was intended as well as including multiple \gls{sssb}s in the future to allow more complex simulations including e.g. a binary system.
+
 Furthermore, the shader used to create the \gls{sssb} models should be developed further. The interface for it should be included into \gls{sispo} and restricted to values that create reasonable shaped outputs. Additionally, the shader should also represent comet surfaces better. Furthermore, since most of the execution time is spent rendering, the shader should be developed to be less computationally heavy.
+
 An attempt to include a HAPKE model via the synthspace package \url{https://github.com/oknuutti/synthspace} was unsuccessful. However, it would be interesting to compare the results of Blender and the HAPKE model. A HAPKE model is substantially faster while being less accurate though possibly still sufficient for some cases.
+
 To improve computational performance and make image compression and possible data transmission more realistic, image cropping should be added. A substantial part of an image far from a nucleus is black which could be cropped away to reduce the amount of data for the computation and the system itself.

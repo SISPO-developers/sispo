@@ -310,7 +310,7 @@ Figure \ref{fig:img_quality_comp} shows series of close-up views of rendered ima
             \caption{\gls{png}}
             \label{fig:img_quality_png}
         \end{subfigure}
-    \caption{Images with different level of compression using \gls{jp2} and one \gls{png}.}
+    \caption{Close-up images with different level of compression using \gls{jp2} and one \gls{png}.}
     \label{fig:img_quality_comp}
 \end{figure}
 
@@ -496,7 +496,7 @@ The difference images for \gls{png} as well as their histograms are empty figure
 Starting from quality level 10 and lower, compression starts having effect on the image quality. Generally, with lowering image quality the number of altered points and the magnitude of alteration increase as expected. Also, the effect of compression is stronger on the close-up images than on the overall images. This can be explained by the large black portion in these images since no stars are visible in the background due to short exposure times. For the overall images in Figures \ref{fig:img_quality_heatmap_1}, \ref{fig:img_quality_heatmap_5} and \ref{fig:img_quality_heatmap_10} the differences resemble random noise. The histograms in Figures \ref{fig:img_quality_histogram_1}, \ref{fig:img_quality_histogram_5} and \ref{fig:img_quality_histogram_10} show that the differences create a Gaussian distribution. While the histograms for the overall images and the close-ups have similar shapes, the difference images show a distinct difference. The overall difference images resemble random noise while the close-up images show some structures. In comparably flat areas the close-up difference images resemble white noise as well, however around surface features like boulders, the feature contours are clearly visible in the difference images meaning that the contours of these features are altered stronger than featureless areas.
 
 \subsection{Reconstruction}
-\gls{sispo} reconstructs using default parameters given in Table \ref{tab:comp_settings}. Refine options is set to NONE to make \gls{sfm} algorithms more likely to converge. It is assumed that in space missions, the intrinsic camera parameters can determined with sufficient accuracy before launch and therefore the parameters do not need to be optimised anymore.
+\gls{sispo} reconstructs using default parameters given in Table \ref{tab:comp_settings}. \textit{refine\_options} is set to NONE to make \gls{sfm} algorithms more likely to converge. In space missions, the intrinsic camera parameters can be determined with sufficient accuracy before launch and therefore the parameters do not need to be optimised anymore.
 
 \begin{table}[htb]
     \centering
