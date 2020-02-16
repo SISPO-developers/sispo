@@ -1,6 +1,5 @@
 \section{Space Imaging Simulator for Proximity Operations} \label{sec:sispo}
-
-\gls{sispo} is a software package developed in python. It is separated in different sub-packages. The two main sub-packages are the \textit{sim} and the \textit{reconstruction} package. The third sub-package provides several image compression algorithms to test effects on reconstruction.
+\gls{sispo} is a software package that integrates trajectory simulation with physics-based rendering, image compression and \gls{3d} reconstruction. It is separated in different sub-packages. The two main sub-packages are the \textit{sim} and the \textit{reconstruction} package. The third sub-package provides several image compression algorithms to test effects on reconstruction.
 
 The software package is hosted on GitHub using a git version control system. Furthermore, the GitHub project management tools are used, including automated KanBan based projects, issue tracking and pull requests.
 
@@ -183,7 +182,6 @@ The precise shape and surface details of the \gls{sssb} are not provided as text
     \label{fig:shader_nodes}
 \end{figure}
 
-
 The shader implementation creates a material that combines surface shading and displacement. The used nodes are grouped into five categories. Math nodes, texture nodes, colouring nodes, vector nodes and shader nodes. A detailed description can be found in the Blender manual, we provide only the most relevant information for our implementation~\cite{IntroductionManual}.
 
 Math nodes include mathematical operators such as add, subtract, multiply, greater than or maximum of a value. Vector nodes allow transformations in \gls{3d} space such as translation, scaling or displacement. We use the Displacement node to move the surface along the surface normals. Colouring nodes are used to change colours. Our model uses the RGB Curves node which allows manipulation of colours separated by channel using a curve that maps the input to output values. Also Mix nodes are used to combine colours. Texture nodes provide procedural creation of texture by calculating colours based on mathematical functions and model coordinates. The Noise Texture node is used to create textured based on Perlin noise. The Voronoi Texture node creates textures using Voronoi patterns, or Worely noise. Three shader nodes are used in our model, the Principled \gls{bsdf}, Diffuse \gls{bsdf} and the Mix Shader node. The Principled \gls{bsdf} node combines many shading features in a single node. The \gls{bsdf} at the output includes a mix of sheen tint, surface roughness and index of refraction among others. The Diffuse BSDF node provides diffuse reflection using a Lambertian and Oren-Nayar model. The Mix Shader node combines its input shaders with a given probability for using either of the input shaders as its output.
@@ -331,7 +329,6 @@ The compression and decompression has a simple implementation of multi-threading
 
 \subsection{Reconstruction Module}
 The reconstruction module can be used to generate a \gls{3d} model of an object using a series of images. It provides a full Multi-View Stereo reconstruction data process pipeline. To achieve this, two libraries are used and combined and called using python. The first library is \gls{omvg}~\cite{openMVG}. The second library is \gls{omvs}~\cite{openMVS}. 
-
 The common steps for the complete pipeline is comprised of the following steps:
 \begin{enumerate}
     \item Read in images [ImageListing in \gls{omvg}]
