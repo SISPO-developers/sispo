@@ -4,6 +4,8 @@ temp/*
 data/*
 !data/README.md
 !data/input/definition.json
+!data/models/sssb.blend
+!data/models/didymos_lowpoly.blend
 software/*
 !software/README.md
 
