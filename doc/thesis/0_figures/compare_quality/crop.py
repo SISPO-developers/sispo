@@ -41,9 +41,8 @@ def create_diff_image(img_name, ref_img_name):
     temp = np.zeros((img.shape[0],img.shape[1],1))
     temp[:,:,0] = ref_img_gray.astype(np.float32) - img_gray.astype(np.float32)
     diff_img = np.linalg.norm(temp, axis=2).astype(np.uint8)
+    #diff_img = temp[:,:,0].astype(np.int16)
     #diff_2 = np.abs(temp[:,:,0]).astype(np.uint8)
-    #test = (diff_img == diff_2)
-    #print(test.any(), test.all(), test.shape)
 
     file_name = img_name[:-4] + "_diff.png"
     cv2.imwrite(file_name, diff_img, (cv2.IMWRITE_PNG_COMPRESSION, 9))
@@ -53,19 +52,19 @@ def create_diff_image(img_name, ref_img_name):
     plt.imshow(temp, interpolation='nearest', cmap='gray', vmin=0, vmax=50)
     cbar = plt.colorbar()
     cbar.ax.get_yaxis().labelpad = 10
-    cbar.ax.set_ylabel("L2-Norm Difference", rotation=270)
-    plt.title(f"Difference Image - {' '.join(img_name[:-4].upper().split('_')[0:2])}")
+    cbar.ax.set_ylabel("Difference", rotation=270)
+    plt.title(f"Difference Image - {' '.join(img_name[:-4].split('/')[-1].upper().split('_')[0:2])}")
     plt.axis("off")
     file_name = file_name[:-4] + "_heatmap.png"
     plt.savefig(file_name, bbox_inches="tight")
     plt.close()
 
     plt.figure()
-    plt.imshow(temp, interpolation='nearest', cmap='YlOrRd', vmin=0,vmax=np.max(np.abs(temp)))
+    plt.imshow(temp, interpolation='nearest', cmap='gray', vmin=0,vmax=np.max(np.abs(temp)))
     cbar = plt.colorbar()
     cbar.ax.get_yaxis().labelpad = 10
-    cbar.ax.set_ylabel("L2-Norm Difference", rotation=270)
-    plt.title(f"Difference Image - {' '.join(img_name[:-4].upper().split('_')[0:2])}")
+    cbar.ax.set_ylabel("Difference", rotation=270)
+    plt.title(f"Difference Image - {' '.join(img_name[:-4].split('/')[-1].upper().split('_')[0:2])}")
     plt.axis("off")
     file_name = file_name[:-len("_heatmap.png")] + "_heatmap_rel.png"
     plt.savefig(file_name, bbox_inches="tight")
@@ -75,8 +74,8 @@ def create_diff_image(img_name, ref_img_name):
     histo_vec = diff_img.flatten()
     histo_vec = histo_vec[histo_vec != 0]
     plt.hist(histo_vec, bins=51, range=(0, 50))
-    plt.title(f"Difference Histogram - {' '.join(img_name[:-4].upper().split('_')[0:2])}")
-    plt.xlabel("L2-Norm Difference")
+    plt.title(f"Difference Histogram - {' '.join(img_name[:-4].split('/')[-1].upper().split('_')[0:2])}")
+    plt.xlabel("Difference")
     plt.ylabel("Number of Pixels")
     plt.legend([f"Changed Pixels: {len(histo_vec)}\nPercentage: {len(histo_vec)/len(temp.flatten())*100:.1f} %"])
     file_name = file_name[:-len("_heatmap_rel.png")] + "_histogram.png"
