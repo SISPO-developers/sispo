@@ -350,7 +350,51 @@ The reconstruction is based on two incremental and one global \gls{sfm} approach
 
 The algorithm used for reconstruction by IncrementalSfM2 is non-deterministic, i.e. results differ between runs on the same data sets. Hence, IncrementalSfM2 should be executed several times and the best result should be selected~\cite{Pajusalu2019CharacterizationMapping}.
 
-\Gls{sispo} outputs intermediate results which show the reconstruction process. 
+\Gls{sispo} outputs intermediate results which show the reconstruction process. Figure~\ref{fig:recon_steps} shows example images of the intermediate results.
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/models_quality/100_1/120_100_1_points2.png}
+        \caption{Point cloud.}
+        \label{fig:recon_step_point}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/models_quality/100_1/120_100_1_dense1.png}
+        \caption{Densified point cloud.}
+        \label{fig:recon_step_dense}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/models_quality/100_1/120_100_1_mesh1.png}
+        \caption{Mesh.}
+        \label{fig:recon_step_mesh}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/models_quality/100_1/120_100_1_refine2.png}
+        \caption{Refined mesh.}
+        \label{fig:recon_step_refine}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/models_quality/100_1/120_100_1_texture1.png}
+        \caption{Point cloud.}
+        \label{fig:recon_step_texture}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/models_quality/100_1/120_100_1_img1.png}
+        \caption{Image.}
+        \label{fig:recon_step_img}
+    \end{subfigure}
+    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} flyby scenario of a \SI{1}{\kilo\meter} \gls{sssb}.}
+    \label{fig:recon_steps}
+\end{figure}
 
 \subsection{Performance}
 \subsubsection{Image processing benchmark} \label{sec:cvskimage}
