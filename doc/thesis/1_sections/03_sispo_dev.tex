@@ -350,6 +350,8 @@ The reconstruction is based on two incremental and one global \gls{sfm} approach
 
 The algorithm used for reconstruction by IncrementalSfM2 is non-deterministic, i.e. results differ between runs on the same data sets. Hence, IncrementalSfM2 should be executed several times and the best result should be selected~\cite{Pajusalu2019CharacterizationMapping}.
 
+\Gls{sispo} outputs intermediate results which show the reconstruction process. 
+
 \subsection{Performance}
 \subsubsection{Image processing benchmark} \label{sec:cvskimage}
 The original codebase used the \gls{skimage} and OpenCV libraries in concurrently. In order to reduce the number of dependencies, the relevant functions of the two libraries were benchmarked. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of five images is selected and are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance in the number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
