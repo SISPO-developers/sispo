@@ -160,37 +160,37 @@ Math nodes include mathematical operators such as add, subtract, multiply, great
 %texture node: noise, Voronoi
 %shader: Principled BSDF, Diffuse BSDF, mix
 
-The resulting shader based Blender material can be applied to any \gls{3d} model inside Blender. It is easily possible to create different looking \glspl{sssb} by changing parameters or modifying the \gls{3d} model itself. Four rendered example images created with the described shader node network are presented in Figure~\ref{}.
+The resulting shader based Blender material can be applied to any \gls{3d} model inside Blender. \Gls{sispo} can be used to create various \glspl{sssb} by changing parameters or modifying the \gls{3d} model itself. Four rendered example images created with the described shader node network are presented in Figure~\ref{fig:render_out}.
 
 \begin{figure}[htb]
     \centering
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/orig.png}
-        \caption{SssbOnly}
-        \label{fig:comp_sssbonly}
+        \caption{Original image.}
+        \label{fig:render_out_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/SssbConstDist_2017-08-15T115855-684000.png}
-        \caption{SssbConstDist}
-        \label{fig:comp_sssbconstdist}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/changed2.png}
+        \caption{Changed shader parameters.}
+        \label{fig:render_out_changed}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/LightRef_2017-08-15T115855-684000.png}
-        \caption{LightRef}
-        \label{fig:comp_lightref}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/main_moon.png}
+        \caption{Two body system.}
+        \label{fig:render_out_main_moon}
     \end{subfigure}
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/Stars_2017-08-15T115855-684000.png}
-        \caption{Stars}
-        \label{fig:comp_stars}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/bilobe2.png}
+        \caption{Bilobate \gls{sssb}.}
+        \label{fig:render_out_bilobe}
     \end{subfigure}
-    \caption{Example set of images used for composition to the final rendering output.}
-    \label{fig:comp_imageset}
+    \caption{Four rendered images using the Blender material used in \gls{sispo}. Image~\ref{fig:render_out_orig} shows the render output with default shader parameters. Image~\ref{fig:render_out_changed} uses the same model with changed shader parameters. Image~\ref{fig:render_out_main_moon} shows a render of a two body system with the same main body as in image~\ref{fig:render_out_orig}. Image~\ref{fig:render_out_bilobe} shows a rendered bilobate body.}
+    \label{fig:render_out}
 \end{figure}
 
 \subsubsection{Star Rendering} \label{sec:stars}

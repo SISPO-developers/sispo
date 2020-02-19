@@ -19,7 +19,7 @@ Several simulations were run with \gls{sispo} in order to assess the capabilitie
 \end{table}
 
 Two computers were used to create the results. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu 18.04.3 LTS.
-During simulation it was realised that the reconstruction pipeline produces is more likely to output a result when using the laptop running Windows. Therefore, images were rendered on the Linux computer and reconstructions were made using the Windows computer.
+During simulation, it was realised that the reconstruction pipeline produces is more likely to output a result when using the laptop running Windows. Therefore, images were rendered on the Linux computer and reconstructions were made using the Windows computer.
 
 \subsection{Rendering} \label{sec:results_sim}
 A subset of all settings was kept constant for all simulations. The instrument settings are presented in Table~\ref{tab:inst_settings} and the settings for the \gls{sssb} in Table~\ref{tab:sssb_settings}. The specific values were chosen in order to mimic the scenario in~\cite{Pajusalu2019CharacterizationMapping}.
@@ -124,21 +124,20 @@ In a first step, the overall image quality is compared visually to real images. 
     \label{fig:render_quali_81p}
 \end{figure}
 
-While all images exhibit show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The overall looks of the rendered images resemble the real images of Bennu well. The rocks and boulders present on Bennu's surface are also visible in the rendered images. When comparing the rendered images to the image of \gls{67p} or \gls{81p}, the most pronounced difference are the jets. \Gls{sispo} does not contain a gas and dust model that would produce a coma or jets and therefore these are missing in the rendered images. While the surface of both comets also feature some rocks and boulders, it is more defined by ridge-like structures. This type of feature is missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
+While all images exhibit show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The overall looks of the rendered images resemble the real images of Bennu well. The rocks and boulders present on Bennu's surface are also visible in the rendered images. When comparing the rendered images to the image of \gls{67p} or \gls{81p}, the most pronounced difference are the jets. \Gls{sispo} does not yet contain a gas and dust model that would produce a coma or jets and therefore these are missing in the rendered images. While the surface of both comets also feature some rocks and boulders, it is more defined by ridge-like structures. This type of feature is missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
 
 \subsubsection{Different Distances}
 Through procedural terrain generation, \gls{sispo} produces results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are shown in Figure~\ref{fig:img_procedural_10k}.
 
 \begin{figure}[htb]
     \centering
-        \begin{subfigure}[b]{0.75\textwidth}
+        \begin{subfigure}[b]{0.49\textwidth}
             \centering
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
             \caption{\SI{566}{\kilo\meter}.}
             \label{fig:img_procedural_500}
         \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.75\textwidth}
+        \begin{subfigure}[b]{0.49\textwidth}
             \centering
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
             \caption{\SI{106}{\kilo\meter}.}
@@ -261,7 +260,7 @@ The \gls{sispo} software package was used to study the effects of compression in
 Comparison of the different compression algorithms is based on several output parameters. The data size of the compressed image series, the number of points in the dense reconstructed point cloud, the number of vertices and the number of faces of the refined reconstructed model. These outputs relate well to the level of detail of the rendered images, since \gls{sfm} algorithms rely on surface details for reconstruction.
 
 \subsubsection{Image Quality Comparison} \label{sec:img_quali_comp}
-To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by surface features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. To better show the artefacts created by compression, the highlighted area in Figure~\ref{fig:img_quality_frame} was studied up closer.
+To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. Once the overall images, containing the entire \gls{sssb} in the \gls{fov}, and closeups, highlighted by the red frame in Figure~\ref{fig:img_quality_frame} are studied. Overall images are used to show compression effects on an entire scene while the closeup images reveal compression effects on surface details. Difference images and histograms are used to further investigate the effects of compression. Difference images take the L2-norm of the \gls{rgb} values of each pixel and subtract them from the respective value of the \gls{png} image. The result is a difference image showing the L2-norm differences through a colour scale. For the histograms, the zero values were removed to only show differences. Therefore, the total number of pixels and the percentage compared to the original that were used for the histogram are given as well.
 
 \begin{figure}[htb]
     \centering
@@ -270,232 +269,556 @@ To compare the image quality after different levels of compression, a specific i
     \label{fig:img_quality_frame}
 \end{figure}
 
-Figure~\ref{fig:img_quality_comp} shows series of close-up views of rendered images at different levels of compression and one \gls{png} image as reference. The high quality level images do not show any difference to the \gls{png} image. Figure~\ref{fig:img_quality_5} shows a minor visible difference to the lossless compressed image. Only image~\ref{fig:img_quality_1} contains clearly visible compression artefacts.
+Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} show the compressed overall image, the difference histograms as well as the difference images after compression with \gls{jp2} with quality levels \SI{1}{}, \SI{5}{}, \SI{10}{}, \SI{100}{} and \SI{1000}{}. Quality level \SI{5}{} is used since most changes due to compression occur at low quality levels.
+
 \begin{figure}[htb]
     \centering
-        \begin{subfigure}[b]{0.44\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center.png}
-            \caption{\gls{jp2} quality 1.}
-            \label{fig:img_quality_1}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.44\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center.png}
-            \caption{\gls{jp2} quality 5.}
-            \label{fig:img_quality_5}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.44\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center.png}
-            \caption{\gls{jp2} quality 10.}
-            \label{fig:img_quality_10}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.44\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center.png}
-            \caption{\gls{jp2} quality 100.}
-            \label{fig:img_quality_100}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.44\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center.png}
-            \caption{\gls{jp2} quality 1000.}
-            \label{fig:img_quality_1000}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.44\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/png_center.png}
-            \caption{\gls{png}}
-            \label{fig:img_quality_png}
-        \end{subfigure}
-    \caption{Close-up images with different level of compression using \gls{jp2} and one \gls{png}.}
-    \label{fig:img_quality_comp}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1.png}
+        \caption{Image.}
+        \label{fig:img_quality_comp_jp2_1_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_histogram.png}
+        \caption{Difference histogram.}
+        \label{fig:img_quality_comp_jp2_1_histo}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_heatmap.png}
+        \caption{Difference image with constant scale.}
+        \label{fig:img_quality_comp_jp2_1_diff}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_heatmap_rel.png}
+        \caption{Difference image with changing scale.}
+        \label{fig:img_quality_comp_jp2_1_diff_rel}
+    \end{subfigure}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between the grayscale images of image~\ref{fig:img_quality_comp_jp2_1_orig} and the lossless compressed image.}
+    \label{fig:img_quality_comp_jp2_1}
 \end{figure}
 
-Difference images and histograms are used to further investigate the effects of compression further. Difference images take the L2-norm of the \gls{rgb} values of each pixel and subtract them from the respective value of the \gls{png} image. The result is a difference image showing the L2-norm differences through a colour scale. For the histograms the zero values were removed to only show differences. Therefore, the total number of pixels and the percentage compared to the original that were used for the histogram are given as well. Difference images and histograms are analysed for the overall image in Figure~\ref{fig:img_quality_frame} and for the highlighted area. The overall difference images and their histograms are shown in Figures~\ref{fig:img_quality_heatmap} and \ref{fig:img_quality_histogram} respectively. The difference images and their histograms for the close-ups are shown in Figures~\ref{fig:img_quality_center_heatmap} and \ref{fig:img_quality_center_histogram}.
 
 \begin{figure}[htb]
     \centering
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_heatmap.png}
-            \caption{\gls{jp2} quality 1.}
-            \label{fig:img_quality_heatmap_1}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_heatmap.png}
-            \caption{\gls{jp2} quality 5.}
-            \label{fig:img_quality_heatmap_5}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_heatmap.png}
-            \caption{\gls{jp2} quality 10.}
-            \label{fig:img_quality_heatmap_10}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_heatmap.png}
-            \caption{\gls{jp2} quality 100.}
-            \label{fig:img_quality_heatmap_100}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_heatmap.png}
-            \caption{\gls{jp2} quality 1000.}
-            \label{fig:img_quality_heatmap_1000}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/png_diff_heatmap.png}
-            \caption{\gls{png}}
-            \label{fig:img_quality_heatmap_png}
-        \end{subfigure}
-    \caption{Difference images of overall images with varying levels of compression using \gls{jp2} and one \gls{png}.}
-    \label{fig:img_quality_heatmap}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5.png}
+        \caption{Image.}
+        \label{fig:img_quality_comp_jp2_5_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_histogram.png}
+        \caption{Difference histogram.}
+        \label{fig:img_quality_comp_jp2_5_histo}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_heatmap.png}
+        \caption{Difference image with constant scale.}
+        \label{fig:img_quality_comp_jp2_5_diff}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_heatmap_rel.png}
+        \caption{Difference image with changing scale.}
+        \label{fig:img_quality_comp_jp2_5_diff_rel}
+    \end{subfigure}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between the grayscale images of image~\ref{fig:img_quality_comp_jp2_5_orig} and the lossless compressed image.}
+    \label{fig:img_quality_comp_jp2_5}
 \end{figure}
 
+
 \begin{figure}[htb]
     \centering
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_histogram.png}
-            \caption{\gls{jp2} quality 1.}
-            \label{fig:img_quality_histogram_1}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_histogram.png}
-            \caption{\gls{jp2} quality 5.}
-            \label{fig:img_quality_histogram_5}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_histogram.png}
-            \caption{\gls{jp2} quality 10.}
-            \label{fig:img_quality_histogram_10}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_histogram.png}
-            \caption{\gls{jp2} quality 100.}
-            \label{fig:img_quality_histogram_100}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_histogram.png}
-            \caption{\gls{jp2} quality 1000.}
-            \label{fig:img_quality_histogram_1000}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/png_diff_histogram.png}
-            \caption{\gls{png}}
-            \label{fig:img_quality_histogram_png}
-        \end{subfigure}
-    \caption{Histograms of overall difference images with varying levels of compression using \gls{jp2} and one \gls{png}.}
-    \label{fig:img_quality_histogram}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10.png}
+        \caption{Image.}
+        \label{fig:img_quality_comp_jp2_10_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_histogram.png}
+        \caption{Difference histogram.}
+        \label{fig:img_quality_comp_jp2_10_histo}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_heatmap.png}
+        \caption{Difference image with constant scale.}
+        \label{fig:img_quality_comp_jp2_10_diff}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_heatmap_rel.png}
+        \caption{Difference image with changing scale.}
+        \label{fig:img_quality_comp_jp2_10_diff_rel}
+    \end{subfigure}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 10. Difference histogram and difference images show the L2-norm of the difference between the grayscale images of image~\ref{fig:img_quality_comp_jp2_10_orig} and the lossless compressed image.}
+    \label{fig:img_quality_comp_jp2_10}
 \end{figure}
 
 \begin{figure}[htb]
     \centering
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_heatmap.png}
-            \caption{\gls{jp2} quality 1.}
-            \label{fig:img_quality_center_heatmap_1}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_heatmap.png}
-            \caption{\gls{jp2} quality 5.}
-            \label{fig:img_quality_center_heatmap_5}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_heatmap.png}
-            \caption{\gls{jp2} quality 10.}
-            \label{fig:img_quality_center_heatmap_10}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_heatmap.png}
-            \caption{\gls{jp2} quality 100.}
-            \label{fig:img_quality_center_heatmap_100}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_heatmap.png}
-            \caption{\gls{jp2} quality 1000.}
-            \label{fig:img_quality_center_heatmap_1000}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/png_center_diff_heatmap.png}
-            \caption{\gls{png}}
-            \label{fig:img_quality_center_heatmap_png}
-        \end{subfigure}
-    \caption{Difference images of close-ups with varying levels of compression using \gls{jp2} and one \gls{png}.}
-    \label{fig:img_quality_center_heatmap}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100.png}
+        \caption{Image.}
+        \label{fig:img_quality_comp_jp2_100_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_histogram.png}
+        \caption{Difference histogram.}
+        \label{fig:img_quality_comp_jp2_100_histo}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_heatmap.png}
+        \caption{Difference image with constant scale.}
+        \label{fig:img_quality_comp_jp2_100_diff}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_heatmap_rel.png}
+        \caption{Difference image with changing scale.}
+        \label{fig:img_quality_comp_jp2_100_diff_rel}
+    \end{subfigure}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 100. Difference histogram and difference images show the L2-norm of the difference between the grayscale images of image~\ref{fig:img_quality_comp_jp2_100_orig} and the lossless compressed image.}
+    \label{fig:img_quality_comp_jp2_100}
 \end{figure}
 
 \begin{figure}[htb]
     \centering
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_histogram.png}
-            \caption{\gls{jp2} quality 1.}
-            \label{fig:img_quality_center_histogram_1}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_histogram.png}
-            \caption{\gls{jp2} quality 5.}
-            \label{fig:img_quality_center_histogram_5}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_histogram.png}
-            \caption{\gls{jp2} quality 10.}
-            \label{fig:img_quality_center_histogram_10}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_histogram.png}
-            \caption{\gls{jp2} quality 100.}
-            \label{fig:img_quality_center_histogram_100}
-        \end{subfigure}
-        \\
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_histogram.png}
-            \caption{\gls{jp2} quality 1000.}
-            \label{fig:img_quality_center_histogram_1000}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.49\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/png_center_diff_histogram.png}
-            \caption{\gls{png}}
-            \label{fig:img_quality_center_histogram_png}
-        \end{subfigure}
-    \caption{Histograms of close-up difference images with varying levels of compression using \gls{jp2} and one \gls{png}. All images use the same color scale, making image \ref{fig:img_quality_center_histogram_100} look entirely white.}
-    \label{fig:img_quality_center_histogram}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000.png}
+        \caption{Image.}
+        \label{fig:img_quality_comp_jp2_1000_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_histogram.png}
+        \caption{Difference histogram.}
+        \label{fig:img_quality_comp_jp2_1000_histo}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_heatmap.png}
+        \caption{Difference image with constant scale.}
+        \label{fig:img_quality_comp_jp2_1000_diff}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_heatmap_rel.png}
+        \caption{Difference image with changing scale.}
+        \label{fig:img_quality_comp_jp2_1000_diff_rel}
+    \end{subfigure}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 1000. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_1000_orig} and the lossless compressed image.}
+    \label{fig:img_quality_comp_jp2_1000}
 \end{figure}
 
-The difference images for \gls{png} as well as their histograms are empty figures as expected since the \gls{png} image is the base line. Also the difference images for quality levels 100 and 1000 seem completely white, however the histograms reveal that there is a small number of pixels that were altered. 
-Starting from quality level 10 and lower, compression starts having effect on the image quality. Generally, with lowering image quality the number of altered points and the magnitude of alteration increase as expected. Also, the effect of compression is stronger on the close-up images than on the overall images. This can be explained by the large black portion in these images since no stars are visible in the background due to short exposure times. For the overall images in Figures~\ref{fig:img_quality_heatmap_1}, \ref{fig:img_quality_heatmap_5} and \ref{fig:img_quality_heatmap_10} the differences resemble random noise. Difference images using varying scales for the same data set are shown in Appendix~\ref{sec:image_differences} revealing that the quality 100 image also resembles random noise. The histograms in Figures~\ref{fig:img_quality_histogram_1}, \ref{fig:img_quality_histogram_5} and \ref{fig:img_quality_histogram_10} show that the differences create a Gaussian distribution. While the histograms for the overall images and the close-ups have similar shapes, the difference images show a distinct difference. The overall difference images resemble random noise while the close-up images show some structures. In comparably flat areas the close-up difference images resemble white noise as well, however around surface features like boulders, the feature contours are clearly visible in the difference images meaning that the contours of these features are altered stronger than featureless areas.
-The histograms in Figure~\ref{fig:img_quality_histogram_1}, \ref{fig:img_quality_histogram_5}, \ref{fig:img_quality_center_histogram_1} and \ref{fig:img_quality_center_histogram_5} seem to have more values below zero than above zero. A negative value reflects a higher value for the \gls{jp2} image compared to the \gls{png} image. It seems that images compressed with \gls{jp2} tend to become brighter since the L2-norm of \gls{rgb} values relates to brightness.
+Overall images show that lossy compression introduces artefacts for all quality levels. Visual inspection of the rendered images does not reveal many changes between different quality levels. However, the histograms reveal that the number of altered pixels and the amount of alteration increases with decreasing quality level. The difference image for quality level 1000 in Figure~\ref{fig:img_quality_comp_jp2_1000_diff_rel} shows the minute changes from compression. The difference images in Figures~\ref{fig:img_quality_comp_jp2_1_diff_rel}, Figure~\ref{fig:img_quality_comp_jp2_5_diff_rel}, Figure~\ref{fig:img_quality_comp_jp2_10_diff_rel} and Figure~\ref{fig:img_quality_comp_jp2_100_diff_rel} outline the shape of the \gls{sssb} showing that compression artefacts are spread across the entire \gls{sssb}. However, when comparing the difference images in Figures~\ref{fig:img_quality_comp_jp2_1_diff}, \ref{fig:img_quality_comp_jp2_5_diff}, \ref{fig:img_quality_comp_jp2_10_diff}, \ref{fig:img_quality_comp_jp2_100_diff} and \ref{fig:img_quality_comp_jp2_1000_diff} which use the same scale for all quality levels, we see the alteration in quality levels \SI{100}{} and \SI{1000}{} are much lower compared to quality levels \SI{1}{}, \SI{5}{} and \SI{10}{}.
+
+Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2_1000_center} show the compressed closeup image, the difference histograms as well as the difference images after compression with \gls{jp2} with quality levels \SI{1}{}, \SI{5}{}, \SI{10}{}, \SI{100}{} and \SI{1000}{}.
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center.png}
+        \caption{Image.}
+        \label{fig:img_quality_comp_jp2_1_center_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_histogram.png}
+        \caption{Difference histogram.}
+        \label{fig:img_quality_comp_jp2_1_center_histo}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_heatmap.png}
+        \caption{Difference image with constant scale.}
+        \label{fig:img_quality_comp_jp2_1_center_diff}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_heatmap_rel.png}
+        \caption{Difference image with changing scale.}
+        \label{fig:img_quality_comp_jp2_1_center_diff_rel}
+    \end{subfigure}
+    \caption{Close-up images compressed with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_1_center_orig} and the lossless compressed image.}
+    \label{fig:img_quality_comp_jp2_1_center}
+\end{figure}
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center.png}
+        \caption{Image.}
+        \label{fig:img_quality_comp_jp2_5_center_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_histogram.png}
+        \caption{Difference histogram.}
+        \label{fig:img_quality_comp_jp2_5_center_histo}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_heatmap.png}
+        \caption{Difference image with constant scale.}
+        \label{fig:img_quality_comp_jp2_5_center_diff}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_heatmap_rel.png}
+        \caption{Difference image with changing scale.}
+        \label{fig:img_quality_comp_jp2_5_center_diff_rel}
+    \end{subfigure}
+    \caption{Close-up images compressed with \gls{jp2} quality level 5. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_5_orig} and the lossless compressed image.}
+    \label{fig:img_quality_comp_jp2_5_center}
+\end{figure}
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center.png}
+        \caption{Image.}
+        \label{fig:img_quality_comp_jp2_10_center_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_histogram.png}
+        \caption{Difference histogram.}
+        \label{fig:img_quality_comp_jp2_10_center_histo}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_heatmap.png}
+        \caption{Difference image with constant scale.}
+        \label{fig:img_quality_comp_jp2_10_center_diff}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_heatmap_rel.png}
+        \caption{Difference image with changing scale.}
+        \label{fig:img_quality_comp_jp2_10_center_diff_rel}
+    \end{subfigure}
+    \caption{Close-up images compressed with \gls{jp2} quality level 10. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_10_orig} and the lossless compressed image.}
+    \label{fig:img_quality_comp_jp2_10_center}
+\end{figure}
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center.png}
+        \caption{Image.}
+        \label{fig:img_quality_comp_jp2_100_center_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_histogram.png}
+        \caption{Difference histogram.}
+        \label{fig:img_quality_comp_jp2_100_center_histo}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_heatmap.png}
+        \caption{Difference image with constant scale.}
+        \label{fig:img_quality_comp_jp2_100_center_diff}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_heatmap_rel.png}
+        \caption{Difference image with changing scale.}
+        \label{fig:img_quality_comp_jp2_100_center_diff_rel}
+    \end{subfigure}
+    \caption{Close-up images compressed with \gls{jp2} quality level 100. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_100_orig} and the lossless compressed image.}
+    \label{fig:img_quality_comp_jp2_100_center}
+\end{figure}
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center.png}
+        \caption{Image.}
+        \label{fig:img_quality_comp_jp2_1000_center_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_histogram.png}
+        \caption{Difference histogram.}
+        \label{fig:img_quality_comp_jp2_1000_center_histo}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_heatmap.png}
+        \caption{Difference image with constant scale.}
+        \label{fig:img_quality_comp_jp2_1000_center_diff}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_heatmap_rel.png}
+        \caption{Difference image with changing scale.}
+        \label{fig:img_quality_comp_jp2_1000_center_diff_rel}
+    \end{subfigure}
+    \caption{Close-up images compressed with \gls{jp2} quality level 1000. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_1000_orig} and the lossless compressed image.}
+    \label{fig:img_quality_comp_jp2_1000_center}
+\end{figure}
+
+Comparing the closeup images for the various quality levels in Figures~\ref{fig:img_quality_comp_jp2_1_center_orig}, \ref{fig:img_quality_comp_jp2_5_center_orig}, \ref{fig:img_quality_comp_jp2_10_center_orig}, \ref{fig:img_quality_comp_jp2_100_center_orig} and \ref{fig:img_quality_comp_jp2_1000_center_orig} reveals a degradation of image quality with decreasing compression quality levels. The histograms confirm that the number of altered pixels and the amount of alteration increases with decreasing quality level. The difference image for quality level 1000 in Figure~\ref{fig:img_quality_comp_jp2_1000_center_diff_rel} and the respective histogram show that there were no altered pixels for quality level 1000, i.e. the compression was lossless. The difference image in Figure~\ref{fig:img_quality_comp_jp2_100_center_diff_rel} resembles random noise. In contrast, the difference images in Figure~\ref{fig:img_quality_comp_jp2_1_center_diff_rel}, Figure~\ref{fig:img_quality_comp_jp2_5_center_diff_rel} and Figure~\ref{fig:img_quality_comp_jp2_10_diff_rel} show non-random artefacts related to surface features when comparing to the unaltered image in Figure~\ref{fig:img_quality_comp_jp2_1000_center_orig}. However, when comparing the difference images in Figures~\ref{fig:img_quality_comp_jp2_1_diff}, \ref{fig:img_quality_comp_jp2_10_diff}, \ref{fig:img_quality_comp_jp2_100_diff} and \ref{fig:img_quality_comp_jp2_1000_diff} which use the same scale for all quality levels, we see the alteration in quality levels \SI{100}{} and \SI{1000}{} are much lower compared to quality levels \SI{1}{}, \SI{5}{} and \SI{10}{}.
+
+When comparing the results for the overall images with the results for the closeup we see that the overall images are less altered by compression. Since the a substantial portion of the  overall images are covered by a black background, compression does change less pixels than in the closeup images. While the overall difference images resemble random noise, the closeup images reveal a relation between surface features and compression artefacts for low quality levels.
+
+%Figure~\ref{fig:img_quality_comp} shows series of close-up views of rendered images at different levels of compression and one \gls{png} image as a reference. The high quality level images do not show any difference to the \gls{png} image. Figure~\ref{fig:img_quality_5} shows a minor visible difference to the lossless compressed image. Only image in Figure~\ref{fig:img_quality_1} contains clearly visible compression artefacts.
+% \begin{figure}[htb]
+%     \centering
+%     \begin{subfigure}[b]{0.44\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center.png}
+%         \caption{\gls{jp2} quality 1.}
+%         \label{fig:img_quality_1}
+%     \end{subfigure}
+%     \begin{subfigure}[b]{0.44\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center.png}
+%         \caption{\gls{jp2} quality 5.}
+%         \label{fig:img_quality_5}
+%     \end{subfigure}
+%     \\
+%     \begin{subfigure}[b]{0.44\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center.png}
+%         \caption{\gls{jp2} quality 10.}
+%         \label{fig:img_quality_10}
+%     \end{subfigure}
+%     \begin{subfigure}[b]{0.44\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center.png}
+%         \caption{\gls{jp2} quality 100.}
+%         \label{fig:img_quality_100}
+%     \end{subfigure}
+%     \\
+%     \begin{subfigure}[b]{0.44\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center.png}
+%         \caption{\gls{jp2} quality 1000.}
+%         \label{fig:img_quality_1000}
+%     \end{subfigure}
+%     \begin{subfigure}[b]{0.44\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/png_center.png}
+%         \caption{\gls{png}}
+%         \label{fig:img_quality_png}
+%     \end{subfigure}
+%     \caption{Close-up images with different level of compression using \gls{jp2} and one \gls{png}.}
+%     \label{fig:img_quality_comp}
+% \end{figure}
+
+%Difference images and histograms are analysed for the overall image in Figure~\ref{fig:img_quality_frame} and for the highlighted area. The overall difference images and their histograms are shown in Figures~\ref{fig:img_quality_heatmap} and \ref{fig:img_quality_histogram} respectively. The difference images and their histograms for the close-ups are shown in Figures~\ref{fig:img_quality_center_heatmap} and \ref{fig:img_quality_center_histogram}.
+
+% \begin{figure}[htb]
+%     \centering
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_heatmap.png}
+%             \caption{\gls{jp2} quality 1.}
+%             \label{fig:img_quality_heatmap_1}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_heatmap.png}
+%             \caption{\gls{jp2} quality 5.}
+%             \label{fig:img_quality_heatmap_5}
+%         \end{subfigure}
+%         \\
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_heatmap.png}
+%             \caption{\gls{jp2} quality 10.}
+%             \label{fig:img_quality_heatmap_10}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_heatmap.png}
+%             \caption{\gls{jp2} quality 100.}
+%             \label{fig:img_quality_heatmap_100}
+%         \end{subfigure}
+%         \\
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_heatmap.png}
+%             \caption{\gls{jp2} quality 1000.}
+%             \label{fig:img_quality_heatmap_1000}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/png_diff_heatmap.png}
+%             \caption{\gls{png}}
+%             \label{fig:img_quality_heatmap_png}
+%         \end{subfigure}
+%     \caption{Difference images of overall images with varying levels of compression using \gls{jp2} and one \gls{png}.}
+%     \label{fig:img_quality_heatmap}
+% \end{figure}
+
+% \begin{figure}[htb]
+%     \centering
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_histogram.png}
+%             \caption{\gls{jp2} quality 1.}
+%             \label{fig:img_quality_histogram_1}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_histogram.png}
+%             \caption{\gls{jp2} quality 5.}
+%             \label{fig:img_quality_histogram_5}
+%         \end{subfigure}
+%         \\
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_histogram.png}
+%             \caption{\gls{jp2} quality 10.}
+%             \label{fig:img_quality_histogram_10}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_histogram.png}
+%             \caption{\gls{jp2} quality 100.}
+%             \label{fig:img_quality_histogram_100}
+%         \end{subfigure}
+%         \\
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_histogram.png}
+%             \caption{\gls{jp2} quality 1000.}
+%             \label{fig:img_quality_histogram_1000}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/png_diff_histogram.png}
+%             \caption{\gls{png}}
+%             \label{fig:img_quality_histogram_png}
+%         \end{subfigure}
+%     \caption{Histograms of overall difference images with varying levels of compression using \gls{jp2} and one \gls{png}.}
+%     \label{fig:img_quality_histogram}
+% \end{figure}
+
+% \begin{figure}[htb]
+%     \centering
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_heatmap.png}
+%             \caption{\gls{jp2} quality 1.}
+%             \label{fig:img_quality_center_heatmap_1}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_heatmap.png}
+%             \caption{\gls{jp2} quality 5.}
+%             \label{fig:img_quality_center_heatmap_5}
+%         \end{subfigure}
+%         \\
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_heatmap.png}
+%             \caption{\gls{jp2} quality 10.}
+%             \label{fig:img_quality_center_heatmap_10}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_heatmap.png}
+%             \caption{\gls{jp2} quality 100.}
+%             \label{fig:img_quality_center_heatmap_100}
+%         \end{subfigure}
+%         \\
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_heatmap.png}
+%             \caption{\gls{jp2} quality 1000.}
+%             \label{fig:img_quality_center_heatmap_1000}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/png_center_diff_heatmap.png}
+%             \caption{\gls{png}}
+%             \label{fig:img_quality_center_heatmap_png}
+%         \end{subfigure}
+%     \caption{Difference images of close-ups with varying levels of compression using \gls{jp2} and one \gls{png}.}
+%     \label{fig:img_quality_center_heatmap}
+% \end{figure}
+
+% \begin{figure}[htb]
+%     \centering
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_histogram.png}
+%             \caption{\gls{jp2} quality 1.}
+%             \label{fig:img_quality_center_histogram_1}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_histogram.png}
+%             \caption{\gls{jp2} quality 5.}
+%             \label{fig:img_quality_center_histogram_5}
+%         \end{subfigure}
+%         \\
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_histogram.png}
+%             \caption{\gls{jp2} quality 10.}
+%             \label{fig:img_quality_center_histogram_10}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_histogram.png}
+%             \caption{\gls{jp2} quality 100.}
+%             \label{fig:img_quality_center_histogram_100}
+%         \end{subfigure}
+%         \\
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_histogram.png}
+%             \caption{\gls{jp2} quality 1000.}
+%             \label{fig:img_quality_center_histogram_1000}
+%         \end{subfigure}
+%         \begin{subfigure}[b]{0.49\textwidth}
+%             \centering
+%             \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/png_center_diff_histogram.png}
+%             \caption{\gls{png}}
+%             \label{fig:img_quality_center_histogram_png}
+%         \end{subfigure}
+%     \caption{Histograms of close-up difference images with varying levels of compression using \gls{jp2} and one \gls{png}. All images use the same color scale, making image \ref{fig:img_quality_center_histogram_100} look entirely white.}
+%     \label{fig:img_quality_center_histogram}
+% \end{figure}
+
+% The difference images for \gls{png} as well as their histograms are empty figures as expected since the \gls{png} image is the baseline. Also the difference images for quality levels 100 and 1000 seem completely white, however the histograms reveal that there is a small number of pixels that were altered. 
+% Starting from quality level 10 and lower, compression starts having effect on the image quality. Generally, with lowering image quality the number of altered points and the magnitude of alteration increase as expected. Also, the effect of compression is stronger on the close-up images than on the overall images. This can be explained by the large black portion in these images since no stars are visible in the background due to short exposure times. For the overall images in Figures~\ref{fig:img_quality_heatmap_1}, \ref{fig:img_quality_heatmap_5} and \ref{fig:img_quality_heatmap_10}, the differences resemble random noise. Difference images using varying scales for the same data set are shown in Appendix~\ref{sec:image_differences} revealing that the quality 100 image also resembles random noise. The histograms in Figures~\ref{fig:img_quality_histogram_1}, \ref{fig:img_quality_histogram_5} and \ref{fig:img_quality_histogram_10} show that the differences create a Gaussian distribution. While the histograms for the overall images and the close-ups have similar shapes, the difference images show a distinct difference. The overall difference images resemble random noise while the close-up images show some structures. In comparably flat areas the close-up difference images resemble white noise as well, however around surface features like boulders, the feature contours are clearly visible in the difference images meaning that the contours of these features are altered stronger than featureless areas.
+% The histograms in Figure~\ref{fig:img_quality_histogram_1}, \ref{fig:img_quality_histogram_5}, \ref{fig:img_quality_center_histogram_1} and \ref{fig:img_quality_center_histogram_5} seem to have more values below zero than above zero. A negative value reflects a higher value for the \gls{jp2} image compared to the \gls{png} image. It seems that images compressed with \gls{jp2} tend to become brighter since the L2-norm of \gls{rgb} values relates to brightness.
+
+\clearpage
 
 \subsection{Reconstruction}
 \gls{sispo} reconstructs using default parameters given in Table~\ref{tab:comp_settings}. \textit{refine\_options} is set to NONE to make \gls{sfm} algorithms more likely to converge. Camera calibration as described in Section~\ref{sec:t_cv} is not needed since in space missions, the intrinsic camera parameters can be determined with sufficient accuracy before launch and therefore the parameters do not need to be optimised anymore.
@@ -617,7 +940,7 @@ To compare the \gls{3d} models, the meshes after refinement are used, since text
 
 
 \subsubsection{Compression Effects on reconstructed 3D Models}
-To compare  quality of the reconstructed \gls{3d} models numerically, the number of points after densification, the number of vertices and the number of faces of the refined meshed model are compared for different levels of compression for the same simulation scenario. Using The number of points, vertices and faces are used because they faces depend on vertices which in turn depend on the number of points thus it is possible to analyse the amount of outliers in the point cloud compared to the \gls{3d} models. All values are normalised to the \gls{png} case to compare lossless compression against lossy compression with varying quality levels.
+To compare  quality of the reconstructed \gls{3d} models numerically, the number of points after densification, the number of vertices and the number of faces of the refined meshed model are compared for different levels of compression for the same simulation scenario. The number of points, vertices and faces are used because they faces depend on vertices which in turn depend on the number of points thus it is possible to analyse the amount of outliers in the point cloud compared to the \gls{3d} models. All values are normalised to the \gls{png} case to compare lossless compression against lossy compression with varying quality levels.
 
 \begin{figure}[htb]
     \centering
@@ -707,7 +1030,7 @@ Comparing the graphs in Figure~\ref{fig:recon_stats_1} to those in Figure~\ref{f
     \label{fig:models_broken}
 \end{figure}
 
-Another problem is a flattening of the model when the minimum distance to the \gls{sssb} is small. In the image series used for reconstructing Figure~\ref{fig:model_flat}, the nucleus does not entirely fit into the \gls{fov} in \SI{65}{} out of \SI{120}{} images. \SI{39}{} out of \SI{120}{} images are completely covered by the nucleus, i.e. the \gls{sssb} extends beyond the corners of the \gls{fov}. With such a high percentage of images not providing information to the reconstruction pipeline about the overall shape of the object, the model becomes flatter.
+Another problem is a flattening of the model when the minimum distance to the \gls{sssb} is small. In the image series used for reconstructing Figure~\ref{fig:model_flat}, the nucleus does not entirely fit into the \gls{fov} in \SI{65}{} out of \SI{120}{} images. The \gls{fov} of \SI{39}{} out of \SI{120}{} images is completely covered by the nucleus, i.e. the \gls{sssb} extends beyond the corners of the \gls{fov}. With such a high percentage of images not providing information to the reconstruction pipeline about the overall shape of the object, the model becomes flatter.
 
 \begin{figure}[htb]
     \centering
@@ -748,7 +1071,7 @@ Since \gls{sispo} uses three \gls{sfm} algorithms, it is investigated which algo
     \begin{tabular}{l|lllll}
         \begin{tabular}[c]{@{}l@{}}Compression/\\ Distance [km]\end{tabular} &\gls{png} & \gls{jp2} 1000 & \gls{jp2} 100 & \gls{jp2} 10 & \gls{jp2} 1 \\ \hline
         50 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 \\
-        100 & \cellcolor[HTML]{FFCC67}Seq2 & --- & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 \\
+        100 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 \\
         200 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{FFCC67}Seq2 \\
         400 & \cellcolor[HTML]{9698ED}Seq1 & \cellcolor[HTML]{C0C0C0}Glob & \cellcolor[HTML]{FFCC67}Seq2 & \cellcolor[HTML]{9698ED}Seq1 & \cellcolor[HTML]{9698ED}Seq1
     \end{tabular}%
@@ -757,5 +1080,5 @@ Since \gls{sispo} uses three \gls{sfm} algorithms, it is investigated which algo
 
 %\cellcolor[HTML]{C0C0C0}
 
-While the global \gls{sfm} algorithm was able to reconstruct a point cloud in various cases, it created only once the best output, for a \SI{400}{\kilo\meter} flyby of a \SI{10}{\kilo\meter} \gls{sssb}. The number of points in the reconstructed point cloud of the incremental \gls{sfm} algorithms exceeded those of the global \gls{sfm} algorithm in the other cases.
-The results in Table~\ref{tab:recon_best_algo_1} suggest that IncrementalSfM produces better results when the \gls{sssb} is closer, i.e. more details are visible, and IncrementalSfM2 produces better results when being further away from the nucleus. However, looking at Table~\ref{tab:recon_best_algo_10} does not support this, since the IncrementalSfM2 was the best algorithm in nearly all cases. In contract, other algorithms than IncrementalSfM2 were only used for the largest distance. Hence , the success of the algorithms does not only depend on the amount of details of the images. A possible explanation for the data is, that IncrementalSfM is more successful than IncrementalSfM2 in well-defined scenarios, i.e. scenarios where many surface details are visible, but the nucleus never covers the entire image. As discussed in Section~\ref{sec:recon_problems}, if the nucleus covers the entire \gls{fov} it causes problems to the reconstruction process, making the scenario less well-defined.
+While the global \gls{sfm} algorithm was able to reconstruct a point cloud in various cases, only once it created the best output, for a \SI{400}{\kilo\meter} flyby of a \SI{10}{\kilo\meter} \gls{sssb}. The number of points in the reconstructed point cloud of the incremental \gls{sfm} algorithms exceeded those of the global \gls{sfm} algorithm in the other cases.
+The results in Table~\ref{tab:recon_best_algo_1} suggest that IncrementalSfM produces better results when the \gls{sssb} is closer, i.e. more details are visible, and IncrementalSfM2 produces better results when being further away from the nucleus. However, looking at Table~\ref{tab:recon_best_algo_10} does not support this, since the IncrementalSfM2 was the best algorithm in nearly all cases. In contract, other algorithms than IncrementalSfM2 were only used for the largest distance. Hence, the success of the algorithms does not only depend on the amount of details of the images. A possible explanation for the data is, that IncrementalSfM is more successful than IncrementalSfM2 in well-defined scenarios, i.e. scenarios where many surface details are visible, but the nucleus never covers the entire image. As discussed in Section~\ref{sec:recon_problems}, if the nucleus covers the entire \gls{fov} it causes problems to the reconstruction process, making the scenario less well-defined.
