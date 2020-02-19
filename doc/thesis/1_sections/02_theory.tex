@@ -127,7 +127,7 @@ In the last step, the calibration factor is calculated. It is defined as
 \end{align}
 where $F_{ref}$ is the reference flux, $\alpha$ is the geometric albedo and $I_{ref}$ is the reference intensity. Multiplying the image with $f_c$ produces the calibrated image.
 
-\subsection{Computer Vision}
+\subsection{Computer Vision} \label{sec:t_cv}
 \Gls{cv} is the science of extracting information from digital photos and videos by mimicking the human vision system using a computer. \Gls{cv} encompasses a wide field of activities, from image formation, processing, detecting and matching features, image segmentation and \gls{3d} reconstruction~\cite{szeliski2010computer}. \Gls{cv} is the computer based variant of photogrammetry which is tasked with obtaining information about physical objects and the environment from photographic images~\cite{Kasser2002DigitalPhotogrammetry}. The most common approach for \gls{3d} reconstruction is stereo-photogrammetry, also referred to as computer stereo vision when using computers. Stereo-photogrammetry applies the binocular vision principle of the human vision system to obtain structural information from images~\cite{do2019review}. Since most, if not all, deep space missions have a visual imager instrument on-board, \gls{cv} constitutes a logical approach of obtaining the \gls{3d} structure of an observation target. A similar problem is the \gls{sfm} approach where the motion of the camera creates the different perspective.
 
 For all \gls{cv} problems, it is relevant to have a model of a camera. The most commonly used model in \gls{cv} is the pinhole camera. Figure~\ref{fig:pinhole_cam} gives a simple overview of the important parts of the pinhole model.

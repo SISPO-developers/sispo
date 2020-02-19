@@ -350,7 +350,61 @@ The reconstruction is based on two incremental and one global \gls{sfm} approach
 
 The algorithm used for reconstruction by IncrementalSfM2 is non-deterministic, i.e. results differ between runs on the same data sets. Hence, IncrementalSfM2 should be executed several times and the best result should be selected~\cite{Pajusalu2019CharacterizationMapping}.
 
+\Gls{sispo} outputs intermediate results which show the reconstruction process. Figure~\ref{fig:recon_steps} shows example images of the intermediate results.
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_points2.png}
+        \caption{Point cloud.}
+        \label{fig:recon_step_point}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_dense1.png}
+        \caption{Densified point cloud.}
+        \label{fig:recon_step_dense}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_mesh1.png}
+        \caption{Mesh.}
+        \label{fig:recon_step_mesh}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_refine2.png}
+        \caption{Refined mesh.}
+        \label{fig:recon_step_refine}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_texture1.png}
+        \caption{Point cloud.}
+        \label{fig:recon_step_texture}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_img1.png}
+        \caption{Image.}
+        \label{fig:recon_step_img}
+    \end{subfigure}
+    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} flyby scenario of a \SI{1}{\kilo\meter} \gls{sssb}.}
+    \label{fig:recon_steps}
+\end{figure}
+
+The most important goal for the reconstruction pipeline is to reconstruct a model. However, \gls{sispo} attempts to create the most detailed model possible by densifying the point cloud and refining the mesh. In case one of these two processes is not run successful, \gls{sispo} continues with either the sparse point cloud or the sparse mesh.
+
 \subsection{Performance}
+the performance of \gls{sispo} and its components was analysed during the development to find code section that substantially increase execution time. While reducing the number of dependencies, it was ensured that the performance does not degrade.
+
+\subsubsection{Overall Performance}
+\gls{sispo} was executed on a machine running Linux Ubuntu 18.04.03 LTS, \SI{16}{\giga\byte} of \gls{ram}, Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores and an NVIDIA\textsuperscript{\textregistered}~GeForce GTX 1080 with \SI{8}{\giga\byte} memory. The performance assessment of a complete \gls{sispo} run shows that the most time consuming part is rendering. 
+A test case with an encounter distance of \SI{50}{\kilo\meter}, a relative velocity of \SI{30}{\kilo\meter\per\second} and \SI{120}{} images is investigated. The complete statistics are presented in Appendix \ref{sec:app_performance}. The total execution time is \SI{41849.938}{\second}. The time spent rendering is \SI{40617.382}{\second}, approximately \SI{97}{\percent} of the overall total. The time spent reconstructing was \SI{785.949}{\second}, approximately \SI{2}{\percent} of the overall total. Hence, after the first profiling of the end-to-end processing pipeline, the Python code was not developed to reduce execution time since \SI{99}{\percent} of the execution time stem from time spent outside the Python code.
+
 \subsubsection{Image processing benchmark} \label{sec:cvskimage}
 The original codebase used the \gls{skimage} and OpenCV libraries in concurrently. In order to reduce the number of dependencies, the relevant functions of the two libraries were benchmarked. For this comparison, OpenCV functions were used to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and a special case of image resizing using local means. A set of five images is selected and are shown in Appendix \ref{sec:app_cvskimage}. Two star images were selected due to the large variance in the number of visible stars. The selected images represent extreme cases with 1804 (Stars1) and 51338 stars (Stars2).
 
