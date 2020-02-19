@@ -1,5 +1,25 @@
 \section{Results} \label{sec:results}
-Several simulations were run with \gls{sispo} in order to assess the capabilities and quality of the output of the three stages, i.e. rendering, compression and reconstruction. Furthermore, the effects of compression using the \gls{jp2} standard on the quality of \gls{3d} model reconstruction.
+Several simulations were run with \gls{sispo} in order to assess the capabilities and quality of the output of the three stages, i.e. rendering, compression and reconstruction. Furthermore, the effects of compression using the \gls{jp2} standard on the quality of \gls{3d} model reconstruction were investigated. Table~\ref{tab:sim_params} shows a summary of the simulated scenarios
+
+\begin{table}[htb]
+    \centering
+    \caption{Simulation parameters used for investigating capabilities of \gls{sispo}. For each scenario \gls{png}, \gls{jp2} quality 1000, quality 100, quality 10 and quality 1 compression methods were used to investigate the effects of compression.}
+    \label{tab:sim_params}
+    \begin{tabular}{l|lll}
+        \textbf{\gls{sssb} Size [\SI{}{\kilo\meter}]}& \textbf{Encounter Distance [\SI{}{\kilo\meter}]} & \textbf{Number of Images [-]} \\ \hline
+        1  & 50  & 120\\
+        1  & 100 & 120\\
+        1  & 200 & 120\\
+        1  & 400 & 120\\
+        10 & 50  & 120\\
+        10 & 100 & 120\\
+        10 & 200 & 120\\
+        10 & 400 & 120\\
+    \end{tabular}
+\end{table}
+
+Two computers were used to create the results. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu 18.04.3 LTS.
+During simulation it was realised that the reconstruction pipeline produces is more likely to output a result when using the laptop running Windows. Therefore, images were rendered on the Linux computer and reconstructions were made using the Windows computer.
 
 \subsection{Rendering} \label{sec:results_sim}
 A subset of all settings was kept constant for all simulations. The instrument settings are presented in Table~\ref{tab:inst_settings} and the settings for the \gls{sssb} in Table~\ref{tab:sssb_settings}. The specific values were chosen in order to mimic the scenario in~\cite{Pajusalu2019CharacterizationMapping}.
@@ -239,24 +259,6 @@ A second problem occurred in a scenario with \SI{50}{\kilo\meter} minimum distan
 \subsection{Compression} \label{sec:results_comp}
 The \gls{sispo} software package was used to study the effects of compression in different scenarios. The scenarios are presented in Table~\ref{tab:sim_params}. Two compression algorithms were used to study compression effects. The \gls{png} format was used because of its wide support among different software packages and \gls{jp2}. Scenarios with varying \gls{sssb} nucleus sizes and flyby distance were simulated. 
 Comparison of the different compression algorithms is based on several output parameters. The data size of the compressed image series, the number of points in the dense reconstructed point cloud, the number of vertices and the number of faces of the refined reconstructed model. These outputs relate well to the level of detail of the rendered images, since \gls{sfm} algorithms rely on surface details for reconstruction.
-
-\begin{table}[htb]
-    \centering
-    \caption{Simulation parameters used for investigating capabilities of \gls{sispo}. For each scenario \gls{png}, \gls{jp2} quality 1000, quality 100, quality 10 and quality 1 compression methods were used to investigate the effects of compression.}
-    \label{tab:sim_params}
-    \begin{tabular}{l|lll}
-        Scenario ID  & \gls{sssb} Size \SI{}{\kilo\meter} & Encounter Distance \SI{}{\kilo\meter} & Number of Images \\ \hline
-        1 & 1  & 50  & 120\\
-        2 & 1  & 100 & 120\\
-        3 & 1  & 200 & 120\\
-        4 & 1  & 400 & 120\\
-        5 & 1  & 50  & 30\\
-        6 & 1  & 100 & 30\\
-        7 & 1  & 200 & 30\\
-        8 & 1  & 400 & 30\\
-        9 & 10 & 50  & 30\\
-    \end{tabular}
-\end{table}
 
 \subsubsection{Image Quality Comparison} \label{sec:img_quali_comp}
 To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by surface features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. To better show the artefacts created by compression, the highlighted area in Figure~\ref{fig:img_quality_frame} was studied up closer.
@@ -687,7 +689,6 @@ The data sizes for the four data sets in Figure~\ref{fig:recon_stats_10} decreas
 Comparing the graphs in Figure~\ref{fig:recon_stats_1} to those in Figure~\ref{fig:recon_stats_10} reveals that the size of the \gls{jp2} quality 1 data sets are bigger for the \SI{1}{\kilo\meter} \gls{sssb} compared to the \SI{10}{\kilo\meter} \gls{sssb}. This is best explained by a larger black portion in the \SI{1}{\kilo\meter} case because the black area is well compressed for \gls{png} already. For the \SI{10}{\kilo\meter} data set, \gls{png} cannot compress the data much because the images are covered by the \gls{sssb} to a big extent.
 
 \subsubsection{Reconstruction Problems} \label{sec:recon_problems}
-
 \begin{figure}[htb]
     \centering
         \begin{subfigure}[b]{0.42\textwidth}
@@ -717,7 +718,6 @@ Another problem is a flattening of the model when the minimum distance to the \g
 
 % \subsubsection{Reconstruction Limits}
 % Reconstructing the \gls{sssb} nucleus for a range of flyby scenarios allows to show some of the limits of the reconstruction pipeline.
-
 % Closer seems not to be a problem, farther away means less and less features. \SI{400}{\kilo\meter} worked with \SI{1}{\kilo\meter} \gls{sssb}. 
 % \SI{0.1}{\kilo\meter} worked until \SI{100}{\kilo\meter} closest approach.
 

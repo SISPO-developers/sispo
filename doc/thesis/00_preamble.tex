@@ -227,11 +227,6 @@
 \thesistitle{3D Reconstruction of small Solar System bodies using rendered and compressed images}
 %\thesistitle[Title of the thesis]{Title of\\ the thesis}
 %% Near-target navigation and mass determination using optical reconstruction of small solar system bodies
-%%
-%% Image creation, compression and reconstruction for Near-target navigation at small Solar System bodies
-%% Image creation, compression and reconstruction for proximity operations at small Solar System bodies
-%% Image compression effects on 3D reconstruction of small Solar System bodies
-%% 3D Reconstruction of small Solar System bodies using rendered and compressed images 
 %% 
 
 %%
@@ -280,16 +275,18 @@
 %% as the abstract page.
 %%
 \thesisabstract{
-Your abstract in English. Keep the abstract short. The abstract explains your 
-research topic, the methods you have used, and the results you obtained. In the 
-PDF/A format of this thesis, in addition to the abstract page, the abstract text is 
-written into the pdf file's metadata. Write here the text that goes into the 
-metadata. The metadata cannot contain special characters, linebreak or paragraph 
-break characters, so these must not be used here. If your abstract does not contain 
-special characters and it does not require paragraphs, you may take advantage of 
-the abstracttext macro (see the comment below). Otherwise, the metadata abstract 
-text must be identical to the text on the abstract page.
+Synthetic image generation and reconstruction of small Solar System bodies and the influence of compression is an becoming an important topic to study because of the advent of using small spacecraft in deep space missions. Most of these use cases are fly-by scenarios, for example in the Comet Interceptor mission. Due to the limited data budgets, maximising the scientific output of small satellites requires investigating effects of lossy compression. We have developed a simulation environment that uses physics-based rendering in combination with procedural terrain generation to overcome limitations of currently used methods for image rendering like the Hapke model. The rendered small Solar System body images are combined with a star background and photometrically calibrated to represent realistic output. We implemented a Structure-from-Motion pipeline to compare the data quality and the possible amount of data reduction of lossy compression to lossless compression. Several scenarios with varying fly-by distances ranging from 50 km to 400 km and body sizes of 1 km and 10 km were simulated and compressed with lossless and several quality levels of lossy compression. We have found that low compression ratios create changes that resemble random noise in images while high compression ratios remove surface features. We have found that the random noise artefacts introduced by low compression ratios using JPEG 2000 can increase the number of vertices and faces of the reconstructed three-dimensional model. 
 }
+
+% Your abstract in English. Keep the abstract short. The abstract explains your 
+% research topic, the methods you have used, and the results you obtained. In the 
+% PDF/A format of this thesis, in addition to the abstract page, the abstract text is 
+% written into the pdf file's metadata. Write here the text that goes into the 
+% metadata. The metadata cannot contain special characters, linebreak or paragraph 
+% break characters, so these must not be used here. If your abstract does not contain 
+% special characters and it does not require paragraphs, you may take advantage of 
+% the abstracttext macro (see the comment below). Otherwise, the metadata abstract 
+% text must be identical to the text on the abstract page.
 
 %% Copyright text. Copyright of a work is with the creator/author of the work
 %% regardless of whether the copyright mark is explicitly in the work or not.
