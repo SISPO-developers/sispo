@@ -43,7 +43,7 @@ The physical parameters of comets are not well known, since they are too small f
 
 It is not clear whether comets are generally similar to rubble piles or rather consolidated, monolithic bodies. The assumption is that most bodies in the range of \SI{200}{\meter} to \SI{10}{\kilo\meter} are rubble piles~\cite{Walsh2018RubbleAsteroids}. However, density measurements and surface features of \gls{67p} are not conclusive so far~\cite{Weissman2020OriginNuclei}. 
 
-\subsubsection{Orbit Mechanics}
+\subsubsection{Orbit Mechanics} \label{sec:orbit_mechanics}
 All objects in space move on trajectories, or orbits if closed, following the Kepler equations. Trajectories are commonly defined using six orbital elements.
 Semi-major axis $a$, eccentricity $e$, inclination $i$, right ascension of ascending node $\Omega$, argument of periapsis $\omega$ and the true anomaly $\nu$ or mean anomaly $M$ at a given epoch. This parameterisation is also called modified Keplerian elements~\cite{Hintz2015FundamentalsAstrodynamics}.
 
@@ -84,6 +84,8 @@ The \gls{fov} defines the extent of the \gls{3d} scene that is visible from the 
     e_{i} = v_d \pm \frac{v_j \times s_k}{2 \times f}, \label{eq:fov_edge}
 \end{align}
 where $e_{i}$ is a vector for the $i^{th}$ edge of the \gls{fov}, $v_d$ is the direction vector of the camera, $v_j$ is the vector pointing right or up in the \gls{fov} plane, $s_k$ is the camera sensor width or height and $f$ is the focal length. The left and right edge vectors, $e_{left}$ and $e_{right}$, are calculated with the vector $v_r$ pointing right in the \gls{fov} plane and the sensor width $s_w$. The upper and lower edge vectors, $e_{upper}$ and $e_{lower}$  are calculated with the vector $v_r$ pointing up in the \gls{fov} plane and the sensor height $s_h$.
+
+In addition to the extent of the \gls{fov} within the image plane, rendering requires the view to be clipped to a minimum and maximum distance to define which objects appear in a rendered scene. The clipping is necessary to limit the computational power required for rendering. 
 
 \subsubsection{Path Tracing}
 Ray tracing is a rendering technique where the path of light rays is traced to generate pixels while simulating effects of encounters with objects. Ray tracing can simulate different effects, such as reflection, refraction, scattering and dispersion. While producing a high degree of realism in images, the computational costs are high as well. There are four types of rays: camera rays, reflection rays, transmission rays and shadow rays. Reflection and transmissions can be further categorised as either diffuse, glossy or singular. Ray tracing is a popular rendering technique where a high degree of realism is necessary since it is a realistic simulation of light transport.
