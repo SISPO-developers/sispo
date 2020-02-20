@@ -105,14 +105,14 @@ In a first step, the overall image quality is compared visually to real images. 
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/procedural_terrain/2963_Bennu.png}
+    \includegraphics[width=.5\textwidth]{doc/thesis/0_figures/procedural_terrain/2963_Bennu.png}
     \caption{Four images of asteroid Bennu and a global surface mosaic. These images were taken by the PolyCam aboard the \textit{OSIRIS-REx} mission~\cite{FourExploration}.}
     \label{fig:render_quali_bennu}
 \end{figure}
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=.8\textwidth]{doc/thesis/0_figures/procedural_terrain/67P_CG.PNG}
+    \includegraphics[width=.5\textwidth]{doc/thesis/0_figures/procedural_terrain/67P_CG.PNG}
     \caption{Representative image of comet \acrlong{67p}. This image was taken by the OSIRIS imager aboard the \textit{Rosetta} mission~\cite{OSIRISArchiveb}}.
     \label{fig:render_quali_67p}
 \end{figure}
@@ -124,7 +124,7 @@ In a first step, the overall image quality is compared visually to real images. 
     \label{fig:render_quali_81p}
 \end{figure}
 
-While all images exhibit show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The overall looks of the rendered images resemble the real images of Bennu well. The rocks and boulders present on Bennu's surface are also visible in the rendered images. When comparing the rendered images to the image of \gls{67p} or \gls{81p}, the most pronounced difference are the jets. \Gls{sispo} does not yet contain a gas and dust model that would produce a coma or jets and therefore these are missing in the rendered images. While the surface of both comets also feature some rocks and boulders, it is more defined by ridge-like structures. This type of feature is missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
+While all images show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The overall looks of the rendered images resemble the real images of Bennu well. The rocks and boulders present on Bennu's surface are also visible in the rendered images. When comparing the rendered images to the image of \gls{67p} or \gls{81p}, the most pronounced difference are the jets. \Gls{sispo} does not yet contain a gas and dust model that would produce a coma or jets and therefore these are missing in the rendered images. While the surface of both comets also feature some rocks and boulders, it is more defined by ridge-like structures. This type of feature is missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
 
 \subsubsection{Different Distances}
 Through procedural terrain generation, \gls{sispo} produces results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are shown in Figure~\ref{fig:img_procedural_10k}.
@@ -255,12 +255,14 @@ A second problem occurred in a scenario with \SI{50}{\kilo\meter} minimum distan
     \label{fig:render_dark}
 \end{figure}
 
+\clearpage
+
 \subsection{Compression} \label{sec:results_comp}
 The \gls{sispo} software package was used to study the effects of compression in different scenarios. The scenarios are presented in Table~\ref{tab:sim_params}. Two compression algorithms were used to study compression effects. The \gls{png} format was used because of its wide support among different software packages and \gls{jp2}. Scenarios with varying \gls{sssb} nucleus sizes and flyby distance were simulated. 
 Comparison of the different compression algorithms is based on several output parameters. The data size of the compressed image series, the number of points in the dense reconstructed point cloud, the number of vertices and the number of faces of the refined reconstructed model. These outputs relate well to the level of detail of the rendered images, since \gls{sfm} algorithms rely on surface details for reconstruction.
 
 \subsubsection{Image Quality Comparison} \label{sec:img_quali_comp}
-To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. Once the overall images, containing the entire \gls{sssb} in the \gls{fov}, and closeups, highlighted by the red frame in Figure~\ref{fig:img_quality_frame} are studied. Overall images are used to show compression effects on an entire scene while the closeup images reveal compression effects on surface details. Difference images and histograms are used to further investigate the effects of compression. Difference images take the L2-norm of the \gls{rgb} values of each pixel and subtract them from the respective value of the \gls{png} image. The result is a difference image showing the L2-norm differences through a colour scale. For the histograms, the zero values were removed to only show differences. Therefore, the total number of pixels and the percentage compared to the original that were used for the histogram are given as well.
+To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. Once the overall images, containing the entire \gls{sssb} in the \gls{fov}, and closeups, highlighted by the red frame in Figure~\ref{fig:img_quality_frame} are studied. Overall images are used to show compression effects on an entire scene while the closeup images reveal compression effects on surface details. Difference images and histograms are used to further investigate the effects of compression. Difference images are created by converting the \gls{rgb} images to greyscale and taking the L2-norm after subtracting each pixel from the respective value of the \gls{png} greyscale image. The result is a difference image showing the L2-norm differences through a colour scale. For the histograms, the zero values were removed to only show differences. Therefore, the total number of pixels and the percentage compared to the original that were used for the histogram are given as well.
 
 \begin{figure}[htb]
     \centering
@@ -298,7 +300,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
         \caption{Difference image with changing scale.}
         \label{fig:img_quality_comp_jp2_1_diff_rel}
     \end{subfigure}
-    \caption{Overall rendered image after compression with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between the grayscale images of image~\ref{fig:img_quality_comp_jp2_1_orig} and the lossless compressed image.}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between the greyscale images of image~\ref{fig:img_quality_comp_jp2_1_orig} and the lossless compressed image.}
     \label{fig:img_quality_comp_jp2_1}
 \end{figure}
 
@@ -330,7 +332,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
         \caption{Difference image with changing scale.}
         \label{fig:img_quality_comp_jp2_5_diff_rel}
     \end{subfigure}
-    \caption{Overall rendered image after compression with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between the grayscale images of image~\ref{fig:img_quality_comp_jp2_5_orig} and the lossless compressed image.}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between the greyscale images of image~\ref{fig:img_quality_comp_jp2_5_orig} and the lossless compressed image.}
     \label{fig:img_quality_comp_jp2_5}
 \end{figure}
 
@@ -362,7 +364,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
         \caption{Difference image with changing scale.}
         \label{fig:img_quality_comp_jp2_10_diff_rel}
     \end{subfigure}
-    \caption{Overall rendered image after compression with \gls{jp2} quality level 10. Difference histogram and difference images show the L2-norm of the difference between the grayscale images of image~\ref{fig:img_quality_comp_jp2_10_orig} and the lossless compressed image.}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 10. Difference histogram and difference images show the L2-norm of the difference between the greyscale images of image~\ref{fig:img_quality_comp_jp2_10_orig} and the lossless compressed image.}
     \label{fig:img_quality_comp_jp2_10}
 \end{figure}
 
@@ -393,7 +395,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
         \caption{Difference image with changing scale.}
         \label{fig:img_quality_comp_jp2_100_diff_rel}
     \end{subfigure}
-    \caption{Overall rendered image after compression with \gls{jp2} quality level 100. Difference histogram and difference images show the L2-norm of the difference between the grayscale images of image~\ref{fig:img_quality_comp_jp2_100_orig} and the lossless compressed image.}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 100. Difference histogram and difference images show the L2-norm of the difference between the greyscale images of image~\ref{fig:img_quality_comp_jp2_100_orig} and the lossless compressed image.}
     \label{fig:img_quality_comp_jp2_100}
 \end{figure}
 
@@ -424,7 +426,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
         \caption{Difference image with changing scale.}
         \label{fig:img_quality_comp_jp2_1000_diff_rel}
     \end{subfigure}
-    \caption{Overall rendered image after compression with \gls{jp2} quality level 1000. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_1000_orig} and the lossless compressed image.}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 1000. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_1000_orig} and the lossless compressed image.}
     \label{fig:img_quality_comp_jp2_1000}
 \end{figure}
 
@@ -459,7 +461,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
         \caption{Difference image with changing scale.}
         \label{fig:img_quality_comp_jp2_1_center_diff_rel}
     \end{subfigure}
-    \caption{Close-up images compressed with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_1_center_orig} and the lossless compressed image.}
+    \caption{Close-up images compressed with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_1_center_orig} and the lossless compressed image.}
     \label{fig:img_quality_comp_jp2_1_center}
 \end{figure}
 
@@ -490,7 +492,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
         \caption{Difference image with changing scale.}
         \label{fig:img_quality_comp_jp2_5_center_diff_rel}
     \end{subfigure}
-    \caption{Close-up images compressed with \gls{jp2} quality level 5. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_5_orig} and the lossless compressed image.}
+    \caption{Close-up images compressed with \gls{jp2} quality level 5. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_5_orig} and the lossless compressed image.}
     \label{fig:img_quality_comp_jp2_5_center}
 \end{figure}
 
@@ -521,7 +523,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
         \caption{Difference image with changing scale.}
         \label{fig:img_quality_comp_jp2_10_center_diff_rel}
     \end{subfigure}
-    \caption{Close-up images compressed with \gls{jp2} quality level 10. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_10_orig} and the lossless compressed image.}
+    \caption{Close-up images compressed with \gls{jp2} quality level 10. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_10_orig} and the lossless compressed image.}
     \label{fig:img_quality_comp_jp2_10_center}
 \end{figure}
 
@@ -552,7 +554,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
         \caption{Difference image with changing scale.}
         \label{fig:img_quality_comp_jp2_100_center_diff_rel}
     \end{subfigure}
-    \caption{Close-up images compressed with \gls{jp2} quality level 100. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_100_orig} and the lossless compressed image.}
+    \caption{Close-up images compressed with \gls{jp2} quality level 100. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_100_orig} and the lossless compressed image.}
     \label{fig:img_quality_comp_jp2_100_center}
 \end{figure}
 
@@ -583,11 +585,11 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
         \caption{Difference image with changing scale.}
         \label{fig:img_quality_comp_jp2_1000_center_diff_rel}
     \end{subfigure}
-    \caption{Close-up images compressed with \gls{jp2} quality level 1000. Difference histogram and difference images show the L2-norm of the difference between grayscale images of image~\ref{fig:img_quality_comp_jp2_1000_orig} and the lossless compressed image.}
+    \caption{Close-up images compressed with \gls{jp2} quality level 1000. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_1000_orig} and the lossless compressed image.}
     \label{fig:img_quality_comp_jp2_1000_center}
 \end{figure}
 
-Comparing the closeup images for the various quality levels in Figures~\ref{fig:img_quality_comp_jp2_1_center_orig}, \ref{fig:img_quality_comp_jp2_5_center_orig}, \ref{fig:img_quality_comp_jp2_10_center_orig}, \ref{fig:img_quality_comp_jp2_100_center_orig} and \ref{fig:img_quality_comp_jp2_1000_center_orig} reveals a degradation of image quality with decreasing compression quality levels. The histograms confirm that the number of altered pixels and the amount of alteration increases with decreasing quality level. The difference image for quality level 1000 in Figure~\ref{fig:img_quality_comp_jp2_1000_center_diff_rel} and the respective histogram show that there were no altered pixels for quality level 1000, i.e. the compression was lossless. The difference image in Figure~\ref{fig:img_quality_comp_jp2_100_center_diff_rel} resembles random noise. In contrast, the difference images in Figure~\ref{fig:img_quality_comp_jp2_1_center_diff_rel}, Figure~\ref{fig:img_quality_comp_jp2_5_center_diff_rel} and Figure~\ref{fig:img_quality_comp_jp2_10_diff_rel} show non-random artefacts related to surface features when comparing to the unaltered image in Figure~\ref{fig:img_quality_comp_jp2_1000_center_orig}. However, when comparing the difference images in Figures~\ref{fig:img_quality_comp_jp2_1_diff}, \ref{fig:img_quality_comp_jp2_10_diff}, \ref{fig:img_quality_comp_jp2_100_diff} and \ref{fig:img_quality_comp_jp2_1000_diff} which use the same scale for all quality levels, we see the alteration in quality levels \SI{100}{} and \SI{1000}{} are much lower compared to quality levels \SI{1}{}, \SI{5}{} and \SI{10}{}.
+Comparing the closeup images for the various quality levels in Figures~\ref{fig:img_quality_comp_jp2_1_center_orig}, \ref{fig:img_quality_comp_jp2_5_center_orig}, \ref{fig:img_quality_comp_jp2_10_center_orig}, \ref{fig:img_quality_comp_jp2_100_center_orig} and \ref{fig:img_quality_comp_jp2_1000_center_orig} reveals a degradation of image quality with decreasing compression quality levels. The histograms confirm that the number of altered pixels and the amount of alteration increases with decreasing quality level. The difference image for quality level 1000 in Figure~\ref{fig:img_quality_comp_jp2_1000_center_diff_rel} and the respective histogram show that there were no altered pixels for quality level 1000, i.e. the compression was lossless. The difference image in Figure~\ref{fig:img_quality_comp_jp2_100_center_diff_rel} resembles random noise. In contrast, the difference images in Figure~\ref{fig:img_quality_comp_jp2_1_center_diff_rel}, Figure~\ref{fig:img_quality_comp_jp2_5_center_diff_rel} and Figure~\ref{fig:img_quality_comp_jp2_10_center_diff_rel} show non-random artefacts related to surface features when comparing to the unaltered image in Figure~\ref{fig:img_quality_comp_jp2_1000_center_orig}. However, when comparing the difference images in Figures~\ref{fig:img_quality_comp_jp2_1_center_diff}, \ref{fig:img_quality_comp_jp2_5_center_diff}, \ref{fig:img_quality_comp_jp2_10_center_diff}, \ref{fig:img_quality_comp_jp2_100_center_diff} and \ref{fig:img_quality_comp_jp2_1000_center_diff} which use the same scale for all quality levels, we see the alteration in quality levels \SI{100}{} and \SI{1000}{} are much lower compared to quality levels \SI{1}{}, \SI{5}{} and \SI{10}{}.
 
 When comparing the results for the overall images with the results for the closeup we see that the overall images are less altered by compression. Since the a substantial portion of the  overall images are covered by a black background, compression does change less pixels than in the closeup images. While the overall difference images resemble random noise, the closeup images reveal a relation between surface features and compression artefacts for low quality levels.
 
@@ -645,7 +647,7 @@ A comparison of the point clouds of the two scenarios is shown in Figure~\ref{fi
     \label{fig:points_dense_comp}
 \end{figure}
 
-To compare the \gls{3d} models, the meshes after refinement are used, since texturing only changes the appearance but not the quality of the model. When comparing the \gls{3d} models in Figure~\ref{fig:models_comp}, the influence of the number of points is clearly visible. It is possible to see single vertices that make up the model in Figure~\ref{fig:models_400_1}. In contrast, the more detailed model in Figure~\ref{fig:models_50_10} represents surface features such as boulders.
+To compare the \gls{3d} models, the meshes after refinement are used, since texturing only changes the appearance but not model quality. When comparing the \gls{3d} models in Figure~\ref{fig:models_comp}, the influence of the number of points is clearly visible. It is possible to see single vertices that make up the model in Figure~\ref{fig:models_400_1}. In contrast, the more detailed model in Figure~\ref{fig:models_50_10} represents surface features such as boulders.
 
 \begin{figure}[htb]
     \centering
@@ -664,52 +666,6 @@ To compare the \gls{3d} models, the meshes after refinement are used, since text
     \caption{Images showing \gls{3d} models reconstructed from the point clouds shown in Figure~\ref{fig:points_dense_comp}. Mesh refinement was not possible in the second scenario, therefore the sparse mesh is shown.}
     \label{fig:models_comp}
 \end{figure}
-
-% The reconstruction process creates a set of intermediate data products. Images taken from similar angles of each step, starting from the point cloud, and an example image from the data set used for the reconstruction are shown in Figure~\ref{fig:models_50_10}.
-
-% \begin{figure}[htb]
-%     \centering
-%         \begin{subfigure}[b]{0.42\textwidth}
-%             \centering
-%             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/50_10/120_50_10_point1.png}
-%             \caption{Reconstructed point cloud.}
-%             \label{fig:models_50_10_point}
-%         \end{subfigure}
-%         \begin{subfigure}[b]{0.42\textwidth}
-%             \centering
-%             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/50_10/120_50_10_dense1.png}
-%             \caption{Densified point cloud.}
-%             \label{fig:models_50_10_dense}
-%         \end{subfigure}
-%         \\
-%         \begin{subfigure}[b]{0.42\textwidth}
-%             \centering
-%             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/50_10/120_50_10_mesh1.png}
-%             \caption{Meshed model.}
-%             \label{fig:models_50_10_mesh}
-%         \end{subfigure}
-%         \begin{subfigure}[b]{0.42\textwidth}
-%             \centering
-%             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/50_10/120_50_10_refine1.png}
-%             \caption{Refined model.}
-%             \label{fig:models_50_10_refine}
-%         \end{subfigure}
-%         \\
-%         \begin{subfigure}[b]{0.42\textwidth}
-%             \centering
-%             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/50_10/120_50_10_texture1.png}
-%             \caption{Textured model.}
-%             \label{fig:models_50_10_texture}
-%         \end{subfigure}
-%         \begin{subfigure}[b]{0.42\textwidth}
-%             \centering
-%             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/50_10/120_50_10_img1.png}
-%             \caption{Example image of the data set.}
-%             \label{fig:models_50_10_img}
-%         \end{subfigure}
-%     \caption{Images showing intermediate steps of a reconstruction for a \SI{50}{\kilo\meter} flyby of a \SI{10}{\kilo\meter} \gls{sssb}. The stripe artefact described in Section~\ref{sec:render_problems} is visible in \ref{fig:models_50_10_point}.}
-%     \label{fig:models_50_10}
-% \end{figure}
 
 
 \subsubsection{Compression Effects on reconstructed 3D Models}
@@ -780,9 +736,16 @@ Figure~\ref{fig:recon_stats_1} shows that compression with \gls{jp2} quality lev
     \label{fig:recon_stats_10}
 \end{figure}
 
-The data sizes for the four data sets in Figure~\ref{fig:recon_stats_10} decrease with each decreasing quality level, i.e. most images contain the \gls{sssb} nucleus to a large extent. Surprisingly, the \gls{jp2} quality 10 data sets contain the highest number of faces after reconstruction. As described in Section~\ref{sec:render_problems}, rendered images with a \SI{10}{\kilo\meter} \gls{sssb} contain stripes. These cause problems for the \gls{sfm} algorithms since the sharp brightness transitions create many false positives as seen in Figure~\ref{}. Compression reduces the effect of this issue, hence the data sets with quality 5 contain the best \gls{3d}~models. Additionally, the brightening effect by compression described at the end of Section~\ref{sec:img_quali_comp} might improve reconstruction for more compressed images since more features might be detected or detected features might be less likely to be considered outliers.
+The data sizes for the four data sets in Figure~\ref{fig:recon_stats_10} decrease with each decreasing quality level, i.e. most images contain the \gls{sssb} nucleus to a large extent. Surprisingly, the \gls{jp2} quality 10 data sets contain the highest number of faces after reconstruction. As described in Section~\ref{sec:render_problems}, rendered images with a \SI{10}{\kilo\meter} \gls{sssb} contain stripes. The stripes increase the density of points in the sparse point cloud as seen in Figure~\ref{fig:point_cloud_stripe}. Realistic images would not have the stripe artefacts and therefore the number of points in the point cloud reconstructed from real images would be lower. Compression reduces the effect of this issue, hence the data sets with quality 5 contain the best \gls{3d}~models. Additionally, the brightening effect by compression described at the end of Section~\ref{sec:img_quali_comp} might improve reconstruction for more compressed images since more features might be detected or detected features might be less likely to be considered outliers.
 
 Comparing the graphs in Figure~\ref{fig:recon_stats_1} to those in Figure~\ref{fig:recon_stats_10} reveals that the size of the \gls{jp2} quality 1 data sets are bigger for the \SI{1}{\kilo\meter} \gls{sssb} compared to the \SI{10}{\kilo\meter} \gls{sssb}. This is best explained by a larger black portion in the \SI{1}{\kilo\meter} case because the black area is well compressed for \gls{png} already. For the \SI{10}{\kilo\meter} data set, \gls{png} cannot compress the data much because the images are covered by the \gls{sssb} to a big extent.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=6\textwidth]{doc/thesis/0_figures/models_quality/50_10/120_50_10_point1.png}
+    \caption{Sparse point cloud of a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} flyby. The point cloud contains a high point density where the stripe artefact exists in rendered images.}
+    \label{fig:point_cloud_stripe}
+\end{figure}
 
 \subsubsection{Reconstruction Problems} \label{sec:recon_problems}
 \begin{figure}[htb]
