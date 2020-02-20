@@ -43,13 +43,20 @@ def create_diff_image(img_name, ref_img_name):
     diff_img = np.linalg.norm(temp, axis=2).astype(np.uint8)
     #diff_img = temp[:,:,0].astype(np.int16)
     #diff_2 = np.abs(temp[:,:,0]).astype(np.uint8)
-
+    print(np.max(np.abs(diff_img)))
     file_name = img_name[:-4] + "_diff.png"
     cv2.imwrite(file_name, diff_img, (cv2.IMWRITE_PNG_COMPRESSION, 9))
 
+    if "center" in img_name:
+        V_MAX_ABS = 50
+        
+    else:    
+        V_MAX_ABS = 131
+    FIGURE_SIZE = (8.5, 7)    
+
     temp = diff_img
-    plt.figure()
-    plt.imshow(temp, interpolation='nearest', cmap='gray', vmin=0, vmax=50)
+    plt.figure(figsize=FIGURE_SIZE)
+    plt.imshow(temp, interpolation='nearest', cmap='gray', vmin=0, vmax=V_MAX_ABS)
     cbar = plt.colorbar()
     cbar.ax.get_yaxis().labelpad = 10
     cbar.ax.set_ylabel("L2-Norm of Difference", rotation=270)
@@ -59,7 +66,7 @@ def create_diff_image(img_name, ref_img_name):
     plt.savefig(file_name, bbox_inches="tight")
     plt.close()
 
-    plt.figure()
+    plt.figure(figsize=FIGURE_SIZE)
     plt.imshow(temp, interpolation='nearest', cmap='gray', vmin=0,vmax=np.max(np.abs(temp)))
     cbar = plt.colorbar()
     cbar.ax.get_yaxis().labelpad = 10
@@ -70,10 +77,10 @@ def create_diff_image(img_name, ref_img_name):
     plt.savefig(file_name, bbox_inches="tight")
     plt.close()
 
-    plt.figure()
+    plt.figure(figsize=FIGURE_SIZE)
     histo_vec = diff_img.flatten()
     histo_vec = histo_vec[histo_vec != 0]
-    plt.hist(histo_vec, bins=51, range=(0, 50))
+    plt.hist(histo_vec, bins=V_MAX_ABS, range=(0, V_MAX_ABS))
     plt.title(f"Difference Histogram - {' '.join(img_name[:-4].split('/')[-1].upper().split('_')[0:2])}")
     plt.xlabel("L2-Norm of Difference")
     plt.ylabel("Number of Pixels")
@@ -98,8 +105,7 @@ if __name__ == "__main__":
                      "jp2_100.png",
                      "jp2_10.png",
                      "jp2_1.png",
-                     "jp2_5.png",
-                     "jp2_4.png"]
+                     "jp2_5.png"]
 
             for file_name in file_list:
                 file_dir = folder + file_name
@@ -113,8 +119,7 @@ if __name__ == "__main__":
                      "jp2_100.png",
                      "jp2_10.png",
                      "jp2_1.png",
-                     "jp2_5.png",
-                     "jp2_4.png"]
+                     "jp2_5.png"]
 
         for file_name in file_list:    
             cropped = crop(file_name)
