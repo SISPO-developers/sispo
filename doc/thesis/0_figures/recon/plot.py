@@ -32,7 +32,7 @@ def main(file_name):
 	
 	ax.set_ylabel('Value normalised to PNG [-]')
 	ax.set_xlabel('Size of data set compared to PNG [%]')
-	ax.set_title(file_name[:-4].replace("_", " "))
+	ax.set_title(file_name[:-4].replace("_", " "), fontdict={'fontsize': 11})
 	ax.set_xticks(x)
 	ax.set_xticklabels(label_size_p)
 	ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
