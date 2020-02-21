@@ -1,5 +1,5 @@
 \section{Results} \label{sec:results}
-Several simulations were run with \gls{sispo} in order to assess the capabilities and quality of the output of the three stages, i.e. rendering, compression and reconstruction. Furthermore, the effects of compression using the \gls{jp2} standard on the quality of \gls{3d} model reconstruction were investigated. Table~\ref{tab:sim_params} shows a summary of the simulated scenarios
+Several simulations were run with \gls{sispo} in order to assess the capabilities and quality of the output of the three stages, i.e. rendering, compression and reconstruction. Furthermore, the effects of compression using the \gls{jp2} standard on the quality of \gls{3d} model reconstruction were investigated. Table~\ref{tab:sim_params} shows a summary of the simulated scenarios.
 
 \begin{table}[htb]
     \centering
@@ -18,8 +18,7 @@ Several simulations were run with \gls{sispo} in order to assess the capabilitie
     \end{tabular}
 \end{table}
 
-Two computers were used to create the results. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu 18.04.3 LTS.
-During simulation, it was realised that the reconstruction pipeline produces is more likely to output a result when using the laptop running Windows. Therefore, images were rendered on the Linux computer and reconstructions were made using the Windows computer.
+Two computers were used to create the results. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu 18.04.3 LTS. During simulation, it was noticed that the reconstruction pipeline is more often successful when using the laptop running Windows. Therefore, images were rendered on the Linux computer and reconstructions were made using the Windows computer.
 
 \subsection{Rendering} \label{sec:results_sim}
 A subset of all settings was kept constant for all simulations. The instrument settings are presented in Table~\ref{tab:inst_settings} and the settings for the \gls{sssb} in Table~\ref{tab:sssb_settings}. The specific values were chosen in order to mimic the scenario in~\cite{Pajusalu2019CharacterizationMapping}.
@@ -99,19 +98,19 @@ In a first step, the overall image quality is compared visually to real images. 
         \label{fig:render_quali_comparison_2}
     \end{subfigure}
     \\
-        \begin{subfigure}[b]{0.48\textwidth}
+    \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_1_Inst_2017-08-15T115837-133000.png}
         \caption{\SI{149}{\kilo\meter}.}
-        \label{fig:render_quali_comparison_1}
+        \label{fig:render_quali_comparison_3}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_1_Inst_2017-08-15T115851-232000.png}
         \caption{\SI{50}{\kilo\meter}.}
-        \label{fig:render_quali_comparison_2}
+        \label{fig:render_quali_comparison_4}
     \end{subfigure}
-    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} at the given distances.}
+    \caption{Images (a) and (b) show the surface of a \SI{10}{\kilo\meter} \gls{sssb} at the given distances. Images (c) and (d) show the surface of a \SI{1}{\kilo\meter} \gls{sssb} at the given distances.}
     \label{fig:render_quali_comparison}
 \end{figure}
 
@@ -136,7 +135,7 @@ In a first step, the overall image quality is compared visually to real images. 
     \label{fig:render_quali_81p}
 \end{figure}
 
-While all images show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The overall looks of the rendered images resemble the real images of Bennu well. The rocks and boulders present on Bennu's surface are also visible in the rendered images. When comparing the rendered images to the image of \gls{67p} or \gls{81p}, the most pronounced difference are the jets. \Gls{sispo} does not yet contain a gas and dust model that would produce a coma or jets and therefore these are missing in the rendered images. While the surface of both comets also feature some rocks and boulders, it is more defined by ridge-like structures. This type of feature is missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
+While all images show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The overall looks of the rendered images resemble the real images of Bennu well. The rocks and boulders present on Bennu's surface appear similar to the rocks and boulders in the rendered images. When comparing the rendered images to the image of \gls{67p} or \gls{81p}, the most pronounced difference are the jets. \Gls{sispo} does not yet contain a gas and dust model that would produce a coma or jets and therefore these are missing in the rendered images. While the surface of both comets feature some rocks and boulders, there surfaces more defined by ridge-like structures. This type of feature is missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
 
 Through procedural terrain generation, \gls{sispo} produces results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are shown in Figure~\ref{fig:render_quali_comparison}.It is visible from Figure~\ref{fig:render_quali_comparison} that surface features and details do not degrade visually. Moving closer to the surface reveals more details, such as tiny bumps between larger structures which are not visible from larger distances. The visible quality of surface features is defined by the shader implementation. 
 
@@ -170,7 +169,7 @@ The composition process uses raw images rendered with Blender and produces photo
                 \caption{Image 2 after calibration.}
                 \label{fig:composition_after_2}
         \end{subfigure}
-        \caption{Two images of a fly-by, image 2 is one second after image 1, before and after the composition process. The nucleus is much brighter than background stars thus no stars visible in these images after calibration.}
+        \caption{Two consecutive images before and after the composition process. The nucleus is much brighter than background stars thus no stars are visible in these images after calibration.}
         \label{fig:composition_before_after}
 \end{figure}
 
@@ -223,7 +222,7 @@ Rendering a fly-by scenario with a \SI{10}{\kilo\meter} \gls{sssb} created artef
     \label{fig:render_artefacts}
 \end{figure}
 
-A second problem occurred in a scenario with \SI{50}{\kilo\meter} minimum distance and a \SI{1}{\kilo\meter} \gls{sssb}. A single image was found to be darker than all other images in the data set. A series of three images is shown in Figure~\ref{fig:render_dark}, with the middle image being darker despite one small patch of pixels. In total, three pixels are much brighter than any other pixel in the image. These are so-called \textit{fireflies}~\cite{Valenza2015BlenderCookbook}. Figure~\ref{fig:render_dark} contains composed images for better visibility of the artefact. However, the artefact also exists in the raw image hence it is a rendering artefact and not introduced by the composition process. No second image with the same issue was found in any other data set therefore the problem was not investigated further.
+A second problem occurred in a \SI{50}{\kilo\meter} fly-by simulation with a \SI{1}{\kilo\meter} \gls{sssb}. A single image was found to be darker than all other images in the data set. Figure~\ref{fig:render_dark} shows three images where the middle image is overall darker except for one small patch of white pixels. Three pixels are much brighter than any other pixel in the image. These are so-called \textit{fireflies}~\cite{Valenza2015BlenderCookbook}. Figure~\ref{fig:render_dark} contains composed images for better visibility of the artefact. The artefact is not introduced by the composition process since it exists in the raw rendered images. No second image with the same issue was found in any other data set therefore the problem was not investigated further.
 
 \begin{figure}[htb]
     \centering
@@ -242,7 +241,7 @@ A second problem occurred in a scenario with \SI{50}{\kilo\meter} minimum distan
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/Inst_2017-08-15T115819-007000_center.png}
             \label{fig:render_dark_3}
         \end{subfigure}
-    \caption{Darkening of overall \gls{sssb} body due to three pixel being much brighter, also referred to as fireflies. All three images are composed images for better visibility of the artefact. The images are cropped to show the \gls{sssb} nucleus up close.}
+    \caption{Overall darkened \gls{sssb} image due to three pixels being much brighter, also referred to as fireflies. All three images are composed images for better visibility of the artefact. The images are cropped to display the \gls{sssb} nucleus and artefact better.}
     \label{fig:render_dark}
 \end{figure}
 
@@ -253,7 +252,7 @@ The \gls{sispo} software package was used to study the effects of compression in
 Comparison of the different compression algorithms is based on several output parameters. The data size of the compressed image series, the number of points in the dense reconstructed point cloud, the number of vertices and the number of faces of the refined reconstructed model. These outputs relate well to the level of detail of the rendered images, since \gls{sfm} algorithms rely on surface details for reconstruction.
 
 \subsubsection{Image Quality Comparison} \label{sec:img_quali_comp}
-To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. Once the overall images, containing the entire \gls{sssb} in the \gls{fov}, and closeups, highlighted by the red frame in Figure~\ref{fig:img_quality_frame} are studied. Overall images are used to show compression effects on an entire scene while the closeup images reveal compression effects on surface details. Difference images and histograms are used to further investigate the effects of compression. Difference images are created by converting the \gls{rgb} images to greyscale and taking the L2-norm after subtracting each pixel from the respective value of the \gls{png} greyscale image. The result is a difference image showing the L2-norm differences through a colour scale. For the histograms, the zero values were removed to only show differences. Therefore, the total number of pixels and the percentage compared to the original that were used for the histogram are given as well.
+To compare the image quality after different levels of compression, a specific image is selected which is compressed to different levels. Since reconstruction is mostly influenced by features, a scene with a distance of \SI{50}{\kilo\meter} was selected for comparison. Once the overall images, containing the entire \gls{sssb} in the \gls{fov}, and closeups, highlighted by the red frame in Figure~\ref{fig:img_quality_frame} are studied. Overall images are used to show compression effects on an entire scene while the closeup images reveal compression effects on surface details. Difference images and histograms are used to further investigate the effects of compression. Difference images are created by converting the \gls{rgb} images to greyscale and taking the L2-norm after subtracting each pixel from the respective value of the \gls{png} greyscale image. The result is a greyscale difference image showing the L2-norm differences. For the histograms, the zero values were removed to only show differences. Therefore, the total number of pixels and the percentage compared to the original that were used for the histogram are given as well.
 
 \begin{figure}[htb]
     \centering
@@ -282,7 +281,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_heatmap.png}
-        \caption{Difference image with constant scale.}
+        \caption{Difference image with constant scale across different compression quality levels.}
         \label{fig:img_quality_comp_jp2_1_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
@@ -314,7 +313,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_heatmap.png}
-        \caption{Difference image with constant scale.}
+        \caption{Difference image with constant scale across different compression quality levels.}
         \label{fig:img_quality_comp_jp2_5_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
@@ -346,7 +345,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_heatmap.png}
-        \caption{Difference image with constant scale.}
+        \caption{Difference image with constant scale across different compression quality levels.}
         \label{fig:img_quality_comp_jp2_10_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
@@ -377,7 +376,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_heatmap.png}
-        \caption{Difference image with constant scale.}
+        \caption{Difference image with constant scale across different compression quality levels.}
         \label{fig:img_quality_comp_jp2_100_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
@@ -408,7 +407,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_heatmap.png}
-        \caption{Difference image with constant scale.}
+        \caption{Difference image with constant scale across different compression quality levels.}
         \label{fig:img_quality_comp_jp2_1000_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
@@ -443,7 +442,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_heatmap.png}
-        \caption{Difference image with constant scale.}
+        \caption{Difference image with constant scale across different compression quality levels.}
         \label{fig:img_quality_comp_jp2_1_center_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
@@ -474,7 +473,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_heatmap.png}
-        \caption{Difference image with constant scale.}
+        \caption{Difference image with constant scale across different compression quality levels.}
         \label{fig:img_quality_comp_jp2_5_center_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
@@ -505,7 +504,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_heatmap.png}
-        \caption{Difference image with constant scale.}
+        \caption{Difference image with constant scale across different compression quality levels.}
         \label{fig:img_quality_comp_jp2_10_center_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
@@ -536,7 +535,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_heatmap.png}
-        \caption{Difference image with constant scale.}
+        \caption{Difference image with constant scale across different compression quality levels.}
         \label{fig:img_quality_comp_jp2_100_center_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
@@ -567,7 +566,7 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_heatmap.png}
-        \caption{Difference image with constant scale.}
+        \caption{Difference image with constant scale across different compression quality levels.}
         \label{fig:img_quality_comp_jp2_1000_center_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
@@ -614,8 +613,7 @@ When comparing the results for the overall images with the results for the close
 \gls{sispo} is choosing which result of which reconstruction method to use based on the number of reconstructed points. Comparing the chosen algorithm with the input parameter reveals that the first incremental \gls{sfm} reconstruction performs better when the fly-by distance is smaller while the second incremental \gls{sfm} algorithms performs better with farther fly-by distances.
 
 \subsubsection{Reconstructed Model Comparison}
-\Gls{3d} models were reconstructed for most scenarios presented in Table~\ref{tab:sim_params}. When using \SI{120}{} images, reconstruction was successful in all cases but the highest compression and a \SI{400}{\kilo\meter} closest approach.
-Generally the number of reconstructed points decreases with a decreasing \gls{sssb} size and an increasing closest distance, i.e. with decreasing visible size in the images.
+\Gls{3d} models were reconstructed for most scenarios presented in Table~\ref{tab:sim_params}. When using \SI{120}{} images, reconstruction was successful in all cases except for a \SI{400}{\kilo\meter} fly-by of a \SI{1}{\kilo\meter} nucleus and the highest compression ratio. Generally the number of reconstructed points decreases with a decreasing \gls{sssb} size and an increasing closest distance, i.e. with decreasing visible size in the images.
 The number of points in the densified point cloud range from approximately \SI{6e6}{} for a \SI{50}{\kilo\meter} fly-by of a \SI{10}{\kilo\meter} \gls{sssb} to approximately \SI{2e3}{} for a \SI{400}{\kilo\meter} fly-by of a \SI{1}{\kilo\meter} \gls{sssb}. Since these two scenarios represent the two boundary cases of the simulation results, these are compared in more detail. The quality of other reconstructed \gls{3d} models are in between the presented results and are therefore not analysed further.
 
 A comparison of the point clouds of the two scenarios is shown in Figure~\ref{fig:points_dense_comp}. The large variation in points after reconstruction and densification strongly influences the \gls{3d} model quality. However, both point clouds contain outliers which are removed later in the \gls{3d} models.
@@ -659,7 +657,7 @@ To compare the \gls{3d} models, the meshes after refinement are used, since text
 \end{figure}
 
 \subsubsection{Compression Effects on reconstructed 3D Models}
-To compare  quality of the reconstructed \gls{3d} models numerically, the number of points after densification, the number of vertices and the number of faces of the refined meshed model are compared for different levels of compression for the same simulation scenario. The number of points, vertices and faces are used because they faces depend on vertices which in turn depend on the number of points thus it is possible to analyse the amount of outliers in the point cloud compared to the \gls{3d} models. All values are normalised to the \gls{png} case to compare lossless compression against lossy compression with varying quality levels.
+To compare  quality of the reconstructed \gls{3d} models numerically, the number of points after densification, the number of vertices and the number of faces of the refined meshed model are compared for different levels of compression for the same simulation scenario. The number of points, vertices and faces are used because they relate to the level of detail of a \gls{3d} model. Moreover, the number of points in relation to the number of vertices can be used to analyse the amount of outliers in the point cloud since outlier points cannot be included into a meaningful \gls{3d} model. All values are normalised to the \gls{png} case to compare lossless compression against lossy compression with varying quality levels.
 
 \begin{figure}[htb]
     \centering
@@ -692,7 +690,7 @@ To compare  quality of the reconstructed \gls{3d} models numerically, the number
     \label{fig:recon_stats_1}
 \end{figure}
 
-The most surprising result that is visible in Figure~\ref{fig:recon_stats_1} is that for the \SI{100}{\kilo\meter} case, the reconstruction results improved with higher degrees of compression. The artefacts introduced by compression create additional features for the \gls{sfm} algorithms. While the number of points for the lowest quality level in Figure~\ref{fig:recon_120_50_1} also has a higher point count than the \gls{png} case, the number of vertices and faces is much lower. Hence the densified point cloud contained a high number of outliers that could not be used for the meshed model. In contrast, in the \SI{400}{\kilo\meter} case, the compression deteriorated the quality of the reconstructed models substantially. Due to the small visual size of the \gls{sssb} nucleus, there is only a small number of usable features which are removed by compression. Only for the \SI{200}{\kilo\meter} case, the quality of the reconstructed \gls{3d} model decreases gradually with decreasing data size.
+Figure~\ref{fig:recon_stats_1} reveals that for a \SI{100}{\kilo\meter} fly-by, the number of reconstructed vertices and faces increases with increasing degrees of compression. The artefacts introduced by compression create additional features for the \gls{sfm} algorithms. While the number of points for the lowest quality level in Figure~\ref{fig:recon_120_50_1} contains more points than the \gls{png} case, the number of vertices and faces is much lower. Hence the densified point cloud contained a higher number of outliers that were removed during meshed creation. If the number of vertices decreased more than the number of points, compression increased the number of outliers. In contrast, in the \SI{400}{\kilo\meter} case, the compression deteriorated the quality of the reconstructed models substantially. Due to the small visual size of the \gls{sssb} nucleus, there is only a small number of usable features which are removed by compression. Only for the \SI{200}{\kilo\meter} case, the quality of the reconstructed \gls{3d} model decreases gradually with decreasing data size.
 Figure~\ref{fig:recon_stats_1} shows that compression with \gls{jp2} quality levels 1000 and 100 do not differ much. For the \SI{100}{\kilo\meter} and \SI{200}{\kilo\meter} cases, even \gls{jp2} quality 10 has the same size as 100 and 1000. This can be explained with a high number of black pixels which can be compressed efficiently without losing information and a small visible nucleus size.
 
 \begin{figure}[htb]
@@ -726,9 +724,9 @@ Figure~\ref{fig:recon_stats_1} shows that compression with \gls{jp2} quality lev
     \label{fig:recon_stats_10}
 \end{figure}
 
-The data sizes for the four data sets in Figure~\ref{fig:recon_stats_10} decrease with each decreasing quality level, i.e. most images contain the \gls{sssb} nucleus to a large extent. Surprisingly, the \gls{jp2} quality 10 data sets contain the highest number of faces after reconstruction for all cases but the \SI{100}{\kilo\meter} fly-by. As described in Section~\ref{sec:render_problems}, rendered images with a \SI{10}{\kilo\meter} \gls{sssb} contain stripes. The stripes increase the density of points in the sparse point cloud as seen in Figure~\ref{fig:point_cloud_stripe}. Realistic images would not have the stripe artefacts and therefore the number of points in the point cloud reconstructed from real images would be lower. Compression reduces the effect of this issue, hence the data sets with quality 5 contain the best \gls{3d}~models. Additionally, the brightening effect by compression described at the end of Section~\ref{sec:img_quali_comp} might improve reconstruction for more compressed images since more features might be detected or detected features might be less likely to be considered outliers.
+The size of the four data sets in Figure~\ref{fig:recon_stats_10} decrease with each decreasing quality level, i.e. most images contain the \gls{sssb} nucleus to a large extent. Surprisingly, the \gls{jp2} quality 10 data sets contain the highest number of faces after reconstruction for all cases but the \SI{100}{\kilo\meter} fly-by. As described in Section~\ref{sec:render_problems}, rendered images with a \SI{10}{\kilo\meter} \gls{sssb} contain stripes. The stripes increase the density of points in the sparse point cloud as seen in Figure~\ref{fig:point_cloud_stripe}. Realistic images would not have the stripe artefacts and therefore the number of points in the point cloud reconstructed from real images would be lower. Compression reduces the effect of this issue, hence the data sets with quality 5 contain the best \gls{3d}~models. Additionally, the brightening effect by compression described at the end of Section~\ref{sec:img_quali_comp} might improve reconstruction for more compressed images since more features might be detected or detected features might be less likely to be considered outliers.
 
-Comparing the graphs in Figure~\ref{fig:recon_stats_1} to those in Figure~\ref{fig:recon_stats_10} reveals that the size of the \gls{jp2} quality 1 data sets are bigger for the \SI{1}{\kilo\meter} \gls{sssb} compared to the \SI{10}{\kilo\meter} \gls{sssb}. This is best explained by a larger black portion in the \SI{1}{\kilo\meter} case because the black area is well compressed for \gls{png} already. For the \SI{10}{\kilo\meter} data set, \gls{png} cannot compress the data much because the images are covered by the \gls{sssb} to a big extent. Furthermore, there are more samples with a considerably less vertices and faces than reconstructed points with a \SI{10}{\kilo\meter} \gls{sssb} compared to a \SI{1}{\kilo\meter} \gls{sssb}. The higher number of outliers is most likely linked to the stripe artefact.
+Comparing the graphs in Figure~\ref{fig:recon_stats_1} to those in Figure~\ref{fig:recon_stats_10} reveals that the size of the \gls{jp2} quality 1 data sets are bigger for the \SI{1}{\kilo\meter} \gls{sssb} compared to the \SI{10}{\kilo\meter} \gls{sssb}. This is best explained by a larger black portion in the \SI{1}{\kilo\meter} case because the black area is well compressed for \gls{png} already. For the \SI{10}{\kilo\meter} data set, \gls{png} cannot compress the data much because the images are covered by the \gls{sssb} to a big extent. Furthermore, there are more samples with a stronger decreased number of vertices than reconstructed points with a \SI{10}{\kilo\meter} \gls{sssb} compared to a \SI{1}{\kilo\meter} \gls{sssb} thus compression introduces more outliers for a \SI{10}{\kilo\meter} \gls{sssb} than for a \SI{1}{\kilo\meter} \gls{sssb}. The stringer correlation between outliers and compression for \SI{10}{\kilo\meter} \glspl{sssb} stems from the increase image area covered by the nucleus compare to a \SI{1}{\kilo\meter} nucleus.
 
 \begin{figure}[htb]
     \centering
@@ -794,7 +792,7 @@ The results in Table~\ref{tab:recon_best_algo_1} suggest that IncrementalSfM pro
     \label{fig:models_broken}
 \end{figure}
 
-Another problem is a flattening of the model when the minimum distance to the \gls{sssb} is small. In the image series used for reconstructing Figure~\ref{fig:model_flat}, the nucleus does not entirely fit into the \gls{fov} in \SI{65}{} out of \SI{120}{} images. The \gls{fov} of \SI{39}{} out of \SI{120}{} images is completely covered by the nucleus, i.e. the \gls{sssb} extends beyond the corners of the \gls{fov}. With such a high percentage of images not providing information to the reconstruction pipeline about the overall shape of the object, the model becomes flatter.
+Another problem is a flattening of the model when the minimum distance to the \gls{sssb} is small. In the image series used for reconstructing Figure~\ref{fig:model_flat}, the nucleus does not entirely fit into the \gls{fov} in \SI{65}{} out of \SI{120}{} images. The \gls{fov} of \SI{39}{} out of \SI{120}{} images is completely covered by the nucleus, i.e. the \gls{sssb} extends beyond the corners of the \gls{fov}. With such a high percentage of images not providing information about the overall shape of the object to the reconstruction pipeline , the model becomes flatter.
 
 \begin{figure}[htb]
     \centering
