@@ -117,7 +117,7 @@ In a first step, the overall image quality is compared visually to real images. 
 \begin{figure}[htb]
     \centering
     \includegraphics[width=.5\textwidth]{doc/thesis/0_figures/procedural_terrain/2963_Bennu.png}
-    \caption{Four images of asteroid Bennu and a global surface mosaic. These images were taken by the PolyCam aboard the \textit{OSIRIS-REx} mission~\cite{FourExploration}.}
+    \caption{Four images of asteroid Bennu and a global surface mosaic. These images were taken by the PolyCam aboard the \textit{OSIRIS-REx} mission~\cite{NASAFourBennu}.}
     \label{fig:render_quali_bennu}
 \end{figure}
 
@@ -248,7 +248,7 @@ A second problem occurred in a \SI{50}{\kilo\meter} fly-by simulation with a \SI
 \clearpage
 
 \subsection{Compression} \label{sec:results_comp}
-The \gls{sispo} software package was used to study the effects of compression in different scenarios. The scenarios are presented in Table~\ref{tab:sim_params}. Two compression algorithms were used to study compression effects. The \gls{png} format was used because of its wide support among different software packages and \gls{jp2}. Scenarios with varying \gls{sssb} nucleus sizes and fly-by distance were simulated. 
+The \gls{sispo} software package was used to study the effects of compression in different scenarios. The scenarios are presented in Table~\ref{tab:sim_params}. Two compression algorithms were used to study compression effects. The \gls{png} format was used because of its wide support among different software packages and \gls{jp2} is used as an improved version over commonly used \gls{jpeg}. The \gls{png} and \gls{jp2} formats were selected as general examples to characterise the compression effects on reconstruction. Neither of these two algorithms is intended to represent image processing on-board a spacecraft. Scenarios with varying \gls{sssb} nucleus sizes and fly-by distance were simulated. 
 Comparison of the different compression algorithms is based on several output parameters. The data size of the compressed image series, the number of points in the dense reconstructed point cloud, the number of vertices and the number of faces of the refined reconstructed model. These outputs relate well to the level of detail of the rendered images, since \gls{sfm} algorithms rely on surface details for reconstruction.
 
 \subsubsection{Image Quality Comparison} \label{sec:img_quali_comp}
