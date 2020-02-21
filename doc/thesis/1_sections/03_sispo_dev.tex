@@ -386,7 +386,7 @@ The algorithm used for reconstruction by IncrementalSfM2 is non-deterministic, i
         \caption{Reference image.}
         \label{fig:recon_step_img}
     \end{subfigure}
-    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} flyby scenario of a \SI{1}{\kilo\meter} \gls{sssb}. Starting from the sparse point cloud and ending in the textured \gls{3d} model outlines the step-wise creation of the final result. A reference image is given for comparison with the textured mesh.}
+    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} fly-by scenario of a \SI{1}{\kilo\meter} \gls{sssb}. Starting from the sparse point cloud and ending in the textured \gls{3d} model outlines the step-wise creation of the final result. A reference image is given for comparison with the textured mesh.}
     \label{fig:recon_steps}
 \end{figure}
 
@@ -429,7 +429,7 @@ the performance of \gls{sispo} and its components was analysed during the develo
 
 \subsubsection{Overall Performance}
 \gls{sispo} was executed on a machine running Linux Ubuntu~18.04.03~LTS, \SI{16}{\giga\byte} of \gls{ram}, Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores and an NVIDIA\textsuperscript{\textregistered}~GeForce~GTX~1080 with \SI{8}{\giga\byte} memory.
-Two test cases were analysed with the parameters and main results given in Table~\ref{tab:profiles}. The complete statistics are presented in Appendix~\ref{sec:performance}. The performance assessment of a complete \gls{sispo} run shows that the most time consuming part is rendering since more than \SI{90}{\percent} of the overall execution time of a complete run of \gls{sispo} are dedicated to it. With only \SI{5}{\percent} to \SI{6}{\percent} used for rendering and less than \SI{1}{\percent} for compression, these steps do not account for much of the overall execution time. Moreover, the total execution time shows differences for the two test cases because of the different apparent size of the \gls{sssb}. Based on the two examples, the execution time for reconstruction is affected even stronger than rendering by decreasing flyby distance.
+Two test cases were analysed with the parameters and main results given in Table~\ref{tab:profiles}. The complete statistics are presented in Appendix~\ref{sec:performance}. The performance assessment of a complete \gls{sispo} run shows that the most time consuming part is rendering since more than \SI{90}{\percent} of the overall execution time of a complete run of \gls{sispo} are dedicated to it. With only \SI{5}{\percent} to \SI{6}{\percent} used for rendering and less than \SI{1}{\percent} for compression, these steps do not account for much of the overall execution time. Moreover, the total execution time shows differences for the two test cases because of the different apparent size of the \gls{sssb}. Based on the two examples, the execution time for reconstruction is affected even stronger than rendering by decreasing fly-by distance.
 Since most of the time of a simulation is spent rendering, improving the performance of \gls{sispo} further requires improving the performance of the rendering process either by changing the parameters or improving the shader implementation.
 
 \begin{table}[htb]
