@@ -93,16 +93,16 @@ Within \gls{sispo} the precise shape and surface details of the \gls{sssb} are n
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/procedural_terrain/smooth_model.png}
-        \caption{Smooth \gls{3d} model of a \gls{sssb}.}
+        \caption{}
         \label{fig:smooth_model}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/node_network.png}
-        \caption{Overview of the shader node network.}
+        \caption{}
         \label{fig:shader_nodes}
     \end{subfigure}
-    \caption{Smooth model and shader node network. The model shows the raw \gls{3d} model before applying texturing and displacement shaders. The shader node network overview shows the shaders used for creating the final \gls{sssb} surface and terrain. Two main trees are visible in the network that are combined in the output, one for shading and the other for displacement. The two main trees are interlinked, i.e. displacement and shading are partial influenced by the same input.}
+    \caption{(a) Raw, smooth \gls{3d} model before applying texturing and displacement shaders. (b) Shader node network overview depicting the shaders used for creating the final \gls{sssb} surface and terrain. Two main trees are visible in the network that are combined in the output, one for shading and the other for displacement. The two main trees are interlinked, i.e. displacement and shading are partial influenced by the same input.}
 \end{figure}
 
 The shader implementation creates a material that combines surface shading and displacement. The used nodes are grouped into five categories. Math nodes, texture nodes, colouring nodes, vector nodes and shader nodes. A detailed description can be found in the Blender manual, we provide only the most relevant information for our implementation~\cite{IntroductionManual}.
@@ -143,7 +143,7 @@ The resulting shader based Blender material can be applied to any \gls{3d} model
         \caption{Bilobate \gls{sssb}.}
         \label{fig:render_out_bilobe}
     \end{subfigure}
-    \caption{Four rendered images using the Blender material used in \gls{sispo}. Image~\ref{fig:render_out_orig} shows the render output with default shader parameters. Image~\ref{fig:render_out_changed} uses the same model with changed shader parameters. Image~\ref{fig:render_out_main_moon} shows a render of a two body system with the same main body as in image~\ref{fig:render_out_orig}. Image~\ref{fig:render_out_bilobe} shows a rendered bilobate body.}
+    \caption{Four rendered images using the Blender material used in \gls{sispo}. (a) Render output with default shader parameters using the \gls{3d} model presented in Figure~\ref{fig:smooth_model}. (b) Rendered image with changed shader parameters using the same model as in (a). (c) Render of a binary system with the same main body as in (a) and default shader parameters. (d) Bilobate body using default shader parameters.}
     \label{fig:render_out}
 \end{figure}
 
@@ -199,7 +199,7 @@ The pixel value of each colour channel is set to the flux calculated from the ma
 \begin{figure}[htb]
     \centering
     \includegraphics[width=\textwidth]{doc/thesis/0_figures/star_rendering/Stars_2017-08-15T115856-171000.png}
-    \caption{Star background rendering.}
+    \caption{Rendered star map containing several thousands stars.}
     \label{fig:star_rendering}
 \end{figure}
 
@@ -215,29 +215,29 @@ The starting point for composition is a set of four images with the prefixes \te
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/SssbOnly_2017-08-15T115855-684000.png}
-        \caption{\textit{SssbOnly}}
+        \caption{}
         \label{fig:comp_sssbonly}
     \end{subfigure}
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/SssbConstDist_2017-08-15T115855-684000.png}
-        \caption{\textit{SssbConstDist}}
+        \caption{}
         \label{fig:comp_sssbconstdist}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/LightRef_2017-08-15T115855-684000.png}
-        \caption{\textit{LightRef}}
+        \caption{}
         \label{fig:comp_lightref}
     \end{subfigure}
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/Stars_2017-08-15T115855-684000.png}
-        \caption{\textit{Stars}}
+        \caption{}
         \label{fig:comp_stars}
     \end{subfigure}
-    \caption{Example set of images used for composition to the final rendering output.}
+    \caption{Example set of images used for composition to the final rendering output. (a) \textit{SssbOnly} image which represents the instrument \gls{fov}. (b) \textit{SssbConstDist} image of a camera that follows the nucleus at a constant distance. (c) \textit{LightRef} scene which contains the light reference used for calibration. (d) \textit{Stars} image which represents the star background in the instrument \gls{fov}.}
     \label{fig:comp_imageset}
 \end{figure}
 
@@ -387,7 +387,7 @@ The algorithm used for reconstruction by IncrementalSfM2 is non-deterministic, i
         \caption{Reference image.}
         \label{fig:recon_step_img}
     \end{subfigure}
-    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} fly-by scenario of a \SI{1}{\kilo\meter} \gls{sssb}. Starting from the sparse point cloud and ending in the textured \gls{3d} model outlines the step-wise creation of the final result. A reference image is given for comparison with the textured mesh.}
+    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} fly-by scenario of a \SI{1}{\kilo\meter} \gls{sssb}. Starting from the sparse point cloud and ending in the textured \gls{3d} model outlines the step-wise creation of the final result. (a) Sparse point cloud create by a \gls{omvs} \gls{sfm} algorithm. (b) Point cloud densified with \gls{omvs}. (c) Mesh created from the dense point cloud shown in (b) using \gls{omvs}. (d) Refined mesh based on the mesh created in (c) using \gls{mvs}. (e) Mesh textured using \gls{omvs}. (e) Rreference image for comparison with the textured mesh.}
     \label{fig:recon_steps}
 \end{figure}
 
@@ -439,7 +439,7 @@ Since most of the time of a simulation is spent rendering, improving the perform
     \label{tab:profiles}
     \resizebox{\textwidth}{!}{%
         \begin{tabular}{l|l|l|l|l|l|l|l|l}
-            \textbf{Distance} & \textbf{\gls{sssb} size} & \textbf{Total time} & \multicolumn{2}{l}{\textbf{Rendering}} & \multicolumn{2}{l}{\textbf{Compression}} & \multicolumn{2}{l}{\textbf{Reconstruction}} \\
+            \textbf{Distance} & \textbf{\gls{sssb} size} & \textbf{Total time} & \multicolumn{2}{l}{\textbf{Rendering}} & \multicolumn{2}{|l}{\textbf{Compression}} & \multicolumn{2}{|l}{\textbf{Reconstruction}} \\
             \textbf{[\SI{}{\kilo\meter}]} & \textbf{[\SI{}{\kilo\meter}]} & \textbf{[\SI{}{\second}]} & \textbf{[\SI{}{\second}]} & \textbf{[\SI{}{\percent}]} & \textbf{[\SI{}{\second}]} & \textbf{[\SI{}{\percent}]} & \textbf{[\SI{}{\second}]}  & \textbf{[\SI{}{\percent}]} \\ \hline
             200 & 10 & 346939.8 & 325834.6 & 93.9 & 55.6 & 0.2 & 21048.2 & 6 \\
             400 & 10 & 212209.4 & 201443.2 & 94.9 & 24.7 & 0.1 & 10740.1 & 5.1
@@ -448,9 +448,9 @@ Since most of the time of a simulation is spent rendering, improving the perform
 \end{table}
 
 \subsubsection{Image processing benchmark} \label{sec:cvskimage}
-The original codebase used the \gls{skimage} and OpenCV libraries concurrently. In order to reduce the number of dependencies, the relevant functions of the two libraries were compared. The parameters for the OpenCV functions were selected to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and image resizing using local means as described in Section~\ref{sec:t_downsample}. Five images are selected for the benchmark. The image set is presented in Appendix~\ref{sec:app_cvskimage}. Two star maps were selected due to the large variance in the number of visible stars. The selected images contain 1804 (Stars1) and 51338 stars (Stars2).
+The original source code used the \gls{skimage} and OpenCV libraries concurrently. In order to reduce the number of dependencies, the relevant functions of the two libraries were compared. The parameters for the OpenCV functions were selected to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and image resizing using local means as described in Section~\ref{sec:t_downsample}. Five images are selected for the benchmark. The image set is presented in Appendix~\ref{sec:app_cvskimage}. Two star maps were selected due to the large variance in the number of visible stars. The selected images contain 1804 (Stars1) and 51338 stars (Stars2).
 
-Two computers are used for the benchmark. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu 18.04.3 LTS.
+Two computers are used for the benchmark. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu~18.04.3~LTS.
 
 To compare the performance between the two libraries the ratio of execution time is used. The ratio is defined as
 \begin{align}
@@ -468,16 +468,16 @@ Figure~\ref{fig:bm_comparison} shows execution time ratios and averages for the 
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/cv_skimage/Comparison_Gaussian}
-        \caption{Gaussian filtering.}
+        \caption{}
         \label{fig:bm_comparison_gauss}
     \end{subfigure}
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/cv_skimage/Comparison_Resize}
-        \caption{Resizing.}
+        \caption{}
         \label{fig:bm_comparison_res}
     \end{subfigure}
-    \caption{Comparison of execution time ratios of Gaussian filtering and resizing five images using OpenCV and \gls{skimage} on two computers. Values $> 1$ correspond to OpenCV being faster. The mean values are given in the legend.}
+    \caption{Comparison of execution time ratios of (a) Gaussian filtering and (b) resizing five images using OpenCV and \gls{skimage} on two computers. Values $> 1$ correspond to OpenCV being faster. The mean values are given in the legend.}
     \label{fig:bm_comparison}
 \end{figure}
 
