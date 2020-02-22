@@ -170,7 +170,7 @@ The pinhole camera model can be described using the $3\times4$ camera matrix $\t
         \textbf{R} & t
     \end{bmatrix}, \label{eq:camera_m}
 \end{align}
-where $f$ is the distance between the focal plane and the image plane, $k_u$ and $k_v$ to are scaling factors, $c_u$ and $c_v$ are the coordinates of the principle point on the image plane, $R$ is a $3\times3$ rotation matrix and $t$ being a $3\times1$ translation vector. The first matrix of $\textbf{K}$ reflects the camera intrinsic parameters while the second matrix describes the extrinsic parameters.
+where $f$ is the distance between the focal plane and the image plane, $k_u$ and $k_v$ to are scaling factors, $c_u$ and $c_v$ are the coordinates of the principle point on the image plane, $\textbf{R}$ is a $3\times3$ rotation matrix and $t$ being a $3\times1$ translation vector. The first matrix of $\textbf{K}$ reflects the camera intrinsic parameters while the second matrix describes the extrinsic parameters.
 More sophisticated pinhole camera models also include distortions. These can include one or more factors for radial and tangential distortions. A special case it the Brown T2 model which includes three radial and two tangential distortion factors.
 
 The conversion between object coordinates and pixel coordinates is obtained from geometric considerations of the pinhole camera model shown in Figure~\ref{fig:pinhole_cam} and is defined as

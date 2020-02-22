@@ -11,11 +11,11 @@ The Python bindings of the Orekit library run a \gls{vm} to execute its Java cod
 
 \begin{table}[htb]
     \centering
-    \caption{Parameters that define the \gls{sssb} orbit in the Orekit library. The parameters represent the modified Keplerian elements presented in Section~\ref{sec:orbit_mechanics}.}
+    \caption{Parameters that define the \gls{sssb} orbit in the Orekit library. The parameters represent the modified Keplerian elements presented in Section~\ref{sec:orbit_mechanics}. Moreover, these are the required parameters by \gls{sispo}.}
     \label{tab:keplerorbit_params}
     \begin{tabular}{p{0.5\textwidth}|p{0.2\textwidth}}
         \textbf{Name [Unit]} & \textbf{Type} \\ \hline
-        Semi\-major axis a [\SI{}{\astronomicalunit}] & float\\
+        \gls{a} [\SI{}{\astronomicalunit}] & float\\
         Eccentricity e [-] & float\\
         Inclination i [\SI{}{\radian}] & float \\
         Argument of periapsis  $\omega$ [\SI{}{\radian}] & float \\
@@ -70,7 +70,7 @@ Rendering requires \gls{3d} models of the \gls{sssb} and the light reference as 
 
 \begin{table}[htb]
     \centering
-    \caption{Input parameters to describe an instrument.}
+    \caption{Input parameters that define an instrument in \gls{sispo}.}
     \label{tab:inst_input}
     \resizebox{\textwidth}{!}{%
         \begin{tabular}{p{0.2\textwidth}|p{0.2\textwidth}|p{0.6\textwidth}}
@@ -102,7 +102,7 @@ Within \gls{sispo} the precise shape and surface details of the \gls{sssb} are n
         \caption{}
         \label{fig:shader_nodes}
     \end{subfigure}
-    \caption{(a) Raw, smooth \gls{3d} model before applying texturing and displacement shaders. (b) Shader node network overview depicting the shaders used for creating the final \gls{sssb} surface and terrain. Two main trees are visible in the network that are combined in the output, one for shading and the other for displacement. The two main trees are interlinked, i.e. displacement and shading are partial influenced by the same input.}
+    \caption{(a) Raw, smooth \gls{3d} model before applying texturing and displacement shaders. (b) Shader node network overview depicting the shaders used for creating the final \gls{sssb} surface and terrain. This overview is only provided to give an idea of the complexity of the network, a larger version of this image with higher resolution can be found in Appendix~\ref{sec:shader_node}.}
 \end{figure}
 
 The shader implementation creates a material that combines surface shading and displacement. The used nodes are grouped into five categories. Math nodes, texture nodes, colouring nodes, vector nodes and shader nodes. A detailed description can be found in the Blender manual, we provide only the most relevant information for our implementation~\cite{IntroductionNodes}.
@@ -188,9 +188,9 @@ In the next step, we retrieve the list of stars that are visible in the \gls{fov
 The conversion of the vectors into their respective right ascension and declination is a transform between Cartesian coordinates to spherical coordinates. Their relation is defined as
 \begin{align}
     \delta = \arcsin{(z)}, \label{eq:declination} \\
-    \alpha = \arccos{\left(\frac{x}{\cos{\delta}}\right)} + \pi, \label{eq:right_ascension}
+    \alpha_r = \arccos{\left(\frac{x}{\cos{\delta}}\right)} + \pi, \label{eq:right_ascension}
 \end{align}
-where $\delta$ is the declination, $\alpha$ the right ascension, $x$ is the x-coordinate and $y$ is the y-coordinate. Using this information the star catalogue returns a list of visible stars with their right ascension and declination as well as their magnitude.
+where $\delta$ is the declination, $\alpha_r$ the right ascension, $x$ is the x-coordinate and $y$ is the y-coordinate. Using this information the star catalogue returns a list of visible stars with their right ascension and declination as well as their magnitude.
 
 The star background is created by generating an image with four times the size of final image. The coordinates are converted from the right ascension and declination of each star into pixel coordinates of the image frame using Equation \ref{eq:pix_conversion}. The pixel coordinates are multiplied with two to fit the oversized image.
 
@@ -302,7 +302,7 @@ The compression module provides compression and decompression algorithms. These 
     \end{tabular}
 \end{table}
 
-Independent of the algorithm, files are handled equally. The images are loaded into \textit{NumPy} arrays inside Python to have a common raw format. Before encoding, the information is reduced to \SI{8}{\bit} since the reconstruction module only reads images with \SI{8}{\bit} colour depth correctly. Images are encoded with the respective algorithm and converted into a binary stream. A copy of this data is saved as a file in the raw folder. The raw binary data is then converted back to a \textit{NumPy} array and decoded to retrieve as much information as possible. Finally, the compressed and decompressed data is stored as a \gls{png} file to not lose any further information.
+Independent of the algorithm, files are handled equally. The images are loaded into NumPy arrays inside Python to have a common raw format. Before encoding, the information is reduced to \SI{8}{\bit} since the reconstruction module only reads images with \SI{8}{\bit} colour depth correctly. Images are encoded with the respective algorithm and converted into a binary stream. A copy of this data is saved as a file in the raw folder. The raw binary data is then converted back to a NumPy array and decoded to retrieve as much information as possible. Finally, the compressed and decompressed data is stored as a \gls{png} file to not lose any further information.
 
 The formats \gls{png}, \gls{jpeg}, \gls{jp2} and tiff are implemented using \textit{OpenCV}. There are various settings for each format\footnote{A detailed description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
 
