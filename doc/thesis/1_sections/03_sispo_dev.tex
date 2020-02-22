@@ -14,13 +14,13 @@ The Python bindings of the Orekit library run a \gls{vm} to execute its Java cod
     \caption{Parameters that define the \gls{sssb} orbit in the Orekit library. The parameters represent the modified Keplerian elements presented in Section~\ref{sec:orbit_mechanics}. Moreover, these are the required parameters by \gls{sispo}.}
     \label{tab:keplerorbit_params}
     \begin{tabular}{p{0.5\textwidth}|p{0.2\textwidth}}
-        \textbf{Name [Unit]} & \textbf{Type} \\ \hline
-        \gls{a} [\SI{}{\astronomicalunit}] & float\\
-        \gls{e} [-] & float\\
-        \gls{i} [\SI{}{\radian}] & float \\
-        \gls{omega} [\SI{}{\radian}] & float \\
-        \gls{Omega} [\SI{}{\radian}] & float \\
-        \gls{M} $M$ [\SI{}{\radian}] & float \\
+        \textbf{Parameter [Unit]} & \textbf{Type} \\ \hline
+        a [\SI{}{\astronomicalunit}] & float\\
+        e [-] & float\\
+        i [\SI{}{\radian}] & float \\
+        omega [\SI{}{\radian}] & float \\
+        Omega [\SI{}{\radian}] & float \\
+        M $M$ [\SI{}{\radian}] & float \\
         Date of the orbital parameters [-] & dict\footnotemark
     \end{tabular}
 \end{table}
@@ -402,7 +402,7 @@ The high-level behaviour of \gls{sispo} can be controlled using a set of flags p
     \caption{Input flags to control high-level behaviour of \gls{sispo}.}
     \label{tab:cli_args}
     \resizebox{\textwidth}{!}{%
-        \begin{tabular}{p{0.23\textwidth}|p{0.32\textwidth}|p{0.16\textwidth}|p{0.28\textwidth}}
+        \begin{tabular}{p{0.22\textwidth}|p{0.32\textwidth}|p{0.16\textwidth}|p{0.29\textwidth}}
             \textbf{Name} & \textbf{Variable Name} & \textbf{Default Value} & \textbf{Description} \\ \hline
             --help & & --- & Prints list of arguments with hints \\
             -i & i & definition.json & Path to a definition file that defines the settings \\
