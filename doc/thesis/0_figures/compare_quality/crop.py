@@ -63,8 +63,8 @@ def create_diff_image(img_name, ref_img_name):
     cbar.ax.set_ylabel("L2-Norm of Difference", rotation=270)
     plt.title(f"Difference Image - {' '.join(img_name[:-4].split('/')[-1].upper().split('_')[0:2])}")
     plt.axis("off")
-    file_name = file_name[:-4] + "_heatmap.png"
-    plt.savefig(file_name, bbox_inches="tight")
+    file_name = file_name[:-4] + "_heatmap.pdf"
+    plt.savefig(file_name, bbox_inches="tight", format="pdf")
     plt.close()
 
     plt.figure(figsize=FIGURE_SIZE)
@@ -74,8 +74,8 @@ def create_diff_image(img_name, ref_img_name):
     cbar.ax.set_ylabel("L2-Norm of Difference", rotation=270)
     plt.title(f"Difference Image - {' '.join(img_name[:-4].split('/')[-1].upper().split('_')[0:2])}")
     plt.axis("off")
-    file_name = file_name[:-len("_heatmap.png")] + "_heatmap_rel.png"
-    plt.savefig(file_name, bbox_inches="tight")
+    file_name = file_name[:-len("_heatmap.png")] + "_heatmap_rel.pdf"
+    plt.savefig(file_name, bbox_inches="tight", format="pdf")
     plt.close()
 
     plt.figure(figsize=FIGURE_SIZE)
@@ -86,8 +86,8 @@ def create_diff_image(img_name, ref_img_name):
     plt.xlabel("L2-Norm of Difference")
     plt.ylabel("Number of Pixels")
     plt.legend([f"Changed Pixels: {len(histo_vec)}\nPercentage: {len(histo_vec)/len(temp.flatten())*100:.1f} %"])
-    file_name = file_name[:-len("_heatmap_rel.png")] + "_histogram.png"
-    plt.savefig(file_name, bbox_inches="tight")
+    file_name = file_name[:-len("_heatmap_rel.png")] + "_histogram.pdf"
+    plt.savefig(file_name, bbox_inches="tight", format="pdf")
     plt.close()
 
     return file_name
