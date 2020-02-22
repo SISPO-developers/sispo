@@ -41,7 +41,7 @@ def main(file_name):
 	ax.legend(loc='lower center', bbox_to_anchor=(0.5, -0.4), ncol=3)
 	
 	fig.tight_layout()
-	plt.savefig(file_name[:-4] + ".png")
+	plt.savefig(file_name[:-4] + ".pdf", format="pdf")
 	#plt.show()
 	
 def heatmap():
