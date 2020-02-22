@@ -63,7 +63,7 @@ Propagation is defined by the simulation duration, number of frames, the timesam
 \end{table}
 
 
-\subsubsection{Rendering}
+\subsubsection{SSSB Rendering}
 The \gls{3d} creation suite Blender was selected for rendering within \gls{sispo}~\cite{blender}. Blender provides the path-tracing rendering engine Cycles which renders photo-realistic, physics-based images~\cite{Cycles}.
 
 Rendering requires \gls{3d} models of the \gls{sssb} and the light reference as well as the Sun as a light source. The \gls{sssb} and light reference objects are kept at the origin while the Sun object and the cameras change position. In total there are three scenes with one camera each. These scenes are called \textit{SssbOnly} with the \textit{ScCam} camera, the \textit{SssbConstDist} scene with the \textit{SssbConstDistCam} and the \textit{LightRef} scene with the \textit{LightRefCam} camera. The three scenes with their respective cameras are necessary for the composition step as described in Section~\ref{sec:composition}. Each camera is configured with the same physical instrument characteristics provided as input as presented in Table~\ref{tab:inst_input}. All cameras are perspective \gls{rgb} cameras with a \gls{fov} clipped to the interval $[\SI{1e-5}{},\SI{1e32}{}]$. The star background is not rendered with Blender and therefore described separately in Section~\ref{sec:stars}.
@@ -203,7 +203,7 @@ The pixel value of each colour channel is set to the flux calculated from the ma
     \label{fig:star_rendering}
 \end{figure}
 
-\subsubsection{Composition} \label{sec:composition}
+\subsubsection{Image Composition} \label{sec:composition}
 Rendered images of Blender vary in absolute light intensity thus requiring calibration. Since the star maps are not rendered in Blender, the raw images need to be combined. Optionally, the combined images can be transformed to a specified bit depth of a \gls{ccd} (cf. instrument input parameters in Table~\ref{tab:inst_input}). Hence, the composition process has two steps and an optional third step. 
 
 First, the \gls{sssb} image and the star background are calibrated. In the second step, these images are combined to create a \gls{sssb} image with star background where stars are occluded by the \gls{sssb} nucleus. For calibration, the Blender output is normalised by comparing the theoretical and rendered intensity of a calibration disk in the same conditions.
@@ -274,7 +274,7 @@ where $\lambda$ is the observed wavelength, $f$ is the focal length, $D$ is the 
 \begin{figure}[htb]
     \centering
     \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/Comp_2017-08-15T115854-575000.png}
-    \caption{Composed image of the four images shown in Fig. \ref{fig:comp_imageset}}
+    \caption{Composed image of the four images shown in Fig. \ref{fig:comp_imageset}. No stars are visible in the background because the nucleus is much brighter than the brightest background star.}
     \label{fig:comp_composed}
 \end{figure}
 
@@ -304,7 +304,7 @@ The compression module provides compression and decompression algorithms. These 
 
 Independent of the algorithm, files are handled equally. The images are loaded into \textit{NumPy} arrays inside Python to have a common raw format. Before encoding, the information is reduced to \SI{8}{\bit} since the reconstruction module only reads images with \SI{8}{\bit} colour depth correctly. Images are encoded with the respective algorithm and converted into a binary stream. A copy of this data is saved as a file in the raw folder. The raw binary data is then converted back to a \textit{NumPy} array and decoded to retrieve as much information as possible. Finally, the compressed and decompressed data is stored as a \gls{png} file to not lose any further information.
 
-The formats \gls{png}, \gls{jpeg}, \gls{jp2} and tiff are implemented using \textit{OpenCV}. There are various settings for each format\footnote{A description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
+The formats \gls{png}, \gls{jpeg}, \gls{jp2} and tiff are implemented using \textit{OpenCV}. There are various settings for each format\footnote{A detailed description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
 
 The most important input parameter that is relevant to all algorithms is the "level" argument in "settings" which describes either the compression level (from 1 to 9 for bz2, gzip, lzma, zlib and \gls{png}, higher meaning more compression) or the quality level (from 1 to 10 for \gls{jpeg} and 0.01 to 10 for \gls{jp2}, higher meaning better quality and less compression). Other input parameters to the compression package are presented in Table~\ref{tab:compression_settings}.
 
@@ -352,42 +352,42 @@ The algorithm used for reconstruction by IncrementalSfM2 is non-deterministic, i
     \begin{subfigure}[b]{0.46\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_points2.png}
-        \caption{Point cloud.}
+        \caption{}
         \label{fig:recon_step_point}
     \end{subfigure}
     \begin{subfigure}[b]{0.46\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_dense1.png}
-        \caption{Densified point cloud.}
+        \caption{}
         \label{fig:recon_step_dense}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.46\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_mesh1.png}
-        \caption{Mesh.}
+        \caption{}
         \label{fig:recon_step_mesh}
     \end{subfigure}
     \begin{subfigure}[b]{0.46\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_refine2.png}
-        \caption{Refined mesh.}
+        \caption{}
         \label{fig:recon_step_refine}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.46\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_texture1.png}
-        \caption{Textured mesh.}
+        \caption{}
         \label{fig:recon_step_texture}
     \end{subfigure}
     \begin{subfigure}[b]{0.46\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_img1.png}
-        \caption{Reference image.}
+        \caption{}
         \label{fig:recon_step_img}
     \end{subfigure}
-    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} fly-by scenario of a \SI{1}{\kilo\meter} \gls{sssb}. Starting from the sparse point cloud and ending in the textured \gls{3d} model outlines the step-wise creation of the final result. (a) Sparse point cloud create by a \gls{omvs} \gls{sfm} algorithm. (b) Point cloud densified with \gls{omvs}. (c) Mesh created from the dense point cloud shown in (b) using \gls{omvs}. (d) Refined mesh based on the mesh created in (c) using \gls{mvs}. (e) Mesh textured using \gls{omvs}. (e) Rreference image for comparison with the textured mesh.}
+    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} fly-by scenario of a \SI{1}{\kilo\meter} \gls{sssb}. Starting from the sparse point cloud and ending in the textured \gls{3d} model. (a) Sparse point cloud create by a \gls{omvs} \gls{sfm} algorithm. (b) Point cloud densified with \gls{omvs}. (c) Mesh created from the dense point cloud shown in (b) using \gls{omvs}. (d) Refined mesh based on the mesh created in (c) using \gls{mvs}. (e) Mesh textured using \gls{omvs}. (e) Reference image for comparison with the textured mesh.}
     \label{fig:recon_steps}
 \end{figure}
 
@@ -447,7 +447,7 @@ Since most of the time of a simulation is spent rendering, improving the perform
     }
 \end{table}
 
-\subsubsection{Image processing benchmark} \label{sec:cvskimage}
+\subsubsection{Image Processing Benchmark} \label{sec:cvskimage}
 The original source code used the \gls{skimage} and OpenCV libraries concurrently. In order to reduce the number of dependencies, the relevant functions of the two libraries were compared. The parameters for the OpenCV functions were selected to create the same behaviour as the respective \gls{skimage} function. The benchmark compares the performance of the Gaussian filter and image resizing using local means as described in Section~\ref{sec:t_downsample}. Five images are selected for the benchmark. The image set is presented in Appendix~\ref{sec:app_cvskimage}. Two star maps were selected due to the large variance in the number of visible stars. The selected images contain 1804 (Stars1) and 51338 stars (Stars2).
 
 Two computers are used for the benchmark. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu~18.04.3~LTS.
