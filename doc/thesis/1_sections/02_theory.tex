@@ -20,26 +20,21 @@
 % Concepts to describe???
 
 \subsection{Small Solar System Body}
-The \gls{iau} defines a \gls{sssb} as any object in the Solar System, that is not a planet, dwarf planet or satellite~\cite{iau_sssb}.
+The \gls{iau} defines an \gls{sssb} as any object in the Solar System, that is not a planet, dwarf planet or satellite~\cite{iau_sssb}. Within this work, the term \gls{sssb} mostly refers to asteroids and comets.
 
-% \begin{figure}[htb]
-%     \centering
-%     \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/Euler_diagram_of_solar_system_bodies.png}
-%     \caption{The group of \glspl{sssb} (grey box) include a part of minor planets, trans-Neptunian objects, comets and centaurs~\cite{wiki:sssb}.}
-%     \label{fig:sssb_diagram}
-% \end{figure}
+In a classical definition, asteroids and comets were two distinct \glspl{sssb} classes based on observational, physical and dynamical properties. However, the discovery of active asteroids and dormant comets began to blur these definitions. Since many observed objects cannot be strictly classified into the classical categories anymore, it is becoming more common to describe these objects as part of a asteroid-comet continuum with asteroids and comets at the ends of the continuum~\cite{Hsieh2017Asteroid-cometSystem}.
 
-Within this work, the term \gls{sssb} mostly refers to asteroids and comets. Therefore, general properties of asteroids and comets are explained in more detail.
+Despite the shift towards a continuum definition, we refer to non-active objects as asteroid and active objects as comets within this work in cases where it is necessary to distinguish between these types of objects. Therefore, a description for the classical definition of asteroids and comets is provided.
 
 \subsubsection{Asteroids}
-Asteroids are rocky bodies that mostly reside in an orbit between Mars and Jupiter, i.e. the asteroid main belt. The terms asteroid and minor planet are often used interchangeably. Since most asteroids are only observed remotely, only their ephemeris and absolute magnitude is observed which gives a rough estimate of its size. However, some asteroids also have physical parameters like rotation period, geometric albedo, colours, spectral type, mass and bulk density.
+Asteroids are rocky bodies that mostly reside in an orbit between Mars and Jupiter, i.e. the asteroid main belt. The terms asteroid and minor planet are often used interchangeably. About \SI{930000}{} asteroids are known of which only about \SI{540000}{} are numbered. Since most asteroids are only observed remotely, only their ephemeris and absolute magnitude ($\approx \SI{925000}{}$) is observed. Approximately, only \SI{136000}{} asteroids have a known diameter~\cite{JPLEngine}. However, a few asteroids also have physical parameters like albedo ($\approx \SI{135000}{}$) , rotation period ($\approx \SI{19000}{}$) , spectral type ($\approx \SI{2000}{}$) and the standard gravitational parameter ($\approx \SI{10}{}$)~\cite{JPLEngine}.
 
 The asteroids Bennu and Ryugu are described as rubble piles due to the low density~\cite{Chesley2014OrbitBennu, Watanabe2019Hayabusa2Pile}. The rubble pile concept refers to objects which aggregated boulders by gravity giving them a low bulk density because of many void spaces in there internal structure~\cite{Richardson2002GravitationalEvolution}.
 
 \subsubsection{Comets}
-Comets are small icy bodies and reside mostly in the outer Solar System. On long timescales, comets are perturbed by the gravity of other objects and leave their outer Solar System orbits to get closer to the Sun. In this process, the ices begin to evaporate. This creates the well known coma around the nucleus of a comet. In most cases the coma is several orders of magnitudes larger than the nucleus, the nucleus is on the order of a few kilometres while the coma can be on the order of hundreds of thousands of kilometres. Additionally, two tails are formed, a gas and a dust tail. The gas tail is formed from coma particles that move away from the nucleus and are then carried away by the solar wind. On the other hand, the dust tail is formed from dust particles in the coma which are carried away from the nucleus by the solar radiation pressure.
+Comets are small icy bodies that mostly reside farther away from the Sun than asteroids. Inside the heliosphere, the source of comets is the Kuiper belt while comets from outside the heliosphere are thought to originate in the Oort cloud. On long timescales, comets are perturbed by the gravity of other objects which alters their orbits and moves them closer to the Sun. While being close to the Sun, volatiles begin to evaporate. This creates the well known coma around the nucleus of a comet. In most cases the coma is several orders of magnitudes larger than the nucleus, the nucleus is on the order of a few kilometres while the coma can be on the order of hundreds of thousands of kilometres. Additionally, two tails are formed, a gas and a dust tail. The gas tail is formed from coma particles that move away from the nucleus and are then carried away by the magnetic field carried by the solar wind. On the other hand, the dust tail is formed from small dust particles in the coma which are carried away from the nucleus by the solar radiation pressure. Larger dust particles remain along a comets trajectory forming part of the meteoroid environment~\cite{Soja2019IMEM2:System, a2017comets, Comets}.
 
-The physical parameters of comets are not well known, since they are too small for ground observations and it is difficult to image the nucleus when they come closer to the Sun since the nucleus is surrounded by the coma. While the ephemeris and magnitude are known for most comets, for only a few comets the rotation period and geometric albedo is known.
+The physical parameters of comets are not well known, since they are small and it is difficult to image the nucleus when they come closer to the Sun since the nucleus is surrounded by the coma. Approximately \SI{3500}{} comets are known of which only about \SI{400}{} are numbered~\cite{JPLEngine}. While the ephemeris ($\approx \SI{1700}{}$) and magnitude ($\approx \SI{1300}{}$) are known for many comets, for only a few comets physical properties like the diameter ($\approx \SI{100}{}$) or the rotation period ($\approx \SI{20}{}$) are known~\cite{JPLEngine}.
 
 It is not clear whether comets are generally similar to rubble piles or rather consolidated, monolithic bodies. It is assumed that most bodies in the range of \SI{200}{\meter} to \SI{10}{\kilo\meter} are rubble piles~\cite{Walsh2018RubbleAsteroids}. However, density measurements and surface features of \gls{67p} are not conclusive so far~\cite{Weissman2020OriginNuclei}. 
 
@@ -254,11 +249,13 @@ Digital image processing is the use of a digital computer to process digital ima
 
 \subsubsection{Compression} \label{sec:t_compress}
 Data compression is tasked with encoding information using less bits than the original representation. Other terms for data compression are source coding or bit-rate reduction~\cite{Mahdi2012ImplementingTechnique}. Two principle methods of compression exist, lossless and lossy compression. While it is possible to recover all information after lossless compression, lossy compression accepts a certain irreversible loss of information to achieve higher compression ratios.
-Lossless compression uses statistical redundancy to decrease the number of bits necessary to encode the same information. This process is completely reversible. There are many lossless compression algorithms such as Huffman coding, arithmetic coding or Ziv-Lempel algorithms~\cite{Bocharova2009CompressionMultimedia}.
+Lossless compression uses statistical redundancy to decrease the number of bits necessary to encode the same information. This process is completely reversible. There are many lossless compression algorithms such as Huffman coding, arithmetic coding or Lempel-Ziv algorithms~\cite{Bocharova2009CompressionMultimedia}.
 
 Lossy compression is not a reversible process, i.e. some of the information is lost and cannot be recovered. The idea of lossy compression is that different image properties are perceived with varying degrees of precision and are therefore not equally important. Lossy compression is a trade-off between compression ratio and data distortion. Audio data can be encoded with a lossy scheme by decreasing the accuracy of acoustic components that are beyond the capabilities of most humans. Another example is, that the human eye is more sensitive to changes in brightness (luminance) than it is to changes in colour (chrominance). Therefore, compression can lose colour information without having a strong influence of the perceived image quality. As a result, images for compression often use a luminance-chrominance representation. The components in such a representation are almost uncorrelated and it is easier to reduce colour information while keeping luminance information. Commonly known formats for lossy compression are MP3 or JPEG. Most lossy compression algorithms are based on transform coding, especially \gls{dct}~\cite{Bocharova2009CompressionMultimedia}.
 
-Image compression is a sub-discipline of data compression. Two common types of image compression techniques are \gls{dct}, used for example in the \gls{jpeg} format, and \gls{dwt}, used for example in the \gls{jp2} format.
+Image compression is a sub-discipline of data compression. A common format for lossless compression is \gls{png} which relies on a Lempel-Ziv algorithm and Huffman-coding. Two types of image compression techniques commonly used for lossy compression are the \gls{dct} and \gls{dwt}. \Gls{dct} is used for example in the \gls{jpeg} format and \gls{dwt} is used for example in the \gls{jp2} format.
+
+The Lempel-Ziv algorithm in \gls{png} replaces repeating sections of data with a single copy and references to that copy. Huffman coding is a form of entropy coding which estimates the number of occurrences of symbols and encodes symbols with higher probability using the least amount of bits.
 
 \Gls{dct} is a type of Fourier transform, hence it expresses finite data as a sum of cosines. In contrast to the Fourier transform itself, it employs however only real components. \Gls{dct} compresses data in form of discrete data blocks. Images can be compressed with differently sized image parts such as $8\times8$ pixels, commonly used in JPEG~\cite{Bocharova2009CompressionMultimedia}.
 The frequency response of the \gls{dct} improves with longer harmonic functions. Hence, \gls{dct} does not have favourable compression characteristics if an image has many small details or contours~\cite{Bocharova2009CompressionMultimedia}.
@@ -282,15 +279,15 @@ A comparison of an image compressed with \gls{jpeg} and with \gls{jp2} with roug
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/jp2_jpeg/proc_5.jpg}
-        \caption{\Gls{jpeg} compression with ratio 61.2:1.}
+        \caption{}
         \label{fig:jpg_jp2_jpeg}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/jp2_jpeg/proc_11.png}
-        \caption{\Gls{jp2} compression with ratio 64.3:1.}
+        \caption{}
         \label{fig:jpg_jp2_jp2}
     \end{subfigure}
-    \caption{Comparison of compression images compressed with different algorithms. Despite having a higher compression ratio, the \gls{jp2} image produces a better result for a \gls{sssb} image. (a) Raw image without compression. (b) Image compressed with \gls{dct} using the \gls{jpeg} format. (c) Image compressed with \gls{dwt} using the \gls{jp2} format.}
+    \caption{Comparison of compression images compressed with different algorithms. Despite having a higher compression ratio, the \gls{jp2} image produces a better result for a \gls{sssb} image. (a) Raw image without compression. (b) Image compressed with \gls{dct} using the \gls{jpeg} format with a compression ratio of 61.2:1. (c) Image compressed with \gls{dwt} using the \gls{jp2} format with a compression ratio of 64.3:1.}
     \label{fig:jpg_jp2_comparison}
 \end{figure}
 
