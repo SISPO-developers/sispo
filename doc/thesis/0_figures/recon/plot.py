@@ -4,6 +4,9 @@ import sys
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.rcParams.update({"font.size": 18})
+FIGURE_SIZE = (9, 7)
+
 def main(file_name):
 	labels = []
 	label_size_p = []
@@ -24,7 +27,7 @@ def main(file_name):
 	x = np.arange(len(labels))  # the label locations
 	width = 0.25  # the width of the bars
 	
-	fig, ax = plt.subplots()
+	fig, ax = plt.subplots(figsize=FIGURE_SIZE)
 	
 	rects1 = ax.bar(x - width, points, width, label='Points')
 	rects2 = ax.bar(x, vertices, width, label='Vertices')
@@ -32,7 +35,7 @@ def main(file_name):
 	
 	ax.set_ylabel('Value normalised to PNG [-]')
 	ax.set_xlabel('Size of data set compared to PNG [%]')
-	ax.set_title(file_name[:-4].replace("_", " "), fontdict={'fontsize': 11})
+	ax.set_title(file_name[:-4].replace("_", " "))
 	ax.set_xticks(x)
 	ax.set_xticklabels(label_size_p)
 	ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
@@ -66,8 +69,8 @@ if __name__ == "__main__":
 		main(sys.argv[1])
 	else:
 		#heatmap()
-		for elem in ["120i_50km_1k.csv", "120i_50km_10k.csv",
-					 "120i_100km_1k.csv", "120i_100km_10k.csv",
-					 "120i_200km_1k.csv", "120i_200km_10k.csv",
-					 "120i_400km_1k.csv", "120i_400km_10k.csv"]:
+		for elem in ["50km_1k.csv", "50km_10k.csv",
+					 "100km_1k.csv", "100km_10k.csv",
+					 "200km_1k.csv", "200km_10k.csv",
+					 "400km_1k.csv", "400km_10k.csv"]:
 			main(elem)
