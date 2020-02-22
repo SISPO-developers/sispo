@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 plt.rcParams.update({"font.size": 18})
-FIGURE_SIZE = (9, 7)
+FIGURE_SIZE = (8, 7)
 
 def main(file_name):
 	labels = []
@@ -38,7 +38,7 @@ def main(file_name):
 	ax.set_title(file_name[:-4].replace("_", " "))
 	ax.set_xticks(x)
 	ax.set_xticklabels(label_size_p)
-	ax.legend(loc='center left', bbox_to_anchor=(1, 0.5))
+	ax.legend(loc='lower center', bbox_to_anchor=(0.5, -0.4), ncol=3)
 	
 	fig.tight_layout()
 	plt.savefig(file_name[:-4] + ".png")
