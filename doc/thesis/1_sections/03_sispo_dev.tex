@@ -18,7 +18,7 @@ The Python bindings of the Orekit library run a \gls{vm} to execute its Java cod
         Semi\-major axis a [\SI{}{\astronomicalunit}] & float\\
         Eccentricity e [-] & float\\
         Inclination i [\SI{}{\radian}] & float \\
-        Argument of perigee  $\omega$ [\SI{}{\radian}] & float \\
+        Argument of periapsis  $\omega$ [\SI{}{\radian}] & float \\
         Right ascension of ascending node $\Omega$ [\SI{}{\radian}] & float \\
         Mean anomaly $M$ [\SI{}{\radian}] & float \\
         Date of the orbital parameters [-] & dict\footnotemark
@@ -105,7 +105,7 @@ Within \gls{sispo} the precise shape and surface details of the \gls{sssb} are n
     \caption{(a) Raw, smooth \gls{3d} model before applying texturing and displacement shaders. (b) Shader node network overview depicting the shaders used for creating the final \gls{sssb} surface and terrain. Two main trees are visible in the network that are combined in the output, one for shading and the other for displacement. The two main trees are interlinked, i.e. displacement and shading are partial influenced by the same input.}
 \end{figure}
 
-The shader implementation creates a material that combines surface shading and displacement. The used nodes are grouped into five categories. Math nodes, texture nodes, colouring nodes, vector nodes and shader nodes. A detailed description can be found in the Blender manual, we provide only the most relevant information for our implementation~\cite{IntroductionManual}.
+The shader implementation creates a material that combines surface shading and displacement. The used nodes are grouped into five categories. Math nodes, texture nodes, colouring nodes, vector nodes and shader nodes. A detailed description can be found in the Blender manual, we provide only the most relevant information for our implementation~\cite{IntroductionNodes}.
 
 Math nodes include mathematical operators such as add, subtract, multiply, greater than or maximum of a value. Vector nodes allow transformations in \gls{3d} space such as translation, scaling or displacement. We use the Displacement node to move the surface along the surface normals. Colouring nodes are used to change colours. Our model uses the RGB Curves node which allows manipulation of colours separated by channel using a curve that maps the input to output values. Also Mix nodes are used to combine colours. Texture nodes provide procedural creation of texture by calculating colours based on mathematical functions and model coordinates. The Noise Texture node is used to create textured based on Perlin noise. The Voronoi Texture node creates textures using Voronoi patterns, or Worely noise. Three shader nodes are used in our model, the Principled \gls{bsdf}, Diffuse \gls{bsdf} and the Mix Shader node. The Principled \gls{bsdf} node combines many shading features in a single node. The \gls{bsdf} at the output includes a mix of sheen tint, surface roughness and index of refraction among others. The Diffuse BSDF node provides diffuse reflection using a Lambertian and Oren-Nayar model. The Mix Shader node combines its input shaders with a given probability for using either of the input shaders as its output.
 %math nodes: add, subtract, multiply, greater than, maximum 
@@ -243,7 +243,7 @@ The starting point for composition is a set of four images with the prefixes \te
 
 Photometric calibration is based on the V-band of the \gls{ubv} as described in Section~\ref{sec:photo_cal}. While the \gls{ubv} was created before \glspl{ccd} were commonly used in imaging and therefore does not account for the higher sensitivity in the red and infrared spectrum of \glspl{ccd}, it was selected because it is easy to implement.
 
-The calibration reference is the solar photon flux in the V-band. The Sun has a magnitude $m_{\odot} = -26.74$ at a distance of \SI{1}{\astronomicalunit}. Using Equation \ref{eq:comp_flux_0mag} and the constants for the V-band from Table~\ref{tab:ubv_constants}, the solar photon flux density at \SI{1}{\astronomicalunit} becomes \SI{4.36715206e+20}{\per\second\per\square\meter}.
+The calibration reference is the solar photon flux in the V-band. The Sun has a magnitude $m_{\astrosun} = -26.74$ at a distance of \SI{1}{\astronomicalunit}. Using Equation \ref{eq:comp_flux_0mag} and the constants for the V-band from Table~\ref{tab:ubv_constants}, the solar photon flux density at \SI{1}{\astronomicalunit} becomes \SI{4.36715206e+20}{\per\second\per\square\meter}.
  
 Since the spacecraft is normally not at exactly \SI{1}{\astronomicalunit}, this flux density is scaled using an inverse square law defined as
 \begin{align}
@@ -387,7 +387,7 @@ The algorithm used for reconstruction by IncrementalSfM2 is non-deterministic, i
         \caption{}
         \label{fig:recon_step_img}
     \end{subfigure}
-    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} fly-by scenario of a \SI{1}{\kilo\meter} \gls{sssb}. Starting from the sparse point cloud and ending in the textured \gls{3d} model. (a) Sparse point cloud create by a \gls{omvs} \gls{sfm} algorithm. (b) Point cloud densified with \gls{omvs}. (c) Mesh created from the dense point cloud shown in (b) using \gls{omvs}. (d) Refined mesh based on the mesh created in (c) using \gls{mvs}. (e) Mesh textured using \gls{omvs}. (e) Reference image for comparison with the textured mesh.}
+    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} fly-by scenario of a \SI{1}{\kilo\meter} \gls{sssb}. Starting from the sparse point cloud and ending in the textured \gls{3d} model. (a) Sparse point cloud create by a \gls{omvs} \gls{sfm} algorithm. (b) Point cloud densified with \gls{omvs}. (c) Mesh created from the dense point cloud shown in (b) using \gls{omvs}. (d) Refined mesh based on the mesh created in (c) using \gls{mvs}. (e) Mesh textured using \gls{omvs}. (f) Reference image for comparison with the textured mesh.}
     \label{fig:recon_steps}
 \end{figure}
 
