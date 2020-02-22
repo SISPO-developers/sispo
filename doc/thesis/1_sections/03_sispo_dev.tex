@@ -349,45 +349,45 @@ The algorithm used for reconstruction by IncrementalSfM2 is non-deterministic, i
 
 \begin{figure}[htb]
     \centering
-    \begin{subfigure}[b]{0.46\textwidth}
+    \begin{subfigure}[b]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_points2.png}
         \caption{}
         \label{fig:recon_step_point}
     \end{subfigure}
-    \begin{subfigure}[b]{0.46\textwidth}
+    \begin{subfigure}[b]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_dense1.png}
         \caption{}
         \label{fig:recon_step_dense}
     \end{subfigure}
     \\
-    \begin{subfigure}[b]{0.46\textwidth}
+    \begin{subfigure}[b]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_mesh1.png}
         \caption{}
         \label{fig:recon_step_mesh}
     \end{subfigure}
-    \begin{subfigure}[b]{0.46\textwidth}
+    \begin{subfigure}[b]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_refine2.png}
         \caption{}
         \label{fig:recon_step_refine}
     \end{subfigure}
     \\
-    \begin{subfigure}[b]{0.46\textwidth}
+    \begin{subfigure}[b]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_texture1.png}
         \caption{}
         \label{fig:recon_step_texture}
     \end{subfigure}
-    \begin{subfigure}[b]{0.46\textwidth}
+    \begin{subfigure}[b]{0.4\textwidth}
         \centering
         \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_img1.png}
         \caption{}
         \label{fig:recon_step_img}
     \end{subfigure}
-    \caption{Images of intermediate results of the \gls{sispo} reconstruction pipeline for a \SI{100}{\kilo\meter} fly-by scenario of a \SI{1}{\kilo\meter} \gls{sssb}. Starting from the sparse point cloud and ending in the textured \gls{3d} model. (a) Sparse point cloud create by a \gls{omvs} \gls{sfm} algorithm. (b) Point cloud densified with \gls{omvs}. (c) Mesh created from the dense point cloud shown in (b) using \gls{omvs}. (d) Refined mesh based on the mesh created in (c) using \gls{mvs}. (e) Mesh textured using \gls{omvs}. (f) Reference image for comparison with the textured mesh.}
+    \caption{Example images of intermediate results of the reconstruction pipeline. (a) Sparse point cloud created by \gls{omvs}. (b) Point cloud densified with \gls{omvs}. (c) Mesh created from the dense point cloud in (b) using \gls{omvs}. (d) Refined mesh based on the mesh created in (c) using \gls{mvs}. (e) Mesh textured using \gls{omvs}. (f) Reference image for comparison with the textured mesh.}
     \label{fig:recon_steps}
 \end{figure}
 
@@ -402,22 +402,22 @@ The high-level behaviour of \gls{sispo} can be controlled using a set of flags p
     \caption{Input flags to control high-level behaviour of \gls{sispo}.}
     \label{tab:cli_args}
     \resizebox{\textwidth}{!}{%
-        \begin{tabular}{l|l|l|l}
+        \begin{tabular}{p{0.25\textwidth}|p{0.25\textwidth}|p{0.16\textwidth}|p{0.3\textwidth}}
             \textbf{Name} & \textbf{Variable Name} & \textbf{Default Value} & \textbf{Description} \\ \hline
             --help & & --- & Prints list of arguments with hints \\
-            -i & i & data/input/definition.json & Path to a definition file that defines the settings \\
+            -i & i & definition.json & Path to a definition file that defines the settings \\
             -v & v & False & Flag to use verbose output, i.e. logging information will also be displayed to console \\
             --profile & profile & False & Flag to use Python's cProfile to profile \gls{sispo} execution \\
             --no-sim & with\_sim & True & Flag to skip simulation step\\
             --no-render & with\_render & True & Flag to skip rendering step\\
             --no-compression & with\_compression & True & Flag to skip compression \\
             --no-reconstruction & with\_reconstruction & True & Flag to skip reconstruction \\
-            --sim-only & sim\_only & False & Flag to only do simulation step \\
-            --sim-render-only & sim\_render\_only & False & Flag to only do simulation and rendering step \\
-            --render-only & render\_only & False & Flag to only do rendering step\\
-            --compress-only & compress\_only & False & Flag to only do compression step \\
-            --reconstruct-only & reconstruct\_only & False & Flag to only do reconstruction step \\
-            --compress-reconstruct-only & compress\_reconstruct\_only & False & Flag to only do compression and reconstruction step
+            --sim-only & sim\_only & False & Flag to do simulation step \\
+            --sim-render-only & sim\_render\_only & False & Flag to do simulation and rendering steps \\
+            --render-only & render\_only & False & Flag to do rendering step\\
+            --compress-only & compress\_only & False & Flag to do compression step \\
+            --reconstruct-only & reconstruct\_only & False & Flag to do reconstruction step \\
+            --compress-reconstruct-only & compress\_reconstruct\_only & False & Flag to do compression and reconstruction steps
         \end{tabular}
     }
 \end{table}
