@@ -25,7 +25,7 @@ A subset of all settings was kept constant for all simulations. The instrument s
 
 \begin{table}[htb]
     \centering
-    \caption{Instrument Settings}
+    \caption{Instrument settings used in all simulation scenarios presented in Table~\ref{tab:sim_params}. The parameters represent the preliminary instrument design presented in~\cite{Pajusalu2019CharacterizationMapping}.}
     \label{tab:inst_settings}
     \begin{tabular}{l|l}
         \textbf{Parameter Name} & \textbf{Value} \\ \hline
@@ -41,13 +41,13 @@ A subset of all settings was kept constant for all simulations. The instrument s
 
 \begin{table}[htb]
     \centering
-    \caption{\gls{sssb} settings.}
+    \caption{\gls{sssb} trajectory settings used in all simulation scenarios presented in Table~\ref{tab:sim_params}. The orbital elements and rotation rate of Didymos were used, comparable to~\cite{Pajusalu2019CharacterizationMapping}.}
     \label{tab:sssb_settings}
     \begin{tabular}{l|l}
         \textbf{Parameter Name} & \textbf{Value} \\ \hline
-        a       & \SI{1.644641475071416}{\astronomicalunit}   \\
-        e        & \SI{3.838774437558215E-01}{}\\
-        i       & \SI{3.408231185574551E+00}{\radian}\\
+        a & \SI{1.644641475071416}{\astronomicalunit}   \\
+        e & \SI{3.838774437558215E-01}{}\\
+        i & \SI{3.408231185574551E+00}{\radian}\\
         P &  \SI{7.703805051391988E+02}{\radian} \\
         omega  & \SI{3.192958853076784E+02}{\radian} \\
         Omega & \SI{7.320940216397703E+01}{\radian} \\
@@ -61,7 +61,7 @@ A subset of all settings was kept constant for all simulations. The instrument s
 
 \begin{table}[htb]
     \centering
-    \caption{Simulation settings.}
+    \caption{Propagation and rendering settings used in all simulation scenarios presented in Table~\ref{tab:sim_params}.}
     \label{tab:sim_settings}
     \begin{tabular}{l|l}
         \textbf{Parameter Name} & \textbf{Value} \\ \hline
@@ -88,26 +88,26 @@ In a first step, the overall image quality is compared visually to real images. 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115755-845000.png}
-        \caption{\SI{566}{\kilo\meter}.}
+        \caption{}
         \label{fig:render_quali_comparison_1}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_10_Inst_2017-08-15T115855-260000.png}
-        \caption{\SI{106}{\kilo\meter}.}
+        \caption{}
         \label{fig:render_quali_comparison_2}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_1_Inst_2017-08-15T115837-133000.png}
-        \caption{\SI{149}{\kilo\meter}.}
+        \caption{}
         \label{fig:render_quali_comparison_3}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/50_1_Inst_2017-08-15T115851-232000.png}
-        \caption{\SI{50}{\kilo\meter}.}
+        \caption{}
         \label{fig:render_quali_comparison_4}
     \end{subfigure}
     \caption{Rendered images of an \gls{sssb} nucleus of different sizes from varying distances. (a) Nucleus of \SI{10}{\kilo\meter} from \SI{566}{\kilo\meter} distance. (b) Nucleus of \SI{10}{\kilo\meter} from \SI{106}{\kilo\meter} distance. (c) Nucleus of \SI{1}{\kilo\meter} from \SI{149}{\kilo\meter} distance. (d) Nucleus of \SI{1}{\kilo\meter} from \SI{50}{\kilo\meter} distance.}
@@ -116,60 +116,64 @@ In a first step, the overall image quality is compared visually to real images. 
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=.5\textwidth]{doc/thesis/0_figures/procedural_terrain/2963_Bennu.png}
-    \caption{Four images of asteroid Bennu and a global surface mosaic. These images were taken by the PolyCam aboard the \textit{OSIRIS-REx} mission~\cite{NASAFourBennu}.}
-    \label{fig:render_quali_bennu}
+    \begin{subfigure}[b]{0.59\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/2963_Bennu.png}
+        \caption{}
+        \label{fig:render_quali_bennu}
+    \end{subfigure} %
+    \begin{subfigure}[b]{0.41\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/67P_CG.PNG}
+        \caption{}
+        \label{fig:render_quali_67p}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.6\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/Wild2.jpg}
+        \caption{}
+        \label{fig:render_quali_81p}
+    \end{subfigure}
+    \label{fig:render_quali}
+    \caption{(a) Four images of asteroid Bennu and a global surface mosaic. These images were taken by the PolyCam aboard the \textit{OSIRIS-REx} mission~\cite{NASAFourBennu}. (b) Representative image of comet \acrlong{67p}. The image was taken by the OSIRIS imager aboard the \textit{Rosetta} mission~\cite{OSIRISArchiveb}. (c) Collection of images of comet \acrlong{81p} taken during the \textit{Stardust} mission by its navigation camera~\cite{StardustImages}.}
 \end{figure}
 
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=.5\textwidth]{doc/thesis/0_figures/procedural_terrain/67P_CG.PNG}
-    \caption{Representative image of comet \acrlong{67p}. This image was taken by the OSIRIS imager aboard the \textit{Rosetta} mission~\cite{OSIRISArchiveb}}.
-    \label{fig:render_quali_67p}
-\end{figure}
-
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/procedural_terrain/Wild2.jpg}
-    \caption{Collection of images of comet \acrlong{81p} taken during the \textit{Stardust} mission by its navigation camera~\cite{StardustImages}.}
-    \label{fig:render_quali_81p}
-\end{figure}
-
-While all images show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The overall looks of the rendered images resemble the real images of Bennu well. The rocks and boulders present on Bennu's surface appear similar to the rocks and boulders in the rendered images. When comparing the rendered images to the image of \gls{67p} or \gls{81p}, the most pronounced difference are the jets. \Gls{sispo} does not yet contain a gas and dust model that would produce a coma or jets and therefore these are missing in the rendered images. While the surface of both comets feature some rocks and boulders, there surfaces more defined by ridge-like structures. This type of feature is missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
+While all images show pits, the overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The overall looks of the rendered images resemble the real images of Bennu well. The rocks and boulders present on Bennu's surface appear similar to the rocks and boulders in the rendered images. When comparing the rendered images to the images of \gls{67p} or \gls{81p}, the most pronounced difference are the jets. \Gls{sispo} does not yet contain a gas and dust model that would produce a coma or jets and therefore these are missing in the rendered images. While the surface of both comets feature some rocks and boulders, there surfaces more defined by ridge-like structures. This type of feature is missing in the rendered images. Hence, the rendering output of \gls{sispo} better represents asteroids than comets.
 
 Through procedural terrain generation, \gls{sispo} produces results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are shown in Figure~\ref{fig:render_quali_comparison}.It is visible from Figure~\ref{fig:render_quali_comparison} that surface features and details do not degrade visually. Moving closer to the surface reveals more details, such as tiny bumps between larger structures which are not visible from larger distances. The visible quality of surface features is defined by the shader implementation. 
 
-\subsubsection{Composition}
+\subsubsection{Image Composition}
 The composition process uses raw images rendered with Blender and produces photometrically calibrated images. An example set of four images consisting of two images before and after calibration is shown in Figure~\ref{fig:composition_before_after}. All four images were converted to \SI{8}{\bit} images. Two effects can be seen. First, the original images differ in there overall brightness. This difference is removed by the calibration. Secondly, images become brighter by the calibration process. 
 
 \begin{figure}[htb]
     \centering
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/SssbOnly_2017-08-15T115858-281000.jpg}
-            \caption{}
-            \label{fig:composition_before_1}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/SssbOnly_2017-08-15T115858-281000.jpg}
+        \caption{}
+        \label{fig:composition_before_1}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/SssbOnly_2017-08-15T115859-288000.jpg}
-            \caption{}
-            \label{fig:composition_before_2}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/SssbOnly_2017-08-15T115859-288000.jpg}
+        \caption{}
+        \label{fig:composition_before_2}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/Inst_2017-08-15T115858-281000.png}
-            \caption{}
-            \label{fig:composition_after_1}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/Inst_2017-08-15T115858-281000.png}
+        \caption{}
+        \label{fig:composition_after_1}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/Inst_2017-08-15T115859-288000.png}
-            \caption{}
-            \label{fig:composition_after_2}
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_lighting/Inst_2017-08-15T115859-288000.png}
+        \caption{}
+        \label{fig:composition_after_2}
     \end{subfigure}
-    \caption{Two consecutive images before and after the composition process. (a) Image 1 before calibration. (b) Image 2 before calibration. (c) Image 1 after calibration. (d) Image 2 after calibration. The nucleus is much brighter than background stars thus no stars are visible in these images after calibration.}
+    \caption{Two consecutive images before and after the composition process. The nucleus is much brighter than background stars thus no stars are visible in these images after calibration. (a)~Image 1 before calibration. (b)~Image 2 before calibration. (c)~Image 1 after calibration. (d)~Image 2 after calibration.}
     \label{fig:composition_before_after}
 \end{figure}
 
@@ -200,25 +204,25 @@ The composition process uses raw images rendered with Blender and produces photo
 Rendering a fly-by scenario with a \SI{10}{\kilo\meter} \gls{sssb} created artefacts in the images. Figure~\ref{fig:render_artefacts} shows renders from fly-bys with different closest distances from the nucleus. All three images are the raw output from rendering, before composition. The images show a stripe, a darker patch across the \gls{sssb} with sharp brightness transitions. Moreover, the stripe is at the same location across the \gls{sssb} in all three images. This type of artefact does not appear for other \gls{sssb} sizes and not in all images with a \SI{10}{\kilo\meter} \gls{sssb}. The most likely explanation are errors while scaling the nucleus from the original \SI{1}{\kilo\meter} to the \SI{10}{\kilo\meter} model.
 \begin{figure}[htb]
     \centering
-        \begin{subfigure}[b]{0.32\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/50_10_SssbOnly_2017-08-15T115845-190000.jpg}
-            \caption{\SI{50}{\kilo\meter}.}
-            \label{fig:render_artefacts_50}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.32\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/200_10_SssbOnly_2017-08-15T115845-190000.jpg}
-            \caption{\SI{200}{\kilo\meter}.}
-            \label{fig:render_artefacts_200}
-        \end{subfigure}
-        \begin{subfigure}[b]{0.32\textwidth}
-            \centering
-            \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/400_10_SssbOnly_2017-08-15T115845-190000.jpg}
-            \caption{\SI{400}{\kilo\meter}.}
-            \label{fig:render_artefacts_400}
-        \end{subfigure}
-    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for fly-bys with the given closest approach distance. Rendering artefacts, the stripes, are clearly visible in all three images.}
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/50_10_SssbOnly_2017-08-15T115845-190000.jpg}
+        \caption{}
+        \label{fig:render_artefacts_50}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/200_10_SssbOnly_2017-08-15T115845-190000.jpg}
+        \caption{}
+        \label{fig:render_artefacts_200}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.32\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/rendering_artefacts/400_10_SssbOnly_2017-08-15T115845-190000.jpg}
+        \caption{}
+        \label{fig:render_artefacts_400}
+    \end{subfigure}
+    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for varying fly-by distances. Rendering artefacts, the stripes, are clearly visible in all three images. (a)~Closest-approach \SI{50}{\kilo\meter}. (b)~Closest-approach \SI{200}{\kilo\meter}. (c)~Closest-approach \SI{400}{\kilo\meter}.}
     \label{fig:render_artefacts}
 \end{figure}
 
@@ -241,7 +245,7 @@ A second problem occurred in a \SI{50}{\kilo\meter} fly-by simulation with a \SI
             \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition_darkening/Inst_2017-08-15T115819-007000_center.png}
             \label{fig:render_dark_3}
         \end{subfigure}
-    \caption{Overall darkened \gls{sssb} image due to three pixels being much brighter, also referred to as fireflies. All three images are composed images for better visibility of the artefact. The images are cropped to display the \gls{sssb} nucleus and artefact better.}
+    \caption{Overall darkened \gls{sssb} image due to three pixels being much brighter. These pixels are referred to as fireflies. All three images are composed images for better visibility of the artefact. The images are cropped to display the \gls{sssb} nucleus and artefact better.}
     \label{fig:render_dark}
 \end{figure}
 
@@ -257,7 +261,7 @@ To compare the image quality after different levels of compression, a specific i
 \begin{figure}[htb]
     \centering
     \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_frame.png}
-    \caption{Scene used for quality comparison. Highlighted in red is the area studied up closer. The specific area was selected since it includes a wide range of colours and various sized surface features.}
+    \caption{Scene used for quality comparison. The area highlighted in red is studied up closer. The specific area was selected since it includes a wide range of colours and various sized surface features.}
     \label{fig:img_quality_frame}
 \end{figure}
 
@@ -268,29 +272,29 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1.png}
-        \caption{Image.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_histogram.png}
-        \caption{Difference histogram.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1_histo}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_heatmap.png}
-        \caption{Difference image with constant scale across different compression quality levels.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_diff_heatmap_rel.png}
-        \caption{Difference image with changing scale.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1_diff_rel}
     \end{subfigure}
-    \caption{Overall rendered image after compression with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between the greyscale images of image~\ref{fig:img_quality_comp_jp2_1_orig} and the lossless compressed image.}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 1. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_1}
 \end{figure}
 
@@ -300,29 +304,29 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5.png}
-        \caption{Image.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_5_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_histogram.png}
-        \caption{Difference histogram.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_5_histo}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_heatmap.png}
-        \caption{Difference image with constant scale across different compression quality levels.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_5_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_diff_heatmap_rel.png}
-        \caption{Difference image with changing scale.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_5_diff_rel}
     \end{subfigure}
-    \caption{Overall rendered image after compression with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between the greyscale images of image~\ref{fig:img_quality_comp_jp2_5_orig} and the lossless compressed image.}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 5. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_5}
 \end{figure}
 
@@ -332,29 +336,29 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10.png}
-        \caption{Image.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_10_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_histogram.png}
-        \caption{Difference histogram.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_10_histo}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_heatmap.png}
-        \caption{Difference image with constant scale across different compression quality levels.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_10_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_diff_heatmap_rel.png}
-        \caption{Difference image with changing scale.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_10_diff_rel}
     \end{subfigure}
-    \caption{Overall rendered image after compression with \gls{jp2} quality level 10. Difference histogram and difference images show the L2-norm of the difference between the greyscale images of image~\ref{fig:img_quality_comp_jp2_10_orig} and the lossless compressed image.}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 10. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_10}
 \end{figure}
 
@@ -363,29 +367,29 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100.png}
-        \caption{Image.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_100_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_histogram.png}
-        \caption{Difference histogram.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_100_histo}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_heatmap.png}
-        \caption{Difference image with constant scale across different compression quality levels.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_100_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_diff_heatmap_rel.png}
-        \caption{Difference image with changing scale.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_100_diff_rel}
     \end{subfigure}
-    \caption{Overall rendered image after compression with \gls{jp2} quality level 100. Difference histogram and difference images show the L2-norm of the difference between the greyscale images of image~\ref{fig:img_quality_comp_jp2_100_orig} and the lossless compressed image.}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 100. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_100}
 \end{figure}
 
@@ -394,29 +398,29 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000.png}
-        \caption{Image.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1000_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_histogram.png}
-        \caption{Difference histogram.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1000_histo}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_heatmap.png}
-        \caption{Difference image with constant scale across different compression quality levels.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1000_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_diff_heatmap_rel.png}
-        \caption{Difference image with changing scale.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1000_diff_rel}
     \end{subfigure}
-    \caption{Overall rendered image after compression with \gls{jp2} quality level 1000. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_1000_orig} and the lossless compressed image.}
+    \caption{Overall rendered image after compression with \gls{jp2} quality level 1000. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_1000}
 \end{figure}
 
@@ -429,29 +433,29 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center.png}
-        \caption{Image.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1_center_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_histogram.png}
-        \caption{Difference histogram.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1_center_histo}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_heatmap.png}
-        \caption{Difference image with constant scale across different compression quality levels.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1_center_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1_center_diff_heatmap_rel.png}
-        \caption{Difference image with changing scale.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1_center_diff_rel}
     \end{subfigure}
-    \caption{Close-up images compressed with \gls{jp2} quality level 1. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_1_center_orig} and the lossless compressed image.}
+    \caption{Close-up rendered image after compression with \gls{jp2} quality level 1. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_1_center}
 \end{figure}
 
@@ -460,29 +464,29 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center.png}
-        \caption{Image.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_5_center_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_histogram.png}
-        \caption{Difference histogram.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_5_center_histo}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_heatmap.png}
-        \caption{Difference image with constant scale across different compression quality levels.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_5_center_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_5_center_diff_heatmap_rel.png}
-        \caption{Difference image with changing scale.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_5_center_diff_rel}
     \end{subfigure}
-    \caption{Close-up images compressed with \gls{jp2} quality level 5. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_5_orig} and the lossless compressed image.}
+    \caption{Close-up rendered image after compression with \gls{jp2} quality level 5. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_5_center}
 \end{figure}
 
@@ -491,29 +495,29 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center.png}
-        \caption{Image.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_10_center_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_histogram.png}
-        \caption{Difference histogram.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_10_center_histo}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_heatmap.png}
-        \caption{Difference image with constant scale across different compression quality levels.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_10_center_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_10_center_diff_heatmap_rel.png}
-        \caption{Difference image with changing scale.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_10_center_diff_rel}
     \end{subfigure}
-    \caption{Close-up images compressed with \gls{jp2} quality level 10. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_10_orig} and the lossless compressed image.}
+    \caption{Close-up rendered image after compression with \gls{jp2} quality level 10. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_10_center}
 \end{figure}
 
@@ -522,29 +526,29 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center.png}
-        \caption{Image.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_100_center_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_histogram.png}
-        \caption{Difference histogram.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_100_center_histo}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_heatmap.png}
-        \caption{Difference image with constant scale across different compression quality levels.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_100_center_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_100_center_diff_heatmap_rel.png}
-        \caption{Difference image with changing scale.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_100_center_diff_rel}
     \end{subfigure}
-    \caption{Close-up images compressed with \gls{jp2} quality level 100. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_100_orig} and the lossless compressed image.}
+    \caption{Close-up rendered image after compression with \gls{jp2} quality level 100. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_100_center}
 \end{figure}
 
@@ -553,29 +557,29 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center.png}
-        \caption{Image.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1000_center_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_histogram.png}
-        \caption{Difference histogram.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1000_center_histo}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_heatmap.png}
-        \caption{Difference image with constant scale across different compression quality levels.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1000_center_diff}
     \end{subfigure}
     \begin{subfigure}[b]{0.48\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_center_diff_heatmap_rel.png}
-        \caption{Difference image with changing scale.}
+        \caption{}
         \label{fig:img_quality_comp_jp2_1000_center_diff_rel}
     \end{subfigure}
-    \caption{Close-up images compressed with \gls{jp2} quality level 1000. Difference histogram and difference images show the L2-norm of the difference between greyscale images of image~\ref{fig:img_quality_comp_jp2_1000_orig} and the lossless compressed image.}
+    \caption{Close-up rendered image after compression with \gls{jp2} quality level 1000. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_1000_center}
 \end{figure}
 
@@ -623,16 +627,16 @@ A comparison of the point clouds of the two scenarios is shown in Figure~\ref{fi
         \begin{subfigure}[b]{0.42\textwidth}
             \centering
             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/50_10/120_50_10_dense2.png}
-            \caption{\SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by with $\approx\SI{6e6}{}$ points.}
+            \caption{}
             \label{fig:points_50_10}
         \end{subfigure}
         \begin{subfigure}[b]{0.42\textwidth}
             \centering
             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/400_1/120_400_1_points2.png}
-            \caption{\SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by with $\approx\SI{2e3}{}$ points.}
+            \caption{}
             \label{fig:points_400_1}
         \end{subfigure}
-    \caption{Images showing point clouds of two fly-by scenarios with two boundary cases with working reconstructions. Due to the low number of points for case \ref{fig:models_400_1}, densification was not possible and the sparse point cloud is shown.}
+    \caption{Images showing point clouds of two fly-by scenarios of two boundary cases with working reconstructions. (a) Point cloud with $\approx\SI{6e6}{}$ points of a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. (b) Point cloud with $\approx\SI{2e3}{}$ points of a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by. Point cloud densification failed for this scenario, therefore the sparse point cloud is depicted.}
     \label{fig:points_dense_comp}
 \end{figure}
 
@@ -652,15 +656,17 @@ To compare the \gls{3d} models, the meshes after refinement are used, since text
             \caption{\SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by with $\approx\SI{700}{}$ vertices.}
             \label{fig:models_400_1}
         \end{subfigure}
-    \caption{Images showing \gls{3d} models reconstructed from the point clouds shown in Figure~\ref{fig:points_dense_comp}. Mesh refinement was not possible in the second scenario, therefore the sparse mesh is shown.}
+    \caption{Images showing \gls{3d} models reconstructed from the point clouds shown in Figure~\ref{fig:points_dense_comp}. (a) Reconstructed mesh with $\approx\SI{1e6}{}$ vertices of a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. (b) Reconstructed mesh with $\approx\SI{700}{}$ vertices of a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by. Mesh refinement failed in this scenario, therefore the sparse mesh is depicted.}
     \label{fig:models_comp}
 \end{figure}
 
-\subsubsection{Compression Effects on reconstructed 3D Models}
+\subsubsection{Compression Effects on Reconstructed 3D Models}
 To compare  quality of the reconstructed \gls{3d} models numerically, the number of points after densification, the number of vertices and the number of faces of the refined meshed model are compared for different levels of compression for the same simulation scenario. The number of points, vertices and faces are used because they relate to the level of detail of a \gls{3d} model. Moreover, the number of points in relation to the number of vertices can be used to analyse the amount of outliers in the point cloud since outlier points cannot be included into a meaningful \gls{3d} model. All values are normalised to the \gls{png} case to compare lossless compression against lossy compression with varying quality levels.
 
-First we compare the theoretical raw size of an image series of \SI{120}{} images to the highest compression ratio of lossless compression with \gls{png}. An image series of \SI{120}{}~\gls{rgb} images with $\SI{2454}{} \times \SI{2054}{}$~pixels and a colour depth of \SI{1}{\byte} has a data size of $d = 120 \times 2454 \times 2054 \times 3 \times \SI{1}{\byte} = \SI{1814.6}{\mega\byte}$. The \gls{png} data sets have sizes ranging from \SI{5.2}{\mega\byte} to \SI{564.6}{\mega\byte}, i.e. \SI{0.3}{\percent} to \SI{31.1}{\percent} of the raw data size.
+First we compare the theoretical raw size of an image series of \SI{120}{} images to the highest compression ratio of lossless compression with \gls{png}. An image series of \SI{120}{}~\gls{rgb} images with $\SI{2454}{} \times \SI{2054}{}$~pixels and a colour depth of \SI{1}{\byte} has a data size of $d = 120 \times 2454 \times 2054 \times 3 \times \SI{1}{\byte} = \SI{1814.6}{\mega\byte}$. The \gls{png} data sets have sizes ranging from \SI{5.2}{\mega\byte} to \SI{564.6}{\mega\byte}, i.e. \SI{0.3}{\percent} to \SI{31.1}{\percent} of the raw data size depending on the simulation scenario. The varying apparent size of the nucleus and the resulting portion with constant black values of an image can be compressed well with \gls{png}.
 % 564573825 / 5172917; 1814585760
+
+Figure~\ref{fig:recon_stats_1} and Figure~\ref{fig:recon_stats_10} compare the effects of lossless compression using \gls{png} and lossy compression using \gls{jp2}.
 
 \begin{figure}[htb]
     \centering
@@ -689,7 +695,7 @@ First we compare the theoretical raw size of an image series of \SI{120}{} image
             \caption{}
             \label{fig:recon_120_400_1}
         \end{subfigure}
-    \caption{Bar graphs comparing output of reconstruction after image compression with varying quality levels for a \SI{1}{\kilo\meter} \gls{sssb}.}
+    \caption{Bar graphs comparing output of reconstruction after image compression with varying quality levels for a \SI{1}{\kilo\meter} \gls{sssb} with varying fly-by distances. (a) Fly-by distance \SI{50}{\kilo\meter}. (b) Fly-by distance \SI{100}{\kilo\meter}. (c) Fly-by distance \SI{200}{\kilo\meter}. (d) Fly-by distance \SI{400}{\kilo\meter}.}
     \label{fig:recon_stats_1}
 \end{figure}
 
@@ -724,7 +730,7 @@ Figure~\ref{fig:recon_stats_1} shows that compression with \gls{jp2} quality lev
             \caption{}
             \label{fig:recon_120_400_10}
         \end{subfigure}
-    \caption{Bar graphs comparing output of reconstruction after image compression with varying quality levels for a \SI{10}{\kilo\meter} \gls{sssb}.}
+    \caption{Bar graphs comparing output of reconstruction after image compression with varying quality levels for a \SI{10}{\kilo\meter} \gls{sssb} with varying fly-by distances. (a) Fly-by distance \SI{50}{\kilo\meter}. (b) Fly-by distance \SI{100}{\kilo\meter}. (c) Fly-by distance \SI{200}{\kilo\meter}. (d) Fly-by distance \SI{400}{\kilo\meter}.}
     \label{fig:recon_stats_10}
 \end{figure}
 
@@ -795,7 +801,7 @@ The results in Table~\ref{tab:recon_best_algo_1} suggest that IncrementalSfM pro
             \caption{\SI{1}{\kilo\meter} \gls{sssb} after a \SI{100}{\kilo\meter} fly-by.}
             \label{fig:models_broken_mesh}
         \end{subfigure}
-    \caption{Images showing a badly reconstructed \gls{3d}. The model is inverted, i.e. resembling the inside of an egg shell, and contains holes.}
+    \caption{Images showing an erroneous reconstructed \gls{3d} model of a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{100}{\kilo\meter} fly-by. The model is inverted, i.e. resembling the inside of an egg shell, and contains holes. (a) Sparse point cloud. (b) Refined mesh.}
     \label{fig:models_broken}
 \end{figure}
 
@@ -804,7 +810,7 @@ Another problem is a flattening of the model when the minimum distance to the \g
 \begin{figure}[htb]
     \centering
     \includegraphics[width=.5\textwidth]{doc/thesis/0_figures/models_quality/50_10/120_50_10_refine1.png}
-    \caption{\SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. The \gls{3d} model does not represent a hemisphere but rather a flat wall which is bend on the left hand side of the image.}
+    \caption{Refined mesh of a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. The \gls{3d} model does not represent a hemisphere but rather a flat wall which is bend on the left hand side of the image.}
     \label{fig:model_flat}
 \end{figure}
 

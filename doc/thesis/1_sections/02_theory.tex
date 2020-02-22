@@ -19,7 +19,8 @@
 %
 % Concepts to describe???
 
-\subsection{Small Solar System Body}
+
+\subsection{Small Solar System Bodies}
 The \gls{iau} defines an \gls{sssb} as any object in the Solar System, that is not a planet, dwarf planet or satellite~\cite{iau_sssb}. Within this work, the term \gls{sssb} mostly refers to asteroids and comets.
 
 In a classical definition, asteroids and comets were two distinct \glspl{sssb} classes based on observational, physical and dynamical properties. However, the discovery of active asteroids and dormant comets began to blur these definitions. Since many observed objects cannot be strictly classified into the classical categories anymore, it is becoming more common to describe these objects as part of a asteroid-comet continuum with asteroids and comets at the ends of the continuum~\cite{Hsieh2017Asteroid-cometSystem}.
@@ -58,7 +59,7 @@ Figure~\ref{fig:kepler_elements} shows the geometric relations of the angular El
         \label{fig:hyperbolic_orbit}
     \end{subfigure}
     \label{fig:astrodynamics}
-    \caption{Important astrodynamic definitions and relations. (a) Modified Keplerian elements \cite{Commons2019File:Orbit1.svgRepository}. (b) A closed orbit around the Sun (\astrosun) becomes a hyperbolic trajectory about another body using Venus (\venus) as an example \cite{Hintz2015FundamentalsAstrodynamics}.}
+    \caption{Important astrodynamic definitions and relations. (a) Modified Keplerian elements \cite{Commons2019File:Orbit1.svgRepository}. (b) A closed orbit around the Sun (\astrosun) becomes a hyperbolic trajectory about another body, Venus (\venus) in this example \cite{Hintz2015FundamentalsAstrodynamics}.}
 \end{figure}
 
 Flyby scenarios in the Solar System are often closed orbits around the Sun, i.e. $e_{\astrosun} < 1$ while they are hyperbolic trajectories in the reference frame of the target, i.e. $e_{\venus} > 1$. An example is given in Figure~\ref{fig:hyperbolic_orbit}. A high relative velocity and the small gravitational force exerted by a \gls{sssb} result in a trajectory closer to a straight line than the bend trajectory presented in Figure~\ref{fig:hyperbolic_orbit}. 
@@ -66,7 +67,10 @@ Flyby scenarios in the Solar System are often closed orbits around the Sun, i.e.
 Most asteroids move on orbits with low eccentricity while comets often have high eccentricities. This stems from their origin, while asteroids mostly origin from the main belt which is nearly circular region, comets enter the inner Solar System from far out, i.e. there aphelion is still far from the Sun resulting in high eccentricities.
 
 \subsection{Rendering}
-Rendering is the process of creating \gls{2d} images from \gls{3d} objects. For rendering, a virtual world is created where \gls{3d} models reside. Light sources and cameras produce artificial illumination and define which part of the world is being captured. A rendering engine calculates the pixel values to generate the final image based on energy conservation by using the rendering equation~\cite{Kajiya1986TheEquation}
+Rendering is the process of creating \gls{2d} images from \gls{3d} objects. For rendering, a virtual world is created where \gls{3d} models reside. Light sources and cameras produce artificial illumination and define which part of the world is being captured. A rendering engine calculates the pixel values to generate the final image based on energy conservation by using the rendering equation~\cite{Kajiya1986TheEquation}.
+
+\subsubsection{Path Tracing}
+Path tracing is a special form of ray tracing. Ray tracing is a rendering technique where the path of light rays is traced to generate pixels while simulating effects of encounters with objects. In path tracing not individual light rays are followed which then branch into an exponentially growing number of rays when being reflected or refracted but only a single path is followed, cutting computation time dramatically in cases with a lot of reflection, refraction and shadow rays per pixel~\cite{Kajiya1986TheEquation}. Ray tracing can simulate different effects, such as reflection, refraction, scattering and dispersion. While producing a high degree of realism in images, the computational costs are high as well. There are four types of rays: camera rays, reflection rays, transmission rays and shadow rays. Reflection and transmissions can be further categorised as either diffuse, glossy or singular. Ray tracing is a popular rendering technique where a high degree of realism is necessary since it is a realistic simulation of light transport.
 
 \subsubsection{3D Models and Shaders}
 A \gls{3d} model is a set of points in \gls{3d} space. The most common type of \gls{3d} models are polygonal meshes. Polygonal meshes are shell models that consist of polygons. A vertex is a corner of a polygon, i.e. every triangle has three vertices and every tetrahedron has four vertices. A face refers to the surfaces that make up a \gls{3d} model. Depending on the rendering environment, models are more or less sophisticated and their surface can have different properties such as reflection, refraction and transmission.
@@ -82,9 +86,6 @@ The \gls{fov} defines the extent of the \gls{3d} scene that is visible from the 
 where $e_{i}$ is a vector for the $i^{th}$ edge of the \gls{fov}, $v_d$ is the direction vector of the camera, $v_j$ is the vector pointing right or up in the \gls{fov} plane, $s_k$ is the camera sensor width or height and $f$ is the focal length. The left and right edge vectors, $e_{left}$ and $e_{right}$, are calculated with the vector $v_r$ pointing right in the \gls{fov} plane and the sensor width $s_w$. The upper and lower edge vectors, $e_{upper}$ and $e_{lower}$  are calculated with the vector $v_r$ pointing up in the \gls{fov} plane and the sensor height $s_h$.
 
 In addition to the extent of the \gls{fov} within the image plane, rendering requires the view to be clipped to a minimum and maximum distance to define which objects appear in a rendered scene. The clipping is necessary to limit the required computational power for rendering. 
-
-\subsubsection{Path Tracing}
-Path tracing is a special form of ray tracing. Ray tracing is a rendering technique where the path of light rays is traced to generate pixels while simulating effects of encounters with objects. In path tracing  not individual light rays are followed which then branch into an exponentially growing number of rays when being reflected or refracted but only a single path is followed, cutting computation time dramatically in cases with a lot of reflection, refraction and shadow rays per pixel~\cite{Kajiya1986TheEquation}. Ray tracing can simulate different effects, such as reflection, refraction, scattering and dispersion. While producing a high degree of realism in images, the computational costs are high as well. There are four types of rays: camera rays, reflection rays, transmission rays and shadow rays. Reflection and transmissions can be further categorised as either diffuse, glossy or singular. Ray tracing is a popular rendering technique where a high degree of realism is necessary since it is a realistic simulation of light transport.
 
 \subsubsection{Photometric calibration} \label{sec:photo_cal}
 Photometric calibration is the process of correcting raw images from a sensor to a common level of brightness. Differences might come from different exposure times, gains or cameras. Photometric calibration uses a photometric systems, such as the \gls{ubv}, which are reference systems with which star magnitude measurements can be compared for a given band of the system~\cite{Bessell1979UBVRIPhotometry}.
@@ -148,7 +149,8 @@ The effect of photometric calibration is delineated in Figure~\ref{fig:t_photome
 \subsection{Computer Vision} \label{sec:t_cv}
 \Gls{cv} is the science of extracting information from digital photos and videos by mimicking the human vision system using a computer. \Gls{cv} encompasses a wide field of activities, from image formation, processing, detecting and matching features, image segmentation and \gls{3d} reconstruction~\cite{szeliski2010computer}. \Gls{cv} is the computer based variant of photogrammetry which is tasked with obtaining information about physical objects and the environment from photographic images~\cite{Kasser2002DigitalPhotogrammetry}. The most common approach for \gls{3d} reconstruction is stereo-photogrammetry, also referred to as computer stereo vision. Stereo-photogrammetry applies the binocular vision principle of the human vision system to obtain structural information from images~\cite{do2019review}. Since most, if not all, deep space missions have a visual imager instrument on-board, \gls{cv} provides a useful framework to obtain the \gls{3d} structure of an observation target. A similar problem is the \gls{sfm} approach where the motion of the camera creates the different perspective.
 
-For all \gls{cv} problems, it is relevant to have a model of a camera. The most commonly used model in \gls{cv} is the pinhole camera. Figure~\ref{fig:pinhole_cam} gives a simple overview of the important parts of the pinhole model.
+\subsubsection{Pinhole Camera Model}
+All \gls{cv} problems require a model of a camera. The most commonly used model in \gls{cv} is the pinhole camera. Figure~\ref{fig:pinhole_cam} gives a simple overview of the important parts of the pinhole model.
 
 \begin{figure}[htb]
     \centering
@@ -255,7 +257,7 @@ Lossy compression is not a reversible process, i.e. some of the information is l
 
 Image compression is a sub-discipline of data compression. A common format for lossless compression is \gls{png} which relies on a Lempel-Ziv algorithm and Huffman-coding. Two types of image compression techniques commonly used for lossy compression are the \gls{dct} and \gls{dwt}. \Gls{dct} is used for example in the \gls{jpeg} format and \gls{dwt} is used for example in the \gls{jp2} format.
 
-The Lempel-Ziv algorithm in \gls{png} replaces repeating sections of data with a single copy and references to that copy. Huffman coding is a form of entropy coding which estimates the number of occurrences of symbols and encodes symbols with higher probability using the least amount of bits.
+The Lempel-Ziv algorithm used in \gls{png} replaces repeating sections of data with a single copy and references to that copy. Huffman coding is a form of entropy coding which estimates the number of occurrences of symbols and encodes symbols with higher probability using the least amount of bits.
 
 \Gls{dct} is a type of Fourier transform, hence it expresses finite data as a sum of cosines. In contrast to the Fourier transform itself, it employs however only real components. \Gls{dct} compresses data in form of discrete data blocks. Images can be compressed with differently sized image parts such as $8\times8$ pixels, commonly used in JPEG~\cite{Bocharova2009CompressionMultimedia}.
 The frequency response of the \gls{dct} improves with longer harmonic functions. Hence, \gls{dct} does not have favourable compression characteristics if an image has many small details or contours~\cite{Bocharova2009CompressionMultimedia}.
