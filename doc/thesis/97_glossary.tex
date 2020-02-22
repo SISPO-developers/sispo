@@ -1,20 +1,26 @@
 %% Glossary
 % Symbols
-\newglossaryentry{latinletters}{name={Latin Symbols},description={},type=symbolslist}
-\newglossaryentry{greekletters}{name={Greek Symbols},description={},type=symbolslist}
-%\newglossaryentry{astrosymbols}{name={Astronomical Symbols},description={},type=symbolslist}
+\newglossaryentry{latinletters}{name={Latin Symbols},description={\nopostdesc},type=symbolslist}
+\newglossaryentry{greekletters}{name={Greek Symbols},description={\nopostdesc},type=symbolslist}
+\newglossaryentry{astrosymbols}{name={Astronomical Symbols},description={\nopostdesc},type=symbolslist}
 
-% \newglossaryentry{sun}{name=\ensuremath{\odot},
-%     description={Sun},
-%     sort=sun,
-%     parent=astrosymbols,
-%     type=symbolslist}
+\newglossaryentry{sun}{name=\ensuremath{\odot},
+    description={Sun},
+    sort=sun,
+    parent=astrosymbols,
+    type=symbolslist}
     
-% \newglossaryentry{venus}{name=\ensuremath{\venus},
-%     description={Venus},
-%     sort=venus,
-%     parent=astrosymbols,
-%     type=symbolslist}
+\newglossaryentry{venus}{name=\ensuremath{\venus},
+    description={Venus},
+    sort=venus,
+    parent=astrosymbols,
+    type=symbolslist}
+    
+\newglossaryentry{aries}{name=\ensuremath{\aries},
+    description={aries},
+    sort=aries,
+    parent=astrosymbols,
+    type=symbolslist}
 
 \newglossaryentry{e}{name=\ensuremath{e},
     description={Orbit eccentricity},
@@ -85,6 +91,24 @@
 \newglossaryentry{k}{name=\ensuremath{\mathbf{K}},
     description={Camera matrix},
     sort=k,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{E_m}{name=\ensuremath{\mathbf{E}},
+    description={Essential matrix},
+    sort=essen,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{F_m}{name=\ensuremath{\mathbf{F}},
+    description={Fundamental matrix},
+    sort=funda,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{H_m}{name=\ensuremath{\mathbf{H}},
+    description={Homography matrix},
+    sort=homography,
     parent=latinletters,
     type=symbolslist}
     
