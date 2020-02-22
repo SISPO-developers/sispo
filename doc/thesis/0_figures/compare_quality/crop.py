@@ -4,6 +4,7 @@ import cv2
 import matplotlib.pyplot as plt
 import numpy as np
 
+plt.rcParams.update({"font.size": 18})
 
 CORNER1 = (1100, 800)
 CORNER2 = (1500, 1200)
@@ -58,7 +59,7 @@ def create_diff_image(img_name, ref_img_name):
     plt.figure(figsize=FIGURE_SIZE)
     plt.imshow(temp, interpolation='nearest', cmap='gray', vmin=0, vmax=V_MAX_ABS)
     cbar = plt.colorbar()
-    cbar.ax.get_yaxis().labelpad = 10
+    cbar.ax.get_yaxis().labelpad = 20
     cbar.ax.set_ylabel("L2-Norm of Difference", rotation=270)
     plt.title(f"Difference Image - {' '.join(img_name[:-4].split('/')[-1].upper().split('_')[0:2])}")
     plt.axis("off")
@@ -69,7 +70,7 @@ def create_diff_image(img_name, ref_img_name):
     plt.figure(figsize=FIGURE_SIZE)
     plt.imshow(temp, interpolation='nearest', cmap='gray', vmin=0,vmax=np.max(np.abs(temp)))
     cbar = plt.colorbar()
-    cbar.ax.get_yaxis().labelpad = 10
+    cbar.ax.get_yaxis().labelpad = 20
     cbar.ax.set_ylabel("L2-Norm of Difference", rotation=270)
     plt.title(f"Difference Image - {' '.join(img_name[:-4].split('/')[-1].upper().split('_')[0:2])}")
     plt.axis("off")
