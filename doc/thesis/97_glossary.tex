@@ -1,78 +1,106 @@
 %% Glossary
 % Symbols
-% \newglossaryentry{$\odot$}{name=\ensuremath{\odot},
-%     description={Sun},
-%     sort=Sun,
-%     type=symbolslist}
+\newglossaryentry{latinletters}{name={Latin Symbols},description={},type=symbolslist}
+\newglossaryentry{greekletters}{name={Greek Symbols},description={},type=symbolslist}
+\newglossaryentry{astrosymbols}{name={Astronomical Symbols},description={},type=symbolslist}
+
+\newglossaryentry{sun}{name=\ensuremath{\odot},
+    description={Sun},
+    sort=Sun,
+    parent=astrosymbols,
+    type=symbolslist}
     
-% \newglossaryentry{$\venus$}{name=\ensuremath{\venus},
-%     description={Venus},
-%     sort=Venus,
-%     type=symbolslist}
-    
+\newglossaryentry{venus}{name=\ensuremath{\venus},
+    description={Venus},
+    sort=Venus,
+    parent=astrosymbols,
+    type=symbolslist}
+
 \newglossaryentry{e}{name=\ensuremath{e},
     description={Orbit eccentricity},
     sort=e,
+    parent=latinletters,
     type=symbolslist}
 
 \newglossaryentry{a}{name=\ensuremath{a},
     description={Orbit semi-major axis},
     sort=a,
+    parent=latinletters,
     type=symbolslist}
 
 \newglossaryentry{i}{name=\ensuremath{i},
     description={Orbit inclination},
     sort=i,
+    parent=latinletters,
     type=symbolslist}
 
 \newglossaryentry{Omega}{name=\ensuremath{\Omega},
     description={Right ascension of ascending node},
     sort=Omega,
+    parent=greekletters,
     type=symbolslist}
 
 \newglossaryentry{omega}{name=\ensuremath{\omega},
     description={Argument of periapsis},
     sort=omega,
+    parent=greekletters,
     type=symbolslist}
 
 \newglossaryentry{M}{name=\ensuremath{M},
     description={Mean anomaly},
     sort=omega,
+    parent=latinletters,
     type=symbolslist}
 
 \newglossaryentry{alpha}{name=\ensuremath{\alpha},
     description={Albedo},
     sort=albedo,
+    parent=greekletters,
     type=symbolslist}
 
 \newglossaryentry{f}{name=\ensuremath{f},
     description={Focal length},
     sort=focal,
+    parent=latinletters,
     type=symbolslist}
     
 \newglossaryentry{ra}{name=\ensuremath{\alpha_r},
     description={Right ascension},
     sort=ra,
+    parent=greekletters,
     type=symbolslist}
     
 \newglossaryentry{de}{name=\ensuremath{\delta},
     description={Declination},
     sort=de,
+    parent=greekletters,
     type=symbolslist}
     
 \newglossaryentry{sigma}{name=\ensuremath{\sigma},
     description={Standard deviation of a Gaussian distribution},
     sort=sig,
+    parent=greekletters,
     type=symbolslist}
     
-
+\newglossaryentry{k}{name=\ensuremath{\mathbf{K}},
+    description={Camera matrix},
+    sort=k,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{area}{name=\ensuremath{A},
+    description={Area},
+    sort=area,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{lambda}{name=\ensuremath{\lambda},
+    description={Wavelength},
+    sort=lambda,
+    parent=greekletters,
+    type=symbolslist}
 
 % Operators
-%\newglossaryentry{nabla_a}{name=\ensuremath{\nabla \times \mathbf{A}},
-%    description={curl of vector $\mathbf{A}$},
-%    sort=curl_a,
-%    type=operatorslist}
-    
 \newglossaryentry{dot_p}{name=\ensuremath{\mathbf{A}~\cdot~\mathbf{B}},
     description={dot product of vectors $\mathbf{A}$ and $\mathbf{B}$},
     sort=dot_p,
