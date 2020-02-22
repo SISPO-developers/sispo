@@ -69,12 +69,14 @@ Otaniemi, 24.2.2020
 
 %% Symbols and abbreviations
 \mysection{Symbols and abbreviations}
+\glssetwidest{M}
+\printnoidxglossary[type=symbolslist, style=alttree]
 
-\printnoidxglossary[type=symbolslist, style=long]
+\glsfindwidesttoplevelname[operatorslist]
+\printnoidxglossary[type=operatorslist, style=alttree]
 
-\printnoidxglossary[type=operatorslist, style=long]
-
-\printnoidxglossary[type=\acronymtype, style=long, title={Abbreviations}] 
+\glssetwidest{UBVRI system}
+\printnoidxglossary[type=\acronymtype, style=alttree, title={Abbreviations}] 
 
 %% \clearpage is similar to \newpage, but it also flushes the floats (figures
 %% and tables).

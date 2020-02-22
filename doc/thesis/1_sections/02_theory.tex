@@ -41,7 +41,7 @@ It is not clear whether comets are generally similar to rubble piles or rather c
 
 \subsubsection{Orbit Mechanics} \label{sec:orbit_mechanics}
 All objects in space move on trajectories, or orbits if closed, following the Kepler equations. Trajectories are commonly defined using six orbital elements.
-Semi-major axis $a$, eccentricity $e$, inclination $i$, right ascension of ascending node $\Omega$, argument of periapsis $\omega$ and the true anomaly $\nu$ or mean anomaly $M$ at a given epoch. This parameterisation is also called modified Keplerian elements~\cite{Hintz2015FundamentalsAstrodynamics}.
+Semi-major axis \gls{a}, eccentricity \gls{e}, inclination \gls{i}, right ascension of ascending node \gls{Omega}, argument of periapsis \gls{omega} and the true anomaly $\nu$ or mean anomaly \gls{M} at a given epoch. This parameterisation is also called modified Keplerian elements~\cite{Hintz2015FundamentalsAstrodynamics}.
 
 Figure~\ref{fig:kepler_elements} shows the geometric relations of the angular Elements.
 
@@ -159,7 +159,7 @@ All \gls{cv} problems require a model of a camera. The most commonly used model 
     \label{fig:pinhole_cam}
 \end{figure} 
 
-The pinhole camera model can be described using the $3\times4$ camera matrix $\textbf{K}$ defined as
+The pinhole camera model can be described using the $3\times4$ camera matrix \gls{k} defined as
 \begin{align}
     \textbf{K} = \begin{bmatrix}
         f\times k_u & 0           & c_u \\
@@ -170,7 +170,7 @@ The pinhole camera model can be described using the $3\times4$ camera matrix $\t
         \textbf{R} & t
     \end{bmatrix}, \label{eq:camera_m}
 \end{align}
-where $f$ is the distance between the focal plane and the image plane, $k_u$ and $k_v$ to are scaling factors, $c_u$ and $c_v$ are the coordinates of the principle point on the image plane, $\textbf{R}$ is a $3\times3$ rotation matrix and $t$ being a $3\times1$ translation vector. The first matrix of $\textbf{K}$ reflects the camera intrinsic parameters while the second matrix describes the extrinsic parameters.
+where $f$ is the distance between the focal plane and the image plane, $k_u$ and $k_v$ to are scaling factors, $c_u$ and $c_v$ are the coordinates of the principle point on the image plane, $\textbf{R}$ is a $3\times3$ rotation matrix and $t$ being a $3\times1$ translation vector. The first matrix of \gls{k} reflects the camera intrinsic parameters while the second matrix describes the extrinsic parameters.
 More sophisticated pinhole camera models also include distortions. These can include one or more factors for radial and tangential distortions. A special case it the Brown T2 model which includes three radial and two tangential distortion factors.
 
 The conversion between object coordinates and pixel coordinates is obtained from geometric considerations of the pinhole camera model shown in Figure~\ref{fig:pinhole_cam} and is defined as
