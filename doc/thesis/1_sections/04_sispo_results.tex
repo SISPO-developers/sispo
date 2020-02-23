@@ -128,9 +128,9 @@ In a first step, the overall image quality is compared visually to real images. 
         \label{fig:render_quali_67p}
     \end{subfigure}
     \\
-    \begin{subfigure}[b]{0.6\textwidth}
+    \begin{subfigure}[b]{0.8\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/Wild2.jpg}
+        \includegraphics[width=\textwidth, angle=90]{doc/thesis/0_figures/procedural_terrain/Wild2.jpg}
         \caption{}
         \label{fig:render_quali_81p}
     \end{subfigure}
@@ -646,13 +646,13 @@ To compare the \gls{3d} models, the meshes after refinement are used, since text
         \begin{subfigure}[b]{0.42\textwidth}
             \centering
             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/50_10/120_50_10_refine2.png}
-            \caption{\SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by with $\approx\SI{1e6}{}$ vertices.} %1072422
+            \caption{} %1072422
             \label{fig:models_50_10}
         \end{subfigure}
         \begin{subfigure}[b]{0.42\textwidth}
             \centering
             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/400_1/120_400_1_mesh2.png}
-            \caption{\SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by with $\approx\SI{700}{}$ vertices.}
+            \caption{}
             \label{fig:models_400_1}
         \end{subfigure}
     \caption{Images showing \gls{3d} models reconstructed from the point clouds shown in Figure~\ref{fig:points_dense_comp}. (a) Reconstructed mesh with $\approx\SI{1e6}{}$ vertices of a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. (b) Reconstructed mesh with $\approx\SI{700}{}$ vertices of a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by. Mesh refinement failed in this scenario, therefore the sparse mesh is depicted.}
@@ -791,13 +791,13 @@ The results in Table~\ref{tab:recon_best_algo_1} suggest that IncrementalSfM pro
         \begin{subfigure}[b]{0.42\textwidth}
             \centering
             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/broken/broken_points1.png}
-            \caption{\SI{10}{\kilo\meter} \gls{sssb} after a \SI{100}{\kilo\meter} fly-by.} %1072422
+            \caption{} %1072422
             \label{fig:models_broken_points}
         \end{subfigure}
         \begin{subfigure}[b]{0.42\textwidth}
             \centering
             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/broken/broken_refine2.png}
-            \caption{\SI{1}{\kilo\meter} \gls{sssb} after a \SI{100}{\kilo\meter} fly-by.}
+            \caption{}
             \label{fig:models_broken_mesh}
         \end{subfigure}
     \caption{Images showing an erroneous reconstructed \gls{3d} model of a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{100}{\kilo\meter} fly-by. The model is inverted, i.e. resembling the inside of an egg shell, and contains holes. (a) Sparse point cloud. (b) Refined mesh.}

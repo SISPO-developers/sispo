@@ -121,26 +121,26 @@ The resulting shader based Blender material can be applied to any \gls{3d} model
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/orig.png}
-        \caption{Original image.}
+        \caption{}
         \label{fig:render_out_orig}
     \end{subfigure}
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/changed2.png}
-        \caption{Changed shader parameters.}
+        \caption{}
         \label{fig:render_out_changed}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/main_moon.png}
-        \caption{Two body system.}
+        \caption{}
         \label{fig:render_out_main_moon}
     \end{subfigure}
     \begin{subfigure}[b]{0.47\textwidth}
         \centering
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/bilobe2.png}
-        \caption{Bilobate \gls{sssb}.}
+        \caption{}
         \label{fig:render_out_bilobe}
     \end{subfigure}
     \caption{Four rendered images using the Blender material used in \gls{sispo}. (a) Render output with default shader parameters using the \gls{3d} model presented in Figure~\ref{fig:smooth_model}. (b) Rendered image with changed shader parameters using the same model as in (a). (c) Render of a binary system with the same main body as in (a) and default shader parameters. (d) Bilobate body using default shader parameters.}
@@ -289,24 +289,25 @@ The compression module provides compression and decompression algorithms. These 
 
 \begin{table}[htb]
     \centering
-    \caption{Lossless and lossy compression algorithms provided within \gls{sispo}.}
+    \caption{Lossless and lossy compression algorithms and image formats provided in \gls{sispo}. The implementation uses either native Python libraries$^{\ast}$~\cite{FoundationDataArchiving}, OpenCV$^{\dagger}$~\cite{opencv_library} or native OpenEXR$^{\ddagger}$~\cite{openexr}. The \gls{tiff} format can use either a lossless or lossy compression algorithm.}
     \label{tab:compression_format}
     \begin{tabular}{l|l}
-        \textbf{Lossless Formats} & \textbf{Lossy Formats} \\ \hline
-        \gls{png}         & \gls{jpeg}           \\
-        exr               & \gls{jp2}        \\
-        bz2               & tiff           \\
-        gzip              &                \\
-        lzma              &                \\
-        zlib              &               
+        \textbf{Lossless Formats}  & \textbf{Lossy Formats} \\ \hline
+        \gls{png}$^{\dagger}$      & \gls{jpeg}$^{\dagger}$  \\
+        OpenEXR$^{\ddagger}$       & \gls{jp2}$^{\dagger}$   \\
+        bzip2$^{\ast}$             & \gls{tiff}$^{\dagger}$  \\
+        gzip$^{\ast}$              &                \\
+        \gls{lzma}$^{\ast}$        &                \\
+        zlib$^{\ast}$              &     \\
+        \gls{tiff}$^{\dagger}$     &  
     \end{tabular}
 \end{table}
 
 Independent of the algorithm, files are handled equally. The images are loaded into NumPy arrays inside Python to have a common raw format. Before encoding, the information is reduced to \SI{8}{\bit} since the reconstruction module only reads images with \SI{8}{\bit} colour depth correctly. Images are encoded with the respective algorithm and converted into a binary stream. A copy of this data is saved as a file in the raw folder. The raw binary data is then converted back to a NumPy array and decoded to retrieve as much information as possible. Finally, the compressed and decompressed data is stored as a \gls{png} file to not lose any further information.
 
-The formats \gls{png}, \gls{jpeg}, \gls{jp2} and tiff are implemented using \textit{OpenCV}. There are various settings for each format\footnote{A detailed description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
+The formats \gls{png}, \gls{jpeg}, \gls{jp2} and tiff are implemented using OpenCV. There are various settings for each format\footnote{A detailed description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
 
-The most important input parameter that is relevant to all algorithms is the "level" argument in "settings" which describes either the compression level (from 1 to 9 for bz2, gzip, lzma, zlib and \gls{png}, higher meaning more compression) or the quality level (from 1 to 10 for \gls{jpeg} and 0.01 to 10 for \gls{jp2}, higher meaning better quality and less compression). Other input parameters to the compression package are presented in Table~\ref{tab:compression_settings}.
+The most important input parameter that is relevant to all algorithms is the "level" argument in "settings" which describes either the compression level (from 1 to 9 for bz2, gzip, \gls{lzma}, zlib and \gls{png}, higher meaning more compression) or the quality level (from 1 to 10 for \gls{jpeg} and 0.01 to 10 for \gls{jp2}, higher meaning better quality and less compression). Other input parameters to the compression package are presented in Table~\ref{tab:compression_settings}.
 
 \begin{table}[htb]
     \centering
@@ -351,43 +352,43 @@ The algorithm used for reconstruction by IncrementalSfM2 is non-deterministic, i
     \centering
     \begin{subfigure}[b]{0.4\textwidth}
         \centering
-        \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_points2.png}
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_points2.png}
         \caption{}
         \label{fig:recon_step_point}
     \end{subfigure}
     \begin{subfigure}[b]{0.4\textwidth}
         \centering
-        \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_dense1.png}
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_dense1.png}
         \caption{}
         \label{fig:recon_step_dense}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.4\textwidth}
         \centering
-        \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_mesh1.png}
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_mesh1.png}
         \caption{}
         \label{fig:recon_step_mesh}
     \end{subfigure}
     \begin{subfigure}[b]{0.4\textwidth}
         \centering
-        \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_refine2.png}
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_refine2.png}
         \caption{}
         \label{fig:recon_step_refine}
     \end{subfigure}
     \\
     \begin{subfigure}[b]{0.4\textwidth}
         \centering
-        \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_texture1.png}
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_texture1.png}
         \caption{}
         \label{fig:recon_step_texture}
     \end{subfigure}
     \begin{subfigure}[b]{0.4\textwidth}
         \centering
-        \includegraphics[width=\textwidth,height=6.4cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_img1.png}
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_img1.png}
         \caption{}
         \label{fig:recon_step_img}
     \end{subfigure}
-    \caption{Example images of intermediate results of the reconstruction pipeline. (a) Sparse point cloud created by \gls{omvs}. (b) Point cloud densified with \gls{omvs}. (c) Mesh created from the dense point cloud in (b) using \gls{omvs}. (d) Refined mesh based on the mesh created in (c) using \gls{mvs}. (e) Mesh textured using \gls{omvs}. (f) Reference image for comparison with the textured mesh.}
+    \caption{Example images of intermediate results of the reconstruction pipeline. (a)~Sparse point cloud created by \gls{omvs}. (b)~Point cloud densified with \gls{omvs}. (c)~Mesh created from the dense point cloud in~(b) using \gls{omvs}. (d)~Refined mesh based on the mesh created in~(c) using \gls{omvs}. (e)~Mesh textured using \gls{omvs}. (f)~Reference image for comparison with the textured mesh.}
     \label{fig:recon_steps}
 \end{figure}
 
@@ -402,7 +403,7 @@ The high-level behaviour of \gls{sispo} can be controlled using a set of flags p
     \caption{Input flags to control high-level behaviour of \gls{sispo}.}
     \label{tab:cli_args}
     \resizebox{\textwidth}{!}{%
-        \begin{tabular}{p{0.22\textwidth}|p{0.32\textwidth}|p{0.16\textwidth}|p{0.29\textwidth}}
+        \begin{tabular}{p{0.24\textwidth}|p{0.32\textwidth}|p{0.16\textwidth}|p{0.27\textwidth}}
             \textbf{Name} & \textbf{Variable Name} & \textbf{Default Value} & \textbf{Description} \\ \hline
             --help & & --- & Prints list of arguments with hints \\
             -i & i & definition.json & Path to a definition file that defines the settings \\
