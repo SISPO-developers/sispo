@@ -78,13 +78,13 @@
     
 \newglossaryentry{ra}{name=\ensuremath{\alpha_r},
     description={Right ascension},
-    sort=ra,
+    sort=rightascensio,
     parent=greekletters,
     type=symbolslist}
     
 \newglossaryentry{de}{name=\ensuremath{\delta},
     description={Declination},
-    sort=de,
+    sort=declination,
     parent=greekletters,
     type=symbolslist}
     
@@ -97,6 +97,18 @@
 \newglossaryentry{k}{name=\ensuremath{\mathbf{K}},
     description={Camera matrix},
     sort=k,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{r}{name=\ensuremath{\mathbf{R}},
+    description={Rotation matrix},
+    sort=r,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{t}{name=\ensuremath{t},
+    description={Translation vector},
+    sort=t,
     parent=latinletters,
     type=symbolslist}
     
@@ -118,9 +130,21 @@
     parent=latinletters,
     type=symbolslist}
     
-\newglossaryentry{area}{name=\ensuremath{A},
-    description={Area},
-    sort=area,
+\newglossaryentry{aperture}{name=\ensuremath{A},
+    description={Aperture Area},
+    sort=areaaperture,
+    parent=latinletters,
+    type=symbolslist}
+        
+\newglossaryentry{a_pixel}{name=\ensuremath{A_{pixel}},
+    description={Area of a pixel},
+    sort=areapixel,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{l_pixel}{name=\ensuremath{l_{pixel}},
+    description={Length of a pixel},
+    sort=lengthpixel,
     parent=latinletters,
     type=symbolslist}
     
@@ -128,6 +152,246 @@
     description={Wavelength},
     sort=lambda,
     parent=greekletters,
+    type=symbolslist}
+    
+\newglossaryentry{dlambda}{name=\ensuremath{\Delta\lambda},
+    description={Wavelength bandwidth},
+    sort=lambdadelta,
+    parent=greekletters,
+    type=symbolslist}
+    
+\newglossaryentry{calibfactor}{name=\ensuremath{f_c},
+    description={Calibration factor for photometric calibration},
+    sort=calibrationfactor,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{iref}{name=\ensuremath{I_{ref}},
+    description={Reference intensity of an image},
+    sort=intensityreference,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{fref}{name=\ensuremath{F_{ref}},
+    description={Reference photon flux},
+    sort=fluxreference,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{flux_d}{name=\ensuremath{F},
+    description={Photon flux density},
+    sort=fluxdensity,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{flux_scaled}{name=\ensuremath{F_d},
+    description={Scaled photon flux density},
+    sort=fluxdensityscaled,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{flux_0}{name=\ensuremath{F_0},
+    description={Photon flux density at magnitude $m = 0$},
+    sort=fluxdensityzero,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{flux_stars}{name=\ensuremath{F_{stars}},
+    description={Total photon flux of stars in the Field of View},
+    sort=fluxstars,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{s_stars}{name=\ensuremath{S_{stars}},
+    description={Sum of pixel values of a single channel of a star map},
+    sort=valuepixelsum,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{m}{name=\ensuremath{m},
+    description={Apparent magnitude},
+    sort=magnitudeapparent,
+    parent=latinletters,
+    type=symbolslist}
+
+\newglossaryentry{m_d}{name=\ensuremath{m_d},
+    description={Multiplier for systems that are not diffraction limited},
+    sort=multiplierdiffraction,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{D}{name=\ensuremath{D},
+    description={Aperture diameter},
+    sort=diameteraperture,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{e_i}{name=\ensuremath{e_i},
+    description={$i^{th}$ edge vector of the Field of View},
+    sort=edgevector,
+    parent=latinletters,
+    type=symbolslist}
+
+\newglossaryentry{e_right}{name=\ensuremath{e_{right}},
+    description={Vector pointing to the right edge of the Field of View},
+    sort=edgevectorright,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{e_left}{name=\ensuremath{e_{left}},
+    description={Vector pointing to the left edge of the Field of View},
+    sort=edgevectorleft,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{e_upper}{name=\ensuremath{e_{upper}},
+    description={Vector pointing to the upper edge of the Field of View},
+    sort=edgevectorupper,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{e_lower}{name=\ensuremath{e_{lower}},
+    description={Vector pointing to the lower edge of the Field of View},
+    sort=edgevectorlower,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{v_d}{name=\ensuremath{v_d},
+    description={Vector pointing along the optical axis of a camera},
+    sort=cameradirection,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{v_dhat}{name=\ensuremath{\hat{v}_d},
+    description={Normalised vector pointing along the optical axis of a camera},
+    sort=cameradirectionnormalised,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{v_rhat}{name=\ensuremath{\hat{v}_r},
+    description={Normalised vector pointing right in the image plane},
+    sort=vright,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{v_uhat}{name=\ensuremath{\hat{v}_u},
+    description={Normalised vector pointing up in the image plane},
+    sort=vup,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{s_k}{name=\ensuremath{s_k},
+    description={Width or height of a camera sensor},
+    sort=sensorwidthheight,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{s_w}{name=\ensuremath{s_w},
+    description={Width of a camera sensor},
+    sort=sensorwidth,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{s_h}{name=\ensuremath{s_h},
+    description={Height of a camera sensor},
+    sort=sensorheight,
+    parent=latinletters,
+    type=symbolslist}
+
+\newglossaryentry{c_u}{name=\ensuremath{c_u},
+    description={Coordinate of image principle point along image u-axis},
+    sort=cu,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{c_v}{name=\ensuremath{c_v},
+    description={Coordinate of image principle point along image v-axis},
+    sort=cv,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{k_u}{name=\ensuremath{k_u},
+    description={Scaling factor along image u-axis},
+    sort=cu,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{k_v}{name=\ensuremath{k_v},
+    description={Scaling factor along image v-axis},
+    sort=cv,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{p}{name=\ensuremath{p},
+    description={Cartesian coordinate vector},
+    sort=p,
+    parent=latinletters,
+    type=symbolslist}
+
+\newglossaryentry{r_u}{name=\ensuremath{r_u},
+    description={Number of pixels of an image sensor along the u-axis},
+    sort=rx,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{r_v}{name=\ensuremath{r_v},
+    description={Number of pixels of an image sensor along the v-axis},
+    sort=ry,
+    parent=latinletters,
+    type=symbolslist}
+
+\newglossaryentry{u_pix}{name=\ensuremath{u_{pix}},
+    description={Pixel u-coordinate},
+    sort=upix,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{v_pix}{name=\ensuremath{v_{pix}},
+    description={Pixel v-coordinate},
+    sort=vpix,
+    parent=latinletters,
+    type=symbolslist}
+
+\newglossaryentry{x_i}{name=\ensuremath{x_i},
+    description={Cartesian coordinates of point $i$ in an image},
+    sort=xcoord,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{l_i}{name=\ensuremath{l'_i},
+    description={Epipolar line of point $i$ in an image},
+    sort=lepipolar,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{G}{name=\ensuremath{G},
+    description={Value of a Gaussian distribution},
+    sort=gaussian,
+    parent=latinletters,
+    type=symbolslist}
+
+\newglossaryentry{d}{name=\ensuremath{d},
+    description={Distance of the spacecraft from the Sun},
+    sort=distance,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{v}{name=\ensuremath{v},
+    description={Value of a pixel},
+    sort=pixelvalue,
+    parent=latinletters,
+    type=symbolslist}
+    
+\newglossaryentry{v_0}{name=\ensuremath{v_0},
+    description={Original value of a pixel},
+    sort=pixelvalueoriginal,
+    parent=latinletters,
+    type=symbolslist}
+
+\newglossaryentry{T}{name=\ensuremath{T},
+    description={Runtime of a program},
+    sort=runtime,
+    parent=latinletters,
     type=symbolslist}
 
 % Operators
@@ -151,8 +415,8 @@
 \newacronym{mvs}{MVS}{Multi-View Stereo}
 \newacronym{dct}{DCT}{Discrete Cosine Transform}
 \newacronym{dwt}{DWT}{Discrete Wavelet Transform}
-\newacronym{2d}{2D}{two-dimensional}
-\newacronym{3d}{3D}{three-dimensional}
+\newacronym{2d}{2D}{Two-Dimensional}
+\newacronym{3d}{3D}{Three-Dimensional}
 \newacronym{ci}{CI}{Comet Interceptor}
 \newacronym{mat}{MAT}{Multi-Asteroid Touring}
 \newacronym{mantis}{MANTIS}{Main-belt Asteroid and NEO Tour with Imaging and Spectroscopy}
