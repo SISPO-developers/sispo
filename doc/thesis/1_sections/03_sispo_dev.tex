@@ -1,13 +1,13 @@
 \section{Space Imaging Simulator for Proximity Operations} \label{sec:sispo}
-\gls{sispo} is a software package that integrates trajectory simulation with physics-based rendering, image compression and \gls{3d} reconstruction. These functionalities are split into three sub-packages. The first sub-package uses Keplerian orbit data for a \gls{sssb} and a definition of the encounter geometry for the spacecraft to propagate both on realistic trajectories and render an image series of the encounter. The second sub-package provides various algorithms for image compression and decompression. The third sub-package uses images to reconstruct a textured \gls{3d} model using the \gls{sfm} technique. The combination of these three modules provides a processing pipeline from an initial \gls{3d} model to a reconstructed \gls{3d} model via rendered and compressed images. \Gls{sispo} is a Python software package which is hosted on a public GitHub repository under a BSD-2-Clause license and maintained by the author~\cite{Schwarzkopf2020SpaceOperations}. In the following, a description of the functionality and input parameters provides insights into the development process and design choices made during development.
+\gls{sispo} is a software package that integrates trajectory simulation with physics-based rendering, image compression and \gls{3d} reconstruction. These functionalities are split into three sub-packages. The first sub-package uses Keplerian orbit data for a \gls{sssb} and a simplified definition of the encounter geometry for the spacecraft to propagate realistic trajectories and render an image series of the encounter. The second sub-package provides various algorithms for image compression and decompression. The third sub-package uses images to reconstruct a textured \gls{3d} model using the \gls{sfm} technique. The three sub-packages combined provide a processing pipeline from an initial \gls{3d} model to a reconstructed \gls{3d} model via rendered and compressed images. \Gls{sispo} is a Python software package which is hosted on a public GitHub repository under a BSD-2-Clause license and maintained by the author~\cite{Schwarzkopf2020SpaceOperations}. In the following, a description of the functionality and input parameters provides insights into the development process and design choices made during development.
 
 \subsection{Simulation Package}
-The simulation sub-package handles orbit propagation for the \gls{sssb} and spacecraft as well as rendering photo-realistic images. Propagation and rendering are two separate steps. First the \gls{sssb} and spacecraft are propagated along their trajectories using the space dynamics library Orekit~\cite{orekit}. The  trajectory and attitude data is used to render four images per frame which are composed and photometrically calibrated to form the final rendering output. To minimise the information loss in intermediate steps, images during the rendering and calibration process use the \gls{hdr} image format OpenEXR~\cite{openexr}. Additionally, rendered images are stored as \gls{png} files for a quick preview of the images. All raw data of intermediate steps is saved for possible in-depth analysis. The raw data consist of the four rendered images, their \gls{png} previews, the metadata, the Blender scene and the star data. The simulation sub-package was developed to contain all general information about the environment in the Environment class in order to have one consistent instance of time, constants and parameters.
+The simulation sub-package handles orbit propagation for the \gls{sssb} and spacecraft as well as rendering photo-realistic images. Propagation and rendering are two separate steps. First the \gls{sssb} and spacecraft are propagated along their trajectories using the space dynamics library Orekit~\cite{orekit}. Subsequently, trajectory and attitude data is used to render four images per frame which are composed and photometrically calibrated to form the final rendering output. Images during rendering and calibration use the \gls{hdr} image format OpenEXR to minimise information loss in intermediate steps~\cite{openexr}. Reduced quality images of the rendered images are stored as \gls{png} files for quick preview. Raw data of intermediate steps is saved for possible in-depth analysis. The raw data consist of the four rendered images, their \gls{png} previews, metadata, the Blender scene and the star data. The simulation sub-package was developed to contain all general information about the environment in the Environment class in order to have one consistent instance of time, constants and parameters.
 
 %one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}~\cite{zacharias2013fourthUCAC4}. Additionally, the date, the spacecraft position, \gls{sssb} position and their distance is stored as metadata. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system~\cite{Bessell1979UBVRIPhotometry}. The composition process is explained in more detail in Section~\ref{sec:composition}.
 
 \subsubsection{Propagation}
-The Python bindings of the Orekit library run a \gls{vm} to execute its Java code. Physical data is required which is distributed with the simulation sub-package. The \gls{vm} and physical data are initialised in the simulation main module and only afterwards other modules are imported which is why other modules do not include the Orekit initialisation. This approach was taken in order to reduce resource consumption by not having several instances of the \gls{vm} running. In the propagation step, Orekit determines state information of the \gls{sssb} and the spacecraft. The state information includes the date, position and the rotation angles of the \gls{sssb}. Propagation is based on Orekit's KeplerianOrbit and KeplerianPropagator classes. The input required to define the \gls{sssb} trajectory are presented in Table~\ref{tab:keplerorbit_params}.
+Propagation is based on the Python bindings of the Orekit library. The Python bindings run a \gls{vm} to execute the underlying Java code. Orekit requires physical data which is distributed with the simulation sub-package. The \gls{vm} and physical data are initialised in the simulation module. Other modules are imported afterwards so other modules do not need to inlcude the Orekit initialisation. Having only one instance Java \gls{vm} executing reduces resource consumption and provides a single consistent set of physical constants. During propagation, Orekit determines state information of the \gls{sssb} and the spacecraft for each sample along the trajectory. The state information includes the date, position and the rotation angles of the \gls{sssb}. Propagation is based on Orekit's KeplerianOrbit and KeplerianPropagator classes. The input required to define the \gls{sssb} trajectory are presented in Table~\ref{tab:keplerorbit_params}.
 
 \begin{table}[htb]
     \centering
@@ -25,7 +25,7 @@ The Python bindings of the Orekit library run a \gls{vm} to execute its Java cod
     \end{tabular}
 \end{table}
 
-The spacecraft trajectory is not defined by Keplerian elements but calculated relative to the \gls{sssb} at their closest approach. The parameters presented in Table~\ref{tab:sc_enc_paras} are used to calculate the state vector of the spacecraft at the encounter which defines the trajectory of the spacecraft. The first five parameters are required as input. The sssb\_state is calculated based on the \gls{sssb} input data and the encounter data.
+The spacecraft trajectory is not defined by Keplerian elements but calculated relative to the \gls{sssb} at closest approach. However, the trajectory around the \gls{sssb} is a closed orbit about the Sun (cf. Section~\ref{sec:orbit_mechanics}). The parameters presented in Table~\ref{tab:sc_enc_paras} are used to calculate the state vector of the spacecraft at the encounter which defines the trajectory of the spacecraft. The first five parameters are required as input. The sssb\_state is calculated based on the \gls{sssb} input data and the encounter data.
 
 \begin{table}[htb]
     \centering
@@ -45,7 +45,7 @@ The spacecraft trajectory is not defined by Keplerian elements but calculated re
 \end{table}
 \footnotetext{A Python dictionary with an int for year, month, day, hour, minute and float for second. \label{fot:date_dict}}
 
-Propagation is defined by the simulation duration, number of frames, the timesampler mode and a slowmotion factor as presented in Table~\ref{tab:sim_prop_input}. The timesampler mode determines whether the steps are distributed linear in time (mode 1, default) or whether an exponential model (mode 2) is used which increases the number of frames around the encounter. How many samples more are taken can be controlled with the slow motion factor. Mode 2 is especially helpful when simulating a long period since far from the \gls{sssb} nucleus, there are only minor visible changes in the rendered images.
+Propagation is defined by the duration of the fly-by, number of frames, timesampler mode and a slowmotion factor as presented in Table~\ref{tab:sim_prop_input}. The timesampler mode determines whether the steps are distributed linear in time (mode 1, default) or whether an exponential model (mode 2) is used which increases the number of frames around the encounter. How many samples more are taken can be controlled with the slow motion factor. Mode 2 is especially helpful when simulating a long fly-by since far from the \gls{sssb} nucleus, there are only minor visible changes in rendered images.
 
 \begin{table}[htb]
     \centering
@@ -64,9 +64,9 @@ Propagation is defined by the simulation duration, number of frames, the timesam
 
 
 \subsubsection{SSSB Rendering}
-The \gls{3d} creation suite Blender was selected for rendering within \gls{sispo}~\cite{blender}. Blender provides the path-tracing rendering engine Cycles which renders photo-realistic, physics-based images~\cite{Cycles}.
+The \gls{3d} creation suite Blender was selected for rendering within \gls{sispo}~\cite{blender}. Blender provides the path tracing rendering engine Cycles which renders photo-realistic, physics-based images~\cite{Cycles}.
 
-Rendering requires \gls{3d} models of the \gls{sssb} and the light reference as well as the Sun as a light source. The \gls{sssb} and light reference objects are kept at the origin while the Sun object and the cameras change position. In total there are three scenes with one camera each. These scenes are called \textit{SssbOnly} with the \textit{ScCam} camera, the \textit{SssbConstDist} scene with the \textit{SssbConstDistCam} and the \textit{LightRef} scene with the \textit{LightRefCam} camera. The three scenes with their respective cameras are necessary for the composition step as described in Section~\ref{sec:composition}. Each camera is configured with the same physical instrument characteristics provided as input as presented in Table~\ref{tab:inst_input}. All cameras are perspective \gls{rgb} cameras with a \gls{fov} clipped to the interval $[\SI{1e-5}{},\SI{1e32}{}]$. The star background is not rendered with Blender and therefore described separately in Section~\ref{sec:stars}.
+Rendering requires \gls{3d} models of the \gls{sssb}, the light reference and the Sun as a light source. The \gls{sssb} and light reference objects are kept at the origin while the Sun object and cameras change location. Three scenes with one camera each are used. The scenes are called \textit{SssbOnly} with the \textit{ScCam} camera, \textit{SssbConstDist} with the \textit{SssbConstDistCam} and \textit{LightRef} with the \textit{LightRefCam} camera. The three scenes with their respective cameras are necessary for the composition step described in Section~\ref{sec:composition}. Each camera is configured with the same physical instrument characteristics provided as input as presented in Table~\ref{tab:inst_input}. All cameras are perspective \gls{rgb} cameras with a \gls{fov} clipped to the interval $[\SI{1e-5}{},\SI{1e32}{}]$. The star background is not rendered with Blender and therefore described separately in Section~\ref{sec:stars}.
 
 \begin{table}[htb]
     \centering
@@ -86,7 +86,7 @@ Rendering requires \gls{3d} models of the \gls{sssb} and the light reference as 
     }
 \end{table}
 
-Within \gls{sispo} the precise shape and surface details of the \gls{sssb} are not provided as texture files and exact shape models. The raw Blender model is a smooth body without any textures as shown in Figure~\ref{fig:smooth_model}. Blender shader nodes are used to create the surface shape and texture during rendering. Blender nodes are a method of programming complex algorithms graphically. These shader nodes are combined in a network or tree. An overview of the shader node network used in our rendering process can be seen in Figure~\ref{fig:shader_nodes}. The network consists of two main trees, one for shading and one for displacement, which are interlinked, i.e. displacement influences surface colour and vice-versa. This approach of procedural terrain generation allows to use the same model on a large range of distances since surface details are generated procedurally.
+Within \gls{sispo} the precise shape and surface details of a \gls{sssb} are not provided as texture files and exact shape models. The raw Blender model is a smooth body without any textures as shown in Figure~\ref{fig:smooth_model}. Blender shader nodes are used to create the surface shape and texture during rendering. Blender nodes are a method of programming complex algorithms graphically. These shader nodes are combined in a network or tree. An overview of the shader node network used in our rendering process can be seen in Figure~\ref{fig:shader_nodes}. The network consists of two main trees, one for shading and one for displacement, which are interlinked, i.e. displacement influences surface colour and vice-versa. Procedural terrain generation allows to use the same model on a large range of distances since surface details are generated automatically~\cite{IntroductionNodes}.
 
 \begin{figure}[htb]
     \centering
@@ -102,12 +102,12 @@ Within \gls{sispo} the precise shape and surface details of the \gls{sssb} are n
         \caption{}
         \label{fig:shader_nodes}
     \end{subfigure}
-    \caption{(a)~Raw, smooth \gls{3d} model before applying texturing and displacement shaders. (b)~Shader node network overview depicting the shaders used for creating the final \gls{sssb} surface and terrain. This overview is only provided to give an idea of the complexity of the network, a larger version of this image with higher resolution can be found in Appendix~\ref{sec:shader_node}.}
+    \caption{(a)~Raw, smooth \gls{3d} model before applying texturing and displacement shaders. (b)~Shader node network overview depicting the shaders used for creating the final \gls{sssb} surface and terrain. The overview shall provide an idea of the complexity of the network, a larger version of this image with higher resolution is presented in Appendix~\ref{sec:shader_node}.}
 \end{figure}
 
 The shader implementation creates a material that combines surface shading and displacement. The used nodes are grouped into five categories. Math nodes, texture nodes, colouring nodes, vector nodes and shader nodes. A detailed description can be found in the Blender manual, we provide only the most relevant information for our implementation~\cite{IntroductionNodes}.
 
-Math nodes include mathematical operators such as add, subtract, multiply, greater than or maximum of a value. Vector nodes allow transformations in \gls{3d} space such as translation, scaling or displacement. We use the Displacement node to move the surface along the surface normals. Colouring nodes are used to change colours. Our model uses the RGB Curves node which allows manipulation of colours separated by channel using a curve that maps the input to output values. Also Mix nodes are used to combine colours. Texture nodes provide procedural creation of texture by calculating colours based on mathematical functions and model coordinates. The Noise Texture node is used to create textured based on Perlin noise. The Voronoi Texture node creates textures using Voronoi patterns, or Worely noise. Three shader nodes are used in our model, the Principled \gls{bsdf}, Diffuse \gls{bsdf} and the Mix Shader node. The Principled \gls{bsdf} node combines many shading features in a single node. The \gls{bsdf} at the output includes a mix of sheen tint, surface roughness and index of refraction among others. The Diffuse BSDF node provides diffuse reflection using a Lambertian and Oren-Nayar model. The Mix Shader node combines its input shaders with a given probability for using either of the input shaders as its output.
+Math nodes include mathematical operators such as add, subtract, multiply, greater than or maximum of a value. Vector nodes allow transformations in \gls{3d} space such as translation, scaling or displacement. \Gls{sispo} uses the Displacement node to move the surface along the surface normals. Colouring nodes are used to alter colours.\Gls{sispo} uses the RGB Curves node which allows manipulation of colours per channel using a curve that maps the input to output values. Mix nodes are used to combine colours. Texture nodes provide procedural creation of texture by calculating colours based on mathematical functions and model coordinates. The Noise Texture node creates textures based on Perlin noise. The Voronoi Texture node creates textures using Voronoi patterns, or Worely noise. Three shader nodes are used in our model, the Principled \gls{bsdf}, Diffuse \gls{bsdf} and the Mix Shader node. The Principled \gls{bsdf} node combines many shading features in a single node. The \gls{bsdf} at the output includes a mix of sheen tint, surface roughness and index of refraction, among others. The Diffuse \gls{bsdf} node provides diffuse reflection using a Lambertian and Oren-Nayar model. The Mix Shader node combines its input shaders with a given probability for using either of the input shaders as its output.
 %math nodes: add, subtract, multiply, greater than, maximum 
 %vector: displacement
 %colouring: RGB curves, Mix
@@ -147,7 +147,7 @@ The resulting shader based Blender material can be applied to any \gls{3d} model
     \label{fig:render_out}
 \end{figure}
 
-Blender is interfaced using its Python bindings which need to be compiled manually (cf. Appendix~\ref{sec:app_setup} for setup instructions). A set of predefined settings is used for each scene while some parameters can be provided as input. The paths to the ".blend" files of models for the Sun, light reference and \gls{sssb} need to be provided in combination with the object name within the respective file.
+Blender is interfaced using its Python bindings which need to be compiled manually (cf. Appendix~\ref{sec:app_setup} for setup instructions). Some predefined settings are used for each scene and some parameters can be provided as input. The paths to the ".blend" files of models for the Sun, light reference and \gls{sssb} need to be provided in combination with the object name within the respective file.
 
 Since images are composed and calibrated in a later step, described in Section~\ref{sec:composition}, the settings shown in Table~\ref{tab:color_space} are selected to not alter images with Blender while saving the raw rendered images.
 \begin{table}[htb]
@@ -155,13 +155,13 @@ Since images are composed and calibrated in a later step, described in Section~\
     \caption{Blender settings that define the colour space and are fixed to not alter images after rendering.}
     \label{tab:color_space}
     \begin{tabular}{p{0.25\textwidth}|p{0.08\textwidth}|p{0.57\textwidth}}
-        \textbf{Name}        & \textbf{Value} & \textbf{Description} \\ \hline
+        \textbf{Name in Blender}        & \textbf{Value} & \textbf{Description} \\ \hline
         Color mode           & RGBA           & Use RGB and alpha channel. \\
         Exposure             & 0              & Exposure in stops, applied before display transform. \\
-        Sequencer colorspace & Raw            & Color space sequencer uses linear color space. \\
-        View transform       & Raw            & No color space conversion. \\
-        Look                 & None           & No artistic effect is applied before color space conversion. \\
-        Film transparent     & True           & World background is transparent, i.e. alpha values can be used for image composition and proper occultation.
+        Sequencer colorspace & Raw            & Colour space sequencer uses linear color space. \\
+        View transform       & Raw            & No colour space conversion. \\
+        Look                 & None           & No artistic effect is applied before colour space conversion. \\
+        Film transparent     & True           & World background is transparent, i.e. alpha values can be used for image composition and occultation.
     \end{tabular}
 \end{table}
 
@@ -174,27 +174,30 @@ The rendering performance of Blender can be configured depending on the availabl
         \begin{tabular}{p{0.15\textwidth}|p{0.15\textwidth}|p{0.7\textwidth}}
             \textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\ \hline
             device & AUTO & Device used for rendering, either "AUTO", \gls{cpu} or \gls{gpu}. "AUTO" attempts to use \gls{gpu}, if no \gls{gpu} is available uses \gls{gpu}. \\
-            tile\_size & 512 (GPU)/ 128 (CPU)  & Size of a rendering tile. When rendering with a \gls{gpu} a bigger tile size tends to have better performance. When rendering with a \gls{cpu}, a smaller tile size tends to have better performance.\footnote{\url{https://docs.blender.org/manual/en/latest/render/cycles/render\_settings/performance.html?highlight=tile\%20size}} \\
+            tile\_size & 512 (GPU)/ 128 (CPU)  & Size of a rendering tile. When rendering with a \gls{gpu} a bigger tile size tends to have better performance. When rendering with a \gls{cpu}, a smaller tile size tends to have better performance\footnotemark. \\
             samples & 48 & Number of samples rendered per pixel.\\
         \end{tabular}
     }
 \end{table}
+\footnotetext{A more detailed description is found at \url{https://docs.blender.org/manual/en/latest/render/cycles/render\_settings/performance.html?highlight=tile\%20size}}
 
-Due to problems during rendering, the Blender scenes are scaled to kilometres instead of metres. I.e. one Blender unit corresponds to \SI{1}{\kilo\meter}. This is the only deviation from SI base units within the software.
+Due to problems during rendering, Blender scenes use kilometres instead of metres, i.e. one Blender unit corresponds to \SI{1}{\kilo\meter}. This is the only deviation from SI base units within \gls{sispo}.
 
 \subsubsection{Star Rendering} \label{sec:stars}
-The background stars are rendered based on the star catalogue \gls{ucac4}. This catalogue includes stars up to magnitude 16. The \gls{fov} is determined based on the spacecraft camera in the \textit{SssbOnly} scene since this camera provides the \gls{fov} of the spacecraft instrument. The edges of the \gls{fov} are calculated using Equation \ref{eq:fov_edge}. 
-In the next step, we retrieve the list of stars that are visible in the \gls{fov}. The interface for the \gls{ucac4} is a commandline tool u4test.exe~\cite{gray}. This interface however requires that the \gls{fov} is input as right ascension \gls{ra}, declination \gls{de}, width and height.
-The conversion of the vectors into their respective right ascension and declination is a transform between Cartesian coordinates to spherical coordinates. Their relation is defined as
+The background stars are rendered based on the star catalogue \gls{ucac4}. The \gls{ucac4} catalogue includes stars up to magnitude 16. The \gls{fov} is determined based on the spacecraft camera in the \textit{SssbOnly} scene which represents the \gls{fov} of the spacecraft instrument. The edges of the \gls{fov} are calculated using Equation~\ref{eq:fov_edge}.
+
+\Gls{sispo} retrieves the list of stars in the \gls{fov}. The interface for the \gls{ucac4} is a commandline tool u4test.exe~\cite{gray}. The commandline interface requires the \gls{fov} defined as right ascension \gls{ra}, declination \gls{de}, width and height.
+
+The conversion of the vectors into their respective right ascension and declination is a transform between Cartesian coordinates to spherical coordinates. The relation is defined as
 \begin{align}
     \delta = \arcsin{(z)}, \label{eq:declination} \\
     \alpha_r = \arccos{\left(\frac{x}{\cos{\delta}}\right)} + \pi, \label{eq:right_ascension}
 \end{align}
-where \gls{de} is the declination, \gls{ra} the right ascension, $x$ is the x-coordinate and $y$ is the y-coordinate. Using this information the star catalogue returns a list of visible stars with their right ascension and declination as well as their magnitude.
+where \gls{de} is the declination, \gls{ra} the right ascension, $x$ is the x-coordinate and $y$ is the y-coordinate. Using this information the star catalogue returns a list of visible stars including their right ascension, declination and magnitude.
 
-The star background is created by generating an image with four times the size of final image. The coordinates are converted from the right ascension and declination of each star into pixel coordinates of the image frame using Equation \ref{eq:pix_conversion}. The pixel coordinates are multiplied with two to fit the oversized image.
+The star background is created by generating an image with four times the size of the final image. The coordinates are converted from right ascension and declination of each star into pixel coordinates of the image frame using Equation~\ref{eq:pix_conversion}. The pixel coordinates are multiplied with two to fit the oversized image.
 
-The pixel value of each colour channel is set to the flux calculated from the magnitude as defined in Equation \ref{eq:mag_flux}. The resulting image is Gaussian filtered and down-sampled to the final image size using local means (cf. Section~\ref{sec:t_downsample}). Star background images are stored in the OpenEXR format with all alpha channel values equal to one. An example image is presented in Figure~\ref{fig:star_rendering}.
+The pixel value of each colour channel is set to the flux calculated from the magnitude as defined in Equation~\ref{eq:mag_flux}. The resulting image is Gaussian filtered and down-sampled to the final image size using local means (cf. Section~\ref{sec:t_downsample}). Star background images are stored in the OpenEXR format with all alpha channel values equal to one. An example image is presented in Figure~\ref{fig:star_rendering}.
 
 \begin{figure}[htb]
     \centering
