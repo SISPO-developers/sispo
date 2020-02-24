@@ -15,7 +15,7 @@ Propagation is based on the Python bindings of the Orekit library. The Python bi
     \label{tab:keplerorbit_params}
     \begin{tabular}{p{0.5\textwidth}|p{0.2\textwidth}}
         \textbf{Parameter [Unit]} & \textbf{Type} \\ \hline
-        a [\SI{}{\astronomicalunit}] & float\\
+        a [\SI{}{au}] & float\\
         e [-] & float\\
         i [\SI{}{\radian}] & float \\
         omega [\SI{}{\radian}] & float \\
@@ -146,7 +146,7 @@ The resulting shader based Blender material can be applied to any \gls{3d} model
     \caption{Four rendered images using the Blender material used in \gls{sispo}. (a)~Render output with default shader parameters using the \gls{3d} model presented in Figure~\ref{fig:smooth_model}. (b)~Rendered image with changed shader parameters using the same model as in~(a). (c)~Render of a binary system with the same main body as in~(a) and default shader parameters. (d)~Bilobate body using default shader parameters.}
     \label{fig:render_out}
 \end{figure}
-Blender is interfaced using its Python bindings which need to be compiled manually (cf. Appendix~\ref{sec:app_setup} for setup instructions). Some predefined settings are used for each scene and some parameters can be provided as input. The paths to the ".blend" files of models for the Sun, light reference and \gls{sssb} need to be provided in combination with the object name within the respective file.
+Blender is interfaced using its Python bindings which need to be compiled manually. Some predefined settings are used for each scene and some parameters can be provided as input. The paths to the ".blend" files of models for the Sun, light reference and \gls{sssb} need to be provided with the object name within the respective file.
 
 Since images are composed and calibrated in a later step, described in Section~\ref{sec:composition}, the settings shown in Table~\ref{tab:color_space} are selected to not alter images with Blender while saving the raw rendered images.
 \begin{table}[htb]
@@ -245,13 +245,13 @@ Composition begins with a set of four images with the prefixes \textit{SssbOnly}
 
 Photometric calibration is based on the V-band of the \gls{ubv} as described in Section~\ref{sec:photo_cal}. The \gls{ubv} was created before \glspl{ccd} were frequently used in imaging. The \gls{ubv} does not consider the higher sensitivity in the red and infrared spectrum of \glspl{ccd}. However, the \gls{ubv} was implemented because of its simplicity.
 
-The calibration reference is the solar photon flux in the V-band. The Sun has a magnitude \gls{m}$_{\astrosun} = -26.74$ at a distance of \SI{1}{\astronomicalunit}. Using Equation~\ref{eq:comp_flux_0mag} and the constants for the V-band from Table~\ref{tab:ubv_constants}, the solar photon flux density at \SI{1}{\astronomicalunit} becomes \gls{flux_d}$_{\astrosun} = \SI{4.36715206e+20}{\per\second\per\square\meter}$.
+The calibration reference is the solar photon flux in the V-band. The Sun has a magnitude \gls{m}$_{\astrosun} = -26.74$ at a distance of \SI{1}{au}. Using Equation~\ref{eq:comp_flux_0mag} and the constants for the V-band from Table~\ref{tab:ubv_constants}, the solar photon flux density at \SI{1}{au} becomes \gls{flux_d}$_{\astrosun} = \SI{4.36715206e+20}{\per\second\per\square\meter}$.
  
-The spacecraft is typically not at a \SI{1}{\astronomicalunit} distance to the Sun, therefore the flux density is scaled using an inverse square law defined as
+The spacecraft is typically not at a \SI{1}{au} distance to the Sun, therefore the flux density is scaled using an inverse square law defined as
 \begin{align}
-    F_d = F \times \left(\frac{\SI{1}{\astronomicalunit}}{d}\right)^2, \label{eq:inverse_square}
+    F_d = F \times \left(\frac{\SI{1}{au}}{d}\right)^2, \label{eq:inverse_square}
 \end{align}
-where \gls{flux_scaled} is the scaled photon flux density, \gls{flux_d} is the flux density at \SI{1}{\astronomicalunit} and \gls{d} is the spacecraft's distance from the Sun in \SI{}{\astronomicalunit}.
+where \gls{flux_scaled} is the scaled photon flux density, \gls{flux_d} is the flux density at \SI{1}{au} and \gls{d} is the spacecraft's distance from the Sun in \SI{}{au}.
 
 Subsequently, the reference photon flux for one pixel is calculated using Equation~\ref{eq:comp_flux_pix} and the scaled photon flux density \gls{flux_scaled}.
 
@@ -428,7 +428,7 @@ The high-level behaviour of \gls{sispo} can be controlled with a set of executio
     }
 \end{table}
 
-\subsection{Performance}
+\subsection{Performance} \label{sec:performance}
 The performance of \gls{sispo} and its components was analysed during the development to find code section that increase execution time. While reducing the number of dependencies, it was ensured that performance does not degrade.
 
 Two computers were available during performance analysis. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second computer is a workstation with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu~18.04.3~LTS.

@@ -5,8 +5,8 @@ Several simulation trials were executed with \gls{sispo} to assess the capabilit
     \centering
     \caption{Simulation parameters used for investigating capabilities of \gls{sispo}. Image compression in each scenario used the formats \gls{png} and \gls{jp2} quality levels 1000, 100, 10 and 1 compression to investigate compression effects.}
     \label{tab:sim_params}
-    \begin{tabular}{l|lll}
-        \textbf{\gls{sssb} Size [\SI{}{\kilo\meter}]}& \textbf{Encounter Distance [\SI{}{\kilo\meter}]} & \textbf{Number of Images [-]} \\ \hline
+    \begin{tabular}{l|ll}
+        \textbf{\gls{sssb} Size [\SI{}{\kilo\meter}]} & \textbf{Encounter Distance [\SI{}{\kilo\meter}]} & \textbf{Number of Images [-]} \\ \hline
         1  & 50  & 120\\
         1  & 100 & 120\\
         1  & 200 & 120\\
@@ -17,12 +17,10 @@ Several simulation trials were executed with \gls{sispo} to assess the capabilit
         10 & 400 & 120\\
     \end{tabular}
 \end{table}
-
-Two computers were used to create the results. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second is a workstation computer with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu 18.04.3 LTS. During the simulation trials, reconstruction was found to be more successful on the Windows computer. Consequently, images were rendered on the Linux computer and reconstructions were carried out on the Windows computer. It was not possible to determine the cause of the higher reconstruction success of the Windows computer.
+The hardware presented in Section~\ref{sec:performance} was used to create the results. During the simulation trials, reconstruction was found to be more successful on the Windows computer. Consequently, images were rendered on the Linux computer and reconstructions were carried out on the Windows computer. It was not possible to determine the cause of the higher reconstruction success of the Windows computer.
 
 \subsection{Rendering} \label{sec:results_sim}
-Some settings were kept constant for all simulations. The instrument settings are presented in Table~\ref{tab:inst_settings} and the settings for the \gls{sssb} in Table~\ref{tab:sssb_settings}. The specific values resemble the scenario in~\cite{Pajusalu2019CharacterizationMapping}.
-
+Some settings were kept constant for all simulations. The instrument settings are presented in Table~\ref{tab:inst_settings} and the settings for the \gls{sssb} in Table~\ref{tab:sssb_settings}.
 \begin{table}[htb]
     \centering
     \caption{Instrument settings used in all simulation scenarios presented in Table~\ref{tab:sim_params}. The parameters represent the preliminary instrument design presented in~\cite{Pajusalu2019CharacterizationMapping}.}
@@ -41,11 +39,11 @@ Some settings were kept constant for all simulations. The instrument settings ar
 
 \begin{table}[htb]
     \centering
-    \caption{\gls{sssb} trajectory settings used in all simulation scenarios presented in Table~\ref{tab:sim_params}. The orbital elements and rotation rate of Didymos were used comparable to~\cite{Pajusalu2019CharacterizationMapping}.}
+    \caption{\gls{sssb} orbit settings used in all simulation scenarios presented in Table~\ref{tab:sim_params}. The orbital elements and rotation rate of Didymos were used comparable to~\cite{Pajusalu2019CharacterizationMapping}.}
     \label{tab:sssb_settings}
     \begin{tabular}{l|l}
         \textbf{Parameter Name} & \textbf{Value} \\ \hline
-        a & \SI{1.644641475071416}{\astronomicalunit}   \\
+        a & \SI{1.644641475071416}{au}   \\
         e & \SI{3.838774437558215E-01}{}\\
         i & \SI{3.408231185574551E+00}{\radian}\\
         omega  & \SI{3.192958853076784E+02}{\radian} \\
@@ -80,7 +78,7 @@ Some settings were kept constant for all simulations. The instrument settings ar
 \end{table}
 
 \subsubsection{Image Comparison}
-The overall image quality is compared visually to real images. A set of images at different nuclei distances with varying apparent nulcei sizes is depicted in Figure~\ref{fig:render_quali_comparison}. A set of five images of asteroid Bennu taken by the PolyCam aboard the \textit{OSIRIS-REx} mission is shown in Figure~\ref{fig:render_quali_bennu}. An image of comet \gls{67p} taken by tOSIRIS aboard the \textit{Rosetta} spacecraft is presented in Figure~\ref{fig:render_quali_67p}. A collection of several views of the comet \gls{81p}, also known as Wild 2, are shown in Figure~\ref{fig:render_quali_81p}. \Gls{81p} was imaged during the \textit{Stardust} mission~\cite{Brownlee2003Stardust:Mission}.
+The overall image quality is compared visually to real images. A set of images at different \gls{sssb} distances with varying apparent \gls{sssb} sizes is depicted in Figure~\ref{fig:render_quali_comparison}. A set of five images of asteroid Bennu taken during the \textit{OSIRIS-REx} mission is shown in Figure~\ref{fig:render_quali_bennu}. An image of comet \gls{67p} taken by the \textit{Rosetta} spacecraft is presented in Figure~\ref{fig:render_quali_67p}. A collection of views of the comet \gls{81p}, also known as Wild 2, is shown in Figure~\ref{fig:render_quali_81p}. \Gls{81p} was imaged during the \textit{Stardust} mission~\cite{Brownlee2003Stardust:Mission}.
 
 \begin{figure}[htb]
     \centering
@@ -109,7 +107,7 @@ The overall image quality is compared visually to real images. A set of images a
         \caption{}
         \label{fig:render_quali_comparison_4}
     \end{subfigure}
-    \caption{Rendered images of an \gls{sssb} nucleus of different sizes from varying distances. (a)~Nucleus of \SI{10}{\kilo\meter} from \SI{566}{\kilo\meter} distance. (b)~Nucleus of \SI{10}{\kilo\meter} from \SI{106}{\kilo\meter} distance. (c)~Nucleus of \SI{1}{\kilo\meter} from \SI{149}{\kilo\meter} distance. (d)~Nucleus of \SI{1}{\kilo\meter} from \SI{50}{\kilo\meter} distance.}
+    \caption{Rendered images of differently sized \glspl{sssb} from varying distances. (a)~Nucleus of \SI{10}{\kilo\meter} from \SI{566}{\kilo\meter} distance. (b)~Nucleus of \SI{10}{\kilo\meter} from \SI{106}{\kilo\meter} distance. (c)~Nucleus of \SI{1}{\kilo\meter} from \SI{149}{\kilo\meter} distance. (d)~Nucleus of \SI{1}{\kilo\meter} from \SI{50}{\kilo\meter} distance.}
     \label{fig:render_quali_comparison}
 \end{figure}
 
@@ -128,22 +126,24 @@ The overall image quality is compared visually to real images. A set of images a
         \caption{}
         \label{fig:render_quali_67p}
     \end{subfigure} %
-    \begin{subfigure}[b]{0.564\textwidth}
+    \begin{subfigure}[b]{0.565\textwidth}
         \centering
         \includegraphics[height=\textwidth, angle=90]{doc/thesis/0_figures/procedural_terrain/Wild2.jpg}
         \caption{}
         \label{fig:render_quali_81p}
     \end{subfigure}
-    \caption{(a)~Four images of asteroid Bennu and a global surface mosaic. The images were taken by the PolyCam aboard the \textit{OSIRIS-REx} mission~\cite{NASAFourBennu}. (b)~Representative image of comet \acrlong{67p}. The image was captured by the OSIRIS imager aboard the \textit{Rosetta} mission~\cite{OSIRISArchiveb}. (c)~Collection of images of comet \acrlong{81p} taken during the \textit{Stardust} mission by its navigation camera~\cite{StardustImages}.}
+    \caption{(a)~Four images of asteroid Bennu and a global surface mosaic. The images were taken by the PolyCam aboard the \textit{OSIRIS-REx} mission~\cite{NASAFourBennu}. (b)~Representative image of comet \gls{67p}. The image was captured by the OSIRIS imager aboard the \textit{Rosetta} mission~\cite{OSIRISArchiveb}. (c)~Image collection of comet \gls{81p} taken during the \textit{Stardust} mission by its navigation camera~\cite{StardustImages}.}
     \label{fig:render_quali}
 \end{figure}
 
-All objects in Figures~\ref{fig:render_quali_comparison}~and~\ref{fig:render_quali} show pits. The overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The rocks and boulders on Bennu's surface appear similar to the rocks and boulders in the rendered images, especially Figures~\ref{fig:render_quali_comparison_1}~and~\ref{fig:render_quali_comparison_2}. The most pronounced difference between rendered images and the images of \gls{67p} or \gls{81p} are jets. \Gls{sispo} does not yet contain a gas and dust model that would produce a coma or jets. Therefore, coma and jets are missing in the rendered images. While the surface of both comets feature some rocks and boulders, there surfaces are more defined by ridge-like structures. Ridge-like features are missing in the rendered images. Consequently, the rendering images of \gls{sispo} are more similar to asteroids than comets.
+All objects in Figures~\ref{fig:render_quali_comparison}~and~\ref{fig:render_quali} show pits. The overall appearance of the rendered images resembles the smoother pits of Bennu better than the sharper pits of \gls{67p} or \gls{81p}. The rocks and boulders on Bennu's surface appear similar to the rocks and boulders in the rendered images, especially Figures~\ref{fig:render_quali_comparison_1}~and~\ref{fig:render_quali_comparison_2}. The most pronounced difference between rendered images and the images of \gls{67p} or \gls{81p} are jets. \Gls{sispo} does not yet contain a gas and dust model that would produce a coma or jets. Therefore, coma and jets are missing in the rendered images. While the surface of both comets feature some boulders, their surfaces are more defined by ridge-like structures. Ridge-like features are missing in the rendered images. Consequently, the rendering images of \gls{sispo} are more similar to asteroids than comets.
 
-Procedural terrain generation within \gls{sispo} creates results for a large range of encounter distances. Example images with different surface distances and \gls{sssb} sizes are presented in Figure~\ref{fig:render_quali_comparison}. No visual degradation of surface features and details is visible in Figure~\ref{fig:render_quali_comparison}. Moving closer to the surface reveals more details, such as tiny bumps between larger structures which are not visible from larger distances. The visible quality of surface features is defined by the shader implementation. 
+Procedural terrain generation within \gls{sispo} creates results for a large range of encounter distances. Images with different surface distances and \gls{sssb} sizes are presented in Figure~\ref{fig:render_quali_comparison}. No visual degradation of surface features and details is visible in Figure~\ref{fig:render_quali_comparison}. Moving closer to the surface reveals more details, such as tiny bumps between larger structures which are not visible from larger distances. The visible quality of surface features is defined by the shader implementation. 
+
+\clearpage
 
 \subsubsection{Image Composition}
-The composition process uses raw images rendered with Blender and produces photometrically calibrated images. An example set of four images consisting of two images before and after calibration is shown in Figure~\ref{fig:composition_before_after}. The four images were reduced to \SI{8}{\bit} colour depth. Two effects can be seen. First, the overall brightness differs in the original images. The brightness difference is corrected by calibration in the processed images. Secondly, images become brighter by the composition process. Image brightening originates from scaling images to the interval $[0,1]$.
+The composition process uses raw images rendered with Blender and produces photometrically calibrated images. An example set of four images consisting of two images before and after calibration is shown in Figure~\ref{fig:composition_before_after}. Two effects can be seen. First, the overall brightness differs in the original images. The brightness difference is corrected by calibration in the processed images. Secondly, images become brighter by the composition process. Image brightening originates from scaling images to the interval $[0,1]$.
 
 \begin{figure}[htb]
     \centering
@@ -162,7 +162,7 @@ The composition process uses raw images rendered with Blender and produces photo
         % \caption{}
         % \label{fig:composition_after_1}
     \end{subfigure}
-    \caption{Two consecutive images before (top) and after (bottom) composition and calibration. The nucleus is much brighter than background stars thus no stars are visible in these images after calibration.}
+    \caption{Two consecutive images before (top) and after (bottom) composition and calibration. The nucleus is much brighter than background stars thus no stars are visible in these images after calibration. The four images are reduced to \SI{8}{\bit} colour depth.}
     \label{fig:composition_before_after}
 \end{figure}
 
@@ -188,7 +188,7 @@ Rendered images of a fly-by scenario with a \SI{10}{\kilo\meter} \gls{sssb} cont
         \caption{}
         \label{fig:render_artefacts_400}
     \end{subfigure}
-    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for varying fly-by distances. Rendering artefacts, the stripes, are clearly visible in all three images. (a)~Closest-approach \SI{50}{\kilo\meter}. (b)~Closest-approach \SI{200}{\kilo\meter}. (c)~Closest-approach \SI{400}{\kilo\meter}.}
+    \caption{Surface of a \SI{10}{\kilo\meter} \gls{sssb} for varying fly-by distances. Rendering artefacts, the stripes, are visible in all images. (a)~Fly-by distance \SI{50}{\kilo\meter}. (b)~Fly-by distance \SI{200}{\kilo\meter}. (c)~Fly-by distance \SI{400}{\kilo\meter}.}
     \label{fig:render_artefacts}
 \end{figure}
 
@@ -231,7 +231,7 @@ Difference images are created by converting the \gls{rgb} images to greyscale an
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_frame}
+    \includegraphics[width=.5\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_frame}
     \caption{Scene used for quality comparison. The area highlighted in red is studied up closer. The specific area was selected since it includes a wide range of colours and various sized surface features.}
     \label{fig:img_quality_frame}
 \end{figure}
@@ -592,7 +592,7 @@ Reconstruction was successful in all cases presented in Table~\ref{tab:sim_param
 
 The number of points in the densified point cloud ranges from approximately \SI{6e6}{} for a \SI{50}{\kilo\meter} fly-by of a \SI{10}{\kilo\meter} \gls{sssb} to approximately \SI{2e3}{} for a \SI{400}{\kilo\meter} fly-by of a \SI{1}{\kilo\meter} \gls{sssb}. These two fly-by scenarios represent the two boundary cases of the simulation results, these are compared in more detail. The quality of other reconstructed \gls{3d} models is in between the presented results and are therefore not analysed further.
 
-A comparison of the point clouds of the two scenarios is shown in Figure~\ref{fig:points_dense_comp}. The large variation in points after reconstruction and densification strongly influences \gls{3d} model quality. Both point clouds contain visible outliers which are removed in the \gls{3d} models.
+A comparison of the point clouds and resulting meshes of the two scenarios is shown in Figure~\ref{fig:points_models_comp}. The large variation in points between Figure~\ref{fig:points_50_10}~and~\ref{fig:points_400_1} after reconstruction and densification strongly influences \gls{3d} model quality. Both point clouds contain visible outliers which are removed in the \gls{3d} models.
 \begin{figure}[htb]
     \centering
         \begin{subfigure}[b]{0.42\textwidth}
@@ -607,14 +607,7 @@ A comparison of the point clouds of the two scenarios is shown in Figure~\ref{fi
             \caption{}
             \label{fig:points_400_1}
         \end{subfigure}
-    \caption{Images showing point clouds of two fly-by scenarios representing two boundary cases with successful reconstructions. (a) Point cloud with $\approx\SI{6e6}{}$ points representing a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. (b) Point cloud with $\approx\SI{2e3}{}$ points representing a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by. Point cloud densification failed for in this fly-by scenario, therefore the sparse point cloud is depicted.}
-    \label{fig:points_dense_comp}
-\end{figure}
-
-Texturing only alters the appearance of a \gls{3d} model but not its quality thus meshes after refinement are compared. Comparing the \gls{3d} models in Figure~\ref{fig:models_comp} shows the influence of the number of points on the \gls{3d} models. Single vertices of the model in Figure~\ref{fig:models_400_1} are visible. In contrast, the more detailed model in Figure~\ref{fig:models_50_10} represents detailed surface features such as boulders.
-
-\begin{figure}[H]
-    \centering
+        \\
         \begin{subfigure}[b]{0.42\textwidth}
             \centering
             \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/50_10/120_50_10_refine2.png}
@@ -627,9 +620,18 @@ Texturing only alters the appearance of a \gls{3d} model but not its quality thu
             \caption{}
             \label{fig:models_400_1}
         \end{subfigure}
-    \caption{Images showing \gls{3d} models reconstructed from the point clouds shown in Figure~\ref{fig:points_dense_comp}. (a) Reconstructed mesh with $\approx\SI{1e6}{}$ vertices of a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. (b) Reconstructed mesh with $\approx\SI{700}{}$ vertices of a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by. Mesh refinement failed in this scenario, therefore the sparse mesh is depicted.}
-    \label{fig:models_comp}
+    \caption{Images showing point clouds and resulting \gls{3d} models of two fly-by scenarios representing two boundary cases with successful reconstructions. (a)~Point cloud with $\approx\SI{6e6}{}$ points representing a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. (b)~Point cloud with $\approx\SI{2e3}{}$ points representing a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by. Point cloud densification failed for in this fly-by scenario, therefore the sparse point cloud is depicted. (c)~Reconstructed mesh based on the point cloud in~(a) with $\approx\SI{1e6}{}$ vertices. (d)~Reconstructed mesh based on the point cloud in~(b) with $\approx\SI{700}{}$ vertices. Mesh refinement failed in this scenario, therefore the sparse mesh is depicted.}
+    \label{fig:points_models_comp}
 \end{figure}
+
+Texturing only alters the appearance of a \gls{3d} model but not its quality thus meshes after refinement are compared. Comparing the \gls{3d} models in Figures~\ref{fig:models_50_10}~and~\ref{fig:models_400_1} shows the influence of the number of points on the \gls{3d} models. Single vertices of the model in Figure~\ref{fig:models_400_1} are visible. In contrast, the more detailed model in Figure~\ref{fig:models_50_10} represents detailed surface features such as boulders.
+
+% \begin{figure}[H]
+%     \centering
+
+%     \caption{Images showing \gls{3d} models reconstructed from the point clouds shown in Figure~\ref{fig:points_dense_comp}. }
+%     \label{fig:models_comp}
+% \end{figure}
 
 \subsubsection{Compression Effects on Reconstructed 3D Models}
 The quality of  reconstructed \gls{3d} models is compared numerically. The number of points after densification, the number of vertices and the number of faces of the refined meshed model are compared for different levels of compression for the same simulation scenario. The number of points, vertices and faces relate to the level of detail of a \gls{3d} model. Moreover, the number of points in relation to the number of vertices can be used to analyse the amount of outliers in the point cloud since outlier points cannot be included into a meaningful \gls{3d} model. All values are normalised to the results of \gls{png} to compare lossless compression against lossy compression with varying quality levels.
@@ -707,7 +709,7 @@ The \gls{jp2} quality level 10 data sets contain the highest number of faces aft
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=.6\textwidth]{doc/thesis/0_figures/models_quality/50_10/120_50_10_point1.png}
+    \includegraphics[width=.5\textwidth]{doc/thesis/0_figures/models_quality/50_10/120_50_10_point1.png}
     \caption{Sparse point cloud of a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. The point cloud contains a high point density where the stripe artefact exists in rendered images.}
     \label{fig:point_cloud_stripe}
 \end{figure}

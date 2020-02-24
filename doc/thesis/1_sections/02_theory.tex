@@ -246,7 +246,7 @@ The Lempel-Ziv algorithm used in \gls{png} replaces repeating sections of data w
 \Gls{dwt} uses a wavelet transform, hence it expresses data using a set of wavelet base functions. \Gls{dwt} has better properties for finite, non-periodic or non-stationary signals than \gls{dct}. Consequently, \gls{dwt}-based compression is particularly well suited to compress images with high frequency components, such as a star background~\cite{Bocharova2009CompressionMultimedia}. The properties of wavelets naturally create a hierarchical structure of the output data after applying a \gls{dwt}. The hierarchical structure of an image transformed with \gls{dwt} is depicted in Figure~\ref{fig:jp2_hierarchy}. After transforming an image with a \gls{dwt}, the lowest lowpass subband of an image contains a rough approximation of a given image. Every additional higher frequency subband adds detail to the image. Only a small fraction of an image contains high frequency components, such as contours and sharp details, therefore these subbands can be strongly compressed using lossless algorithms since these subbands mostly contain zeros~\cite{Bocharova2009CompressionMultimedia}.
 \begin{figure}[htb]
     \centering
-        \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/jp2_jpeg/Jpeg2000_2-level_wavelet_transform-lichtenstein.png}
+        \includegraphics[width=.65\textwidth]{doc/thesis/0_figures/jp2_jpeg/Jpeg2000_2-level_wavelet_transform-lichtenstein.png}
         \caption{Hierarchical structure of an image transformed with 2-level \gls{dwt} \cite{Commons20192-levelTransform-lichtenstein}.}
         \label{fig:jp2_hierarchy}
 \end{figure}
@@ -254,7 +254,7 @@ The Lempel-Ziv algorithm used in \gls{png} replaces repeating sections of data w
 A comparison of an image compressed with \gls{jpeg} and with \gls{jp2} with roughly similar compression ratio is presented in Figure~\ref{fig:jpg_jp2_comparison}. Artefacts are created around the contours in the \gls{jpeg} image in contrast to the \gls{jp2} image, despite the higher compression ratio of the \gls{jp2} image.
 \begin{figure}[htb]
     \centering
-    \begin{subfigure}[b]{0.7\textwidth}
+    \begin{subfigure}[b]{0.6\textwidth}
         \includegraphics[width=\textwidth]{doc/thesis/0_figures/jp2_jpeg/orig.png}
         \caption{Original image without compression.}
         \label{fig:jpg_jp2_oirg}
