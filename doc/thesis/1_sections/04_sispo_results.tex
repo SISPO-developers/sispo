@@ -231,7 +231,7 @@ Difference images are created by converting the \gls{rgb} images to greyscale an
 
 \begin{figure}[htb]
     \centering
-    \includegraphics[width=.5\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_frame}
+    \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/compare_quality/set1/jp2_1000_frame}
     \caption{Scene used for quality comparison. The area highlighted in red is studied up closer. The specific area was selected since it includes a wide range of colours and various sized surface features.}
     \label{fig:img_quality_frame}
 \end{figure}
@@ -394,12 +394,14 @@ Figures~\ref{fig:img_quality_comp_jp2_1} to \ref{fig:img_quality_comp_jp2_1000} 
     \caption{Overall rendered image after compression with \gls{jp2} quality level 1000. The L2-norm is applied to the difference between the greyscale images of the lossless and respective lossy image. (a) Image after lossy compression. (b) Histogram of L2-norms of differences. (c) L2-norm difference image with a colour scale from $0$ to $131$ for comparison between various compression levels. (d) L2-norm difference image with a colour scale from $0$ to the maximum L2-norm value for better visibility of compression effects.}
     \label{fig:img_quality_comp_jp2_1000}
 \end{figure}
-
+\clearpage
 Overall images show that lossy compression introduces artefacts for all quality levels. Visual inspection of the rendered images does not reveal many changes between different quality levels. However, histograms reveal that the number of altered pixels and the amount of alteration increases with decreasing quality level. The difference image for quality level 1000 in Figure~\ref{fig:img_quality_comp_jp2_1000_diff_rel} shows the minute changes from compression. The difference images in Figures~\ref{fig:img_quality_comp_jp2_1_diff_rel},~\ref{fig:img_quality_comp_jp2_5_diff_rel},~\ref{fig:img_quality_comp_jp2_10_diff_rel}~and~\ref{fig:img_quality_comp_jp2_100_diff_rel} outline the shape of the \gls{sssb} hence compression artefacts are spread across the entire \gls{sssb}. Comparing the difference images in Figures~\ref{fig:img_quality_comp_jp2_1_diff},~\ref{fig:img_quality_comp_jp2_5_diff},~\ref{fig:img_quality_comp_jp2_10_diff},~\ref{fig:img_quality_comp_jp2_100_diff}~and~\ref{fig:img_quality_comp_jp2_1000_diff} which use the same scale for all quality levels show that the alteration in quality levels \SI{100}{} and \SI{1000}{} are much lower compared to quality levels \SI{1}{}, \SI{5}{} and \SI{10}{}.
 
-\clearpage
-
 Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2_1000_center} show compressed close-up images, difference histograms and difference images after compression with \gls{jp2} with quality levels \SI{1}{}, \SI{5}{}, \SI{10}{}, \SI{100}{} and \SI{1000}{}.
+
+Comparing the close-up images of various quality levels in Figures~\ref{fig:img_quality_comp_jp2_1_center_orig},~\ref{fig:img_quality_comp_jp2_5_center_orig},~\ref{fig:img_quality_comp_jp2_10_center_orig},~\ref{fig:img_quality_comp_jp2_100_center_orig} and~\ref{fig:img_quality_comp_jp2_1000_center_orig} reveals a degradation of image quality with decreasing compression quality levels. Histograms confirm that the number of altered pixels and the amount of alteration increases with decreasing quality level. The difference image for quality level 1000 in Figure~\ref{fig:img_quality_comp_jp2_1000_center_diff_rel} and the respective histogram show that there were no altered pixels for quality level 1000, i.e. compression was lossless. The difference image in Figure~\ref{fig:img_quality_comp_jp2_100_center_diff_rel} resembles random noise. In contrast, difference images in Figures~\ref{fig:img_quality_comp_jp2_1_center_diff_rel},~\ref{fig:img_quality_comp_jp2_5_center_diff_rel} and~\ref{fig:img_quality_comp_jp2_10_center_diff_rel} show non-random artefacts correlated with surface features when comparing to the unaltered image in Figure~\ref{fig:img_quality_comp_jp2_1000_center_orig}. However, when comparing the difference images in Figures~\ref{fig:img_quality_comp_jp2_1_center_diff}, \ref{fig:img_quality_comp_jp2_5_center_diff}, \ref{fig:img_quality_comp_jp2_10_center_diff}, \ref{fig:img_quality_comp_jp2_100_center_diff} and \ref{fig:img_quality_comp_jp2_1000_center_diff} which use the same scale for all quality levels, we see the alteration in quality levels \SI{100}{} and \SI{1000}{} are much lower compared to quality levels \SI{1}{}, \SI{5}{} and \SI{10}{}.
+
+Comparing results of the overall images with results of the close-up images reveals that overall images are less altered by compression relative to their size. A substantial portion of overall images is covered by a black background thus compression does change less pixels than in close-up images. Overall difference images resemble random noise. In contrast, close-up images reveal a relation between surface features and compression artefacts for low quality levels.
 
 \begin{figure}[htb]
     \centering
@@ -556,10 +558,6 @@ Figures~\ref{fig:img_quality_comp_jp2_1_center} to \ref{fig:img_quality_comp_jp2
     \label{fig:img_quality_comp_jp2_1000_center}
 \end{figure}
 
-Comparing the close-up images of various quality levels in Figures~\ref{fig:img_quality_comp_jp2_1_center_orig},~\ref{fig:img_quality_comp_jp2_5_center_orig},~\ref{fig:img_quality_comp_jp2_10_center_orig},~\ref{fig:img_quality_comp_jp2_100_center_orig}~and~\ref{fig:img_quality_comp_jp2_1000_center_orig} reveals a degradation of image quality with decreasing compression quality levels. Histograms confirm that the number of altered pixels and the amount of alteration increases with decreasing quality level. The difference image for quality level 1000 in Figure~\ref{fig:img_quality_comp_jp2_1000_center_diff_rel} and the respective histogram show that there were no altered pixels for quality level 1000, i.e. compression was lossless. The difference image in Figure~\ref{fig:img_quality_comp_jp2_100_center_diff_rel} resembles random noise. In contrast, difference images in Figure~\ref{fig:img_quality_comp_jp2_1_center_diff_rel}, Figure~\ref{fig:img_quality_comp_jp2_5_center_diff_rel} and Figure~\ref{fig:img_quality_comp_jp2_10_center_diff_rel} show non-random artefacts correlated with surface features when comparing to the unaltered image in Figure~\ref{fig:img_quality_comp_jp2_1000_center_orig}. However, when comparing the difference images in Figures~\ref{fig:img_quality_comp_jp2_1_center_diff}, \ref{fig:img_quality_comp_jp2_5_center_diff}, \ref{fig:img_quality_comp_jp2_10_center_diff}, \ref{fig:img_quality_comp_jp2_100_center_diff} and \ref{fig:img_quality_comp_jp2_1000_center_diff} which use the same scale for all quality levels, we see the alteration in quality levels \SI{100}{} and \SI{1000}{} are much lower compared to quality levels \SI{1}{}, \SI{5}{} and \SI{10}{}.
-
-Comparing results of the overall images with results of the close-up images reveals that overall images are less altered by compression relative to their size. A substantial portion of overall images is covered by a black background thus compression does change less pixels than in close-up images. Overall difference images resemble random noise. In contrast, close-up images reveal a relation between surface features and compression artefacts for low quality levels.
-
 \clearpage
 
 \subsection{Reconstruction}
@@ -620,7 +618,7 @@ A comparison of the point clouds and resulting meshes of the two scenarios is sh
             \caption{}
             \label{fig:models_400_1}
         \end{subfigure}
-    \caption{Images showing point clouds and resulting \gls{3d} models of two fly-by scenarios representing two boundary cases with successful reconstructions. (a)~Point cloud with $\approx\SI{6e6}{}$ points representing a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. (b)~Point cloud with $\approx\SI{2e3}{}$ points representing a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by. Point cloud densification failed for in this fly-by scenario, therefore the sparse point cloud is depicted. (c)~Reconstructed mesh based on the point cloud in~(a) with $\approx\SI{1e6}{}$ vertices. (d)~Reconstructed mesh based on the point cloud in~(b) with $\approx\SI{700}{}$ vertices. Mesh refinement failed in this scenario, therefore the sparse mesh is depicted.}
+    \caption{Images showing point clouds and resulting \gls{3d} models of two fly-by scenarios representing boundary cases with successful reconstructions. (a)~Point cloud with $\approx\SI{6e6}{}$~points representing a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. (b)~Point cloud with $\approx\SI{2e3}{}$~points representing a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{400}{\kilo\meter} fly-by. Point cloud densification failed for in this fly-by scenario, therefore the sparse point cloud is depicted. (c)~Mesh based on the point cloud in~(a) with $\approx\SI{1e6}{}$~vertices. (d)~Mesh based on the point cloud in~(b) with $\approx\SI{700}{}$~vertices. Mesh refinement failed in this scenario, therefore the sparse mesh is depicted.}
     \label{fig:points_models_comp}
 \end{figure}
 
@@ -634,9 +632,9 @@ Texturing only alters the appearance of a \gls{3d} model but not its quality thu
 % \end{figure}
 
 \subsubsection{Compression Effects on Reconstructed 3D Models}
-The quality of  reconstructed \gls{3d} models is compared numerically. The number of points after densification, the number of vertices and the number of faces of the refined meshed model are compared for different levels of compression for the same simulation scenario. The number of points, vertices and faces relate to the level of detail of a \gls{3d} model. Moreover, the number of points in relation to the number of vertices can be used to analyse the amount of outliers in the point cloud since outlier points cannot be included into a meaningful \gls{3d} model. All values are normalised to the results of \gls{png} to compare lossless compression against lossy compression with varying quality levels.
+The quality of  reconstructed \gls{3d} models is compared numerically. The number of points after densification, the number of vertices and the number of faces of the refined meshed model are compared for different levels of compression for the same simulation scenario. The number of points, vertices and faces relate to the level of detail of a \gls{3d} model. Moreover, the number of points in relation to the number of vertices can be used to analyse the amount of outliers in the point cloud since outlier points cannot be included into a meaningful \gls{3d} model. Values are normalised to the results of \gls{png} to compare lossless compression against lossy compression.
 
-The theoretical size of an image series of \SI{120}{} images to the highest compression ratio of lossless compression using \gls{png} is compared. An image series of \SI{120}{}~\gls{rgb} images with $\SI{2454}{} \times \SI{2054}{}$~pixels and a colour depth of \SI{8}{\bit} has a data size of \gls{d_s}$ = 120 \times 2454 \times 2054 \times 3 \times \SI{8}{\bit} = \SI{1814.6}{\mega\byte}$. The \gls{png} data sets have sizes ranging from \SI{5.2}{\mega\byte} to \SI{564.6}{\mega\byte}, i.e. \SI{0.3}{\percent} to \SI{31.1}{\percent} of the raw data size depending on the simulation scenario. Varying apparent sizes of the nucleus and the resulting varying black portion of an image explain the varying and high possible compression ratios of \gls{png}.
+The theoretical size of \SI{120}{} images is compared to the highest compression ratio of lossless compression using \gls{png}. A series of \SI{120}{}~\gls{rgb} images with $\SI{2454}{} \times \SI{2054}{}$~pixels and a colour depth of \SI{8}{\bit} has a data size of \gls{d_s}$ = 120 \times 2454 \times 2054 \times 3 \times \SI{8}{\bit} = \SI{1814.6}{\mega\byte}$. The \gls{png} data sets have sizes ranging from \SI{5.2}{\mega\byte} to \SI{564.6}{\mega\byte}, i.e. \SI{0.3}{\percent} to \SI{31.1}{\percent} of the raw data size. Varying apparent sizes of the nucleus and the resulting varying black portion of an image explain the varying and high possible compression ratios of \gls{png}.
 % 564573825 / 5172917; 1814585760
 
 Figure~\ref{fig:recon_stats_1} and Figure~\ref{fig:recon_stats_10} compare effects of lossless compression using \gls{png} and varying quality levels of lossy compression using \gls{jp2}.
@@ -668,11 +666,9 @@ Figure~\ref{fig:recon_stats_1} and Figure~\ref{fig:recon_stats_10} compare effec
             \caption{}
             \label{fig:recon_120_400_1}
         \end{subfigure}
-    \caption{Bar graphs comparing output of reconstruction after image compression with varying quality levels for a \SI{1}{\kilo\meter} \gls{sssb} with varying fly-by distances. (a) Fly-by distance \SI{50}{\kilo\meter}. (b) Fly-by distance \SI{100}{\kilo\meter}. (c) Fly-by distance \SI{200}{\kilo\meter}. (d) Fly-by distance \SI{400}{\kilo\meter}.}
+    \caption{Comparison of reconstruction output after image compression with varying quality levels for a \SI{1}{\kilo\meter} \gls{sssb} with varying fly-by distances. (a) Fly-by distance \SI{50}{\kilo\meter}. (b) Fly-by distance \SI{100}{\kilo\meter}. (c) Fly-by distance \SI{200}{\kilo\meter}. (d) Fly-by distance \SI{400}{\kilo\meter}.}
     \label{fig:recon_stats_1}
 \end{figure}
-
-Several observations can be made by analysing the graphs in Figure~\ref{fig:recon_stats_1}. The number of reconstructed vertices and faces increases with increasing degrees of compression for a \SI{100}{\kilo\meter} fly-by. Artefacts introduced by compression create additional features for the \gls{sfm} algorithms. The number of points of the lowest quality level of a \SI{50}{\kilo\meter} fly-by contains more points than the \gls{png} scenario. However, the number of vertices and faces is much lower hence the densified point cloud contained a higher number of outliers that were removed during meshed creation. If the number of vertices decreased more than the number of points, compression increased the number of outliers. The \gls{3d} model of a \SI{400}{\kilo\meter} fly-by is strongly affected by compression. The level of detail of the reconstructed models deteriorated. The apparent size of the \gls{sssb} is small resulting in a small number of usable features which are removed by compression. For a \SI{200}{\kilo\meter} fly-by, the level of detail of the reconstructed \gls{3d} model decreases gradually with decreasing data size. Comparing data size in Figure~\ref{fig:recon_stats_1} reveals that the amount of data can be reduced to approximately half of the size of \gls{png} data sets without losing much detail except for a \SI{400}{\kilo\meter} fly-by.
 
 \begin{figure}[htb]
     \centering
@@ -701,11 +697,13 @@ Several observations can be made by analysing the graphs in Figure~\ref{fig:reco
             \caption{}
             \label{fig:recon_120_400_10}
         \end{subfigure}
-    \caption{Bar graphs comparing output of reconstruction after image compression with varying quality levels for a \SI{10}{\kilo\meter} \gls{sssb} with varying fly-by distances. (a)~Fly-by distance \SI{50}{\kilo\meter}. (b)~Fly-by distance \SI{100}{\kilo\meter}. (c)~Fly-by distance \SI{200}{\kilo\meter}. (d)~Fly-by distance \SI{400}{\kilo\meter}.}
+    \caption{Comparison of reconstruction output after image compression with varying quality levels for a \SI{10}{\kilo\meter} \gls{sssb} with varying fly-by distances. (a)~Fly-by distance \SI{50}{\kilo\meter}. (b)~Fly-by distance \SI{100}{\kilo\meter}. (c)~Fly-by distance \SI{200}{\kilo\meter}. (d)~Fly-by distance \SI{400}{\kilo\meter}.}
     \label{fig:recon_stats_10}
 \end{figure}
 
-The \gls{jp2} quality level 10 data sets contain the highest number of faces after reconstruction for all cases except the \SI{100}{\kilo\meter} fly-by. As described in Section~\ref{sec:render_problems}, rendered images with a \SI{10}{\kilo\meter} \gls{sssb} contain stripes. The stripes increase the density of points in the sparse point cloud as seen in Figure~\ref{fig:point_cloud_stripe}. Realistic images would not have the stripe artefacts and therefore the number of points in the point cloud reconstructed from real images would be lower. The size of the four data sets in Figure~\ref{fig:recon_stats_10} decreases with each decreasing quality level, i.e. most images contain the \gls{sssb} nucleus to a large extent. The data can be reduced without losing much detail in the \gls{3d} models to about a quarter of the \gls{png} data size except for the \SI{400}{\kilo\meter} fly-by.
+Several observations can be made by analysing the graphs in Figure~\ref{fig:recon_stats_1}. The number of reconstructed vertices and faces increases with increasing degrees of compression for a \SI{100}{\kilo\meter} fly-by. Artefacts introduced by compression create additional features for the \gls{sfm} algorithms. The number of points of the lowest quality level of a \SI{50}{\kilo\meter} fly-by contains more points than the \gls{png} scenario. However, the number of vertices and faces is much lower hence the densified point cloud contains a higher number of outliers. If the number of vertices decreased more than the number of points, compression increased the number of outliers. The \gls{3d} model of a \SI{400}{\kilo\meter} fly-by is strongly affected by compression. The level of detail of the reconstructed models deteriorated. The apparent size of the \gls{sssb} is small resulting in a small number of usable features which are removed by compression. For a \SI{200}{\kilo\meter} fly-by, the level of detail of the reconstructed \gls{3d} model decreases gradually with decreasing data size. Comparing data size in Figure~\ref{fig:recon_stats_1} reveals that the amount of data can be reduced to approximately half of the size of \gls{png} data sets without losing much detail except for a \SI{400}{\kilo\meter} fly-by.
+
+The \gls{jp2} quality level 10 data sets contain the highest number of faces after reconstruction for all cases except the \SI{100}{\kilo\meter} fly-by. As described in Section~\ref{sec:render_problems}, rendered images with a \SI{10}{\kilo\meter} \gls{sssb} contain stripes. The stripes increase the density of points in the sparse point cloud as seen in Figure~\ref{fig:point_cloud_stripe}. Realistic images would not have stripe artefacts and therefore the number of points in the point cloud reconstructed from real images would be lower. The size of the four data sets in Figure~\ref{fig:recon_stats_10} decreases with decreasing quality levels, i.e. most images contain the \gls{sssb} to a large extent. The data can be reduced without losing much detail in the \gls{3d} models to about a quarter of the \gls{png} data size except for the \SI{400}{\kilo\meter} fly-by.
 
 \begin{figure}[htb]
     \centering
@@ -716,7 +714,7 @@ The \gls{jp2} quality level 10 data sets contain the highest number of faces aft
 
 Comparing the graphs in Figure~\ref{fig:recon_stats_1} to the graphs in Figure~\ref{fig:recon_stats_10} reveals that the data size reduces more gradual for a \SI{10}{\kilo\meter} \gls{sssb}. The gradual decrease is explained by a larger black portion in \SI{1}{\kilo\meter} \gls{sssb} images because \gls{png} can compress the black area well. For the \SI{10}{\kilo\meter} data set, \gls{png} cannot compress data much because the images are covered by the \gls{sssb} to a big extent.
 
-Furthermore, there are more samples with a stronger decreased number of vertices than reconstructed points in the \SI{10}{\kilo\meter} \gls{sssb} scenarios compared to a \SI{1}{\kilo\meter} \gls{sssb}. Compression introduces more outliers for a \SI{10}{\kilo\meter} \gls{sssb} than for a \SI{1}{\kilo\meter} \gls{sssb}.
+More samples exist with a stronger decreased number of vertices than reconstructed points in the \SI{10}{\kilo\meter} \gls{sssb} scenarios compared to \SI{1}{\kilo\meter} \gls{sssb} scenarios. Compression introduces more outliers for a \SI{10}{\kilo\meter} \gls{sssb} than for a \SI{1}{\kilo\meter} \gls{sssb}.
 
 \subsubsection{Reconstruction Algorithms}
 \gls{sispo} selects the best result of the three reconstruction algorithms based on the number of reconstructed points of each algorithm. Since \gls{sispo} uses three \gls{sfm} algorithms, it is investigated which algorithm is more successful under which parameter set. Tables~\ref{tab:recon_best_algo_1}~and~\ref{tab:recon_best_algo_10} show which algorithm reconstructed the most points in which scenario. The tables are colour-coded to improve readability.
@@ -760,33 +758,31 @@ The results in Table~\ref{tab:recon_best_algo_1} suggest that IncrementalSfM pro
 A possible explanation for the results is, that IncrementalSfM is most successful in well-defined scenarios, i.e. scenarios where many surface details are visible, but the nucleus never covers the entire image. As discussed in Section~\ref{sec:recon_problems}, if the nucleus covers the entire \gls{fov} it causes problems to the reconstruction process, making the scenario less well-defined. For less well-defined scenarios, IncrementalSfM2 reconstructs the most points. The scenario where GlobalSfM reconstructed the most points is considered an outlier.
 
 \subsubsection{Reconstruction Problems} \label{sec:recon_problems}
-One problem of the reconstruction pipeline were inverted models. Additionally, some \gls{3d} models did not have a closed surface. An erroneous model containing both problems is presented in Figure~\ref{fig:models_broken}. The problem was overcome by using priors and fixed intrinsic camera parameters.
+One problem of the reconstruction pipeline were inverted models. Some \gls{3d} models also did not have a closed surface. A third issue is flattening of models. Erroneous models containing all three problems are presented in Figure~\ref{fig:models_broken}.
 \begin{figure}[htb]
     \centering
-        \begin{subfigure}[b]{0.42\textwidth}
+        \begin{subfigure}[b]{0.32\textwidth}
             \centering
-            \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/broken/broken_points1.png}
+            \includegraphics[width=\textwidth,height=5cm]{doc/thesis/0_figures/models_quality/broken/broken_points1.png}
             \caption{} %1072422
             \label{fig:models_broken_points}
         \end{subfigure}
-        \begin{subfigure}[b]{0.42\textwidth}
+        \begin{subfigure}[b]{0.32\textwidth}
             \centering
-            \includegraphics[width=\textwidth,height=6.2cm]{doc/thesis/0_figures/models_quality/broken/broken_refine2.png}
+            \includegraphics[width=\textwidth,height=5cm]{doc/thesis/0_figures/models_quality/broken/broken_refine2.png}
             \caption{}
             \label{fig:models_broken_mesh}
         \end{subfigure}
-    \caption{Images showing an erroneous reconstructed \gls{3d} model of a \SI{1}{\kilo\meter} \gls{sssb} after a \SI{100}{\kilo\meter} fly-by. The model is inverted, i.e. resembling the inside of an egg shell, and contains holes. (a) Sparse point cloud. (b) Refined mesh.}
+        \begin{subfigure}[b]{0.32\textwidth}
+            \centering
+            \includegraphics[width=\textwidth,height=5cm]{doc/thesis/0_figures/models_quality/50_10/120_50_10_refine1.png}
+            \caption{}
+            \label{fig:model_flat}
+        \end{subfigure}
+    \caption{Erroneous reconstructed point cloud and models. (a)~Sparse point cloud containing holes and being inverted, i.e. resembling the inside of an egg shell. (b)~Refined mesh of created from the point cloud in~(a). (c)~Mesh which does not resemble a hemisphere but rather a flat wall which is slightly bent on the left side of the image.}
     \label{fig:models_broken}
 \end{figure}
-
-Another reconstruction issue is flattening of a model when the minimum distance to the \gls{sssb} is small. In the image series used for reconstructing Figure~\ref{fig:model_flat}, the nucleus does not entirely fit into the \gls{fov} in \SI{65}{} out of \SI{120}{} images. The \gls{fov} of \SI{39}{} out of \SI{120}{} images is completely covered by the nucleus, i.e. the \gls{sssb} extends beyond the corners of the \gls{fov}. The model becomes flattened since such a high percentage of images does not provide information about the overall shape of the object to the reconstruction pipeline.
-
-\begin{figure}[htb]
-    \centering
-    \includegraphics[width=.5\textwidth]{doc/thesis/0_figures/models_quality/50_10/120_50_10_refine1.png}
-    \caption{Refined mesh of a \SI{10}{\kilo\meter} \gls{sssb} after a \SI{50}{\kilo\meter} fly-by. The \gls{3d} model does not represent a hemisphere but rather a flat wall which is bend on the left hand side of the image.}
-    \label{fig:model_flat}
-\end{figure}
+The problem with holes and inverted models was overcome by using priors and fixed intrinsic camera parameters. Flattening of a model occurs when the minimum distance to the \gls{sssb} is small. In the image series used for reconstructing Figure~\ref{fig:model_flat}, the \gls{sssb} does not entirely fit into the \gls{fov} in \SI{65}{} out of \SI{120}{} images. The \gls{fov} of \SI{39}{} out of \SI{120}{} images is completely covered by the nucleus, i.e. the \gls{sssb} extends beyond the corners of the \gls{fov}. The model becomes flattened since such a high percentage of images does not provide information about the overall shape of the object to the reconstruction pipeline. Flattening can be overcome by adding views that provide more shape information about an object.
 
 % \subsubsection{Reconstruction Limits}
 % Reconstructing the \gls{sssb} nucleus for a range of fly-by scenarios allows to show some of the limits of the reconstruction pipeline.
