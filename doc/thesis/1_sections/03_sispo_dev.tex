@@ -155,9 +155,9 @@ Since images are composed and calibrated in a later step, described in Section~\
     \label{tab:color_space}
     \begin{tabular}{p{0.25\textwidth}|p{0.08\textwidth}|p{0.57\textwidth}}
         \textbf{Name in Blender}        & \textbf{Value} & \textbf{Description} \\ \hline
-        Color mode           & RGBA           & Use RGB and alpha channel. \\
+        Color mode           & RGBA           & Use \gls{rgba} channels. \\
         Exposure             & 0              & Exposure in stops, applied before display transform. \\
-        Sequencer colorspace & Raw            & Colour space sequencer uses linear color space. \\
+        Sequencer colorspace & Raw            & Colour space sequencer uses linear colour space. \\
         View transform       & Raw            & No colour space conversion. \\
         Look                 & None           & No artistic effect is applied before colour space conversion. \\
         Film transparent     & True           & World background is transparent, i.e. alpha values can be used for image composition and occultation.
@@ -185,7 +185,7 @@ Due to problems during rendering, Blender scenes use kilometres instead of metre
 \subsubsection{Star Rendering} \label{sec:stars}
 The background stars are rendered based on the star catalogue \gls{ucac4}. The \gls{ucac4} catalogue includes stars up to magnitude 16. The \gls{fov} is determined based on the spacecraft camera in the \textit{SssbOnly} scene which represents the \gls{fov} of the spacecraft instrument. The edges of the \gls{fov} are calculated using Equation~\ref{eq:fov_edge}.
 
-\Gls{sispo} retrieves the list of stars in the \gls{fov}. The interface for the \gls{ucac4} is a commandline tool u4test.exe~\cite{gray}. The commandline interface requires the \gls{fov} defined as right ascension \gls{ra}, declination \gls{de}, width and height.
+\Gls{sispo} retrieves the list of stars in the \gls{fov}. The interface for the \gls{ucac4} is a command-line tool u4test.exe~\cite{gray}. The command-line interface requires the \gls{fov} defined as right ascension \gls{ra}, declination \gls{de}, width and height.
 
 The conversion of the vectors into their respective right ascension and declination is a transform between Cartesian coordinates to spherical coordinates. The relation is defined as
 \begin{align}
