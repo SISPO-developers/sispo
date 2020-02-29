@@ -10,3 +10,5 @@ If you are using this package in a code project, please acknowledge by adding ou
 
 ### Installation instructions
 Installation instructions can be found in the respective [wiki page](https://github.com/YgabrielsY/sispo/wiki/Installation)
+
+[![astropy](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat)](http://www.astropy.org/)
