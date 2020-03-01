@@ -1,6 +1,4 @@
 name: sispo
-channels:
-  - conda-forge
 dependencies:
   - python
   - pip
