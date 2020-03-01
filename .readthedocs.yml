@@ -11,9 +11,6 @@ sphinx:
   configuration: doc/source/conf.py
   fail_on_warning: true
 
-# Optionally build your docs in additional formats such as PDF and ePub
-formats: all
-
 # Conda environment settings
 conda:
   environment: environment.yml
