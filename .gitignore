@@ -2,6 +2,7 @@
 # Directories
 temp/*
 data/*
+doc/build/
 !data/README.md
 !data/input/definition.json
 software/*
