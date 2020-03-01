@@ -110,37 +110,36 @@ def read_input_cli():
     raise NotImplementedError()
 
 
-def read_input_file(filename=None):
+def read_input_file(args):
     """
     Reads input from a given file.
 
     :type filename: String
     :param filename: Filename of a mission definition file.
     """
-    if filename is None:
+    if args.i is None:
         root_dir = Path(__file__).resolve().parent.parent
         def_file = root_dir / "data" / "input" / "definition.json"
     else:
-        def_file = Path(filename).resolve()
+        def_file = Path(args.i).resolve()
 
         if not def_file.exists():
             root_dir = Path(__file__).resolve().parent.parent
-            def_file = root_dir / "data" / "input" / filename.name
+            def_file = root_dir / "data" / "input" / args.i.name
 
     with open(str(def_file), "r") as cfg_file:
         settings = json.load(cfg_file)
 
-    return parse_settings_file(settings)
+    return parse_settings_file(args, settings)
 
-def parse_settings_file(settings):
+def parse_settings_file(args, settings):
     """
     Parses settings from input file or CLI into correct data formats
 
     :type settings: dict
     :param settings: String based description of settings.
     """
-    global args
-    
+
     if "simulation" not in settings:
         logger.debug("No simulation settings provided!")
 
@@ -214,7 +213,7 @@ def main():
     if args.cli:
         settings = read_input()
     else:
-        settings = read_input_file(args.i)
+        settings = read_input_file(args)
 
     if args.profile:
         pr = cProfile.Profile()
