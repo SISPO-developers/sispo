@@ -11,6 +11,7 @@ sphinx:
   configuration: doc/source/conf.py
   fail_on_warning: true
 
-# Conda environment settings
-conda:
-  environment: environment.yml
+# Python
+python:
+   version: 3.7
+   system_packages: true

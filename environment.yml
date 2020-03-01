@@ -1,5 +1,6 @@
 name: sispo
 channels:
+  - defaults
   - conda-forge
 dependencies:
   - python
@@ -8,4 +9,3 @@ dependencies:
   - pylint
   - numpy
   - numpy-base
-  - orekit
