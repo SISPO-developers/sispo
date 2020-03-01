@@ -50,7 +50,20 @@ source_suffix = {
 }
 
 # Autodoc settings
-autodoc_mock_imports = ["bpy", "opencv", "orekit"]
+autodoc_mock_imports = ["astropy", "bpy", "cv2"]
+# Orekit special stuff
+autodoc_mock_imports.extend(["orekit", 
+                             "orekit.pyhelpers",
+                             "org.orekit.time",
+                             "org.orekit.frames",
+                             "org.orekit.utils",
+                             "org.orekit.propagation.events.handlers",
+                             "org.orekit.python",
+                             "org.orekit.propagation.events",
+                             "org.orekit.propagation.analytical",
+                             "org.orekit.orbits",
+                             "org.hipparchus.geometry.euclidean.threed",
+                             "org.orekit.attitudes"])
 
 # -- Options for HTML output -------------------------------------------------
 
