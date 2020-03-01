@@ -49,6 +49,9 @@ source_suffix = {
     '.md': 'markdown',
 }
 
+# Autodoc settings
+autodoc_mock_imports = ["bpy", "opencv", "orekit"]
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
