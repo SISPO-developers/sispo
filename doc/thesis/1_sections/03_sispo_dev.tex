@@ -1,167 +1,489 @@
-\section{\Acrlong{sispo}}
+\section{Space Imaging Simulator for Proximity Operations} \label{sec:sispo}
+\gls{sispo} is a software package that integrates trajectory simulation with physics-based rendering, image compression and \gls{3d} reconstruction. These functionalities are split into three sub-packages. The first sub-package uses Keplerian orbit data for a \gls{sssb} and a simplified definition of the encounter geometry for the spacecraft to propagate realistic trajectories and render an image series of the encounter. The second sub-package provides various algorithms for image compression and decompression. The third sub-package uses images to reconstruct a textured \gls{3d} model using the \gls{sfm} technique. The three sub-packages combined provide a processing pipeline from an initial \gls{3d} model to a reconstructed \gls{3d} model via rendered and compressed images. \Gls{sispo} is a Python software package which is hosted on a public GitHub repository under a BSD-2-Clause license and maintained by the author~\cite{Schwarzkopf2020SpaceOperations}. \Gls{sispo} is based on source code developed by Mihkel Pajusalu~\cite{Pajusalu2019CharacterizationMapping}. The original source code consisted of a rendering and reconstruction pipeline. In this thesis, the original processing pipeline was developed further into a software suite and a compression module was added. In the following, a description of the functionality and input parameters provides insights into the development process and design choices made during development.
 
-\gls{sispo} is a software package developed in python. It is separated in different sub-packages. The two main sub-packages are the \textit{sim} and the \textit{reconstruction} package. The third sub-package provides several image compression algorithms to test effects on reconstruction.
+\subsection{Simulation Package}
+The simulation sub-package handles orbit propagation for the \gls{sssb} and spacecraft as well as rendering photo-realistic images. Propagation and rendering are two separate steps. First the \gls{sssb} and spacecraft are propagated along their trajectories using the space dynamics library Orekit~\cite{orekit}. Subsequently, trajectory and attitude data is used to render four images per frame which are composed and photometrically calibrated to form the final rendering output. Images during rendering and calibration use the \gls{hdr} image format OpenEXR to minimise information loss in intermediate steps~\cite{openexr}. Reduced quality images of the rendered images are stored as \gls{png} files for quick preview. Raw data of intermediate steps is saved for possible in-depth analysis. The raw data consist of the four rendered images, their \gls{png} previews, metadata, the Blender scene and the star data. The simulation sub-package was developed to contain all general information about the environment in the Environment class in order to have one consistent instance of time, constants and parameters.
 
-The software package is hosted on GitHub using a git version control system. Furthermore, the GitHub project management tools are used, including automated KanBan based projects, issue tracking and pull requests.
+%one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}~\cite{zacharias2013fourthUCAC4}. Additionally, the date, the spacecraft position, \gls{sssb} position and their distance is stored as metadata. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system~\cite{Bessell1979UBVRIPhotometry}. The composition process is explained in more detail in Section~\ref{sec:composition}.
 
-The most important python dependencies of \gls{sispo} are:
-\begin{itemize}
-    \item astropy: Astronomy package developed by \cite{robitaille2013astropy} and \cite{price2018astropy}
-    \item Blender: 3D creation suite
-    \item numpy: Scientific computing for python
-    \item opencv: Computer vision library used for image processing
-    \item OpenEXR: \gls{hdr} image reading and writing
-    \item Orekit: Space dynamics library
-\end{itemize}
+\subsubsection{Propagation}
+Propagation is based on the Python bindings of the Orekit library. The Python bindings run a \gls{vm} to execute the underlying Java code. Orekit requires physical data which is distributed with the simulation sub-package. The \gls{vm} and physical data are initialised in the simulation module. Other modules are imported subsequently to only execute one instance of the \gls{vm}. Having only one instance of the Java \gls{vm} executing reduces resource consumption and provides a single consistent set of physical constants. During propagation, Orekit determines state information of the \gls{sssb} and the spacecraft for each sample along the trajectory. The state information includes the date, position and the rotation angles of the \gls{sssb}. Propagation is based on Orekit's KeplerianOrbit and KeplerianPropagator classes. The input parameters required to define the \gls{sssb} trajectory are presented in Table~\ref{tab:keplerorbit_params}.
 
-It was attempted to reduce dependencies to other libraries as much as possible. Originally, both \textit{scikit-image} and \textit{opencv} were used. After a small benchmark between the two libraries, it was evident that \textit{opencv} performs three to seven times faster compared to \textit{scikit-image}. Hence \textit{scikit-image} was completely replaced with equivalent \textit{opencv} functions. Additionally, it was attempted to use the \textit{opencv} package to replace the \textit{OpenEXR} dependency since it is not easy to install. However, this is currently not possible as the \textit{OpenEXR} implementation of \textit{opencv} does not provide an alpha channel and is generally less flexible.
-
-To ease development, numerous parameters are silently assigned default values if not provided e.g. for an instrument. Therefore, all parameters should be explicitly set when before running a simulation.
-
-
-
-\subsection{User Interface}
-The sispo package can be installed using pip and the GitHub project. If done, it will be installed into the site-packages folder of the used python environment. Additionally, an executable is installed, providing a \gls{cli} as user interface. The most recent possible input arguments are documented in the repository or by using the --help input. The most important arguments for the \gls{cli} are seen in Table \ref{tab:cli_args}.
-
-\begin{table}[htpb]
-\caption{Input arguments for sispo \gls{cli}}
-\begin{tabular}{llll}
-\hline
-\textbf{Name}                            & \textbf{Variable Name} & \textbf{Default Value}     & \textbf{Description}                                                                                                      \\ \hline
-\multicolumn{1}{l|}{--help}              &                        & ---                        & Prints list of arguments with hints                                                                                       \\
-\multicolumn{1}{l|}{-i}                  & i                      & data/input/definition.json & Path to a definition file that defines the settings                                                                 \\
-\multicolumn{1}{l|}{-v}                  & v                      & False                      & Verbose output, logging information will also be displayed on STDOUT                                                      \\
-\multicolumn{1}{l|}{--cli}               & cli                    & False                      & If the \gls{cli} flag is set, an interactive \gls{cli} will be started. NOT IMPLEMENTED. \\
-\multicolumn{1}{l|}{--profile}           & profile                & False                      & If the profile flag is set, Python's cProfile will be used to profile \gls{sispo} execution              \\
-\multicolumn{1}{l|}{--no-sim}            & with\_sim              & True                       & If flag is set, simulation step will be skipped                                                                           \\
-\multicolumn{1}{l|}{--no-render}         & with\_render           & True                       & If flag is set, rendering step will be skipped                                                                            \\
-\multicolumn{1}{l|}{--no-compression}    & with\_compression      & True                       & If flag is set, compression step will be skipped                                                                          \\
-\multicolumn{1}{l|}{--no-reconstruction} & with\_reconstruction   & True                       & If flag is set, reconstruction step will be skipped                                                                       \\
-\multicolumn{1}{l|}{--sim-only}          & sim\_only              & False                      & If flag is set, only simulation step will be done                                                                         \\
-\multicolumn{1}{l|}{--sim-render-only}   & sim\_render\_only      & False                      & If flag is set, only simulation and rendering will be done                                                                \\
-\multicolumn{1}{l|}{--render-only}       & render\_only           & False                      & If flag is set, only rendering will be done                                                                               \\
-\multicolumn{1}{l|}{--compress-only}     & compress\_only         & False                      & If flag is set, only compression will be done                                                                             \\
-\multicolumn{1}{l|}{--reconstruct-only}  & reconstruct\_only      & False                      & If flag is set, only reconstruction will be done                                                                         
-
-\end{tabular}
-\label{tab:cli_args}
+\begin{table}[htb]
+    \centering
+    \caption{Input parameters that define the \gls{sssb} orbit in~\gls{sispo}. The parameters represent the modified Keplerian elements presented in Section~\ref{sec:orbit_mechanics}.}
+    \label{tab:keplerorbit_params}
+    \begin{tabular}{p{0.5\textwidth}|p{0.2\textwidth}}
+        \textbf{Parameter [Unit]} & \textbf{Type} \\ \hline
+        a [\SI{}{au}] & float\\
+        e [-] & float\\
+        i [\SI{}{\radian}] & float \\
+        omega [\SI{}{\radian}] & float \\
+        Omega [\SI{}{\radian}] & float \\
+        M [\SI{}{\radian}] & float \\
+        Date of the orbital parameters [-] & dict\footnotemark
+    \end{tabular}
 \end{table}
 
-\gls{sispo} can be imported as a Python module. 
+The spacecraft trajectory is not defined by Keplerian elements but calculated relative to the \gls{sssb} at closest approach. However, the trajectory around the \gls{sssb} is a closed orbit around the Sun (cf. Section~\ref{sec:orbit_mechanics}). The parameters presented in Table~\ref{tab:sc_enc_paras} are used to calculate the state vector of the spacecraft at the encounter which defines the trajectory of the spacecraft. The sssb\_state is calculated based on the \gls{sssb} input data and the encounter data.
 
-\subsection{Simulation Module}
-The simulation module creates photo-realistic images by simulating a realistic trajectory of a \gls{sssb} and a spacecraft using orekit. This trajectory and attitude data is then used to render four images per frame, one containing only the \gls{sssb}, one where the view is kept at a constant distance from the \gls{sssb}, one calibration reference image and one that renders a realistic star background using the \gls{ucac4}. These images are composed to one image using photometry to calibrate the absolute light intensity of the different images in terms of realistic photon fluxes using the Johnson magnitude system \cite{bessel1979ubvri}.
+\begin{table}[htb]
+    \centering
+    \caption{Parameters that define the encounter state of the spacecraft in~\gls{sispo}. The first five parameters are required as input.}
+    \label{tab:sc_enc_paras}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{p{0.29\textwidth}|p{0.07\textwidth}|p{0.6\textwidth}}
+            \textbf{Parameter [Unit]}  & \textbf{Type} & \textbf{Description} \\ \hline
+            encounter\_distance [\SI{}{\meter}] & float & Minimum distance between SSSB and spacecraft. \\
+            with\_terminator [-] & bool & Determines whether the terminator is visible at the closest approach. \\
+            with\_sunnyside [-] & bool  & Determines whether the spacecraft passes the \gls{sssb} on the Sun facing side or the side facing away from the Sun. \\
+            relative\_velocity [\SI{}{\meter\per\second}] & float & Relative velocity of the spacecraft to the \gls{sssb} at the encounter. \\
+            encounter\_date [-] & dict$^{\ref{fot:date_dict}}$ & Date of the closest approach of the spacecraft and the \gls{sssb}. \\
+            sssb\_state [\SI{}{\meter} \& \SI{}{\meter\per\second}] & tuple & \gls{sssb} state vector containing 3 position and 3 velocity components at the encounter. The spacecraft encounter state is calculated relative to this state vector. The \gls{sssb} state is not required as input since it is calculated based on the \gls{sssb} trajectory and encounter date.
+        \end{tabular}
+    }
+\end{table}
+\footnotetext{A Python dictionary with an int for year, month, day, hour, minute and float for second. \label{fot:date_dict}}
 
-All images during the rendering and calibration process use \gls{hdr} images to minimise the loss of information in intermediate steps.
+Propagation is defined by the duration of the fly-by, number of frames, timesampler mode and a slowmotion factor as presented in Table~\ref{tab:sim_prop_input}. The timesampler mode determines whether the steps are distributed linear in time (mode 1, default) or whether an exponential model (mode 2) is used which increases the number of frames around the encounter. How many additional samples are taken can be controlled with the slow motion factor. Mode 2 is especially helpful when simulating a long fly-by since far from the \gls{sssb} nucleus only minor changes are visible in rendered images.
 
-\subsection{Compression Module}
-The compression module provides compression and decompression algorithms. These can be tested against different mission scenarios and image series to investigate the impact of compression and decompression on the science quality.
+\begin{table}[htb]
+    \centering
+    \caption{Input parameters that define the propagation step in~\gls{sispo}.}
+    \label{tab:sim_prop_input}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{p{0.27\textwidth}|p{0.07\textwidth}|p{0.6\textwidth}}
+            \textbf{Parameter [Unit]} & \textbf{Type} & \textbf{Description} \\ \hline
+            duration [\SI{}{\second}] & float & Total length of the simulation. The encounter date is reached after half of the duration. \\
+            frames [-] & int & Number of frames (samples) taken during the encounter. \\
+            timesampler\_mode [-] & int & Mode 1 = linear, mode 2 = exponential sampling.  \\
+            slowmotion\_factor [-] & float & Determines how many more state samples are taken around the encounter. Only applies if timesampler\_mode is exponential. \\
+        \end{tabular}
+    }
+\end{table}
 
-The following set of compression algorithms 
 
-\subsection{Reconstruction Module}
-The reconstruction module can be used to generate a 3D model of an object using a series of images. It provides a full Multi-View Stereo reconstruction data process pipeline. To achieve this, two libraries are used and combined and called using python. The first library is \gls{omvg} by \cite{openMVG}. The second library is \gls{omvs}. 
-The common steps for the complete pipeline is comprised of the following steps:
+\subsubsection{SSSB Rendering}
+The \gls{3d} creation suite Blender was selected for rendering within \gls{sispo}~\cite{blender}. Blender provides the path tracing rendering engine Cycles which renders photo-realistic, physics-based images~\cite{Cycles}.
+
+Rendering requires \gls{3d} models of the \gls{sssb}, the light reference and the Sun as a light source. The \gls{sssb} and light reference objects are kept at the origin while the Sun object and cameras change location. Three scenes with one camera each are used. The scenes are called \textit{SssbOnly} with the \textit{ScCam} camera, \textit{SssbConstDist} with the \textit{SssbConstDistCam} and \textit{LightRef} with the \textit{LightRefCam} camera. The three scenes with their respective cameras are necessary for the composition step described in Section~\ref{sec:composition}. Each camera is configured with the same physical instrument characteristics provided as input as presented in Table~\ref{tab:inst_input}. All cameras are perspective \gls{rgb} cameras with a \gls{fov} clipped to the interval $[\SI{1e-5}{},\SI{1e32}{}]$. The star background is not rendered with Blender and therefore described separately in Section~\ref{sec:stars}.
+
+\begin{table}[htb]
+    \centering
+    \caption{Input parameters that define an instrument in \gls{sispo}.}
+    \label{tab:inst_input}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{p{0.2\textwidth}|p{0.2\textwidth}|p{0.6\textwidth}}
+            \textbf{Parameter [Unit]} & \textbf{type} & \textbf{Description} \\ \hline
+            res [-] & (int, int) & Number of pixels of the \gls{ccd} in x- and y-axis. Two values need to be given as either list or tuple.\\
+            pixel\_l [\SI{}{\micro\meter}] & float & Length of a pixel of the \gls{ccd} .\\
+            focal\_l [\SI{}{\milli\meter}] & float & Focal length of the optical bench. \\
+            aperture\_d [\SI{}{\centi\meter}] & float & Diameter of the aperture of the optical bench.\\
+            wavelength [\SI{}{\nano\meter}] & float & Centre wavelength of the instrument. \\
+            quantum\_eff [-] & float & Optical efficiency of the optical system, including optical bench, quantum efficiency of the \gls{ccd}. \\
+            color\_depth [\SI{}{\bit}] & int & Bit depth of the \gls{ccd}. 
+        \end{tabular}
+    }
+\end{table}
+
+The precise shape and surface details of an \gls{sssb} are not provided as texture files and exact shape models within \gls{sispo}. The raw Blender model is a smooth body without any textures as shown in Figure~\ref{fig:smooth_model}. Blender shader nodes are used to create the surface shape and texture during rendering. Blender nodes are a method of visually programming complex algorithms. Blender nodes are combined in a network or tree. An overview of the node network used in \gls{sispo}'s rendering process can be seen in Figure~\ref{fig:shader_nodes}. The network consists of two main trees, one for shading and one for displacement. The two trees are interlinked, i.e. displacement influences surface colour and vice-versa. Procedural terrain generation allows to use the same model on a large range of distances since surface details are generated automatically~\cite{IntroductionNodes}.
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=.7\textwidth]{doc/thesis/0_figures/procedural_terrain/smooth_model.png}
+        \caption{}
+        \label{fig:smooth_model}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/node_network.png}
+        \caption{}
+        \label{fig:shader_nodes}
+    \end{subfigure}
+    \caption{(a)~Raw, smooth \gls{3d} model before applying texturing and displacement shaders. (b)~Shader node network overview depicting the shaders used for creating the final \gls{sssb} surface and terrain. The overview shall provide an idea of the complexity of the network, a larger version of this image with higher resolution is presented in Appendix~\ref{sec:shader_node}.}
+\end{figure}
+
+The shader implementation creates a material that combines surface shading and displacement. The used nodes are grouped into five categories. Math nodes, texture nodes, colouring nodes, vector nodes and shader nodes. A detailed description can be found in the Blender manual~\cite{IntroductionNodes}. Only the most relevant information for the implementation in \gls{sispo} is provided.
+
+Math nodes include mathematical operators such as add, subtract, multiply, greater than or maximum of a value. Vector nodes allow transformations in \gls{3d} space such as translation, scaling or displacement. \Gls{sispo} uses the Displacement node to move the surface along the surface normals. Colouring nodes are used to alter colours. \Gls{sispo} uses the RGB Curves node which allows manipulation of colours per channel using a curve that maps the input to output values. Mix nodes are used to combine colours. Texture nodes provide procedural creation of texture by calculating colours based on mathematical functions and model coordinates. The Noise Texture node creates textures based on Perlin noise. The Voronoi Texture node creates textures using Voronoi patterns, or Worely noise. Three shader nodes are used in our model, the Principled \gls{bsdf}, Diffuse \gls{bsdf} and the Mix Shader node. The Principled \gls{bsdf} node combines many shading features into a single node. The \gls{bsdf} at the output includes a mix of sheen tint, surface roughness and index of refraction, among others. The Diffuse \gls{bsdf} node provides diffuse reflection using a Lambertian and Oren-Nayar model. The Mix Shader node combines its input shaders with a given probability for using either of the input shaders as its output.
+%math nodes: add, subtract, multiply, greater than, maximum 
+%vector: displacement
+%colouring: RGB curves, Mix
+%texture node: noise, Voronoi
+%shader: Principled BSDF, Diffuse BSDF, mix
+
+The resulting shader based Blender material can be applied to any \gls{3d} model inside Blender. \Gls{sispo} can be used to create various \glspl{sssb} by changing parameters or modifying the \gls{3d} model itself. Four rendered example images created with the described shader node network are presented in Figure~\ref{fig:render_out}.
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/orig.png}
+        \caption{}
+        \label{fig:render_out_orig}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/changed2.png}
+        \caption{}
+        \label{fig:render_out_changed}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/main_moon.png}
+        \caption{}
+        \label{fig:render_out_main_moon}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/procedural_terrain/bilobe2.png}
+        \caption{}
+        \label{fig:render_out_bilobe}
+    \end{subfigure}
+    \caption{Four rendered images using the Blender material used in \gls{sispo}. (a)~Render output with default shader parameters using the \gls{3d} model presented in Figure~\ref{fig:smooth_model}. (b)~Rendered image with changed shader parameters using the same model as in~(a). (c)~Render of a binary system with the same main body as in~(a) and default shader parameters. (d)~Bilobate body using default shader parameters.}
+    \label{fig:render_out}
+\end{figure}
+Blender is interfaced using its Python bindings which need to be compiled manually. Some predefined settings are used for each scene and some parameters can be provided as input. The paths to the ".blend" files of models for the Sun, light reference and \gls{sssb} need to be provided with the object name within the respective file.
+
+Since images are composed and calibrated in a later step, described in Section~\ref{sec:composition}, the settings shown in Table~\ref{tab:color_space} are selected to not alter images with Blender while saving the raw rendered images.
+\begin{table}[htb]
+    \centering
+    \caption{Blender settings that define the colour space and are fixed to not alter images after rendering.}
+    \label{tab:color_space}
+    \begin{tabular}{p{0.25\textwidth}|p{0.08\textwidth}|p{0.57\textwidth}}
+        \textbf{Name in Blender}        & \textbf{Value} & \textbf{Description} \\ \hline
+        Color mode           & RGBA           & Use \gls{rgba} channels. \\
+        Exposure             & 0              & Exposure in stops, applied before display transform. \\
+        Sequencer colorspace & Raw            & Colour space sequencer uses linear colour space. \\
+        View transform       & Raw            & No colour space conversion. \\
+        Look                 & None           & No artistic effect is applied before colour space conversion. \\
+        Film transparent     & True           & World background is transparent, i.e. alpha values can be used for image composition and occultation.
+    \end{tabular}
+\end{table}
+
+The rendering performance of Blender can be configured depending on the available hardware and required image quality with the parameters presented in Table~\ref{tab:blender_settings_input}.
+\begin{table}[htb]
+    \centering
+    \caption{Input parameters that affect rendering performance and image quality in~\gls{sispo}.}
+    \label{tab:blender_settings_input}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{p{0.15\textwidth}|p{0.15\textwidth}|p{0.7\textwidth}}
+            \textbf{Parameter} & \textbf{Default Value} & \textbf{Description} \\ \hline
+            device & AUTO & Device used for rendering, either "AUTO", \gls{cpu} or \gls{gpu}. "AUTO" attempts to use \gls{gpu}, if no \gls{gpu} is available uses \gls{cpu}. \\
+            tile\_size & 512 (GPU)/ 128 (CPU)  & Size of a rendering tile. When rendering with a \gls{gpu} a bigger tile size tends to have better performance. When rendering with a \gls{cpu}, a smaller tile size tends to have better performance\footnotemark. \\
+            samples & 48 & Number of samples rendered per pixel.\\
+        \end{tabular}
+    }
+\end{table}
+\footnotetext{A more detailed description is found at \url{https://docs.blender.org/manual/en/latest/render/cycles/render\_settings/performance.html?highlight=tile\%20size}}
+
+Due to problems during rendering, Blender scenes use kilometres instead of metres, i.e. one Blender unit corresponds to \SI{1}{\kilo\meter}. This is the only deviation from SI base units within \gls{sispo}.
+
+\subsubsection{Star Rendering} \label{sec:stars}
+The background stars are rendered based on the star catalogue \gls{ucac4}. The \gls{ucac4} catalogue includes stars up to magnitude 16. The \gls{fov} is determined based on the spacecraft camera in the \textit{SssbOnly} scene which represents the \gls{fov} of the spacecraft instrument. The edges of the \gls{fov} are calculated using Equation~\ref{eq:fov_edge}.
+
+\Gls{sispo} retrieves the list of stars in the \gls{fov}. The interface for the \gls{ucac4} is a command-line tool u4test.exe~\cite{gray}. The command-line interface requires the \gls{fov} defined as right ascension \gls{ra}, declination \gls{de}, width and height.
+
+The conversion of the vectors into their respective right ascension and declination is a transform between Cartesian coordinates to spherical coordinates. The relation is defined as
+\begin{align}
+    \delta = \arcsin{(z)}, \label{eq:declination} \\
+    \alpha_r = \arccos{\left(\frac{x}{\cos{\delta}}\right)} + \pi, \label{eq:right_ascension}
+\end{align}
+where \gls{de} is the declination, \gls{ra} the right ascension, $x$ is the x-coordinate and $y$ is the y-coordinate. Using this information the star catalogue returns a list of visible stars including their right ascension, declination and magnitude.
+
+The star background is created by generating an image with four times the size of the final image. The coordinates are converted from right ascension and declination of each star into pixel coordinates of the image frame using Equation~\ref{eq:pix_conversion}. The pixel coordinates are multiplied with two to fit the oversized image.
+
+The pixel value of each colour channel is set to the flux calculated from the magnitude as defined in Equation~\ref{eq:mag_flux}. The resulting image is Gaussian filtered and down-sampled to the final image size using local means (cf. Section~\ref{sec:t_downsample}). Star background images are stored in the OpenEXR format with all alpha channel values equal to one. An example image is presented in Figure~\ref{fig:star_rendering}.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{doc/thesis/0_figures/star_rendering/Stars_2017-08-15T115856-171000.png}
+    \caption{Rendered star map containing several thousand stars.}
+    \label{fig:star_rendering}
+\end{figure}
+
+\subsubsection{Image Composition} \label{sec:composition}
+Rendered images vary in brightness thus photometric calibration is necessary. Star maps are not rendered with Blender, thus the raw images need to be combined. Optionally, the combined images can be transformed to have a specified colour depth of a \gls{ccd} (cf. instrument input parameters in Table~\ref{tab:inst_input}). Consequently, the composition process has two steps and an optional third step. 
+
+First, the \gls{sssb} image and the star background are calibrated. Calibration compares a rendered image of a calibration disk with theoretically calculated values for the same conditions.  In the second step, these images are combined to create an \gls{sssb} image with star background. Occultation of stars by the nucleus is included in the image combination.
+
+Composition begins with a set of four images with the prefixes \textit{SssbOnly}, \textit{SssbConstDist}, \textit{LightRef} and \textit{Stars}. An example set is shown in Figure~\ref{fig:comp_imageset}. \textit{SssbOnly} represents the \gls{fov} of the spacecraft instrument. \textit{SssbConstDist} is a follower camera at a constant distance of \SI{1000}{\kilo\meter} from the \gls{sssb}. \textit{LightRef} contains a calibration disk. \textit{Stars} is an image of the star background. The \textit{SssbOnly} and \textit{Stars} are rendered for the same \gls{fov}.
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/SssbOnly_2017-08-15T115855-684000.png}
+        \caption{}
+        \label{fig:comp_sssbonly}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/SssbConstDist_2017-08-15T115855-684000.png}
+        \caption{}
+        \label{fig:comp_sssbconstdist}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/LightRef_2017-08-15T115855-684000.png}
+        \caption{}
+        \label{fig:comp_lightref}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/Stars_2017-08-15T115855-684000.png}
+        \caption{}
+        \label{fig:comp_stars}
+    \end{subfigure}
+    \caption{Example set of images used for composition to the final rendering output. (a)~\textit{SssbOnly} image which represents the instrument \gls{fov}. (b)~\textit{SssbConstDist} image of a camera that follows the nucleus at a constant distance. (c)~\textit{LightRef} scene which contains the light reference used for calibration. (d)~\textit{Stars} image which represents the star background in the instrument \gls{fov}.}
+    \label{fig:comp_imageset}
+\end{figure}
+
+Photometric calibration is based on the V-band of the \gls{ubv} as described in Section~\ref{sec:photo_cal}. The \gls{ubv} was created before \glspl{ccd} were frequently used in imaging. The \gls{ubv} does not consider the higher sensitivity in the red and infrared spectrum of \glspl{ccd}. However, the \gls{ubv} was implemented because of its simplicity.
+
+The calibration reference is the solar photon flux in the V-band. The Sun has a magnitude \gls{m}$_{\astrosun} = -26.74$ at a distance of \SI{1}{au}. Using Equation~\ref{eq:comp_flux_0mag} and the constants for the V-band from Table~\ref{tab:ubv_constants}, the solar photon flux density at \SI{1}{au} becomes \gls{flux_d}$_{\astrosun} = \SI{4.36715206e+20}{\per\second\per\square\meter}$.
+ 
+The spacecraft is typically not at a \SI{1}{au} distance to the Sun, therefore the flux density is scaled using an inverse square law defined as
+\begin{align}
+    F_d = F \times \left(\frac{\SI{1}{au}}{d}\right)^2, \label{eq:inverse_square}
+\end{align}
+where \gls{flux_scaled} is the scaled photon flux density, \gls{flux_d} is the flux density at \SI{1}{au} and \gls{d} is the spacecraft's distance from the Sun in \SI{}{au}.
+
+Subsequently, the reference photon flux for one pixel is calculated using Equation~\ref{eq:comp_flux_pix} and the scaled photon flux density \gls{flux_scaled}.
+
+The calibration factor for each pixel of the \gls{sssb} image is obtained using Equation~\ref{eq:comp_cal_fac}. The reference intensity \gls{iref} of the image is calculated as the mean intensity of $\SI{70}{}\times\SI{70}{}$ pixels of the centre of the light reference image.
+
+If the rendered image is far away from the \gls{sssb} nucleus, the apparent size of the nucleus is too small to be used for calibration. If the \gls{sssb} nucleus is only in a few pixels of the image the intensities are not rendered correctly. In such a case, a point source \gls{sssb} image is generated and used for calibration in combination with the \textit{SssbConstDist} image. The point source image is created by Gaussian filtering a single white pixel at the centre of an oversized image. The image is oversized by a factor of five and subsequently down-sampled to the same size as the \textit{SssbOnly} image using local means as described in Section~\ref{sec:t_downsample}.
+
+For the star background, every pixel value \gls{v} is calibrated using
+\begin{align}
+        v = v_0 \times F_0 \times A \times \frac{F_{stars}}{S_{stars}}, \label{eq:comp_cal_starmap}
+\end{align}
+with \gls{v_0} being the original pixel value, \gls{flux_0} being the flux at a magnitude \gls{m}$ = 0$, \gls{aperture} being the aperture area, \gls{flux_stars} being the total flux of visible stars and \gls{s_stars} being the summed pixel value of one channel of a star map.
+
+The star background and calibrated \gls{sssb} image are merged considering alpha channels. The alpha channel is used to implement occultation of background stars by the nucleus. The film\_transparent option of Blender is activated to make the scene background transparent, i.e. only pixels containing the \gls{sssb} have an alpha value larger than zero.
+
+The composed image is multiplied by the efficiency of the instrument. The efficiency parameter combines all efficiencies to convert incoming photon flux into pixel value, not only the \gls{ccd} quantum efficiency. A diffraction pattern and noise based on a Poisson distribution are added. The diffraction pattern can be approximated with a Gaussian filter. The standard deviation for the Gaussian approximation of a diffraction pattern is \gls{sigma} $\approx 0.45 \times$ \gls{lambda} $\times \frac{\gls{f}}{\gls{D}}$ when the Gaussian profile should contain the same energy as the diffraction pattern~\cite{Zhang2007GaussianModels}. Therefore, the standard deviation \gls{sigma} for Gaussian filtering in \gls{sispo} is defined as
+\begin{align}
+    \sigma = 0.45 \times \lambda \times \frac{f}{D} \times \frac{m_d}{l_{pix}}, \label{eq:comp_sigma}
+\end{align}
+where \gls{lambda} is the observed wavelength, \gls{f} is the focal length, \gls{D} is the aperture diameter, \gls{l_pixel} is the length of one side of a pixel and \gls{m_d} is a multiplier for systems that are not diffraction limited. A perfectly diffraction limited system would have \gls{m_d}~$= 1$). \Gls{sispo} uses \gls{m_d}~$= 2$ to simulate systems that are not diffraction limited. 
+
+The noisy image is scaled to an interval $[0,1]$ by dividing through the maximum value. If a point source \gls{sssb} is used, the maximum value is clipped to five times the maximum of the \gls{sssb} point source reference if the maximum value of the merged image is above this threshold. Figure~\ref{fig:comp_composed} shows the composed image which is based on the image set presented in Figure~\ref{fig:comp_imageset}.
+
+\begin{figure}[htb]
+    \centering
+    \includegraphics[width=\textwidth]{doc/thesis/0_figures/composition/Comp_2017-08-15T115854-575000.png}
+    \caption{Composed image of the four images shown in Figure~\ref{fig:comp_imageset}. No stars are visible in the background because the nucleus is much brighter than the brightest background star.}
+    \label{fig:comp_composed}
+\end{figure}
+
+The additional third step allows to scale the image values to the colour depth of a \gls{ccd} (cf. Table~\ref{tab:inst_input}). The maximum permissible colour depth is \SI{16}{bit} due to an increase in code complexity for higher bit depths. Colour depth clipping can be turned off by setting the with\_clipping parameter to false. By default, colour depth clipping is used since \gls{sispo} aims to realistically simulate the imaging capabilities of a spacecraft.
+
+An additional feature is to add an information box that includes the spacecraft distance to the \gls{sssb} and the date of the frame in the lower right corner of the images. The infobox can be added by setting the with\_infobox parameter to true.
+
+Throughout the composition process, the astropy package~\cite{robitaille2013astropy, price2018astropy} handles unit conversion between quantities. Down-sampling and Gaussian filtering are handled by OpenCV during the composition process~\cite{opencv_library}.
+
+\subsection{Compression Package}
+The compression package provides various compression and decompression algorithms. The algorithms can be tested in various mission scenarios and image series to investigate the impact of compression and decompression on the scientific return of images. Table~\ref{tab:compression_format} presents the available compression and decompression algorithms.
+
+\begin{table}[htb]
+    \centering
+    \caption{Lossless and lossy compression algorithms and image formats provided in \gls{sispo}. The implementation uses either native Python libraries$^{\ast}$~\cite{FoundationDataArchiving}, OpenCV$^{\dagger}$~\cite{opencv_library} or native OpenEXR$^{\ddagger}$~\cite{openexr}. The \gls{tiff} format can use either a lossless or lossy compression algorithm.}
+    \label{tab:compression_format}
+    \begin{tabular}{l|l}
+        \textbf{Lossless Formats}  & \textbf{Lossy Formats} \\ \hline
+        \gls{png}$^{\dagger}$      & \gls{jpeg}$^{\dagger}$  \\
+        OpenEXR$^{\ddagger}$       & \gls{jp2}$^{\dagger}$   \\
+        bzip2$^{\ast}$             & \gls{tiff}$^{\dagger}$  \\
+        gzip$^{\ast}$              &                \\
+        \gls{lzma}$^{\ast}$        &                \\
+        zlib$^{\ast}$              &     \\
+        \gls{tiff}$^{\dagger}$     &  
+    \end{tabular}
+\end{table}
+
+Independent of the algorithm, files are handled equally. Images are loaded into NumPy arrays in \gls{sispo} to have a common raw format. Before encoding, the information is reduced to \SI{8}{\bit} since the reconstruction module only works correctly with images of \SI{8}{\bit} colour depth correctly. Images are encoded with the selected algorithm and converted into a binary stream. A copy of this data is saved as a file in the raw folder. The raw binary data is converted back to a NumPy array and decoded. The decompressed data is stored as a \gls{png} file to not lose any further information.
+
+The formats \gls{png}, \gls{jpeg}, \gls{jp2} and \gls{tiff} are implemented using OpenCV. There are various settings for each format\footnote{A detailed description can be found at \url{https://docs.opencv.org/4.1.2/d4/da8/group__imgcodecs.html\#ga292d81be8d76901bff7988d18d2b42ac}}.
+
+The most relevant input parameter to all compression algorithms is the "level" argument in "settings" which describes either the compression level or the quality level. The algorithms bz2, gzip, \gls{lzma}, zlib and \gls{png} use a compression level from one to nine where a higher number means more compression. The formats \gls{jpeg} and \gls{jp2} use the quality level which is defined from zero to ten where a higher number means less compression. Other input parameters to the compression package are presented in Table~\ref{tab:compression_settings}.
+
+\begin{table}[htb]
+    \centering
+    \caption{Input parameters that define the compression behaviour in~\gls{sispo}.}
+    \label{tab:compression_settings}
+    \begin{tabular}{p{0.1\textwidth}|p{0.14\textwidth}|p{0.73\textwidth}}
+        \textbf{Name} & \textbf{Default Value} & \textbf{Description} \\ \hline
+        algo    & \gls{png}  & Compression algorithm, for a list of available algorithms see Table~\ref{tab:compression_format}\\
+        settings & \{"level": 9\} & Python dictionary including all settings for compression algorithms. For a description of the possible settings see the code or documentation of the providing library. \\
+        img\_ext    & \gls{png} & Image extension to search for when loading images for compression. 
+    \end{tabular}
+\end{table}
+
+Compression and decompression use a simple implementation of multi-threading to execute several image compression and decompression processes concurrently to reduce execution time. Images are only loaded during the compression and decompression process and are removed from memory directly afterwards to reduce memory consumption.
+
+\subsection{Reconstruction Package}
+The reconstruction package generates a \gls{3d} model of an object based on a set of images. Reconstruction is based on the \gls{sfm} technique. Two libraries are combined within \gls{sispo} to create the full reconstruction pipeline. \Gls{omvg} is used to create a sparse point cloud~\cite{openMVG}. \Gls{omvs} is used to refine the sparse point cloud and create a textured \gls{3d} model~\cite{openMVS}. 
+
+The steps of the complete pipeline are:
 \begin{enumerate}
-    \item Read in images [ImageListing in \gls{omvg}]
-    \item Compute visual features [ComputeFeatures in \gls{omvg}]
-    \item Match computed features between different images [MatchFeatures in \gls{omvg}]
-    \item Generate point cloud from matched features [IncrementalSfM in \gls{omvg}]
-    \item Export to \gls{omvs} format [openMVG2openMVS in \gls{omvg}]
-    \item Increase number of points in point cloud [DensifyPointCloud in \gls{omvs}]
-    \item Create a mesh from the point cloud [ReconstructMesh in \gls{omvs}]
-    \item Refine the generated mesh [RefineMesh in \gls{omvs}]
-    \item Apply texture to mesh to create final 3D model [TextureMesh in \gls{omvs}]
+    \item Loading images with associated information such as priors (ImageListing in \gls{omvg})
+    \item Compute visual features (ComputeFeatures in \gls{omvg})
+    \item Match computed features between different images (MatchFeatures in \gls{omvg})
+    \item Generate a sparse point cloud from matched features (IncrementalSfM in \gls{omvg})
+    \item Export sparse point cloud to the \gls{omvs} format (openMVG2openMVS in \gls{omvg})
+    \item Increase the number of points in the point cloud (DensifyPointCloud in \gls{omvs})
+    \item Triangulate a rough mesh from the dense point cloud (ReconstructMesh in \gls{omvs})
+    \item Refine the rough mesh (RefineMesh in \gls{omvs})
+    \item Apply texture to refined mesh to create final \gls{3d} model (TextureMesh in \gls{omvs})
 \end{enumerate}
 
-\subsection{Setup}
-\gls{sispo} can be setup with Linux and Windows. The default case used in this description is a Windows setup. Known differences or problems under Linux will be pointed out as well. While it should be possible to use a plain Python environment and pip, a miniconda environment manager was used for development. Also a C compiler is necessary. Linux has the GCC already installed, for Windows it is easiest to install Microsoft Visual Studio with \gls{msvc} and \gls{msbuild}. Another possibility when using Windows is to use vcpkg\footnote{Found at \url{https://github.com/microsoft/vcpkg}}. However, previously the openMVG and openMVS ports in vcpkg did not work. Vcpkg can also be used with Linux. However during an attempt, there were unsolvable problems when using vcpkg so everything was installed natively.
-For \gls{omvg}, \gls{omvs} and star\_cats it is necessary to have the executables in the correct folder for \gls{sispo} to function. \newline
+\gls{omvg} and \gls{omvs} are controlled with numerous parameters. All parameters have default values in \gls{sispo} itself which occasionally differ from the original default settings of the software packages. The default settings were adapted to improve results in the \gls{sssb} fly-by scenarios.
 
-\begin{figure}
-    \dirtree{%
-.1 sispo.
-.2 build.
-.2 data.
-.3 UCAC4.
-.4 u4b.
-.4 u4i.
-.3 sensor\_database.
-.3 models.
-.3 input.
-.2 doc.
-.2 sispo.
-.3 sim.
-.3 compression.
-.3 reconstruction.
-.2 software.
-.3 miniconda.
-.3 vcpkg.
-.3 blender.
-.3 openMVG.
-.4 openMVG.
-.4 build\_openMVG.
-.5 install.
-.3 openMVS.
-.4 openMVS.
-.4 build\_openMVS.
-.5 install.
-.3 star\_cats.
-.4 star\_cats.
-.4 build\_star\_cats.
-}
-    \caption{Directory structure after setup}
-    \label{fig:dir_tree}
+During the image listing step, the spacecraft locations from the simulations are added as motion priors to improve stability of the \gls{sfm} algorithms. Priors are used based on the assumption that a rough spacecraft trajectory is known.
+
+Reconstruction is based on two incremental and one global \gls{sfm} approach provided by \gls{omvg}. The three algorithms are executed and the number of reconstructed points are compared. The result containing the most points is exported to \gls{omvs} for further processing. Residuals are not considered hence the selection method might not choose the highest quality point cloud due to a possibly high number of outliers. If the reconstructed \gls{3d} model is considered unacceptable, a better model might be created from a sparse point cloud of another \gls{sfm} algorithm.
+
+The IncrementalSfM2 algorithm is non-deterministic, i.e. results can differ between executions using the same data sets. Consequently, IncrementalSfM2 should be executed several times and the best result should be selected~\cite{Pajusalu2019CharacterizationMapping}.
+
+\Gls{sispo} saves intermediate results of the reconstruction process, starting from the sparse point cloud and ending in the textured \gls{3d} model. Figure~\ref{fig:recon_steps} depicts the evolution of the sparse point cloud to a textured \gls{3d} model and a rendered image used in the reconstruction process for comparison.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_points2.png}
+        \caption{}
+        \label{fig:recon_step_point}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_dense1.png}
+        \caption{}
+        \label{fig:recon_step_dense}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_mesh1.png}
+        \caption{}
+        \label{fig:recon_step_mesh}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_refine2.png}
+        \caption{}
+        \label{fig:recon_step_refine}
+    \end{subfigure}
+    \\
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_texture1.png}
+        \caption{}
+        \label{fig:recon_step_texture}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\textwidth,height=5.95cm]{doc/thesis/0_figures/models_quality/100_1/120_100_1_img1.png}
+        \caption{}
+        \label{fig:recon_step_img}
+    \end{subfigure}
+    \caption{Example images of intermediate results of the reconstruction pipeline. (a)~Sparse point cloud created by \gls{omvs}. (b)~Point cloud densified with \gls{omvs}. (c)~Mesh created from the dense point cloud in~(b) using \gls{omvs}. (d)~Refined mesh based on the mesh created in~(c) using \gls{omvs}. (e)~Mesh textured using \gls{omvs}. (f)~Reference image for comparison with the textured mesh.}
+    \label{fig:recon_steps}
 \end{figure}
-Figure \ref{fig:dir_tree} shows the assumed overall folder structure after installation. No subfolders of the build folder or any files are depicted. 
 
-To make \gls{sispo} perform well, it is beneficial to install Nvidia CUDA Toolkit (https://developer.nvidia.com/cuda-downloads) in case an Nvidia graphics card is available.
+The highest priority of the reconstruction pipeline is to reconstruct a model. \Gls{sispo} attempts to create the most detailed model possible by densifying the point cloud and refining the mesh. If point cloud densification or mesh refinement is unsuccessful, \gls{sispo} continues with either the sparse point cloud or the rough mesh.
 
-\begin{enumerate}
-    \item Clone the GitHub repository onto the local machine \\ \shellcmd{git clone https://github.com/YgabrielsY/sispo.git}. The project provides a software folder which is intended to be used to install all following software.
-    \item Setup (conda) environment with dependencies (to software/miniconda folder):
-    \begin{enumerate}
-        \item orekit 9.3.1, the current version 10.0 have issues when once attempted. Also orekit needs a data package to function, it is distributed with \gls{sispo} in the sim module folder.
-        \item astropy
-        \item opencv
-        \item OpenEXR\footnote{For Windows the pre-compiled package found at \url{https://www.lfd.uci.edu/~gohlke/pythonlibs/\#openexr} needs to be used because the pip or conda version do not work.}
-        \item numpy
-        \item Python\footnote{During development Python version 3.7 was used.}
-    \end{enumerate}{}
-    \item (Especially Windows) Install vcpkg to software/vcpkg folder, follow instructions at \url{https://github.com/microsoft/vcpkg}
-    \item Install Blender as a python module (bpy)\footnote{During development Blender version 2.8 was used.}
-    \begin{enumerate}
-        \item Clone Blender git repository to software/blender/blender \\ \shellcmd{git clone git://git.blender.org/blender.git}
-        \item Compile target bpy \shellcmd{make bpy}, this works also for Windows through the make.bat file provided with Blender
-        \item When available: Activate CUDA in the cmake project and recompile
-        \item Install bpy to python environment\footnote{Follow these instructions \url{https://blender.stackexchange.com/questions/117200/how-to-build-blender-as-a-python-module}}
-    \end{enumerate}{}
-    \item Install OpenMVG, follow instructions at \\ \url{https://github.com/openMVG/openMVG/blob/master/BUILD.md} or look for hints in the OpenMVG install script in the build folder.
-    \begin{enumerate}
-        \item Install dependencies according to instructions
-        \item Clone OpenMVG GitHub repository to software/openMVG/openMVG \shellcmd{git clone --recursive https://github.com/openMVG/openMVG.git}
-        \item Build to software/openMVG/build\_openMVG folder
-        \item Install to software/openMVG/build\_openMVG/install folder
-    \end{enumerate}
-    \item Install OpenMVS, follow instructions at \\ \url{https://github.com/cdcseacave/openMVS/wiki/Building} or look at the OpenMVS install script in the build folder for hints.
-    \begin{enumerate}
-        \item Install dependencies according to instructions
-        \item Clone OpenMVS GitHub repository to software/openMVS/openMVS \shellcmd{git clone https://github.com/cdcseacave/openMVS.git}
-        \item Build to software/openMVS/build\_openMVS folder
-        \item Install to software/openMVS/build\_openMVS/install folder
-    \end{enumerate}
-    \item Install star\_cats
-    \begin{enumerate}
-        \item Clone star\_cats GitHub repository to software/star\_cats/star\_cats \\ \shellcmd{git clone https://github.com/Bill-Gray/star\_cats.git}
-        \item Build to software/star\_cats/build\_star\_cats \shellcmd{make}
-    \end{enumerate}
-    \item Download UCAC4 star catalog to data/UCAC4, use either:
-    \begin{enumerate}
-        \item the build/data/download\_ucac4.sh script
-        \item download the folder u4b and u4i directly from \\ \url{http://casdc.china-vo.org/mirror/UCAC/UCAC4/}
-    \end{enumerate}
-\end{enumerate}{}
+\subsection{User Interface}
+\Gls{sispo} is a Python package and therefore the user interface is a Python console. Settings for the three sub-packages along with general settings of \gls{sispo} are stored in a \gls{json} file. After importing, \gls{sispo} can be executed by one of two equivalent functions sispo.run() or sispo.main(). An example definition.json file is provided with the repository in the data/input folder. The example provides the most important settings. However, more settings exist which can be found in the source code. Especially the \gls{sfm} software packages use many default settings which can be customised. An explanation of all parameters is found in the documentation of the respective software package.
 
-\subsection{Future Developments}
-There are several issues left open within the \gls{sispo} software package. First, there is currently no realistic model of spacecraft attitude motion and control implemented. The camera of the simulation environment is perfectly oriented towards the centre of the \gls{sssb}'s nucleus during the entire simulation. Realistic rotation should cover at least two effects, motion blur due to instantaneous rotation velocities of spacecraft and off-centre pointing due to control inaccuracies. Furthermore, it is necessary to include  image distortions such as astigmatism, bokeh, coma, field curvature, glare. Moreover, it is necessary to include a gas and dust environment around the nucleus. From a technical perspective, a proper simulation of the data transmission should be included. For example, a realistic simulation for packet loss. The ultimate goal is to develop a prioritisation algorithm for the images which should prioritise data transmission on packet level.
-Furthermore, the shader used to create the \gls{sssb} models should be developed further. The interface for it should be included into \gls{sispo} and restricted to values that create reasonable shaped outputs.
+The high-level behaviour of \gls{sispo} can be controlled with a set of execution flags presented in Table~\ref{tab:cli_args}.
+\begin{table}[htb]
+    \centering
+    \caption{Input flags to control high-level behaviour of \gls{sispo}.}
+    \label{tab:cli_args}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{p{0.24\textwidth}|p{0.32\textwidth}|p{0.16\textwidth}|p{0.27\textwidth}}
+            \textbf{Name} & \textbf{Variable Name} & \textbf{Default Value} & \textbf{Description} \\ \hline
+            --help & & --- & Prints list of arguments with hints \\
+            -i & i & definition.json & Path to a definition file that defines the settings \\
+            -v & v & False & Flag to use verbose output, i.e. logging information will also be displayed to console \\
+            --profile & profile & False & Flag to use Python's cProfile to profile \gls{sispo} execution \\
+            --no-sim & with\_sim & True & Flag to skip simulation step\\
+            --no-render & with\_render & True & Flag to skip rendering step\\
+            --no-compression & with\_compression & True & Flag to skip compression \\
+            --no-reconstruction & with\_reconstruction & True & Flag to skip reconstruction \\
+            --sim-only & sim\_only & False & Flag to do simulation step \\
+            --sim-render-only & sim\_render\_only & False & Flag to do simulation and rendering steps \\
+            --render-only & render\_only & False & Flag to do rendering step\\
+            --compress-only & compress\_only & False & Flag to do compression step \\
+            --reconstruct-only & reconstruct\_only & False & Flag to do reconstruction step \\
+            --compress-reconstruct-only & compress\_reconstruct\_only & False & Flag to do compression and reconstruction steps
+        \end{tabular}
+    }
+\end{table}
+
+\subsection{Performance} \label{sec:performance}
+The performance of \gls{sispo} and its components was analysed during the development to find code section that increase execution time. While reducing the number of dependencies, it was ensured that performance does not degrade.
+
+Two computers were available during performance analysis. A laptop with \SI{8}{\giga\byte} \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-6700HQ with \SI{4}{} cores at \SI{2.6}{\giga\hertz} and Windows 10. The second computer is a workstation with \SI{16}{\giga\byte} of \gls{ram}, an Intel\textsuperscript{\textregistered}~Core\texttrademark~i7-8700 processor with \SI{6}{} cores at \SI{3.2}{\giga\hertz} and Ubuntu~18.04.3~LTS.
+
+\subsubsection{Overall Performance}
+\gls{sispo} was executed on the workstation computer to assess overall performance.
+
+Two test cases were analysed with the parameters and main results given in Table~\ref{tab:profiles}. The performance assessment of two \gls{sispo} trials shows that rendering is the most time consuming process. More than \SI{90}{\percent} of the total execution time is dedicated to rendering.  Only \SI{5}{\percent} to \SI{6}{\percent} are used for reconstruction and less than \SI{1}{\percent} for compression. Consequently, compression and reconstruction do not contribute much to the total execution time. The difference of the total execution time of the two trials is explained by the different apparent size of the \gls{sssb}. Based on the two examples, the execution time for reconstruction is affected stronger by a decreasing fly-by distance than rendering.
+
+Most execution time of a simulation is related to rendering thus improving the performance of \gls{sispo} further requires improving the performance of the rendering process. Either rendering parameters can be changed or the shader implementation can be improved. Parts of the code were optimised before profiling such as multi-threading for compression or replacing the \gls{skimage} library with OpenCV.
+
+\begin{table}[htb]
+    \centering
+    \caption{Summary of two profiles obtained while executing complete trials of \gls{sispo}, i.e. rendering, compression and reconstruction. More than \SI{90}{\percent} of total time is spent rendering images.}
+    \label{tab:profiles}
+    \resizebox{\textwidth}{!}{%
+        \begin{tabular}{l|l|l|l|l|l|l|l|l}
+            \textbf{Distance} & \textbf{\gls{sssb} size} & \textbf{Total time} & \multicolumn{2}{l}{\textbf{Rendering}} & \multicolumn{2}{|l}{\textbf{Compression}} & \multicolumn{2}{|l}{\textbf{Reconstruction}} \\
+            \textbf{[\SI{}{\kilo\meter}]} & \textbf{[\SI{}{\kilo\meter}]} & \textbf{[\SI{}{\second}]} & \textbf{[\SI{}{\second}]} & \textbf{[\SI{}{\percent}]} & \textbf{[\SI{}{\second}]} & \textbf{[\SI{}{\percent}]} & \textbf{[\SI{}{\second}]}  & \textbf{[\SI{}{\percent}]} \\ \hline
+            200 & 10 & 346939.8 & 325834.6 & 93.9 & 55.6 & 0.2 & 21048.2 & 6 \\
+            400 & 10 & 212209.4 & 201443.2 & 94.9 & 24.7 & 0.1 & 10740.1 & 5.1
+        \end{tabular}%
+    }
+\end{table}
+
+\subsubsection{Image Processing Benchmark} \label{sec:cvskimage}
+The original source code used the \gls{skimage} and OpenCV libraries concurrently. In order to reduce the number of dependencies, relevant functions of the two libraries were compared. Parameters for the OpenCV functions were selected to mimic the respective \gls{skimage} function. The benchmark compares performance of Gaussian filtering and image down-sampling using local means as described in Section~\ref{sec:t_gauss} and Section~\ref{sec:t_downsample} respectively. Five images are selected for the benchmark. The image set is presented in Appendix~\ref{sec:app_cvskimage}. Two star maps were selected due to the large variance in the number of visible stars. The selected images contain 1804 and 51338 stars.
+
+The ratio of execution time is used to compare performance of the two libraries. The ratio is defined as
+\begin{align}
+    Ratio = \frac{T_{skimage}}{T_{opencv}}, \label{eq:bm_exec_ratio}
+\end{align}
+where \gls{T}$_{skimage}$ is the execution time of \gls{skimage} and \gls{T}$_{opencv}$ is the execution time of OpenCV. Each command is executed and timed for 1000 trials. The lowest value is selected as result, since higher values are more likely influenced by other processes running on the respective machine than the relevant code snippet itself~\cite{timeit2020}.
+
+Both available computers were used for the image processing performance benchmark. Figure~\ref{fig:bm_comparison} shows execution time ratios and averages for the image set. A ratio larger than one represents a longer execution time of \gls{skimage}. On average, OpenCV outperforms \gls{skimage} for both tests on both computers. The maximum absolute difference between pixel values of images is \SI{1.486e-6}{} and \SI{7.153e-7}{} for the Gaussian filtered and the resized images respectively. Such differences are not relevant for image colour depths of up to \SI{16}{bit}.
+
+%Maximum error gauss:  1.4864218655930017e-06
+%Maximum error resize:  7.152557373046875e-07
+
+\begin{figure}[htb]
+    \centering
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/cv_skimage/Comparison_Gaussian}
+        \caption{}
+        \label{fig:bm_comparison_gauss}
+    \end{subfigure}
+    \begin{subfigure}[b]{0.47\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{doc/thesis/0_figures/cv_skimage/Comparison_Resize}
+        \caption{}
+        \label{fig:bm_comparison_res}
+    \end{subfigure}
+    \caption{Comparison of execution time ratios of (a) Gaussian filtering and (b) resizing five images using OpenCV and \gls{skimage} on two computers. Values $> 1$ correspond to OpenCV executing faster. The mean values are presented in the legend.}
+    \label{fig:bm_comparison}
+\end{figure}
+
+OpenCV has a performance advantage over the \gls{skimage} library, hence only OpenCV is used in \gls{sispo}. OpenCV might also be used to replace the OpenEXR dependency in the future, if the OpenEXR implementation of OpenCV includes alpha channel support\footnote{A GitHub issue was created at \url{https://github.com/YgabrielsY/sispo/issues/128} that links to the relevant OpenCV GitHub issue.}.

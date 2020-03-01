@@ -67,10 +67,13 @@ class OpenMVSController():
         args.extend(["--estimate-normals", str(int(est_normals))])
         args.extend(["--sample-mesh", str(sample_mesh)])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Point cloud densification returned: %s", str(ret))
+        try:
+            utils.execute(args, self.logger, OpenMVSControllerError)
+        except OpenMVSControllerError as e:
+            pass
 
     def create_mesh(self,
+                    export_type="obj",
                     p_prio=-1,
                     max_threads=0,
                     const_weight=1,
@@ -78,9 +81,9 @@ class OpenMVSController():
                     thickness=1,
                     quality=1,
                     decimate=1,
-                    spurious=20,
-                    spikes=True,
-                    holes=30,
+                    remove_spurious=20,
+                    remove_spikes=True,
+                    close_holes=30,
                     smooth=2):
         """Create a mesh from a 3D point cloud."""
         self.logger.debug("Create mesh from point cloud")
@@ -88,11 +91,19 @@ class OpenMVSController():
         working_dir = utils.check_dir(self.res_dir / "mesh")
         self.mesh_scene = working_dir / "mesh.mvs"
 
+        # If no dense point cloud exists, use exported scene
         args = [str(self.openMVS_dir / "ReconstructMesh")]
-        args.extend(["-i", str(self.dense_scene)])
+        if self.dense_scene.is_file():
+            args.extend(["-i", str(self.dense_scene)])
+        elif self.export_scene.is_file():
+            self.logger.debug("Using exported scene instead of dense scene.")
+            args.extend(["-i", str(self.export_scene)])
+        else:
+            raise OpenMVSControllerError("No pointcloud found, will not mesh")
         args.extend(["-o", str(self.mesh_scene)])
         args.extend(["-w", str(working_dir)])
 
+        args.extend(["--export-type", str(export_type)])
         args.extend(["--process-priority", str(p_prio)])
         args.extend(["--max-threads", str(max_threads)])
         args.extend(["--constant-weight", str(const_weight)])
@@ -100,15 +111,15 @@ class OpenMVSController():
         args.extend(["--thickness-factor", str(thickness)])
         args.extend(["--quality-factor", str(quality)])
         args.extend(["--decimate", str(decimate)])
-        args.extend(["--remove-spurious", str(spurious)])
-        args.extend(["--remove-spikes", str(int(spikes))])
-        args.extend(["--close-holes", str(holes)])
+        args.extend(["--remove-spurious", str(remove_spurious)])
+        args.extend(["--remove-spikes", str(int(remove_spikes))])
+        args.extend(["--close-holes", str(close_holes)])
         args.extend(["--smooth", str(smooth)])
-
-        ret = subprocess.run(args)
-        self.logger.debug("Mesh creation returned: %s", str(ret))
-
+        
+        utils.execute(args, self.logger, OpenMVSControllerError)
+        
     def refine_mesh(self,
+                    export_type="obj",
                     p_prio=-1,
                     max_threads=0,
                     res_lvl=0,
@@ -126,8 +137,15 @@ class OpenMVSController():
                     rig_ela_r=0.9,
                     grad_step=45.05,
                     vertex_ratio=0,
-                    cuda=True):
-        """Refine 3D mesh."""
+                    use_cuda=False):
+        """
+        Refine 3D mesh.
+        
+        Despite being used by default, CUDA is specifically disabled as default
+        since it is known to cause problems. See also
+        https://github.com/cdcseacave/openMVS/issues/378
+        https://github.com/cdcseacave/openMVS/issues/230
+        """
         self.logger.debug("Refine 3D mesh")
 
         working_dir = utils.check_dir(self.res_dir / "refined_mesh")
@@ -138,6 +156,7 @@ class OpenMVSController():
         args.extend(["-o", str(self.refined_mesh)])
         args.extend(["-w", str(working_dir)])
 
+        args.extend(["--export-type", str(export_type)])
         args.extend(["--process-priority", str(p_prio)])
         args.extend(["--max-threads", str(max_threads)])
         args.extend(["--resolution-level", str(res_lvl)])
@@ -155,10 +174,12 @@ class OpenMVSController():
         args.extend(["--rigidity-elasticity-ratio", str(rig_ela_r)])
         args.extend(["--gradient-step", str(grad_step)])
         args.extend(["--planar-vertex-ratio", str(vertex_ratio)])
-        args.extend(["--use-cuda", str(int(cuda))])
+        args.extend(["--use-cuda", str(int(use_cuda))])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Mesh refinement returned: %s", str(ret))
+        try:
+            utils.execute(args, self.logger, OpenMVSControllerError)
+        except OpenMVSControllerError as e:
+            pass
 
     def texture_mesh(self,
                      export_type="obj",
@@ -180,6 +201,7 @@ class OpenMVSController():
         working_dir = utils.check_dir(self.res_dir / "textured_mesh")
         self.textured_obj = working_dir / "textured_model.obj"
 
+        # If no refined mesh exists, use regular mesh
         args = [str(self.openMVS_dir / "TextureMesh")]
         if self.refined_mesh.is_file():
             args.extend(["-i", str(self.refined_mesh)])
@@ -187,7 +209,7 @@ class OpenMVSController():
             self.logger.debug("Using regular mesh instead of refined mesh.")
             args.extend(["-i", str(self.mesh_scene)])
         else:
-            raise OpenMVSControllerError("No mesh was found, will not texture")
+            raise OpenMVSControllerError("No mesh found, will not texture")
         args.extend(["-o", str(self.textured_obj)])
         args.extend(["-w", str(working_dir)])
 
@@ -205,5 +227,4 @@ class OpenMVSController():
         args.extend(["--empty-color", str(empty_color)])
         args.extend(["--orthographic-image-resolution", str(orthographic_res)])
 
-        ret = subprocess.run(args)
-        self.logger.debug("Adding texture returned: %s", str(ret))
+        utils.execute(args, self.logger, OpenMVSControllerError)

@@ -347,9 +347,6 @@ class ImageCompositor():
             composed_max = np.max(composed_img)
 
         composed_img[:, :, :] /= composed_max
-
-        filename = self.res_dir / ("Comp_" + str(frame.id))
-        utils.write_openexr_image(filename, composed_img)
   
         if self.with_infobox:
             infobox_img = composed_img[:, :, 0:3] * 255
@@ -362,10 +359,26 @@ class ImageCompositor():
             filename = self.res_dir / ("Comp_" + str(frame.id) + ".png")
             cv2.imwrite(str(filename), infobox_img)
 
+            exrfile = self.image_dir / ("Comp_" + str(frame.id))
+        else:
+            exrfile = self.res_dir / ("Comp_" + str(frame.id))
+
         if self.with_clipping:
             clipped_img = self.clip_color_depth(composed_img)
             filename = self.res_dir / ("Inst_" + str(frame.id) + ".png")
             cv2.imwrite(str(filename), clipped_img)
+
+            rel_pos = frame.metadata["sc_pos"] - frame.metadata["sssb_pos"]
+            rel_pos = rel_pos.value / 1000.
+            filename = str(filename) + ".xyz"
+            with open(str(filename), "w") as priorfile:
+                priorfile.write(f"{rel_pos[0]} {rel_pos[1]} {rel_pos[2]}")
+
+            exrfile = self.image_dir / ("Comp_" + str(frame.id))
+        else:
+            exrfile = self.res_dir / ("Comp_" + str(frame.id))
+   
+        utils.write_openexr_image(exrfile, composed_img)
 
     def create_sssb_ref(self, res, scale=5):
         """Creates a reference sssb image for calibration.
@@ -467,12 +480,16 @@ class ImageCompositor():
 
     def clip_color_depth(self, img):
         """Reduces color depth to the instrument color depth."""
-        max_val = 2 ** self.inst.color_depth - 1
+        max_val = int(2 ** self.inst.color_depth - 1)
 
-        img = img[:, :, 0:3] * max_val
-        img = img.astype(np.uint16)
-        img = np.asarray(img * (65535. / max_val), np.float32)
-        img = img.astype(np.uint16)
+        if max_val <= 255:
+            img = img[:, :, 0:3] * max_val
+            img = img.astype(np.uint8)
+        else:
+            img = img[:, :, 0:3] * max_val
+            img = img.astype(np.uint16)
+            img = np.asarray(img * (65535. / max_val), np.float32)
+            img = img.astype(np.uint16)
 
         return img
 

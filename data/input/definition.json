@@ -1,11 +1,11 @@
 {
-    "name": "Didymos",
-    "flags": ["--reconstruct-only"],
-    "res_dir": "data/results/Didymos",
+    "name": "default",
+    "res_dir": "data/results/default",
+    "flags": ["--profile"],
     "simulation":
     {
-        "res_dir": "data/results/Didymos/rendering",
-        "duration": 20,
+        "res_dir": "data/results/default/rendering",
+        "duration": 120,
         "encounter_date": 
         {
             "year": 2017,
@@ -15,13 +15,14 @@
             "minutes": 0,
             "seconds": 0.0
         },
-        "frames": 30,
+        "frames": 120,
         "encounter_distance": 1E5,
+        "relative_velocity": 10000,
         "with_terminator": 0,
         "with_sunnyside": 1,
         "timesampler_mode": 1,
         "slowmotion_factor": 10,
-        "exposure": 1.554,
+        "exposure": 0,
         "samples": 48,
         "device": "GPU",
         "tile_size": 512,
@@ -69,7 +70,7 @@
             },
             "model":
             {
-                "file": "data/models/didymos2.blend",
+                "file": "data/models/didymos3.blend",
                 "name": "Didymos.001"
             },
             "albedo": 0.15,
@@ -77,24 +78,23 @@
         },
         "instrument": 
         {
-            "res": [2464, 2048],
+            "res": [2464, 2054],
             "pix_l": 3.45,
             "focal_l": 230,
             "aperture_d": 4,
             "wavelength": 550,
             "quantum_eff": 0.25,
-            "chip_noise": 10,
-            "color_depth": 12
+            "color_depth": 8
         },
         "with_infobox": 0,
         "with_clipping": 1
     },
     "compression":
     {
-        "res_dir": "data/results/Didymos/compressed",
-        "img_dir": "data/results/Didymos/rendering",
+        "res_dir": "data/results/default/compressed",
+        "img_dir": "data/results/default/rendering",
         "img_ext": "png",
-        "algo": "jpg",
+        "algo": "png",
         "settings":
         {
             "level": 9
@@ -102,6 +102,19 @@
     },
     "reconstruction":
     {
-        "res_dir": "data/results/Didymos"
+        "res_dir": "data/results/default",
+        "export_type": "obj",
+        "focal": 66667,
+        "cam_model": 1,
+        "geo_model": "f",
+        "num_overlaps": 4,
+        "use_prior": 1,
+        "use_upright": 0,
+        "force_compute": 0,
+        "descriptor": "SIFT",
+        "d_preset": "ULTRA",
+        "method": "FASTCASCADEHASHINGL2",
+        "refine_options": "NONE",
+        "reduce_memory": 1
     }
 }

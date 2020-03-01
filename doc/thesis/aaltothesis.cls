@@ -177,7 +177,7 @@
   }%
 }%
 %
-\RequirePackage[T1]{fontenc}%
+\RequirePackage[TS1,T1]{fontenc}%
 \RequirePackage{inputenc}% For scands in both Finnish and English input docs
 \RequirePackage[english, finnish, swedish]{babel}%
 \RequirePackage{lmodern}%

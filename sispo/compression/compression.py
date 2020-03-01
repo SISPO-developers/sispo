@@ -10,6 +10,7 @@ import gzip
 import logging
 import lzma
 from pathlib import Path
+import shutil
 import threading
 import zlib
 
@@ -40,10 +41,12 @@ class Compressor():
 
         self.res_dir = self._check_dir(res_dir)
         self.image_dir = self._check_dir(img_dir)
+        self.raw_dir = self._check_dir(res_dir / "raw")
 
         self.img_extension = "." + img_ext
 
-        self.imgs = []
+        self.imgs = {}
+        self.xyzs = {}
         self._res = None
 
         if algo is None:
@@ -75,6 +78,33 @@ class Compressor():
 
         return ids
 
+    def load_image(self, img_id):
+        """
+        Load a single image into memory.
+
+        :type img_id: str
+        :param img_id: id of the image to load
+        """
+        self.logger.debug(f"Load image {img_id}")
+        img_path = self.image_dir / ("Inst_" + img_id + self.img_extension)
+        img = cv2.imread(str(img_path), cv2.IMREAD_UNCHANGED)
+        self.imgs[img_id] = img
+
+        if self.imgs:
+            id0 = list(self.imgs.keys())[0]
+            if self.imgs[id0] is not None:
+                self._res = self.imgs[id0].shape
+            if not img.shape == self._res:
+                self.logger.debug(f"Images must have size {self._res}!")
+                raise CompressionError(f"Images must have size {self._res}!")
+
+        xyz_file = ("Inst_" + img_id + self.img_extension + ".xyz")
+        xyz_path = self.image_dir / xyz_file
+        if xyz_path.is_file():
+            self.xyzs[img_id] = xyz_path
+        else:
+            self.xyzs[img_id] = None
+
     def load_images(self, img_ids=None):
         """Load composition images using ids."""
         if img_ids is None:
@@ -83,33 +113,28 @@ class Compressor():
             self.img_ids = img_ids
 
         for img_id in self.img_ids:
-            self.logger.debug(f"Load image {img_id}")
-            img_path = self.image_dir / ("Inst_" + img_id + self.img_extension)
-            img = cv2.imread(str(img_path), cv2.IMREAD_UNCHANGED)
-            self.imgs.append(img)
+            self.load_image(img_id)
 
-        self.logger.debug(f"Loaded {len(self.imgs)} images")
+        self.logger.debug(f"Loaded {len(self.imgs.keys())} images")       
 
-        self._res = self.imgs[0].shape
-        self.logger.debug(f"Image size is {self._res}")
-
-        for img in self.imgs:
-            if not img.shape == self._res:
-                self.logger.debug("All images must have same size!")
-                raise CompressionError("All images must have same size!")
+    def unload_image(self, img_id):
+        """Unload image with given img_id, keeps ID."""
+        self.imgs[img_id] = None
 
     def unload_images(self):
         """Unloads images to free memory, keeps IDs."""
-        self.imgs = []
+        self.imgs = {}
 
-    def compress_series(self, max_threads=3):
+    def comp_decomp_series(self, max_threads=7):
         """
-        Compresses multiple images using :py:meth: `.compress`
+        Compresses and decompresses multiple images using :py:func:comp_decomp
         """
-        self.logger.debug(f"Compress series of images with {max_threads} threads")
+        method = self.comp_decomp
+        self.logger.debug(f"{method} img series with {max_threads} threads")
 
-        compressed = []
-        for img_id, img in zip(self.img_ids, self.imgs):
+        self.img_ids = self.get_frame_ids()
+
+        for img_id in self.img_ids:
 
             for thr in self._threads:
                 if not thr.is_alive():
@@ -117,35 +142,58 @@ class Compressor():
 
             if len(self._threads) < max_threads - 1:
                 # Allow up to 2 additional threads
-                thr = threading.Thread(target=self.compress, args=(img,img_id))
+                thr = threading.Thread(target=method, args=(None,img_id))
                 thr.start()
                 self._threads.append(thr)
             else:
                 # If too many, also compress in main thread to not drop a frame
-                self.compress(img, img_id)
+                method(None,img_id)
 
         for thr in self._threads:
             thr.join()
 
         self.unload_images()
 
-        return compressed
+    def comp_decomp(self, img=None, img_id=None):
+        """
+        Default function that applies compression and decompression.
 
-    def compress(self, img, img_id=None):
+        :param img: Image to be compressed and decompressed.
+        """
+        compressed_img = self.compress(img, img_id)
+        decompressed_img = self.decompress(compressed_img)
+
+        if img_id is not None:
+            self.logger.debug(f"Save image {img_id}")
+            filename = self.res_dir / (str(img_id) + ".png")
+            params = (cv2.IMWRITE_PNG_COMPRESSION, 9)
+            cv2.imwrite(str(filename), decompressed_img, params)
+
+            if self.xyzs[img_id] is not None:
+                xyz_file = str(filename) + ".xyz"
+                shutil.copyfile(self.xyzs[img_id], xyz_file)
+                self.logger.debug(f"Save prior file {xyz_file}")
+
+    def compress(self, img=None, img_id=None):
         """
         Compresses images using predefined algorithm or file format.
         
         :param img: Image to be compressed.
         :returns: A compressed image.
         """
+        
+        if img is None and img_id is not None:
+            self.load_image(img_id)
+            img = self.imgs[img_id]
+
         img_cmp = self._comp_met(img, self._settings)
 
         if img_id is not None:
-            self.logger.debug(f"Save image {img_id}")
-            file_extension = "." + self.algo
-            filename = self.res_dir / (str(img_id) + file_extension)
-            with open(str(self.res_dir / filename), "wb") as file:
+            filename_raw = self.raw_dir / (str(img_id) + "." + self.algo)
+            with open(str(self.raw_dir / filename_raw), "wb") as file:
                 file.write(img_cmp)
+            
+            self.unload_image(img_id)
 
         return img_cmp
 
@@ -155,12 +203,6 @@ class Compressor():
 
         :returns: Decompressed image.
         """
-        if img is None:
-            self.logger.debug(f"Read image {self.img_ids[0]}")
-            filename = self.res_dir / (self.img_ids[0] + "." + self.algo)
-            with open(str(filename), "rb") as file:
-                img = file.read()
-
         img_dcmp = self._decomp_met(img)
 
         return img_dcmp
@@ -237,15 +279,17 @@ class Compressor():
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
 
-        elif "jpeg2000" or "jp2":
+        elif algo == "jpeg2000" or algo == "jp2":
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".jp2"
-            level = settings["level"] * 100 # Ranges from 0 to 1000
+            level = int(settings["level"] * 100) # Ranges from 0 to 1000
             params = (cv2.IMWRITE_JPEG2000_COMPRESSION_X1000, level)
+
+            settings["params"] = params
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
 
-        elif "png":
+        elif algo == "png":
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".png"
             params = (cv2.IMWRITE_PNG_COMPRESSION, settings["level"])
@@ -268,7 +312,7 @@ class Compressor():
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
 
-        elif "tiff":
+        elif algo == "tiff":
             # According to: http://libtiff.org/support.html
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".tiff"
@@ -315,7 +359,7 @@ class Compressor():
 
             decomp = self._decorate_cv_decompress(cv2.imdecode)
 
-        elif "exr":
+        elif algo == "exr":
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".exr"
             params = ()
@@ -341,6 +385,16 @@ class Compressor():
     @staticmethod
     def _decorate_builtin_compress(func):
         def compress(img, settings):
+            if img.dtype == np.float32 and np.max(img) <= 1.:
+                img_temp = img * 255
+                img = img_temp.astype(np.uint8)
+            elif img.dtype == np.uint16:
+                img_temp = img / 255
+                img = img_temp.astype(np.uint8)
+            elif img.dtype == np.uint8:
+                pass            
+            else:
+                raise RuntimeError("Invalid compression input")
             img_cmp = func(img, **settings)
             return img_cmp
 
@@ -349,7 +403,7 @@ class Compressor():
     def _decorate_builtin_decompress(self, func):
         def decompress(img):
             img_dcmp = func(img)
-            img_dcmp = np.frombuffer(img_dcmp, dtype=np.float32)
+            img_dcmp = np.frombuffer(img_dcmp, dtype=np.uint8)
             img_dcmp = img_dcmp.reshape(self._res)
             return img_dcmp
 
@@ -361,6 +415,16 @@ class Compressor():
             if img.dtype == np.float32 and np.max(img) <= 1.:
                 img_temp = img * 255
                 img = img_temp.astype(np.uint8)
+            elif img.dtype == np.uint16:
+                img_temp = img / 255
+                img = img_temp.astype(np.uint8)
+            elif img.dtype == np.uint8:
+                pass            
+            else:
+                raise RuntimeError("Invalid compression input")
+            #if settings["ext"] == ".jpg":
+            #    img_temp = img / 255
+            #    img = img_temp.astype(np.uint8)
             _, img_cmp = func(settings["ext"], img, settings["params"])
             img_cmp = np.array(img_cmp).tobytes()
             return img_cmp

@@ -102,11 +102,17 @@ class BlenderController:
         bpy.context.window.scene = self.default_scene
 
     def set_scene_defaults(self, scenes=None):
-        """Sets default settings to a scene."""
+        """
+        Sets default settings to a scene.
+        
+        :type scenes: None, String, bpy.types.Scene, list
+        :param scenes: Scene(s) which default settings are applied to.
+        """
         for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.color_mode = "RGBA"
             scene.render.image_settings.use_zbuffer = True
-            scene.render.resolution_percentage = 100 # TODO: change, 5 is debug setting
+            scene.render.resolution_percentage = 100
+            scene.sequencer_colorspace_settings.name = "Raw"
             scene.view_settings.view_transform = "Raw"
             scene.view_settings.look = "None"
         
@@ -127,7 +133,7 @@ class BlenderController:
             scene.cycles.seed = time.time()
             scene.cycles.film_transparent = True
 
-    def set_device(self, device="AUTO", scenes=None):
+    def set_device(self, device="AUTO", tile_size=None, scenes=None):
         """Set cycles rendering device for given scenes.
 
         When device="AUTO" it is attempted to use GPU first, otherwise
@@ -137,7 +143,9 @@ class BlenderController:
 
         self.device = self._determine_device(device)
         self._set_cycles_device()
-        tile_size = self._get_tile_size()
+        
+        if tile_size is None:
+            tile_size = self._get_tile_size()
 
         # Sets render device of scenes
         for scene in self._get_scenes_iter(scenes):
@@ -210,7 +218,7 @@ class BlenderController:
         for scene in self._get_scenes_iter(scenes):
             scene.cycles.samples = samples
 
-    def set_exposure(self, exposure, scenes=None):
+    def set_exposure(self, exposure=0, scenes=None):
         """Set exposure value."""
         for scene in self._get_scenes_iter(scenes):
             scene.view_settings.exposure = exposure

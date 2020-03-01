@@ -34,7 +34,12 @@ class SimulationError(RuntimeError):
 
 
 class Environment():
-    """Simulation environment."""
+    """
+    Simulation environment.
+
+    This environment is used to propagate trajectories and render images at
+    each simulation step.
+    """
 
     def __init__(self,
                  res_dir,
@@ -49,6 +54,7 @@ class Environment():
                  duration,
                  frames,
                  encounter_distance,
+                 relative_velocity,
                  with_sunnyside,
                  with_terminator,
                  timesampler_mode,
@@ -93,6 +99,7 @@ class Environment():
         self.frames = frames
 
         self.minimum_distance = encounter_distance
+        self.relative_velocity = relative_velocity
         self.with_terminator = bool(with_terminator)
         self.with_sunnyside = bool(with_sunnyside)
         self.timesampler_mode = timesampler_mode
@@ -154,7 +161,8 @@ class Environment():
                                        self.inst.focal_l,
                                        self.inst.chip_w)
 
-        self.renderer.set_device(self.render_settings["device"])
+        self.renderer.set_device(self.render_settings["device"], 
+                                 self.render_settings["tile"])
         self.renderer.set_samples(self.render_settings["samples"])
         self.renderer.set_exposure(self.render_settings["exposure"])
         self.renderer.set_resolution(self.inst.res)
@@ -213,6 +221,7 @@ class Environment():
         sssb_state = self.sssb.get_state(self.encounter_date)
         sc_state = Spacecraft.calc_encounter_state(sssb_state,
                                                    self.minimum_distance,
+                                                   self.relative_velocity,
                                                    self.with_terminator,
                                                    self.with_sunnyside)
         self.spacecraft = Spacecraft("CI", 
@@ -291,7 +300,7 @@ class Environment():
 
             sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
             sssb_angle = sssb_rot.getAngle()
-            self.sssb.render_obj.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)          
+            self.sssb.render_obj.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)       
 
             self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             

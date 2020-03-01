@@ -13,6 +13,12 @@ import cProfile
 import io
 import json
 import logging
+###############################################################################
+################## Hack to enable JPEG2000 format in OpenCV ###################
+######## See https://github.com/opencv/opencv/issues/14058 for details ########
+import os
+os.environ["OPENCV_IO_ENABLE_JASPER"] = "TRUE"
+###############################################################################
 from pathlib import Path
 import pstats
 import sys
@@ -76,6 +82,9 @@ parser.add_argument("--render-only",
 parser.add_argument("--compress-only",
                     action="store_true",
                     help="Will only compress images, not perform other steps.")
+parser.add_argument("--compress-reconstruct-only",
+                    action="store_true",
+                    help="Will only compress images and reconstruct 3D model, not perform other steps.")
 parser.add_argument("--reconstruct-only",
                     action="store_true",
                     help="Will only reconstruct 3D, not perform other steps.")
@@ -84,6 +93,17 @@ parser.add_argument("--profile",
                     help="Use cProfiler and write results to log.")
 
 def read_input():
+    """Read input, either from CLI or from input file"""
+
+    if args.cli:
+        settings = read_input_cli()
+    else:
+        settings = read_input_file(args.i)
+
+    return settings
+
+
+def read_input_cli():
     """
     Reads input interactively from CLI.
     """
@@ -119,6 +139,8 @@ def parse_settings_file(settings):
     :type settings: dict
     :param settings: String based description of settings.
     """
+    global args
+    
     if "simulation" not in settings:
         logger.debug("No simulation settings provided!")
 
@@ -247,9 +269,20 @@ def main():
     if args.compress_only:
         logger.debug("Only compressing, no other step")
         comp = Compressor(**comp_settings, ext_logger=logger)
-        comp.load_images()
-        comp.compress_series()
+        comp.comp_decomp_series()
         logger.debug("Finished compressing")
+        return
+
+    if args.compress_reconstruct_only:
+        logger.debug("Only compressing and reconstructing, no other step.")
+        logger.debug("Start compressing")
+        comp = Compressor(**comp_settings, ext_logger=logger)
+        comp.comp_decomp_series()
+        logger.debug("Finished compressing")
+        logger.debug("Start reconstructing")
+        recon = Reconstructor(**recon_settings, ext_logger=logger)
+        recon.reconstruct()
+        logger.debug("Finished reconstructing")
         return
 
     if args.reconstruct_only:
@@ -274,8 +307,7 @@ def main():
     if args.with_compression:
         logger.debug("With compression")
         comp = Compressor(**comp_settings, ext_logger=logger)
-        comp.load_images()
-        comp.compress_series()
+        comp.comp_decomp_series()
 
     if args.with_reconstruction:
         logger.debug("With reconstruction")

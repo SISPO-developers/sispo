@@ -24,19 +24,12 @@
 %% above.
 %%
 % \begin{abstractpage}[english]
-%   Your abstract in English. Keep the abstract short. The abstract explains your
-%   research topic, the methods you have used, and the results you obtained.  
-  
-%   The abstract text of this thesis is written on the readable abstract page as
-%   well as into the pdf file's metadata via the $\backslash$thesisabstract macro
-%   (see above). Write here the text that goes onto the readable abstract page.
-%   You can have special characters, linebreaks, and paragraphs here. Otherwise,
-%   this abstract text must be identical to the metadata abstract text.
-  
-%   If your abstract does not contain special characters and it does not require
-%   paragraphs, you may take advantage of the abstracttext macro (see the comment
-%   below).
-% \end{abstractpage}
+% Synthetic image generation and reconstruction of \glspl{sssb} and the influence of compression is becoming an important topic to study because of the advent of using small spacecraft in deep space missions. Most of these use cases are fly-by scenarios, for example in the Comet Interceptor mission. Due to the limited data budgets, maximising the scientific output of small satellites requires investigating effects of lossy compression. 
+
+% We have developed a simulation environment that uses physics-based rendering in combination with procedural terrain generation to overcome limitations of currently used methods for image rendering like the Hapke model. The rendered \gls{sssb} images are combined with a star background based on the \gls{ucac4} star catalog and photometrically calibrated using the \gls{ubv} to represent realistic output. We implemented a \gls{sfm} pipeline to compare the data quality and the possible amount of data reduction of lossy compression to lossless compression. 
+
+% Several scenarios with varying fly-by distances ranging from \SI{50}{\kilo\meter} to \SI{400}{\kilo\meter} and body sizes of \SI{1}{\kilo\meter} and \SI{10}{\kilo\meter} were simulated and compressed with lossless and several quality levels of lossy compression. We have found that low compression ratios create changes that resemble random noise in images while high compression ratios remove surface features. We have found that the random noise artefacts introduced by low compression ratios using \gls{jp2} can increase the number of vertices and faces of the reconstructed \gls{3d} model.
+%\end{abstractpage}
 
 %% The text in the \thesisabstract macro is stored in the macro \abstractext, so
 %% you can use the text metadata abstract directly as follows:
@@ -48,13 +41,18 @@
 %% Preface
 %%
 %% This section is optional. Remove it if you do not want a preface.
-\mysection{Preface}
+\mysection{Acknowledgements}
 %\mysection{Esipuhe}
-I want to thank Professor Jaan Praks and my instructor Andris Slavinskis, PhD for 
-their good and poor guidance.\\
+I would first like to thank my thesis advisor Dr. Andris Slavinskis and my supervisor Prof.\ Jaan Praks of the School of Electrical Engineering at Aalto University. Their office door was always open whenever I ran into a trouble spot or had a question about my research or writing. They consistently allowed this thesis to be my own work, but steered me in the right the direction whenever he thought I needed it.
+
+I would also like to thank the person who started this research project: Dr. Mihkel Pajusalu. Without laying the foundation of the project and his continuous input, the project would not have been successful.
+
+I would also like to acknowledge Prof.\ Mikael Granvik of the Department of Computer Science, Electrical and Space Engineering at the Lule{\aa} University of Technology as the second reader of this thesis, and I am gratefully indebted for his valuable comments on this thesis.
+
+Finally, I must express my very profound gratitude to my parents and to my girlfriend for providing me with unfailing support and continuous encouragement throughout my studies and through the process of researching and writing this thesis. This accomplishment would not have been possible without them. Thank you.
 
 \vspace{5cm}
-Otaniemi, 31.8.2018
+Otaniemi, 24.2.2020
 
 \vspace{5mm}
 {\hfill \ThesisAuthor \hspace{1cm}}
@@ -70,13 +68,15 @@ Otaniemi, 31.8.2018
 
 
 %% Symbols and abbreviations
-\mysection{Symbols and abbreviations}
+\mysection{Symbols and Abbreviations}
+\glssetwidest{$A_{pixel}$}
+\printnoidxglossary[type=symbolslist, style=alttree]
 
-\printnoidxglossary[type=symbolslist, style=long]
+% \glsfindwidesttoplevelname[operatorslist]
+% \printnoidxglossary[type=operatorslist, style=alttree]
 
-\printnoidxglossary[type=operatorslist, style=long]
-
-\printnoidxglossary[type=\acronymtype, style=long, title={Abbreviations}] 
+\glssetwidest{UBVRI system}
+\printnoidxglossary[type=\acronymtype, style=alttree, title={Abbreviations}] 
 
 %% \clearpage is similar to \newpage, but it also flushes the floats (figures
 %% and tables).
@@ -97,30 +97,65 @@ Otaniemi, 31.8.2018
 
 %% In a thesis, every section starts a new page, hence \clearpage
 \clearpage
-\input{doc/thesis/1_sections/00_introduction.tex}
+\input{doc/thesis/1_sections/01_introduction.tex}
 
 \clearpage
-\input{doc/thesis/1_sections/01_background.tex}
+\input{doc/thesis/1_sections/02_theory.tex}
+
+
+\clearpage
+\input{doc/thesis/1_sections/03_sispo_dev.tex}
+
+
+\clearpage
+\input{doc/thesis/1_sections/04_sispo_results.tex}
+
+\clearpage
+\input{doc/thesis/1_sections/05_conclusion.tex}
+
+\clearpage
+
+\thesisbibliography
+\printbibliography
+
+%% Appendices
+%% If you don't have appendices, remove \clearpage and \thesisappendix below.
+\clearpage
+
+\thesisappendix
+\pagestyle{empty}
+% \input{doc/thesis/2_appendices/appA.tex}
+
+% \clearpage
+\input{doc/thesis/2_appendices/appB.tex}
+
+\clearpage
+\input{doc/thesis/2_appendices/appC.tex}
+
+% \clearpage
+% \input{doc/thesis/2_appendices/appD.tex}
+
+\end{document}
 
 %% Three levels of hierarchy in sectioning should be enough
 
-\subsection*{Numerointi}
-
-Every section of the thesis begins on a new page. A subsection begins on a new 
-page only if the previous page a full.
-
-The page numbering begins from the cover page and it is continuous through to 
-the end. Arabian numerals are in the page numbering.
-
-The page numbers are made visibleafter the abstract pages, from the preface 
-onwards, if there is one, or from the table of contents onwards.
-
-The list of references (bibliography) begins on a new page.
-
-Every appendix begins on a new page. Its page number continues from that on the
-previous page.
-
-The page number is place on the upper corner of the page.
+%%\subsection*{Numerointi}
+%%
+%%Every section of the thesis begins on a new page. A subsection begins on a new 
+%%page only if the previous page a full.
+%%
+%%The page numbering begins from the cover page and it is continuous through to 
+%%the end. Arabian numerals are in the page numbering.
+%%
+%%The page numbers are made visibleafter the abstract pages, from the preface 
+%%onwards, if there is one, or from the table of contents onwards.
+%%
+%%The list of references (bibliography) begins on a new page.
+%%
+%%Every appendix begins on a new page. Its page number continues from that on the
+%%previous page.
+%%
+%%The page number is place on the upper corner of the page.
 
 %% The example for embedding the graphics file linediagram.pdf into the document.
 %% Command \inclugraphics[parametres]{argument} embeds the graphic.
@@ -146,53 +181,3 @@ The page number is place on the upper corner of the page.
 % %\includegraphics[height=5cm]{curves.eps}
 % \caption{This is an example of a MATLAB graph. \label{kuva2}}
 % \end{figure}
-
-
-\clearpage
-\input{doc/thesis/1_sections/02_literature_review.tex}
-
-
-\clearpage
-\input{doc/thesis/1_sections/03_sispo_dev.tex}
-
-
-\clearpage
-
-\section{Results}
-%\section{Tulokset}
-
-
-
-\clearpage
-
-\section{Summary} 
-%\section{Yhteenveto}
-
-
-\clearpage
-%% L\"ahdeluettelo
-
-\thesisbibliography
-\printbibliography
-%\bibliographystyle{plain}
-%\begin{thebibliography}{99}
-%\bibliographystyle{ieeetr}
-%\bibliography{99_references}
-%\end{thebibliography}
-
-%% Appendices
-%% If you don't have appendices, remove \clearpage and \thesisappendix below.
-\clearpage
-
-\thesisappendix
-
-\section{Esimerkki liitteest\"a\label{LiiteA}}
-
-\input{doc/thesis/2_appendices/appA.tex}
-
-\clearpage
-\section{Toinen esimerkki liitteest\"a\label{LiiteB}}
-
-\input{doc/thesis/2_appendices/appB.tex}
-
-\end{document}

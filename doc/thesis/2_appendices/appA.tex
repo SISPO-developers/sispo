@@ -1,37 +1,128 @@
+\section{SISPO Setup Instructions} \label{sec:app_setup}
 
-Liitteet eiv\"at ole opinn\"aytteen kannalta v\"altt\"am\"att\"omi\"a ja 
-opinn\"aytteen tekij\"an on 
-kirjoittamaan ryhtyess\"a\"an hyv\"a ajatella p\"arj\"a\"av\"ans\"a ilman liitteit\"a.
-Kokemattomat kirjoittajat, jotka ovat huolissaan
-tekstiosan pituudesta, paisuttavat turhan 
-helposti liitteit\"a pit\"a\"akseen tekstiosan pituuden annetuissa rajoissa.
-T\"all\"a tavalla ei synny hyv\"a\"a opinn\"aytett\"a.   
+% Liitteet eiv\"at ole opinn\"aytteen kannalta v\"altt\"am\"att\"omi\"a ja 
+% opinn\"aytteen tekij\"an on 
+% kirjoittamaan ryhtyess\"a\"an hyv\"a ajatella p\"arj\"a\"av\"ans\"a ilman liitteit\"a.
+% Kokemattomat kirjoittajat, jotka ovat huolissaan
+% tekstiosan pituudesta, paisuttavat turhan 
+% helposti liitteit\"a pit\"a\"akseen tekstiosan pituuden annetuissa rajoissa.
+% T\"all\"a tavalla ei synny hyv\"a\"a opinn\"aytett\"a.   
 
-Liite on itsen\"ainen kokonaisuus, vaikka se t\"aydent\"a\"akin tekstiosaa.
-Liite ei siten ole pelkk\"a listaus, kuva tai taulukko, vaan 
-liitteess\"a selitet\"a\"an aina sis\"all\"on laatu ja tarkoitus. 
+% Liite on itsen\"ainen kokonaisuus, vaikka se t\"aydent\"a\"akin tekstiosaa.
+% Liite ei siten ole pelkk\"a listaus, kuva tai taulukko, vaan 
+% liitteess\"a selitet\"a\"an aina sis\"all\"on laatu ja tarkoitus. 
 
-Liitteeseen voi laittaa esimerkiksi listauksia. Alla on 
-listausesimerkki t\"am\"an liitteen luomisesta. 
+% Liitteeseen voi laittaa esimerkiksi listauksia. Alla on 
+% listausesimerkki t\"am\"an liitteen luomisesta. 
 
-%% Verbatim-ymp\"arist\"o ei muotoile tai tavuta teksti\"a. Fontti on monospace.
-%% Verbatim-ymp\"arist\"on sis\"all\"a annettuja komentoja ei LaTeX k\"asittele. 
-%% Vasta \end{verbatim}-komennon j\"alkeen jatketaan k\"asittely\"a.
-\begin{verbatim}
-	\clearpage
-	\appendix
-	\addcontentsline{toc}{section}{Liite A}
-	\section*{Liite A}
-	...
-	\thispagestyle{empty}
-	...
-	teksti\"a
-	...
-	\clearpage
-\end{verbatim}
+% %% Verbatim-ymp\"arist\"o ei muotoile tai tavuta teksti\"a. Fontti on monospace.
+% %% Verbatim-ymp\"arist\"on sis\"all\"a annettuja komentoja ei LaTeX k\"asittele. 
+% %% Vasta \end{verbatim}-komennon j\"alkeen jatketaan k\"asittely\"a.
+% \begin{verbatim}
+% 	\clearpage
+% 	\appendix
+% 	\addcontentsline{toc}{section}{Liite A}
+% 	\section*{Liite A}
+% 	...
+% 	\thispagestyle{empty}
+% 	...
+% 	teksti\"a
+% 	...
+% 	\clearpage
+% \end{verbatim}
 
-Kaavojen numerointi muodostaa liitteiss\"a oman kokonaisuutensa:
-\begin{align}
-d \wedge A &= F, \label{liitekaava1}\\
-d \wedge F &= 0. \label{liitekaava2}
-\end{align}
+% Kaavojen numerointi muodostaa liitteiss\"a oman kokonaisuutensa:
+% \begin{align}
+% d \wedge A &= F, \label{liitekaava1}\\
+% d \wedge F &= 0. \label{liitekaava2}
+% \end{align}
+
+\gls{sispo} can be setup with Linux and Windows. The default case used in this description is a Windows setup. It is recommended to set \gls{sispo} up in a Windows environment since e.g. the reconstruction algorithms seemed to be more stable. Known differences or problems under Linux will be pointed out. While it should be possible to use a plain Python environment and pip, a miniconda environment manager was used for development. Also a C compiler is necessary. Linux provides the GCC, for Windows it is easiest to install Microsoft Visual Studio with \gls{msvc} and \gls{msbuild}. Another possibility when using Windows is to use vcpkg\footnote{Found at \url{https://github.com/microsoft/vcpkg}}. However, previously the openMVG and openMVS ports in vcpkg did not work. Vcpkg can also be used with Linux. However, there were unsolvable problems when using vcpkg so everything was installed natively.
+
+For \gls{omvg}, \gls{omvs} and star\_cats it is necessary to have the executables in the correct folder for \gls{sispo} to function.\newline
+
+\begin{figure}
+    \dirtree{%
+        .1 sispo.
+            .2 build.
+            .2 data.
+                .3 input.
+                .3 models.
+                .3 sensor\_database.
+                .3 UCAC4.
+                    .4 u4b.
+                    .4 u4i.
+            .2 doc.
+            .2 sispo.
+                .3 compression.
+                .3 reconstruction.
+                .3 sim.
+            .2 software.
+                .3 blender.
+                .3 miniconda.
+                .3 openMVG.
+                    .4 build\_openMVG.
+                        .5 install.
+                    .4 openMVG.
+                .3 openMVS.
+                    .4 build\_openMVS.
+                        .5 install.
+                    .4 openMVS.
+                .3 star\_cats.
+                    .4 build\_star\_cats.
+                    .4 star\_cats.
+                .3 vcpkg.
+    }
+    \caption{Directory structure after setup. No files are shown.}
+    \label{fig:dir_tree}
+\end{figure}
+Figure \ref{fig:dir_tree} shows the assumed overall folder structure after installation. No sub-folders of the build folder or any files are shown.
+
+To make \gls{sispo} perform well, it is beneficial to install the Nvidia CUDA Toolkit (https://developer.nvidia.com/cuda-downloads) in case an Nvidia graphics card is available.
+
+In the following enumeration, commands intended to be run in a shell are highlighted with a grey box.
+
+\begin{enumerate}
+    \item Clone the GitHub repository onto the local machine \\ \shellcmd{git clone https://github.com/YgabrielsY/sispo.git}. The project provides a software folder which is intended to be used to install all following software.
+    \item Setup (conda) environment with dependencies (to software/miniconda folder):
+    \begin{enumerate}
+        \item orekit 9.3.1, the current version 10.0 had issues when attempted to install. Also orekit needs a data package to function, it is distributed with \gls{sispo} in the sim module folder.
+        \item astropy
+        \item opencv
+        \item OpenEXR\footnote{For Windows the pre-compiled package found at \url{https://www.lfd.uci.edu/~gohlke/pythonlibs/\#openexr} needs to be used because the pip or conda version do not work.}
+        \item \textit{NumPy}
+        \item Python\footnote{During development Python version 3.7 was used.}
+    \end{enumerate}{}
+    \item (Especially Windows) Install vcpkg to software/vcpkg folder, follow instructions at \url{https://github.com/microsoft/vcpkg}
+    \item Install Blender as a python module (bpy)\footnote{During development Blender version 2.8 was used.}
+    \begin{enumerate}
+        \item Clone Blender git repository to software/blender/blender \\ \shellcmd{git clone git://git.blender.org/blender.git}
+        \item Compile target bpy \shellcmd{make bpy}, this works also for Windows through the make.bat file provided with Blender
+        \item When available: Activate CUDA in the cmake project and recompile
+        \item Install bpy to python environment\footnote{Follow these instructions \url{https://blender.stackexchange.com/questions/117200/how-to-build-blender-as-a-python-module}}
+    \end{enumerate}{}
+    \item Install OpenMVG, follow instructions at \\ \url{https://github.com/openMVG/openMVG/blob/master/BUILD.md} or look for hints in the OpenMVG install script in the build folder.
+    \begin{enumerate}
+        \item Install dependencies according to instructions
+        \item Clone OpenMVG GitHub repository to software/openMVG/openMVG \shellcmd{git clone --recursive https://github.com/openMVG/openMVG.git}
+        \item Build to software/openMVG/build\_openMVG folder
+        \item Install to software/openMVG/build\_openMVG/install folder
+    \end{enumerate}
+    \item Install OpenMVS, follow instructions at \\ \url{https://github.com/cdcseacave/openMVS/wiki/Building} or look at the OpenMVS install script in the build folder for hints.
+    \begin{enumerate}
+        \item Install dependencies according to instructions
+        \item Clone OpenMVS GitHub repository to software/openMVS/openMVS \shellcmd{git clone https://github.com/cdcseacave/openMVS.git}
+        \item Build to software/openMVS/build\_openMVS folder
+        \item Install to software/openMVS/build\_openMVS/install folder
+    \end{enumerate}
+    \item Install star\_cats
+    \begin{enumerate}
+        \item Clone star\_cats GitHub repository to software/star\_cats/star\_cats \\ \shellcmd{git clone https://github.com/Bill-Gray/star\_cats.git}
+        \item Build to software/star\_cats/build\_star\_cats \shellcmd{make}
+    \end{enumerate}
+    \item Download UCAC4 star catalog to data/UCAC4, use either:
+    \begin{enumerate}
+        \item the build/data/download\_ucac4.sh script
+        \item download the folder u4b and u4i directly from \\ \url{http://casdc.china-vo.org/mirror/UCAC/UCAC4/}
+    \end{enumerate}
+\end{enumerate}{}
