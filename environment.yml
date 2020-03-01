@@ -9,7 +9,3 @@ dependencies:
   - pylint
   - numpy
   - numpy-base
-  - matplotlib
-  - scikit-image
-  - orekit=9.3.1
-  - simplejson

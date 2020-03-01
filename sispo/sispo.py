@@ -92,17 +92,13 @@ parser.add_argument("--profile",
                     action="store_true",
                     help="Use cProfiler and write results to log.")
 
-pr = cProfile.Profile()
-
-args = parser.parse_args()
-
-def read_input():
+def read_input(args):
     """Read input, either from CLI or from input file"""
 
     if args.cli:
         settings = read_input_cli()
     else:
-        settings = read_input_file(args.i)
+        settings = read_input_file(args)
 
     return settings
 
@@ -114,37 +110,36 @@ def read_input_cli():
     raise NotImplementedError()
 
 
-def read_input_file(filename=None):
+def read_input_file(args):
     """
     Reads input from a given file.
 
     :type filename: String
     :param filename: Filename of a mission definition file.
     """
-    if filename is None:
+    if args.i is None:
         root_dir = Path(__file__).resolve().parent.parent
         def_file = root_dir / "data" / "input" / "definition.json"
     else:
-        def_file = Path(filename).resolve()
+        def_file = Path(args.i).resolve()
 
         if not def_file.exists():
             root_dir = Path(__file__).resolve().parent.parent
-            def_file = root_dir / "data" / "input" / filename.name
+            def_file = root_dir / "data" / "input" / args.i.name
 
     with open(str(def_file), "r") as cfg_file:
         settings = json.load(cfg_file)
 
-    return parse_settings_file(settings)
+    return parse_settings_file(args, settings)
 
-def parse_settings_file(settings):
+def parse_settings_file(args, settings):
     """
     Parses settings from input file or CLI into correct data formats
 
     :type settings: dict
     :param settings: String based description of settings.
     """
-    global args
-    
+
     if "simulation" not in settings:
         logger.debug("No simulation settings provided!")
 
@@ -190,7 +185,7 @@ def _parse_paths(settings):
 
 def _parse_flags(settings):
     """
-    Recursively parses all settings with with_ prefix to a bool.
+    Recursively parses all settings containing with_ prefix to a bool.
 
     :type settings: dict
     :param settings: Dictionary containing settings
@@ -207,6 +202,31 @@ def main():
     """
     Main function to run when executing file
     """
+    args = parser.parse_args()
+
+    if args.v:
+        stream_handler = logging.StreamHandler(sys.stdout)
+        stream_handler.setLevel(logging.DEBUG)
+        stream_handler.setFormatter(logger_formatter)
+        logger.addHandler(stream_handler)
+    
+    settings = read_input(args)
+
+    if args.profile:
+        pr = cProfile.Profile()
+
+    now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
+    filename = (now + "_sispo.log")
+    log_dir = settings["res_dir"]
+    if not log_dir.is_dir:
+        Path.mkdir(log_dir)
+    log_file = log_dir / filename
+    file_handler = logging.FileHandler(str(log_file))
+    file_handler.setLevel(logging.DEBUG)
+    file_handler.setFormatter(logger_formatter)
+    logger.addHandler(file_handler)
+    logger.debug("\n\n#################### NEW SISPO LOG ####################\n")
+
     logger.debug("Settings:")
     logger.debug(f"{settings}")
     sim_settings = settings["simulation"]
@@ -309,7 +329,7 @@ def main():
     logger.debug("Finished sispo main")
 
 def run():
-    """Alias for main()."""
+    """Alias for :py:func:`main` ."""
     main()
 
 def change_arg(arg):
@@ -318,25 +338,6 @@ def change_arg(arg):
         arg = [arg]
     parser.parse_args(args=arg, namespace=args)
 
-if args.v:
-    stream_handler = logging.StreamHandler(sys.stdout)
-    stream_handler.setLevel(logging.DEBUG)
-    stream_handler.setFormatter(logger_formatter)
-    logger.addHandler(stream_handler)
-
-settings = read_input()
-
-now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
-filename = (now + "_sispo.log")
-log_dir = settings["res_dir"]
-if not log_dir.is_dir:
-    Path.mkdir(log_dir)
-log_file = log_dir / filename
-file_handler = logging.FileHandler(str(log_file))
-file_handler.setLevel(logging.DEBUG)
-file_handler.setFormatter(logger_formatter)
-logger.addHandler(file_handler)
-logger.debug("\n\n#################### NEW SISPO LOG ####################\n")
 
 if __name__ == "__main__":
     main()
