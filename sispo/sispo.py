@@ -92,13 +92,13 @@ parser.add_argument("--profile",
                     action="store_true",
                     help="Use cProfiler and write results to log.")
 
-def read_input():
+def read_input(args):
     """Read input, either from CLI or from input file"""
 
     if args.cli:
         settings = read_input_cli()
     else:
-        settings = read_input_file(args.i)
+        settings = read_input_file(args)
 
     return settings
 
@@ -185,7 +185,7 @@ def _parse_paths(settings):
 
 def _parse_flags(settings):
     """
-    Recursively parses all settings with with_ prefix to a bool.
+    Recursively parses all settings containing with_ prefix to a bool.
 
     :type settings: dict
     :param settings: Dictionary containing settings
@@ -210,10 +210,7 @@ def main():
         stream_handler.setFormatter(logger_formatter)
         logger.addHandler(stream_handler)
     
-    if args.cli:
-        settings = read_input()
-    else:
-        settings = read_input_file(args)
+    settings = read_input(args)
 
     if args.profile:
         pr = cProfile.Profile()
@@ -332,7 +329,7 @@ def main():
     logger.debug("Finished sispo main")
 
 def run():
-    """Alias for main()."""
+    """Alias for :py:func:`main` ."""
     main()
 
 def change_arg(arg):
