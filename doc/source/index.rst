@@ -5,13 +5,14 @@
 
 Welcome to SISPO's documentation!
 =================================
-.. include:: ../../README.md
+.. mdinclude:: ../../README.md
 
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
 
    modules
+   setup
 
 Indices and tables
 ==================
