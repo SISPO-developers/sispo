@@ -49,16 +49,19 @@ def read_input():
     if "flags" in settings:
         settings = _parse_input_flags(settings)
 
-    settings = parse_input(settings)
-
-    if args.o is not None:
-        res_dir = Path(args.o).resolve()
-        res_dir = utils.check_dir(res_dir)
-
-        settings["res_dir"] = res_dir
-
-    if args.n is not None:
-        settings["name"] = args.n
+    if settings["flags"].restart:
+        raise NotImplementedError()
+    else:
+        settings = parse_input(settings)
+    
+        if args.o is not None:
+            res_dir = Path(args.o).resolve()
+            res_dir = utils.check_dir(res_dir)
+    
+            settings["res_dir"] = res_dir
+    
+        if args.n is not None:
+            settings["name"] = args.n
 
     return settings
 
@@ -151,6 +154,9 @@ def _parse_input_flags(settings):
                         action="store_true",
                         dest="with_reconstruction",
                         help="If set, SISPO will attempt reconstruction.")
+    parser.add_argument("--restart",
+                        action="store_true",
+                        help="Use cProfiler and write results to log.")
     parser.add_argument("--profile",
                         action="store_true",
                         help="Use cProfiler and write results to log.")
