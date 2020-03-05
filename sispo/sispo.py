@@ -151,7 +151,21 @@ def _parse_input_flags(settings):
                         action="store_true",
                         dest="with_reconstruction",
                         help="If set, SISPO will attempt reconstruction.")
+    parser.add_argument("--profile",
+                        action="store_true",
+                        help="Use cProfiler and write results to log.")
     settings["flags"] = parser.parse_args(args=settings["flags"])
+
+    # If all flags are false it is default case and all steps are done
+    if not settings["flags"].with_sim and \
+        not settings["flags"].with_render and \
+        not settings["flags"].with_compression and \
+        not settings["flags"].with_reconstruction:
+
+        settings["flags"].with_sim = True
+        settings["flags"].with_render = True
+        settings["flags"].with_compression = True
+        settings["flags"].with_reconstruction = True
 
     return settings
 
@@ -270,7 +284,7 @@ def main():
 
     logger.debug("Run full pipeline")
 
-    if settings["flags"].with_sim or args.with_render:
+    if settings["flags"].with_sim or settings["flags"].with_render:
         logger.debug("With either simulation or rendering")
         env = Environment(**sim_settings, ext_logger=logger)
 
