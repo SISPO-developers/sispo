@@ -135,51 +135,22 @@ def _parse_input_flags(settings):
     parser.add_argument("-v",
                         action="store_true",
                         help="Verbose output, displays log also on STDOUT")
-    parser.add_argument("--no-sim",
-                        action="store_const",
-                        const=False,
-                        default=True,
+    parser.add_argument("--with-sim",
+                        action="store_true",
                         dest="with_sim",
-                        help="If set, sispo will not simulate the scenario")
-    parser.add_argument("--no-render",
-                        action="store_const",
-                        const=False,
-                        default=True,
+                        help="If set, SISPO will simulate the scenario")
+    parser.add_argument("--with-render",
+                        action="store_true",
                         dest="with_render",
-                        help="If set, sispo will not render the scenario")
-    parser.add_argument("--no-compression",
-                        action="store_const",
-                        const=False,
-                        default=True,
+                        help="If set, SISPO will render the scenario")
+    parser.add_argument("--with-compression",
+                        action="store_true",
                         dest="with_compression",
-                        help="If set, images will not be compressed after rendering")
-    parser.add_argument("--no-reconstruction",
-                        action="store_const",
-                        const=False,
-                        default=True,
+                        help="If set, SISPO will compress images")
+    parser.add_argument("--with-reconstruction",
+                        action="store_true",
                         dest="with_reconstruction",
-                        help="If set, no 3D model will be reconstructed")
-    parser.add_argument("--sim-only",
-                        action="store_true",
-                        help="Will only simulate, not perform other steps.")
-    parser.add_argument("--sim-render-only",
-                        action="store_true",
-                        help="Will only simulate and render, not perform other steps.")
-    parser.add_argument("--render-only",
-                        action="store_true",
-                        help="Will only render, not perform other steps.")
-    parser.add_argument("--compress-only",
-                        action="store_true",
-                        help="Will only compress images, not perform other steps.")
-    parser.add_argument("--compress-reconstruct-only",
-                        action="store_true",
-                        help="Will only compress images and reconstruct 3D model, not perform other steps.")
-    parser.add_argument("--reconstruct-only",
-                        action="store_true",
-                        help="Will only reconstruct 3D, not perform other steps.")
-    parser.add_argument("--profile",
-                        action="store_true",
-                        help="Use cProfiler and write results to log.")
+                        help="If set, SISPO will attempt reconstruction.")
     settings["flags"] = parser.parse_args(args=settings["flags"])
 
     return settings
@@ -296,55 +267,6 @@ def main():
         pr.enable()
 
     t_start = time.time()
-
-    if settings["flags"].sim_only:
-        logger.debug("Only simulating, no other step")
-        env = Environment(**sim_settings, ext_logger=logger)
-        env.simulate()
-        logger.debug("Finished simulating")
-        return
-
-    if settings["flags"].sim_render_only:
-        logger.debug("Only simulating and rendering, no other step")
-        env = Environment(**sim_settings, ext_logger=logger)
-        env.simulate()
-        env.render()
-        logger.debug("Finished simulating and rendering")
-        return
-
-    if settings["flags"].render_only:
-        raise NotImplementedError()
-        logger.debug("Only rendering, no other step")
-        env = Environment(**sim_settings, ext_logger=logger)
-        env.render()
-        logger.debug("Finished rendering")
-        return
-
-    if settings["flags"].compress_only:
-        logger.debug("Only compressing, no other step")
-        comp = Compressor(**comp_settings, ext_logger=logger)
-        comp.comp_decomp_series()
-        logger.debug("Finished compressing")
-        return
-
-    if settings["flags"].compress_reconstruct_only:
-        logger.debug("Only compressing and reconstructing, no other step.")
-        logger.debug("Start compressing")
-        comp = Compressor(**comp_settings, ext_logger=logger)
-        comp.comp_decomp_series()
-        logger.debug("Finished compressing")
-        logger.debug("Start reconstructing")
-        recon = Reconstructor(**recon_settings, ext_logger=logger)
-        recon.reconstruct()
-        logger.debug("Finished reconstructing")
-        return
-
-    if settings["flags"].reconstruct_only:
-        logger.debug("Only reconstructing, no other step")
-        recon = Reconstructor(**recon_settings, ext_logger=logger)
-        recon.reconstruct()
-        logger.debug("Finished reconstructing")
-        return
 
     logger.debug("Run full pipeline")
 
