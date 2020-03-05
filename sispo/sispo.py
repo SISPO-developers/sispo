@@ -340,4 +340,5 @@ def change_arg(arg):
 
 
 if __name__ == "__main__":
-    main()
+    print("SISPO is a Python package.")
+    print("Either import in Python console or SISPO executable")
