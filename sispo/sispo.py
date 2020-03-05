@@ -26,8 +26,9 @@ import time
 
 from .compression import *
 from .reconstruction import *
-from .sim import utils
 from .sim import *
+from .sim import utils
+
 
 logger = logging.getLogger("sispo")
 logger.setLevel(logging.DEBUG)
@@ -36,7 +37,9 @@ logger_formatter = logging.Formatter(
 
 
 def read_input():
-    """Read input, either from CLI or from input file"""
+    """
+    Reads CLI input and then parses input file.
+    """
     args = read_input_cli()
 
     inputfile = _parse_input_filepath(args.i)
@@ -130,7 +133,7 @@ def _parse_input_flags(settings):
     """
     parser = argparse.ArgumentParser(description=__file__.__doc__)
     parser.add_argument("-v",
-                        action="store_false",
+                        action="store_true",
                         help="Verbose output, displays log also on STDOUT")
     parser.add_argument("--no-sim",
                         action="store_const",
@@ -227,6 +230,9 @@ def _parse_flags(settings):
 
 
 def _parse_input_filepath(filepath):
+    """
+    Parse input file path either from CLI argument or default file path.
+    """
     if filepath is None:
         root_dir = Path(__file__).resolve().parent.parent
         filename = root_dir / "data" / "input" / "definition.json"
@@ -238,6 +244,17 @@ def _parse_input_filepath(filepath):
             filename = root_dir / "data" / "input" / filepath.name
 
     return filename
+
+
+def serialize(o):
+    """
+    Serializes Path or Namespace objects into strings or dicts respectively.
+    """
+    if isinstance(o, Path):
+        return str(o)
+    elif isinstance(o, argparse.Namespace):
+        return vars(o)
+    raise TypeError(f"Object of type {type(o)} not serializable!")
 
 
 def main():
@@ -265,11 +282,11 @@ def main():
     file_handler.setLevel(logging.DEBUG)
     file_handler.setFormatter(logger_formatter)
     logger.addHandler(file_handler)
-    logger.debug(
-        "\n\n#################### NEW SISPO LOG ####################\n")
+    logger.debug("\n\n################### NEW SISPO LOG ###################\n")
 
     logger.debug("Settings:")
-    logger.debug(f"{settings}")
+    logger.debug(f"{json.dumps(settings, indent=4, default=serialize)}")
+
     sim_settings = settings["simulation"]
     comp_settings = settings["compression"]
     recon_settings = settings["reconstruction"]
@@ -373,13 +390,6 @@ def main():
 def run():
     """Alias for :py:func:`main` ."""
     main()
-
-
-def change_arg(arg):
-    """Change an argument in the argparser namespace."""
-    if not isinstance(arg, list):
-        arg = [arg]
-    parser.parse_args(args=arg, namespace=args)
 
 
 if __name__ == "__main__":
