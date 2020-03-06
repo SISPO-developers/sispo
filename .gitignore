@@ -15,14 +15,20 @@ doc/build/
 !data/models/didymos_lowpoly.blend
 software/*
 !software/README.md
+build/lib/*
 
 ## Ignore mypy files
 .mypy_cache/*
 
-## Ignore building files
-build/lib/*
-*egg-info
-dist/*
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+/*.egg
+
+# Compiled python modules.
+*.pyc
+
+# Setuptools distribution folder.
+/dist/
 
 ## Ignore Visual Stdio Code settings
 .vscode/*
