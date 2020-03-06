@@ -24,6 +24,7 @@ import pstats
 import sys
 import time
 
+from .__init__ import __version__
 from .compression import *
 from .reconstruction import *
 from .sim import *
@@ -36,63 +37,113 @@ logger_formatter = logging.Formatter(
     "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
 
 
+def _create_parser():
+    """
+    Creates argparser for SISPO which can be used for CLI and options
+    """
+    parser = argparse.ArgumentParser(usage="%(prog)s [OPTION] ...",
+                                     description=__file__.__doc__)
+    parser.add_argument("-i", "--inputdir",
+                        action="store",
+                        default=None,
+                        type=str,
+                        help="Path to 'definition.json' file")
+    parser.add_argument("-o", "--outputdir",
+                        action="store",
+                        default=None,
+                        type=str,
+                        help="Path to results directory")
+    parser.add_argument("-n", "--name",
+                        action="store",
+                        default=None,
+                        type=str,
+                        help="Name of simulation scenario")
+    parser.add_argument("--verbose",
+                        action="store_true",
+                        help="Verbose output, displays log also on STDOUT")
+    parser.add_argument("--with-sim",
+                        action="store_true",
+                        dest="with_sim",
+                        help="If set, SISPO will simulate the scenario")
+    parser.add_argument("--with-render",
+                        action="store_true",
+                        dest="with_render",
+                        help="If set, SISPO will render the scenario")
+    parser.add_argument("--with-compression",
+                        action="store_true",
+                        dest="with_compression",
+                        help="If set, SISPO will compress images")
+    parser.add_argument("--with-reconstruction",
+                        action="store_true",
+                        dest="with_reconstruction",
+                        help="If set, SISPO will attempt reconstruction.")
+    parser.add_argument("--restart",
+                        action="store_true",
+                        help="Use cProfiler and write results to log.")
+    parser.add_argument("--profile",
+                        action="store_true",
+                        help="Use cProfiler and write results to log.")
+    parser.add_argument("-v", "--version",
+                        action="store_true",
+                        help="Prints version number.")
+
+    return parser
+
+
 def read_input():
     """
     Reads CLI input and then parses input file.
     """
-    args = read_input_cli()
+    parser = _create_parser()
+    args = parser.parse_args()
 
     inputfile = _parse_input_filepath(args.inputdir)
 
     settings = read_input_file(inputfile)
 
     if "options" in settings:
-        settings = _parse_options(settings)
+        settings["options"] = parser.parse_args(args=settings["options"])
 
-    if settings["options"].restart:
-        raise NotImplementedError()
+        if settings["options"].restart:
+            raise NotImplementedError()
+
+        else:
+
+            # If all options are false it is default case and all steps are done
+            if not settings["options"].with_sim and \
+                    not settings["options"].with_render and \
+                    not settings["options"].with_compression and \
+                    not settings["options"].with_reconstruction:
+
+                settings["options"].with_sim = True
+                settings["options"].with_render = True
+                settings["options"].with_compression = True
+                settings["options"].with_reconstruction = True
+        
+            settings = parse_input(settings)
+
+            if args.outputdir is not None:
+                res_dir = Path(args.outputdir).resolve()
+                res_dir = utils.check_dir(res_dir)
+
+                settings["res_dir"] = res_dir
+
+            if args.name is not None:
+                settings["name"] = args.name
+
     else:
         settings = parse_input(settings)
-    
+
         if args.outputdir is not None:
             res_dir = Path(args.outputdir).resolve()
             res_dir = utils.check_dir(res_dir)
-    
+
             settings["res_dir"] = res_dir
-    
+
         if args.name is not None:
             settings["name"] = args.name
 
     return settings
-
-
-def read_input_cli():
-    """
-    Reads input from CLI.
-
-    Represents top level input of a definition.json file
-    """
-    cli_parser = argparse.ArgumentParser(usage="%(prog)s [OPTION] ...",
-                                         description=__file__.__doc__)
-    cli_parser.add_argument("-i", "--inputdir",
-                            action="store",
-                            default=None,
-                            type=str,
-                            help="Path to 'definition.json' file")
-    cli_parser.add_argument("-o", "--outputdir",
-                            action="store",
-                            default=None,
-                            type=str,
-                            help="Path to results directory")
-    cli_parser.add_argument("-n", "--name",
-                            action="store",
-                            default=None,
-                            type=str,
-                            help="Name of simulation scenario")
-
-    cli_args = cli_parser.parse_args()
-
-    return cli_args
 
 
 def read_input_file(filename):
@@ -127,52 +178,6 @@ def parse_input(settings):
 
     settings = _parse_paths(settings)
     settings = _parse_flags(settings)
-
-    return settings
-
-
-def _parse_options(settings):
-    """
-    Parse options field in input
-    """
-    parser = argparse.ArgumentParser(description=__file__.__doc__)
-    parser.add_argument("--verbose",
-                        action="store_true",
-                        help="Verbose output, displays log also on STDOUT")
-    parser.add_argument("--with-sim",
-                        action="store_true",
-                        dest="with_sim",
-                        help="If set, SISPO will simulate the scenario")
-    parser.add_argument("--with-render",
-                        action="store_true",
-                        dest="with_render",
-                        help="If set, SISPO will render the scenario")
-    parser.add_argument("--with-compression",
-                        action="store_true",
-                        dest="with_compression",
-                        help="If set, SISPO will compress images")
-    parser.add_argument("--with-reconstruction",
-                        action="store_true",
-                        dest="with_reconstruction",
-                        help="If set, SISPO will attempt reconstruction.")
-    parser.add_argument("--restart",
-                        action="store_true",
-                        help="Use cProfiler and write results to log.")
-    parser.add_argument("--profile",
-                        action="store_true",
-                        help="Use cProfiler and write results to log.")
-    settings["options"] = parser.parse_args(args=settings["options"])
-
-    # If all options are false it is default case and all steps are done
-    if not settings["options"].with_sim and \
-        not settings["options"].with_render and \
-        not settings["options"].with_compression and \
-        not settings["options"].with_reconstruction:
-
-        settings["options"].with_sim = True
-        settings["options"].with_render = True
-        settings["options"].with_compression = True
-        settings["options"].with_reconstruction = True
 
     return settings
 
@@ -254,6 +259,10 @@ def main():
     Main function to run when executing file
     """
     settings = read_input()
+
+    if settings["options"].version:
+        print(f"v{__version__}")
+        return
 
     if settings["options"].verbose:
         stream_handler = logging.StreamHandler(sys.stdout)
