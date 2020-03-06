@@ -46,10 +46,10 @@ def read_input():
 
     settings = read_input_file(inputfile)
 
-    if "flags" in settings:
-        settings = _parse_input_flags(settings)
+    if "options" in settings:
+        settings = _parse_options(settings)
 
-    if settings["flags"].restart:
+    if settings["options"].restart:
         raise NotImplementedError()
     else:
         settings = parse_input(settings)
@@ -130,9 +130,9 @@ def parse_input(settings):
     return settings
 
 
-def _parse_input_flags(settings):
+def _parse_options(settings):
     """
-    Parse flags field in input
+    Parse options field in input
     """
     parser = argparse.ArgumentParser(description=__file__.__doc__)
     parser.add_argument("-v",
@@ -160,18 +160,18 @@ def _parse_input_flags(settings):
     parser.add_argument("--profile",
                         action="store_true",
                         help="Use cProfiler and write results to log.")
-    settings["flags"] = parser.parse_args(args=settings["flags"])
+    settings["options"] = parser.parse_args(args=settings["options"])
 
-    # If all flags are false it is default case and all steps are done
-    if not settings["flags"].with_sim and \
-        not settings["flags"].with_render and \
-        not settings["flags"].with_compression and \
-        not settings["flags"].with_reconstruction:
+    # If all options are false it is default case and all steps are done
+    if not settings["options"].with_sim and \
+        not settings["options"].with_render and \
+        not settings["options"].with_compression and \
+        not settings["options"].with_reconstruction:
 
-        settings["flags"].with_sim = True
-        settings["flags"].with_render = True
-        settings["flags"].with_compression = True
-        settings["flags"].with_reconstruction = True
+        settings["options"].with_sim = True
+        settings["options"].with_render = True
+        settings["options"].with_compression = True
+        settings["options"].with_reconstruction = True
 
     return settings
 
@@ -254,13 +254,13 @@ def main():
     """
     settings = read_input()
 
-    if settings["flags"].v:
+    if settings["options"].v:
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setLevel(logging.DEBUG)
         stream_handler.setFormatter(logger_formatter)
         logger.addHandler(stream_handler)
 
-    if settings["flags"].profile:
+    if settings["options"].profile:
         pr = cProfile.Profile()
 
     now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
@@ -282,7 +282,7 @@ def main():
     comp_settings = settings["compression"]
     recon_settings = settings["reconstruction"]
 
-    if settings["flags"].profile:
+    if settings["options"].profile:
         logger.debug("Start Profiling")
         pr.enable()
 
@@ -290,29 +290,29 @@ def main():
 
     logger.debug("Run full pipeline")
 
-    if settings["flags"].with_sim or settings["flags"].with_render:
+    if settings["options"].with_sim or settings["options"].with_render:
         logger.debug("With either simulation or rendering")
         env = Environment(**sim_settings, ext_logger=logger)
 
-        if settings["flags"].with_sim:
+        if settings["options"].with_sim:
             env.simulate()
 
-        if settings["flags"].with_render:
+        if settings["options"].with_render:
             env.render()
 
-    if settings["flags"].with_compression:
+    if settings["options"].with_compression:
         logger.debug("With compression")
         comp = Compressor(**comp_settings, ext_logger=logger)
         comp.comp_decomp_series()
 
-    if settings["flags"].with_reconstruction:
+    if settings["options"].with_reconstruction:
         logger.debug("With reconstruction")
         recon = Reconstructor(**recon_settings, ext_logger=logger)
         recon.reconstruct()
 
     t_end = time.time()
 
-    if settings["flags"].profile:
+    if settings["options"].profile:
         pr.disable()
         logger.debug("Stop Profile")
 

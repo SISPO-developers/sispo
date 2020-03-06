@@ -1,7 +1,7 @@
 {
     "name": "default",
     "res_dir": "data/results/default",
-    "flags": ["--profile"],
+    "options": ["--profile"],
     "simulation":
     {
         "res_dir": "data/results/default/rendering",
