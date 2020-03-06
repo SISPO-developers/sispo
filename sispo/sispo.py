@@ -42,7 +42,7 @@ def read_input():
     """
     args = read_input_cli()
 
-    inputfile = _parse_input_filepath(args.i)
+    inputfile = _parse_input_filepath(args.inputdir)
 
     settings = read_input_file(inputfile)
 
@@ -54,14 +54,14 @@ def read_input():
     else:
         settings = parse_input(settings)
     
-        if args.o is not None:
-            res_dir = Path(args.o).resolve()
+        if args.outputdir is not None:
+            res_dir = Path(args.outputdir).resolve()
             res_dir = utils.check_dir(res_dir)
     
             settings["res_dir"] = res_dir
     
-        if args.n is not None:
-            settings["name"] = args.n
+        if args.name is not None:
+            settings["name"] = args.name
 
     return settings
 
@@ -72,18 +72,19 @@ def read_input_cli():
 
     Represents top level input of a definition.json file
     """
-    cli_parser = argparse.ArgumentParser(description=__file__.__doc__)
-    cli_parser.add_argument("-i",
+    cli_parser = argparse.ArgumentParser(usage="%(prog)s [OPTION] ...",
+                                         description=__file__.__doc__)
+    cli_parser.add_argument("-i", "--inputdir",
                             action="store",
                             default=None,
                             type=str,
                             help="Path to 'definition.json' file")
-    cli_parser.add_argument("-o",
+    cli_parser.add_argument("-o", "--outputdir",
                             action="store",
                             default=None,
                             type=str,
                             help="Path to results directory")
-    cli_parser.add_argument("-n",
+    cli_parser.add_argument("-n", "--name",
                             action="store",
                             default=None,
                             type=str,
@@ -254,7 +255,7 @@ def main():
     """
     settings = read_input()
 
-    if settings["options"].v:
+    if settings["options"].verbose:
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setLevel(logging.DEBUG)
         stream_handler.setFormatter(logger_formatter)
