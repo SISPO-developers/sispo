@@ -135,7 +135,7 @@ def _parse_options(settings):
     Parse options field in input
     """
     parser = argparse.ArgumentParser(description=__file__.__doc__)
-    parser.add_argument("-v",
+    parser.add_argument("--verbose",
                         action="store_true",
                         help="Verbose output, displays log also on STDOUT")
     parser.add_argument("--with-sim",
