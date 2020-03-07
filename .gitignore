@@ -5,15 +5,17 @@
 *.pyproj
 
 # Directories
-temp/
+build/lib/
 data/
+doc/build/
+software/
+temp/
+
+# Excepted files and directories
 !data/README.md
 !data/input/definition.json
 !data/models/
-software/
 !software/README.md
-doc/build/
-build/lib/
 
 ## Ignore mypy files
 .mypy_cache/*
