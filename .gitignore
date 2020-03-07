@@ -5,24 +5,30 @@
 *.pyproj
 
 # Directories
-temp/*
-data/*
+build/lib/
+data/
 doc/build/
-!doc/source/requirements.txt
+software/
+temp/
+
+# Excepted files and directories
 !data/README.md
 !data/input/definition.json
-!data/models/sssb.blend
-!data/models/didymos_lowpoly.blend
-software/*
+!data/models/
 !software/README.md
 
 ## Ignore mypy files
 .mypy_cache/*
 
-## Ignore building files
-build/lib/*
-*egg-info
-dist/*
+# Python egg metadata, regenerated from source files by setuptools.
+/*.egg-info
+/*.egg
+
+# Compiled python modules.
+*.pyc
+
+# Setuptools distribution folder.
+/dist/
 
 ## Ignore Visual Stdio Code settings
 .vscode/*
