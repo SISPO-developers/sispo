@@ -97,12 +97,17 @@ def read_input():
     parser = _create_parser()
     args = parser.parse_args()
 
+    if args.version:
+        print(f"v{__version__}")
+        return None
+
     inputfile = _parse_input_filepath(args.inputdir)
 
     settings = read_input_file(inputfile)
-
-
     settings["options"] = parser.parse_args(args=settings["options"])
+
+    if settings["options"].version:
+        print(f"v{__version__}")
 
     if settings["options"].restart:
         raise NotImplementedError()
@@ -248,8 +253,7 @@ def main():
     """
     settings = read_input()
 
-    if settings["options"].version:
-        print(f"v{__version__}")
+    if settings is None:
         return
 
     if settings["options"].verbose:
