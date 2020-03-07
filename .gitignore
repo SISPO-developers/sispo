@@ -5,16 +5,15 @@
 *.pyproj
 
 # Directories
-temp/*
-data/*
-doc/build/
-!doc/source/requirements.txt
+temp/
+data/
 !data/README.md
 !data/input/definition.json
 !data/models/
-software/*
+software/
 !software/README.md
-build/lib/*
+doc/build/
+build/lib/
 
 ## Ignore mypy files
 .mypy_cache/*
