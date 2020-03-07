@@ -115,10 +115,10 @@ def read_input():
     else:
 
         # If all options are false it is default case and all steps are done
-        if not settings["options"].with_sim and \
-            not settings["options"].with_render and \
-            not settings["options"].with_compression and \
-            not settings["options"].with_reconstruction:
+        if (not settings["options"].with_sim and
+            not settings["options"].with_render and
+            not settings["options"].with_compression and
+            not settings["options"].with_reconstruction):
 
             settings["options"].with_sim = True
             settings["options"].with_render = True
