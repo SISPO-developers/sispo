@@ -276,9 +276,9 @@ class ImageCompositor():
         """
         
         # Calculate Gaussian standard deviation for approx diffraction pattern
-        sigma = self.dlmult * 0.45 * self.inst.wavelength \
-                * self.inst.focal_l / (self.inst.aperture_d \
-                * self.inst.pix_l)  
+        sigma = (self.dlmult * 0.45 * self.inst.wavelength
+                * self.inst.focal_l / (self.inst.aperture_d
+                * self.inst.pix_l))
 
         # SSSB photometry
         sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"]) * u.m
@@ -438,8 +438,8 @@ class ImageCompositor():
         if height is not None or width is not None:
             if height > y_res or width > x_res:
                 raise ImageCompositorError("Infobox is bigger than image.")
-            elif height < self.INFOBOX_SIZE["min"][0] or \
-                    width < self.INFOBOX_SIZE["min"][1]:
+            elif (height < self.INFOBOX_SIZE["min"][0] or
+                    width < self.INFOBOX_SIZE["min"][1]):
                 raise ImageCompositorError("Infobox is too small to read.")
 
         sig = 3

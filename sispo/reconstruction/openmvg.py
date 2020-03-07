@@ -31,8 +31,8 @@ class OpenMVGController():
                 raise OpenMVGControllerError("Could not find executables dir!")
         else:
             self.openMVG_dir = openMVG_dir
-        self.sensor_database = root_dir / "data" / \
-            "sensor_database" / "sensor_width_camera_database.txt"
+        self.sensor_database = (root_dir / "data" /
+            "sensor_database" / "sensor_width_camera_database.txt")
 
         self.logger.debug("openMVG executables dir %s", str(self.openMVG_dir))
 

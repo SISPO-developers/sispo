@@ -444,12 +444,12 @@ class BlenderController:
             vec2 = [x_star, -y_star, z_star]
             if np.dot(vec, direction) < np.dot(vec2, direction):
                 vec = vec2
-            x_pix = ss * (f_over_w_ccd_2 * np.dot(right_norm, vec) \
-                    / np.dot(direction, vec) + 1.) * (res_x - 1) / 2.
+            x_pix = ss * ((f_over_w_ccd_2 * np.dot(right_norm, vec)
+                    / np.dot(direction, vec) + 1.)) * (res_x - 1) / 2.
             x_pix = min(round(x_pix), res_x * ss - 1)
             x_pix = max(0, int(x_pix))
-            y_pix = ss * (-f_over_h_ccd_2 * np.dot(up_norm, vec) \
-                    / np.dot(direction, vec) + 1.) * (res_y - 1) / 2.
+            y_pix = ss * ((-f_over_h_ccd_2 * np.dot(up_norm, vec)
+                    / np.dot(direction, vec) + 1.)) * (res_y - 1) / 2.
             y_pix = min(round(y_pix), res_y * ss - 1)
             y_pix = max(0, int(y_pix))
             # Add flux to color channels

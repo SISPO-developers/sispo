@@ -146,8 +146,8 @@ class TimeSampler(DateDetector):
             halfdur = duration / 2.
 
             for _ in range(0, steps):
-                t2 = halfdur + math.sinh((t - halfdur) * factor / halfdur) \
-                    * halfdur / math.sinh(factor)
+                t2 = (halfdur + math.sinh((t - halfdur) * factor / halfdur)
+                    * halfdur / math.sinh(factor))
                 self.times.append(start.shiftedBy(t2))
                 t += dt
             dtout = duration * math.sinh(factor / steps) / math.sinh(factor)

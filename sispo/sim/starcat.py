@@ -48,16 +48,16 @@ class StarCatalog():
 
         exe_dir = self.root_dir / "software" / "star_cats"
 
-        if (exe_dir / "u4test").is_file() or \
-                (exe_dir / "u4test.exe").is_file():
+        if ((exe_dir / "u4test").is_file() or
+                (exe_dir / "u4test.exe").is_file()):
             self.exe = exe_dir / "u4test"
 
-        elif (exe_dir / "star_cats" / "u4test").is_file() or \
-                (exe_dir / "star_cats" / "u4test.exe").is_file():
+        elif ((exe_dir / "star_cats" / "u4test").is_file() or
+                (exe_dir / "star_cats" / "u4test.exe").is_file()):
             self.exe = exe_dir / "star_cats" / "u4test"
 
-        elif (exe_dir / "build_star_cats" / "u4test").is_file() or \
-                (exe_dir / "build_star_cats" / "u4test.exe").is_file():
+        elif ((exe_dir / "build_star_cats" / "u4test").is_file() or
+                (exe_dir / "build_star_cats" / "u4test.exe").is_file()):
             self.exe = exe_dir / "build_star_cats" / "u4test"
             
         else:
