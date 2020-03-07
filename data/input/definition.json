@@ -31,7 +31,7 @@
         {
             "model":
             {
-                "file": "data/models/didymos_lowpoly.blend",
+                "file": "data/models/general_bodies.blend",
                 "name": "Sun"
             }
         },
@@ -39,7 +39,7 @@
         {
             "model": 
             {
-                "file": "data/models/didymos_lowpoly.blend",
+                "file": "data/models/general_bodies.blend",
                 "name": "CalibrationDisk"
             }
         },
@@ -70,7 +70,7 @@
             },
             "model":
             {
-                "file": "data/models/didymos3.blend",
+                "file": "data/models/sssb.blend",
                 "name": "Didymos.001"
             },
             "albedo": 0.15,

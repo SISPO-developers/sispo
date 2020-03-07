@@ -101,37 +101,25 @@ def read_input():
 
     settings = read_input_file(inputfile)
 
-    if "options" in settings:
-        settings["options"] = parser.parse_args(args=settings["options"])
 
-        if settings["options"].restart:
-            raise NotImplementedError()
+    settings["options"] = parser.parse_args(args=settings["options"])
 
-        else:
-
-            # If all options are false it is default case and all steps are done
-            if not settings["options"].with_sim and \
-                    not settings["options"].with_render and \
-                    not settings["options"].with_compression and \
-                    not settings["options"].with_reconstruction:
-
-                settings["options"].with_sim = True
-                settings["options"].with_render = True
-                settings["options"].with_compression = True
-                settings["options"].with_reconstruction = True
-        
-            settings = parse_input(settings)
-
-            if args.outputdir is not None:
-                res_dir = Path(args.outputdir).resolve()
-                res_dir = utils.check_dir(res_dir)
-
-                settings["res_dir"] = res_dir
-
-            if args.name is not None:
-                settings["name"] = args.name
+    if settings["options"].restart:
+        raise NotImplementedError()
 
     else:
+
+        # If all options are false it is default case and all steps are done
+        if not settings["options"].with_sim and \
+            not settings["options"].with_render and \
+            not settings["options"].with_compression and \
+            not settings["options"].with_reconstruction:
+
+            settings["options"].with_sim = True
+            settings["options"].with_render = True
+            settings["options"].with_compression = True
+            settings["options"].with_reconstruction = True
+        
         settings = parse_input(settings)
 
         if args.outputdir is not None:
@@ -161,7 +149,7 @@ def read_input_file(filename):
 
 def parse_input(settings):
     """
-    Parses settings from input file or CLI into correct data formats
+    Parses settings from input file into correct data formats
 
     :type settings: dict
     :param settings: String based description of settings.
