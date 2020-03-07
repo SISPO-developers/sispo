@@ -11,8 +11,7 @@ doc/build/
 !doc/source/requirements.txt
 !data/README.md
 !data/input/definition.json
-!data/models/sssb.blend
-!data/models/general_bodies.blend
+!data/models/
 software/*
 !software/README.md
 build/lib/*
