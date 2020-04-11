@@ -7,6 +7,12 @@ Welcome to SISPO's documentation!
 =================================
 .. mdinclude:: ../../README.md
 
+Overall python software structure
+=================================
+.. image:: figs/programme_structure.svg
+
+Figure 1: Overall software structure with main package, sub-packages, modules and sub-modules.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
