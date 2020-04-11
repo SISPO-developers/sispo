@@ -13,6 +13,8 @@ Overall python software structure
 
 Figure 1: Overall software structure with main package, sub-packages, modules and sub-modules.
 
+A more detailed definition of classes, methods and attributes can be found under :py:mod:`sispo` and its sub-packages.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
