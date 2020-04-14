@@ -15,6 +15,12 @@ Figure 1: Overall software structure with main package, sub-packages, modules an
 
 A more detailed definition of classes, methods and attributes can be found under :py:mod:`sispo` and its sub-packages.
 
+SISPO execution flow diagram
+============================
+.. image:: figs/programme_flow.svg
+
+Figure 2: Software flow diagram showing how functions are executed step by step.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
