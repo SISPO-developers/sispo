@@ -21,6 +21,14 @@ SISPO execution flow diagram
 
 Figure 2: Software flow diagram showing how functions are executed step by step.
 
+.. image:: figs/programme_flow_sim.svg
+
+Figure 3: Software flow diagram showing how functions are executed step by step during simulation.
+
+.. image:: figs/programme_flow_reconstruct.svg
+
+Figure 4: Software flow diagram showing how functions are executed step by step during reconstruction.
+
 .. toctree::
    :maxdepth: 2
    :caption: Contents:
