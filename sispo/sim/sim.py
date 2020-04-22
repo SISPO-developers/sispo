@@ -323,16 +323,30 @@ class Environment():
         """Save simulation results to a file."""
         self.logger.debug("Saving propagation results")
 
-        with open(str(self.res_dir / "PositionHistory.txt"), "w+") as file:
-            for (date, sc_pos, sssb_pos) in zip(self.spacecraft.date_history,
-                                                self.spacecraft.pos_history,
-                                                self.sssb.pos_history):
 
-                sc_pos = np.asarray(sc_pos.toArray())
-                sssb_pos = np.asarray(sssb_pos.toArray())
+        print_list = []
+        print_list.append([self.spacecraft.date_history,"date"])
+        print_list.append([self.spacecraft.pos_history,"toArray"])
+        print_list.append([self.spacecraft.vel_history,"toArray"])
+        #print_list.append([self.spacecraft.rot_history,False])
+        print_list.append([self.sssb.pos_history,"toArray"])
+        print_list.append([self.sssb.vel_history,"toArray"])
+        #print_list.append([self.sssb.rot_history,False])
+        float_formatter = "{:.16f}".format
+        np.set_printoptions(formatter={'float_kind':float_formatter})
 
-                file.write(str(date) + "\t" + str(sssb_pos) + "\t"
-                           + str(sc_pos) + "\n")
+        with open(str(self.res_dir / "DynamicsHistory.txt"), "w+") as file:
+            
+            for i in range(0,len(self.spacecraft.date_history)):
+                line = ""
+                sepr = "\t"
+                for history in print_list:
+                    if(history[1]=="date"):
+                        line = line+str(history[0][i])+sepr
+                    elif(history[1]=="toArray"):
+                        line = line+str(np.asarray(history[0][i].toArray()))+sepr
+                line = line+"\n"
+                file.write(line)
 
         self.logger.debug("Propagation results saved")
 

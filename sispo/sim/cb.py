@@ -41,6 +41,7 @@ class CelestialBody():
 
         self.date_history = self.event_handler.date_history
         self.pos_history = self.event_handler.pos_history
+        self.vel_history = self.event_handler.vel_history
         self.rot_history = self.event_handler.rot_history
 
     def __repr__(self):
@@ -102,6 +103,7 @@ class TimingEvent(PythonEventHandler):
         PythonEventHandler.__init__(self)
         self.date_history = []
         self.pos_history = []
+        self.vel_history = []
         self.rot_history = []
         self.events = 0
 
@@ -113,6 +115,7 @@ class TimingEvent(PythonEventHandler):
 
         self.date_history.append(s.getDate())
         self.pos_history.append(s.getPVCoordinates().getPosition())
+        self.vel_history.append(s.getPVCoordinates().getVelocity())
         self.rot_history.append(s.getAttitude().getRotation())
         return EventHandler.Action.CONTINUE
 
