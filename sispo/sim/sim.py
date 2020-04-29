@@ -323,29 +323,31 @@ class Environment():
         """Save simulation results to a file."""
         self.logger.debug("Saving propagation results")
 
-
         print_list = []
-        print_list.append([self.spacecraft.date_history,"date"])
-        print_list.append([self.spacecraft.pos_history,"toArray"])
-        print_list.append([self.spacecraft.vel_history,"toArray"])
+        print_list.append([self.spacecraft.date_history, "date"])
+        print_list.append([self.spacecraft.pos_history, "vector"])
+        print_list.append([self.spacecraft.vel_history, "vector"])
         #print_list.append([self.spacecraft.rot_history,False])
-        print_list.append([self.sssb.pos_history,"toArray"])
-        print_list.append([self.sssb.vel_history,"toArray"])
+        print_list.append([self.sssb.pos_history, "vector"])
+        print_list.append([self.sssb.vel_history, "vector"])
         #print_list.append([self.sssb.rot_history,False])
         float_formatter = "{:.16f}".format
-        np.set_printoptions(formatter={'float_kind':float_formatter})
+        np.set_printoptions(formatter={'float_kind': float_formatter})
 
         with open(str(self.res_dir / "DynamicsHistory.txt"), "w+") as file:
-            
-            for i in range(0,len(self.spacecraft.date_history)):
+
+            for i in range(0, len(self.spacecraft.date_history)):
                 line = ""
                 sepr = "\t"
                 for history in print_list:
-                    if(history[1]=="date"):
-                        line = line+str(history[0][i])+sepr
-                    elif(history[1]=="toArray"):
-                        line = line+str(np.asarray(history[0][i].toArray()))+sepr
-                line = line+"\n"
+                    if(history[1] == "date"):
+                        value = history[0][i]
+                    elif(history[1] == "vector"):
+                        value = np.asarray(history[0][i].toArray())
+
+                    line = line + str(value) + sepr
+
+                line = line + "\n"
                 file.write(line)
 
         self.logger.debug("Propagation results saved")
