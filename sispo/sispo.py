@@ -29,7 +29,7 @@ from .compression import *
 from .reconstruction import *
 from .sim import *
 from .sim import utils
-
+from .plugins import plugins
 
 logger = logging.getLogger("sispo")
 logger.setLevel(logging.DEBUG)
@@ -86,7 +86,10 @@ def _create_parser():
     parser.add_argument("-v", "--version",
                         action="store_true",
                         help="Prints version number.")
-
+    parser.add_argument("--with-plugins",
+                        action="store_true",
+                        dest="with_plugins",
+                        help="Plugins that are run before rendering.")
     return parser
 
 
@@ -124,7 +127,7 @@ def read_input():
             settings["options"].with_render = True
             settings["options"].with_compression = True
             settings["options"].with_reconstruction = True
-        
+
         settings = parse_input(settings)
 
         if args.outputdir is not None:
@@ -298,6 +301,9 @@ def main():
 
         if settings["options"].with_sim:
             env.simulate()
+
+        if settings["options"].with_plugins:
+            plugins.try_plugins(settings["plugins"], settings, env)
 
         if settings["options"].with_render:
             env.render()
