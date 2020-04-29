@@ -44,6 +44,7 @@ setuptools.setup(
             "sispo.sim",
             "sispo.compression",
             "sispo.reconstruction"
+            "sispo.plugins"
         ],
         exclude=[
             "*test*",
