@@ -56,7 +56,7 @@ class SmallSolarSystemBody(CelestialBody):
 
         # Define attitude
         self.rot_conv = RotationConvention.valueOf("VECTOR_OPERATOR")
-        rotation_rate = att["rotation_rate"]
+        rotation_rate = att["rotation_rate"] * 2.0 * math.pi / 180.0
 
         self.RA      = math.radians(att["RA"])
         self.Dec     = math.radians(att["Dec"])
