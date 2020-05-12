@@ -17,6 +17,8 @@ from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=i
 from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.utils import Constants  # pylint: disable=import-error
 
+from mathutils import Matrix
+
 from . import cb
 from .cb import *
 from . import sc
@@ -27,6 +29,7 @@ from . import render
 from .render import *
 from . import utils
 
+import  mathutils
 
 class SimulationError(RuntimeError):
     """Generic simulation error."""
@@ -271,10 +274,33 @@ class Environment():
         self.logger.debug("Simulation completed")
         self.save_results()
 
+
+    def set_rotation(self, sssb_rot, sispoObj):
+        """Set rotation and returns original transformation matrix"""
+        """Assumes that the blender scaling is set to 1"""
+        #sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
+        sssb_angle = sssb_rot.getAngle()
+        
+        eul0 = mathutils.Euler((0.0, 0.0, sssb_angle), 'XYZ')
+        eul1 = mathutils.Euler((0.0, sispoObj.Dec, 0.0), 'XYZ')
+        eul2 = mathutils.Euler((0.0, 0.0, sispoObj.RA), 'XYZ')
+
+        R0 = eul0.to_matrix()
+        R1 = eul1.to_matrix()
+        R2 = eul2.to_matrix()
+
+        M = R2 @ R1 @ R0
+
+        original_transform = sispoObj.render_obj.matrix_world
+
+        sispoObj.render_obj.matrix_world = M.to_4x4()
+        return original_transform
+
+
     def render(self):
         """Render simulation scenario."""
         self.logger.debug("Rendering simulation")
-
+         
         # Render frame by frame
         for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
                                                       self.spacecraft.pos_history,
@@ -291,16 +317,14 @@ class Environment():
             metainfo["distance"] = sc_pos.distance(sssb_pos)
             metainfo["date"] = date_str
 
+            orig_transform = self.set_rotation(sssb_rot, self.sssb)
+
             # Update environment
             self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / 1000.
 
             # Update sssb and spacecraft
             pos_sc_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
             self.renderer.set_camera_location("ScCam", pos_sc_rel_sssb)            
-
-            sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
-            sssb_angle = sssb_rot.getAngle()
-            self.sssb.render_obj.rotation_axis_angle = (sssb_angle, sssb_axis.x, sssb_axis.y, sssb_axis.z)       
 
             self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             
@@ -316,7 +340,10 @@ class Environment():
 
             # Render blender scenes
             self.renderer.render(metainfo)
-
+            
+            #set original rotation
+            self.sssb.render_obj.matrix_world = orig_transform
+                
         self.logger.debug("Rendering completed")
 
     def save_results(self):
