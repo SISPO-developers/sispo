@@ -62,7 +62,8 @@ setuptools.setup(
         "numpy",
         "opencv-contrib-python",
         "openexr",
-        "orekit"
+        "orekit",
+        "mathutils"
     ],
     entry_points={
         "console_scripts": [

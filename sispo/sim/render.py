@@ -60,6 +60,7 @@ class BlenderController:
 
         self.default_scene = bpy.context.scene
         self.scenes = bpy.data.scenes
+
         self.cameras = bpy.data.cameras
 
         # Initial scene is SssbOnly, clear from objects, and set defaults

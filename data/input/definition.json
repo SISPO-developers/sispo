@@ -1,7 +1,9 @@
 {
     "name": "default",
     "res_dir": "data/results/default",
-    "options": ["--profile"],
+    "options": ["--with-sim", "--with-render"],
+    "plugins": ["/app/JetCreator/interface.py"],
+    "orekit_path": "/app/sispo/sispo/sim/orekit-data.zip",
     "simulation":
     {
         "res_dir": "data/results/default/rendering",
@@ -23,9 +25,9 @@
         "timesampler_mode": 1,
         "slowmotion_factor": 10,
         "exposure": 0,
-        "samples": 48,
+        "samples": 8,
         "device": "GPU",
-        "tile_size": 512,
+        "tile_size": 256,
         "starcat_dir": "data/UCAC4",
         "sun": 
         {
@@ -66,7 +68,9 @@
             },
             "att": 
             {
-                "rotation_rate": 8133.48
+                "rotation_rate": 0.01,
+                "RA": 0.0,
+                "Dec": 0.0
             },
             "model":
             {
@@ -78,7 +82,7 @@
         },
         "instrument": 
         {
-            "res": [2464, 2054],
+            "res": [800,600],
             "pix_l": 3.45,
             "focal_l": 230,
             "aperture_d": 4,

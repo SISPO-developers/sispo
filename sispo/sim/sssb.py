@@ -41,6 +41,19 @@ class SmallSolarSystemBody(CelestialBody):
 
         if "rotation_rate" not in att:
             rotation_rate = 2. * math.pi / (2.2593 * 3600)
+        else:
+            rotation_rate = att["rotation_rate"] * 2.0 * math.pi / 180.0
+
+        if "RA" not in att:
+            self.RA      = 0.
+        else:
+            self.RA      = math.radians(att["RA"])
+
+        if "Dec" not in att:
+            self.Dec      = 0.
+        else:
+            self.Dec      = math.radians(att["Dec"])
+
 
         # Define trajectory/orbit
         self.trajectory = KeplerianOrbit(trj["a"] * utils.Constants.IAU_2012_ASTRONOMICAL_UNIT,
@@ -56,7 +69,7 @@ class SmallSolarSystemBody(CelestialBody):
 
         # Define attitude
         self.rot_conv = RotationConvention.valueOf("VECTOR_OPERATOR")
-        rotation_rate = 2. * math.pi / att["rotation_rate"]
+
         rotation = utils.AngularCoordinates(Rotation.IDENTITY, 
                                             Vector3D(0., 0., rotation_rate))
         attitude = Attitude(trj_date, self.ref_frame, rotation)
