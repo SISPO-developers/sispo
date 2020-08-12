@@ -165,7 +165,6 @@ class ImageCompositor():
         self._threads = []
 
         self.inst = instrument
-        self.dlmult = 2
 
         self.sssb = sssb
 
@@ -275,11 +274,6 @@ class ImageCompositor():
         :param frame: Frame containing necessary inormation for composition.
         """
         
-        # Calculate Gaussian standard deviation for approx diffraction pattern
-        sigma = (self.dlmult * 0.45 * self.inst.wavelength
-                * self.inst.focal_l / (self.inst.aperture_d
-                * self.inst.pix_l))
-
         # SSSB photometry
         sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"]) * u.m
         ref_flux = SUN_FLUX_VBAND_1AU * ((const.au / sc_sun_dist) ** 2)
@@ -303,13 +297,6 @@ class ImageCompositor():
         dist_scale = np.power(1E6 * u.m / frame.metadata["distance"], 2.)  
         vis_dim = self.sssb["max_dim"] * dist_scale
 
-        # Kernel size calculated to equal skimage.filters.gaussian
-        # Reference:
-        # https://github.com/scipy/scipy/blob/4bfc152f6ee1ca48c73c06e27f7ef021d729f496/scipy/ndimage/filters.py#L214
-        kernel = int((4 * sigma + 0.5) * 2)
-        kernel = max(kernel, 5) # Don't use smaller than 5
-        ksize = (kernel, kernel)
-
         if vis_dim < 0.1:
             # Use point source sssb
             # Generate point source reference image
@@ -318,10 +305,7 @@ class ImageCompositor():
             scale = frame.sssb_const_dist[:, :, 0:3] * alpha 
             sssb_ref[:, :, 0:3] *= np.sum(scale, axis=-1) * dist_scale
 
-            composed_img = (sssb_ref[:, : , 0:3] + frame.stars)
-            composed_img *= self.inst.quantum_eff
-            composed_img = cv2.GaussianBlur(composed_img, ksize, sigma)
-            composed_img += np.random.poisson(composed_img)
+            composed_img = self.inst.sense(sssb_ref[:, :, 0:3] + frame.stars[:, :, 0:3])
             composed_max = np.max(composed_img)
             ref_sssb_max = np.max(sssb_ref[:, :, 0:3])
             if composed_max > ref_sssb_max * 5:
@@ -340,14 +324,12 @@ class ImageCompositor():
                 sssb = frame.sssb_only[:, :, c]
                 stars = frame.stars[:, :, c]
                 composed_img[:, :, c] = alpha * sssb + (1 - alpha) * stars
-                
-            composed_img[:, :, 0:3] *= self.inst.quantum_eff
-            composed_img = cv2.GaussianBlur(composed_img, ksize, sigma)
-            composed_img += np.random.poisson(composed_img)
+
+            composed_img = self.inst.sense(composed_img[:, :, 0:3])
             composed_max = np.max(composed_img)
 
         composed_img[:, :, :] /= composed_max
-  
+
         if self.with_infobox:
             infobox_img = composed_img[:, :, 0:3] * 255
             infobox_img = infobox_img.astype(np.uint8)

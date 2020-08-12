@@ -4,6 +4,8 @@ from pathlib import Path
 
 from astropy import units as u
 import numpy as np
+import cv2
+
 import orekit
 from org.orekit.orbits import KeplerianOrbit # pylint: disable=import-error
 from org.orekit.frames import FramesFactory # pylint: disable=import-error
@@ -137,3 +139,23 @@ class Instrument():
             self.color_depth = 12
 
         self.aperture_a = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) * np.pi/4
+        self.dlmult = 2
+
+    def sense(self, flux_img):
+        # Calculate Gaussian standard deviation for approx diffraction pattern
+        sigma = (self.dlmult * 0.45 * self.wavelength
+                * self.focal_l / (self.aperture_d
+                * self.pix_l))
+
+        # Kernel size calculated to equal skimage.filters.gaussian
+        # Reference:
+        # https://github.com/scipy/scipy/blob/4bfc152f6ee1ca48c73c06e27f7ef021d729f496/scipy/ndimage/filters.py#L214
+        kernel = int((4 * sigma + 0.5) * 2)
+        kernel = max(kernel, 5) # Don't use smaller than 5
+        ksize = (kernel, kernel)
+
+        img = self.quantum_eff * flux_img
+        img = cv2.GaussianBlur(img, ksize, sigma)
+        img += np.random.poisson(img)
+
+        return img
