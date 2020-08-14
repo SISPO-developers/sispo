@@ -1,0 +1,2 @@
+import sispo
+sispo.main()

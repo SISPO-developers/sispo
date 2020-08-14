@@ -80,6 +80,9 @@ def _create_parser():
     parser.add_argument("--restart",
                         action="store_true",
                         help="Use cProfiler and write results to log.")
+    parser.add_argument("--opengl",
+                        action="store_true",
+                        help="Use OpenGL based rendering")
     parser.add_argument("--profile",
                         action="store_true",
                         help="Use cProfiler and write results to log.")
@@ -297,7 +300,7 @@ def main():
 
     if settings["options"].with_sim or settings["options"].with_render:
         logger.debug("With either simulation or rendering")
-        env = Environment(**sim_settings, ext_logger=logger)
+        env = Environment(**sim_settings, ext_logger=logger, opengl_renderer=settings["options"].opengl)
 
         if settings["options"].with_sim:
             env.simulate()
@@ -343,5 +346,5 @@ def run():
 
 
 if __name__ == "__main__":
-    print("SISPO is a Python package.")
-    print("Either import in Python console or SISPO executable")
+    print('Please run using `python -m sispo <arguments>` from project root')
+    # main()

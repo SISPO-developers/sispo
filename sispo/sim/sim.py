@@ -25,8 +25,6 @@ from . import sc
 from .sc import *
 from . import sssb
 from .sssb import *
-from . import render
-from .render import *
 from . import utils
 
 import  mathutils
@@ -66,13 +64,18 @@ class Environment():
                  samples,
                  device,
                  tile_size,
-                 ext_logger=None):
+                 ext_logger=None,
+                 opengl_renderer=False,
+                 refl_model_params=None):
 
         if ext_logger is not None:
             self.logger = ext_logger
         else:
             self.logger = utils.create_logger()
-        
+
+        self.opengl_renderer = opengl_renderer
+        self.refl_model_params = refl_model_params  # TODO: object specific refl_model_params, read from object files
+
         self.root_dir = Path(__file__).parent.parent.parent
         data_dir = self.root_dir / "data"
         self.models_dir = utils.check_dir(data_dir / "models")
@@ -121,17 +124,18 @@ class Environment():
         # Setup rendering engine (renderer)
         self.setup_renderer()
 
-        # Setup Sun
-        self.setup_sun(sun)
-
         # Setup SSSB
         self.setup_sssb(sssb)
 
         # Setup SC
         self.setup_spacecraft()
 
-        # Setup Lightref
-        self.setup_lightref(lightref)
+        if not self.opengl_renderer:
+            # Setup Sun
+            self.setup_sun(sun)
+
+            # Setup Lightref
+            self.setup_lightref(lightref)
 
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
@@ -139,15 +143,23 @@ class Environment():
         render_dir = utils.check_dir(self.res_dir)
         raw_dir = utils.check_dir(render_dir / "raw")
 
-        self.renderer = render.BlenderController(render_dir,
-                                                 raw_dir, 
-                                                 self.starcat_dir,
-                                                 self.inst,
-                                                 self.sssb_settings,
-                                                 self.with_infobox,
-                                                 self.with_clipping,
-                                                 ext_logger=self.logger)
+        if self.opengl_renderer:
+            from .opengl import rendergl
+            self.renderer = rendergl.RenderController(render_dir, stardb_path=self.starcat_dir, logger=self.logger)
+            self.renderer.create_scene("SssbOnly")
+        else:
+            from .render import BlenderController
+            self.renderer = BlenderController(render_dir,
+                                              raw_dir,
+                                              self.starcat_dir,
+                                              self.inst,
+                                              self.sssb_settings,
+                                              self.with_infobox,
+                                              self.with_clipping,
+                                              ext_logger=self.logger)
+
         self.renderer.create_camera("ScCam")
+
         self.renderer.configure_camera("ScCam", 
                                        self.inst.focal_l,
                                        self.inst.chip_w)
@@ -158,11 +170,23 @@ class Environment():
                                        self.inst.focal_l,
                                        self.inst.chip_w)
 
-        self.renderer.create_scene("LightRef")
-        self.renderer.create_camera("LightRefCam", scenes="LightRef")
-        self.renderer.configure_camera("LightRefCam", 
-                                       self.inst.focal_l,
-                                       self.inst.chip_w)
+        if not self.opengl_renderer:
+            self.renderer.create_scene("LightRef")
+            self.renderer.create_camera("LightRefCam", scenes="LightRef")
+            self.renderer.configure_camera("LightRefCam",
+                                           self.inst.focal_l,
+                                           self.inst.chip_w)
+        else:
+            # as use sispo cam model
+            self.renderer.set_scene_config({
+                'debug': False,
+                'flux_only': False,
+                'sispo_cam': self.inst,         # use sispo cam model instead of own (could use own if can give exposure & gain)
+                'stars': True,                  # use own star db
+                'lens_effects': False,          # includes the sun
+                'hapke_params': self.refl_model_params or rendergl.RenderObject.HAPKE_PARAMS,
+                # TODO: object specific refl_model_params, read from object files
+            })
 
         self.renderer.set_device(self.render_settings["device"], 
                                  self.render_settings["tile"])
@@ -218,6 +242,7 @@ class Environment():
                                                          ["SssbOnly", 
                                                           "SssbConstDist"])
         self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
+        self.sssb.render_obj.location = (0, 0, 0)
 
     def setup_spacecraft(self):
         """Create Spacecraft and respective blender object."""
@@ -289,7 +314,11 @@ class Environment():
         R1 = eul1.to_matrix()
         R2 = eul2.to_matrix()
 
-        M = R2 @ R1 @ R0
+        try:
+            M = R2 @ R1 @ R0
+        except TypeError:
+            # earlier versions of mathutils (e.g. 2.78) does not yet support @ for matrix multiplication
+            M = R2 * R1 * R0
 
         original_transform = sispoObj.render_obj.matrix_world
 
@@ -300,7 +329,8 @@ class Environment():
     def render(self):
         """Render simulation scenario."""
         self.logger.debug("Rendering simulation")
-         
+        scaling = 1 if self.opengl_renderer else 1000.
+
         # Render frame by frame
         for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
                                                       self.spacecraft.pos_history,
@@ -320,23 +350,27 @@ class Environment():
             orig_transform = self.set_rotation(sssb_rot, self.sssb)
 
             # Update environment
-            self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / 1000.
+            if not self.opengl_renderer:
+                self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / scaling
+            else:
+                self.renderer.set_sun_location(-np.asarray(sssb_pos.toArray()))
 
             # Update sssb and spacecraft
-            pos_sc_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / 1000.
-            self.renderer.set_camera_location("ScCam", pos_sc_rel_sssb)            
-
+            pos_sc_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / scaling
+            self.renderer.set_camera_location("ScCam", pos_sc_rel_sssb)
             self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             
             # Update scenes/cameras
-            pos_cam_const_dist = pos_sc_rel_sssb * 1000. / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
+            pos_cam_const_dist = pos_sc_rel_sssb * scaling / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
             self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
             self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
 
-            lightrefcam_pos = -np.asarray(sssb_pos.toArray()) * 1000. /np.sqrt(np.dot(np.asarray(sssb_pos.toArray()),np.asarray(sssb_pos.toArray())))
-            self.renderer.set_camera_location("LightRefCam", lightrefcam_pos)
-            self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
-            self.renderer.target_camera(self.lightref, "LightRefCam")
+            if not self.opengl_renderer:
+                lightrefcam_pos = -np.asarray(sssb_pos.toArray()) * scaling \
+                                  / np.sqrt(np.dot(np.asarray(sssb_pos.toArray()), np.asarray(sssb_pos.toArray())))
+                self.renderer.set_camera_location("LightRefCam", lightrefcam_pos)
+                self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
+                self.renderer.target_camera(self.lightref, "LightRefCam")
 
             # Render blender scenes
             self.renderer.render(metainfo)
@@ -350,31 +384,23 @@ class Environment():
         """Save simulation results to a file."""
         self.logger.debug("Saving propagation results")
 
-        print_list = []
-        print_list.append([self.spacecraft.date_history, "date"])
-        print_list.append([self.spacecraft.pos_history, "vector"])
-        print_list.append([self.spacecraft.vel_history, "vector"])
-        #print_list.append([self.spacecraft.rot_history,False])
-        print_list.append([self.sssb.pos_history, "vector"])
-        print_list.append([self.sssb.vel_history, "vector"])
-        #print_list.append([self.sssb.rot_history,False])
         float_formatter = "{:.16f}".format
         np.set_printoptions(formatter={'float_kind': float_formatter})
+        vec2str = lambda v: str(np.asarray(v.toArray()))
+
+        print_list = [
+            [str(v) for v in self.spacecraft.date_history],
+            [vec2str(v) for v in self.spacecraft.pos_history],
+            [vec2str(v) for v in self.spacecraft.vel_history],
+            #[vec2str(v) for v in self.spacecraft.rot_history],
+            [vec2str(v) for v in self.sssb.pos_history],
+            [vec2str(v) for v in self.sssb.vel_history],
+            #[vec2str(v) for v in self.sssb.rot_history],
+        ]
 
         with open(str(self.res_dir / "DynamicsHistory.txt"), "w+") as file:
-
-            for i in range(0, len(self.spacecraft.date_history)):
-                line = ""
-                sepr = "\t"
-                for history in print_list:
-                    if(history[1] == "date"):
-                        value = history[0][i]
-                    elif(history[1] == "vector"):
-                        value = np.asarray(history[0][i].toArray())
-
-                    line = line + str(value) + sepr
-
-                line = line + "\n"
+            for i in range(len(self.spacecraft.date_history)):
+                line = "\t".join([v[i] for v in print_list]) + "\n"
                 file.write(line)
 
         self.logger.debug("Propagation results saved")
