@@ -9,6 +9,7 @@ import cv2
 import orekit
 from org.orekit.orbits import KeplerianOrbit # pylint: disable=import-error
 from org.orekit.frames import FramesFactory # pylint: disable=import-error
+from org.orekit.attitudes import Attitude, FixedRate # pylint: disable=import-error
 from org.orekit.propagation.analytical import KeplerianPropagator # pylint: disable=import-error
 from org.orekit.time import AbsoluteDate, TimeScalesFactory # pylint: disable=import-error
 from org.orekit.utils import PVCoordinates # pylint: disable=import-error
@@ -20,15 +21,27 @@ from .cb import CelestialBody
 class Spacecraft(CelestialBody):
     """Handling properties and behaviour of the spacecraft."""
 
-    def __init__(self, name, mu, state, trj_date):
+    def __init__(self, name, mu, state, trj_date, rot_state=None, oneshot=False):
         """Currently hard implemented for SC."""
 
         super().__init__(name)
 
         self.trj_date = trj_date
+        self.auto_targeting = rot_state is None
 
-        self.trajectory = KeplerianOrbit(state, self.ref_frame, self.trj_date, mu)
-        self.propagator = KeplerianPropagator(self.trajectory)
+        att_provider = []
+        if rot_state is not None:
+            attitude = Attitude(trj_date, self.ref_frame, rot_state)
+            att_provider = [FixedRate(attitude)]
+
+        if oneshot:
+            self.date_history = [trj_date]
+            self.pos_history = [state.getPosition()]
+            self.vel_history = [state.getVelocity()]
+            self.rot_history = [None if rot_state is None else rot_state.getRotation()]
+        else:
+            self.trajectory = KeplerianOrbit(state, self.ref_frame, self.trj_date, mu)
+            self.propagator = KeplerianPropagator(self.trajectory, *att_provider)
 
         self.payload = None
 

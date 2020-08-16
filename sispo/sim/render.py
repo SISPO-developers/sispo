@@ -287,6 +287,14 @@ class BlenderController:
         camera = bpy.data.objects[camera_name]
         camera.location = location
 
+    def set_camera_rot(self, rot, camera_name="Camera"):
+        """Target camera towards target."""
+        camera = bpy.data.objects[camera_name]
+        camera.rotation_mode = 'ZYX'    # TODO: check if works, if not, try XYZ order
+        camera.rotation_euler[0] = rot[0]
+        camera.rotation_euler[1] = rot[1]
+        camera.rotation_euler[2] = rot[2]
+
     def target_camera(self, target, camera_name="Camera"):
         """Target camera towards target."""
         camera = bpy.data.objects[camera_name]

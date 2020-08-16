@@ -1,13 +1,14 @@
 {
-    "name": "default",
-    "res_dir": "data/results/default",
-    "options": ["--with-sim", "--with-render"],
+    "name": "oneshot_67p_opengl",
+    "res_dir": "data/results/oneshot",
+    "options": ["--with-render", "--opengl"],
     "plugins": ["/app/JetCreator/interface.py"],
     "orekit_path": "/app/sispo/sispo/sim/orekit-data.zip",
     "simulation":
     {
-        "res_dir": "data/results/default/rendering",
-        "duration": 120,
+        "res_dir": "data/results/oneshot/rendering",
+		"oneshot": true,
+        "duration": 1,
         "encounter_date": 
         {
             "year": 2017,
@@ -17,45 +18,41 @@
             "minutes": 0,
             "seconds": 0.0
         },
-        "frames": 120,
-        "encounter_distance": 1E5,
-        "relative_velocity": 10000,
-        "with_terminator": 0,
-        "with_sunnyside": 1,
+        "frames": 1,
+        "encounter_distance": null,
+        "relative_velocity": null,
+        "with_terminator": null,
+        "with_sunnyside": null,
         "timesampler_mode": 1,
         "slowmotion_factor": 10,
         "exposure": 0,
-        "samples": 8,
+        "samples": 4,
         "device": "GPU",
         "tile_size": 256,
-        "starcat_dir": "data/UCAC4",
-        "sun": 
-        {
-            "model":
-            {
-                "file": "data/models/general_bodies.blend",
-                "name": "Sun"
-            }
-        },
-        "lightref": 
-        {
-            "model": 
-            {
-                "file": "data/models/general_bodies.blend",
-                "name": "CalibrationDisk"
-            }
-        },
+        "starcat_dir": "data/stardb/deep_space_objects.sqlite",
+		"brdf_params": {
+			"J": 0,
+			"th_p": 27.07,
+			"w": 0.034,
+			"b": -0.078577,
+			"c": 0,
+			"B_SH0": 2.25,
+			"hs": 0.00106,
+			"B_CB0": 0,
+			"hc": 0.005,
+			"K": 1
+		},
+        "sun": null,
+        "lightref": null,
+		"spacecraft": {
+			"r": [163613518304.0, 101637309778.0, 36457190373.0],
+			"angleaxis": [1.892926, 0.781228, -0.540109, -0.312995]
+		},
         "sssb":
         {
             "trj":
             {
-                "a": 1.644641475071416,
-                "e": 3.838774437558215E-01,
-                "i": 3.408231185574551E+00,
-                "P": 7.703805051391988E+02,
-                "omega": 3.192958853076784E+02,
-                "Omega": 7.320940216397703E+01, 
-                "M": 1.967164895190036E+02,
+                "r": [163613595198.0, 101637176823.0, 36457220690.0],
                 "date": 
                 {
                     "year": 2017, 
@@ -68,26 +65,27 @@
             },
             "att": 
             {
-                "rotation_rate": 0.01,
-                "RA": 0.0,
-                "Dec": 0.0
+                "rotation_rate": 0.0,
+                "RA": 69.54,
+                "Dec": 64.11,
+				"ZLRA": 162.976134
             },
             "model":
             {
-                "file": "data/models/cube.blend",
-                "name": "Cube"
+                "file": "data/models/67P_C-G_shape_model_MALMER_2015_11_20-in-km.obj",
+                "name": "67P"
             },
             "albedo": 0.15,
             "max_dim": 512
         },
         "instrument": 
         {
-            "res": [800,600],
-            "pix_l": 3.45,
-            "focal_l": 230,
-            "aperture_d": 4,
-            "wavelength": 550,
-            "quantum_eff": 0.25,
+            "res": [1024, 1024],
+            "pix_l": 13.0,
+            "focal_l": 152.5,
+            "aperture_d": 30,
+            "wavelength": 550.0,
+            "quantum_eff": 0.8,
             "color_depth": 8
         },
         "with_infobox": 0,
