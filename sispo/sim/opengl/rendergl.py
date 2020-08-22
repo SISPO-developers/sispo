@@ -190,7 +190,7 @@ class RenderObject(RenderAbstractObject):
             return None
         else:
             mx44 = np.identity(4)
-            mx44[:3, :3] = quaternion.as_rotation_matrix(self.q)
+            mx44[:3, :3] = quaternion.as_rotation_matrix(self.q.conj())
             return mx44
 
     @matrix_world.setter
@@ -200,7 +200,7 @@ class RenderObject(RenderAbstractObject):
         else:
             mx33 = np.asarray(mx44)[:3, :3]
             mx33 /= np.linalg.norm(mx33, axis=0)
-            self.q = quaternion.from_rotation_matrix(mx33)
+            self.q = quaternion.from_rotation_matrix(mx33).conj()
 
     def prepare(self, scene):
         self._check_params()
@@ -218,7 +218,7 @@ class RenderScene(RenderAbstractObject):
     DEF_STAR_DB = Path(os.path.join(os.path.dirname(__file__), '..', 'data', 'deep_space_objects.sqlite'))
 
     def __init__(self, name, render_dir, stars=True, lens_effects=False, flux_only=False, normalize=False,
-                 sispo_cam=None, hapke_params=RenderObject.HAPKE_PARAMS, stardb_path=None, verbose=True, debug=False):
+                 sispo_cam=None, brdf_params=RenderObject.HAPKE_PARAMS, stardb_path=None, verbose=True, debug=False):
 
         super().__init__(name)
         self._samples = 1
@@ -242,9 +242,18 @@ class RenderScene(RenderAbstractObject):
         self.sispo_cam = sispo_cam
         self.stars = stars
         self.lens_effects = lens_effects
-        self.hapke_params = hapke_params
+        self.brdf_params = brdf_params
         self.verbose = verbose
         self.debug = debug
+
+    @property
+    def brdf_params(self):
+        return self._brdf_params
+
+    @brdf_params.setter
+    def brdf_params(self, params):
+        keys = ["J", "th_p", "w", "b", "c", "B_SH0", "hs", "B_CB0", "hc", "K"]
+        self._brdf_params = [params[k] for k in keys] if isinstance(params, dict) else params
 
     @property
     def width(self):
@@ -305,13 +314,14 @@ class RenderScene(RenderAbstractObject):
             rel_pos_v = [rel_pos_v[i]/self.object_scale for i in obj_idxs]
             rel_rot_q = [rel_rot_q[i] for i in obj_idxs]
             light_v = tools.q_times_v(c.q.conj(), tools.normalize_v(sun_sc_v))
+            brdf_params = RenderObject.HAPKE_PARAMS if self.brdf_params is None else self.brdf_params
 
             self._renderer.set_frustum(c.model.x_fov, c.model.y_fov, c.frustum_near, c.frustum_far)
             flux = TestLoop.render_navcam_image_static(None, self._renderer, obj_idxs, rel_pos_v, rel_rot_q,
                                                        light_v, c.q, sun_distance, cam=c.model, auto_gain=False,
                                                        use_shadows=True, use_textures=True, fluxes_only=True,
                                                        stars=self.stars, lens_effects=self.lens_effects,
-                                                       reflmod_params=self.hapke_params, star_db=self._stardb)
+                                                       reflmod_params=brdf_params, star_db=self._stardb)
 
             if self.flux_only:
                 image = flux
@@ -425,7 +435,7 @@ class RenderController:
         """
         for s in self._iter_scenes(scenes):
             for p, v in params.items():
-                assert p in s.__dict__, "Class RenderScene does not have a property with the name '%s'" % p
+                assert p in dir(s), "Class RenderScene does not have a property with the name '%s'" % p
                 setattr(s, p, v)
 
     def set_device(self, device="AUTO", scenes=None):
@@ -498,17 +508,24 @@ class RenderController:
         assert mode == "PERSP", 'ORTHO currently not supported even though it could be'
         self._cams[camera_name].conf(lens, sensor, clip_start, clip_end, **kwargs)
 
-    def set_camera_location(self, camera_name="Camera", location=(0, 0, 0), orientation=None, angleaxis=True):
+    def set_camera_location(self, camera_name="Camera", location=(0, 0, 0)):
         cam = self._cams[camera_name]
         cam.loc = np.array(location) if location is not None else None
-        if orientation is not None:
-            if len(orientation) == 4:
-                if angleaxis:
-                    orientation = tools.angleaxis_to_q(orientation)
-                else:
-                    orientation = np.quaternion(*orientation)
-            assert isinstance(orientation, np.quaternion), 'orientation needs to be a quaternion or angle-axis with angle given last'
-            cam.q = orientation
+
+    def set_camera_rot(self, rot, camera_name="Camera", type='zyx'):
+        if rot is None:
+            q = None
+        elif type == 'zyx':
+            q = tools.ypr_to_q(-rot[1], rot[0], rot[2])
+        elif type == 'ypr':
+            q = tools.ypr_to_q(*rot)
+        elif type == 'quat':
+            q = np.quaternion(*rot).normalized()
+        elif type == 'angleaxis':
+            q = tools.angleaxis_to_q(rot)
+        else:
+            assert False, 'invalid rotation type: %s' % type
+        self._cams[camera_name].q = q
 
     def target_camera(self, target_obj: RenderObject, camera_name="Camera"):
         """Target camera towards target."""
@@ -611,7 +628,7 @@ if __name__ == '__main__':
         'normalize': False,
         'stars': True,
         'lens_effects': True,          # includes the sun
-        'hapke_params': RenderObject.HAPKE_PARAMS,
+        'brdf_params': RenderObject.HAPKE_PARAMS,
     })
     control.create_camera('test_cam', scenes='test_sc')
     control.configure_camera('test_cam', lens=35.0, sensor=5e-3*1024)

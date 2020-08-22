@@ -9,7 +9,7 @@ from org.orekit.orbits import KeplerianOrbit, PositionAngle # pylint: disable=im
 from org.orekit.attitudes import Attitude, FixedRate # pylint: disable=import-error
 from org.orekit.propagation.analytical import KeplerianPropagator # pylint: disable=import-error
 from org.orekit.time import AbsoluteDate
-from org.hipparchus.geometry.euclidean.threed import Rotation, RotationConvention, Vector3D  # pylint: disable=import-error
+from org.hipparchus.geometry.euclidean.threed import Rotation, RotationOrder, RotationConvention, Vector3D  # pylint: disable=import-error
 
 from .cb import CelestialBody
 
@@ -30,30 +30,32 @@ class SmallSolarSystemBody(CelestialBody):
                                      float(date["seconds"]),
                                      self.timescale)
 
-        if "a" and "e" and "i" and "omega" and "Omega" and "M" not in trj:
-            a = 1.644641475071416E+00 * utils.Constants.IAU_2012_ASTRONOMICAL_UNIT
-            P = 7.703805051391988E+02 * utils.Constants.JULIAN_DAY
-            e = 3.838774437558215E-01
-            i = math.radians(3.408231185574551E+00)
-            omega = math.radians(3.192958853076784E+02)
-            Omega = math.radians(7.320940216397703E+01)
-            M = math.radians(1.967164895190036E+02)
 
-        if "rotation_rate" not in att:
-            rotation_rate = 2. * math.pi / (2.2593 * 3600)
+        # rotation axis
+        self.axis_ra = math.radians(att["RA"]) if "RA" in att else 0.
+        self.axis_dec = math.radians(att["Dec"]) if "Dec" in att else math.pi/2
+
+        # rotation offset, zero longitude right ascension at epoch
+        self.rotation_zlra = math.radians(att["ZLRA"]) if "ZLRA" in att else 0.
+
+        # rotation angular velocity [rad/s]
+        if "rotation_rate" in att:
+            self.rotation_rate = att["rotation_rate"] * 2.0 * math.pi / 180.0
         else:
-            rotation_rate = att["rotation_rate"] * 2.0 * math.pi / 180.0
+            self.rotation_rate = 2. * math.pi / (2.2593 * 3600)     # didymain by default
 
-        if "RA" not in att:
-            self.RA      = 0.
-        else:
-            self.RA      = math.radians(att["RA"])
+        # Define initial rotation, set rotation convention
+        #  - For me, FRAME_TRANSFORM order makes more sense, the rotations are applied from left to right
+        #    so that the following rotations apply on previously rotated axes  +Olli
+        self.rot_conv = RotationConvention.FRAME_TRANSFORM
+        init_rot = Rotation(RotationOrder.ZYZ, self.rot_conv, self.axis_ra, math.pi/2-self.axis_dec, self.rotation_zlra)
 
-        if "Dec" not in att:
-            self.Dec      = 0.
-        else:
-            self.Dec      = math.radians(att["Dec"])
-
+        if "r" in trj:
+            self.date_history = [trj_date]
+            self.pos_history = [Vector3D(*trj["r"])]
+            self.vel_history = [Vector3D(*(trj["v"] if "v" in trj else [0., 0., 0.]))]
+            self.rot_history = [init_rot]
+            return
 
         # Define trajectory/orbit
         self.trajectory = KeplerianOrbit(trj["a"] * utils.Constants.IAU_2012_ASTRONOMICAL_UNIT,
@@ -67,11 +69,7 @@ class SmallSolarSystemBody(CelestialBody):
                                          trj_date, 
                                          mu)
 
-        # Define attitude
-        self.rot_conv = RotationConvention.valueOf("VECTOR_OPERATOR")
-
-        rotation = utils.AngularCoordinates(Rotation.IDENTITY, 
-                                            Vector3D(0., 0., rotation_rate))
+        rotation = utils.AngularCoordinates(init_rot, Vector3D(0., 0., self.rotation_rate))
         attitude = Attitude(trj_date, self.ref_frame, rotation)
         att_provider = FixedRate(attitude)
 

@@ -1,13 +1,14 @@
 {
-    "name": "default",
-    "res_dir": "data/results/default",
-    "options": ["--with-sim", "--with-render"],
+    "name": "oneshot_itokawa_opengl",
+    "res_dir": "data/results/oneshot",
+    "options": ["--with-render", "--opengl"],
     "plugins": ["/app/JetCreator/interface.py"],
     "orekit_path": "/app/sispo/sispo/sim/orekit-data.zip",
     "simulation":
     {
-        "res_dir": "data/results/default/rendering",
-        "duration": 120,
+        "res_dir": "data/results/oneshot/rendering",
+		"oneshot": true,
+        "duration": 1,
         "encounter_date": 
         {
             "year": 2017,
@@ -17,45 +18,40 @@
             "minutes": 0,
             "seconds": 0.0
         },
-        "frames": 120,
-        "encounter_distance": 1E5,
-        "relative_velocity": 10000,
-        "with_terminator": 0,
-        "with_sunnyside": 1,
+        "frames": 1,
+        "encounter_distance": null,
+        "relative_velocity": null,
+        "with_terminator": null,
+        "with_sunnyside": null,
         "timesampler_mode": 1,
         "slowmotion_factor": 10,
         "exposure": 0,
-        "samples": 8,
+        "samples": 4,
         "device": "GPU",
         "tile_size": 256,
-        "starcat_dir": "data/UCAC4",
-        "sun": 
-        {
-            "model":
-            {
-                "file": "data/models/general_bodies.blend",
-                "name": "Sun"
-            }
-        },
-        "lightref": 
-        {
-            "model": 
-            {
-                "file": "data/models/general_bodies.blend",
-                "name": "CalibrationDisk"
-            }
-        },
+        "starcat_dir": "data/stardb/deep_space_objects.sqlite",
+		"brdf_params": {
+			"J": 0,
+			"th_p": 26,
+			"w": 0.31,
+			"b": -0.35,
+			"c": 0,
+			"B_SH0": 0.86,
+			"hs": 0.00021,
+			"B_CB0": 0,
+			"hc": 0.005,
+			"K": 1
+		},
+        "sun": null,
+        "lightref": null,
+		"spacecraft": {
+			"r": [-158762111207.709991, 25607729751.070000, 16009401587.629999]
+		},
         "sssb":
         {
             "trj":
             {
-                "a": 1.644641475071416,
-                "e": 3.838774437558215E-01,
-                "i": 3.408231185574551E+00,
-                "P": 7.703805051391988E+02,
-                "omega": 3.192958853076784E+02,
-                "Omega": 7.320940216397703E+01, 
-                "M": 1.967164895190036E+02,
+                "r": [-158762119198.410004, 25607729852.579998, 16009401727.420000],
                 "date": 
                 {
                     "year": 2017, 
@@ -68,25 +64,26 @@
             },
             "att": 
             {
-                "rotation_rate": 0.01,
-                "RA": 0.0,
-                "Dec": 0.0
+                "rotation_rate": 0.0,
+                "RA": -13.182141,
+                "Dec": -64.694813,
+				"ZLRA": 116.263134
             },
             "model":
             {
-                "file": "data/models/cube.blend",
-                "name": "Cube"
+                "file": "data/models/itokawa_16k.obj",
+                "name": "Itokawa"
             },
             "albedo": 0.15,
             "max_dim": 512
         },
         "instrument": 
         {
-            "res": [800,600],
-            "pix_l": 3.45,
-            "focal_l": 230,
-            "aperture_d": 4,
-            "wavelength": 550,
+            "res": [1024, 1024],
+            "pix_l": 12.0,
+            "focal_l": 120.8,
+            "aperture_d": 1.5,
+            "wavelength": 550.0,
             "quantum_eff": 0.25,
             "color_depth": 8
         },

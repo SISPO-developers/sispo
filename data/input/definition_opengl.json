@@ -1,7 +1,7 @@
 {
-    "name": "default",
+    "name": "default_opengl",
     "res_dir": "data/results/default",
-    "options": ["--with-sim", "--with-render"],
+    "options": ["--with-sim", "--with-render", "--opengl"],
     "plugins": ["/app/JetCreator/interface.py"],
     "orekit_path": "/app/sispo/sispo/sim/orekit-data.zip",
     "simulation":
@@ -25,26 +25,24 @@
         "timesampler_mode": 1,
         "slowmotion_factor": 10,
         "exposure": 0,
-        "samples": 8,
+        "samples": 4,
         "device": "GPU",
         "tile_size": 256,
-        "starcat_dir": "data/UCAC4",
-        "sun": 
-        {
-            "model":
-            {
-                "file": "data/models/general_bodies.blend",
-                "name": "Sun"
-            }
-        },
-        "lightref": 
-        {
-            "model": 
-            {
-                "file": "data/models/general_bodies.blend",
-                "name": "CalibrationDisk"
-            }
-        },
+        "starcat_dir": "data/stardb/deep_space_objects.sqlite",
+		"brdf_params": {
+			"J": 0,
+			"th_p": 26,
+			"w": 0.31,
+			"b": -0.35,
+			"c": 0,
+			"B_SH0": 0.86,
+			"hs": 0.00021,
+			"B_CB0": 0,
+			"hc": 0.005,
+			"K": 1
+		},
+        "sun": null,
+        "lightref": null,
         "sssb":
         {
             "trj":
@@ -74,7 +72,7 @@
             },
             "model":
             {
-                "file": "data/models/cube.blend",
+                "file": "data/models/cube.obj",
                 "name": "Cube"
             },
             "albedo": 0.15,

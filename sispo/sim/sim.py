@@ -15,7 +15,8 @@ setup_orekit_curdir(str(OREKIT_DATA_FILE))
 #################### orekit VM init ####################
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
 from org.orekit.frames import FramesFactory  # pylint: disable=import-error
-from org.orekit.utils import Constants  # pylint: disable=import-error
+from org.orekit.utils import Constants, PVCoordinates, AngularCoordinates  # pylint: disable=import-error
+from org.hipparchus.geometry.euclidean.threed import Vector3D, Rotation, RotationOrder, RotationConvention  # pylint: disable=import-error
 
 from mathutils import Matrix
 
@@ -64,9 +65,11 @@ class Environment():
                  samples,
                  device,
                  tile_size,
+                 oneshot=False,
+                 spacecraft=None,
                  ext_logger=None,
                  opengl_renderer=False,
-                 refl_model_params=None):
+                 brdf_params=None):
 
         if ext_logger is not None:
             self.logger = ext_logger
@@ -74,7 +77,7 @@ class Environment():
             self.logger = utils.create_logger()
 
         self.opengl_renderer = opengl_renderer
-        self.refl_model_params = refl_model_params  # TODO: object specific refl_model_params, read from object files
+        self.brdf_params = brdf_params
 
         self.root_dir = Path(__file__).parent.parent.parent
         data_dir = self.root_dir / "data"
@@ -128,7 +131,7 @@ class Environment():
         self.setup_sssb(sssb)
 
         # Setup SC
-        self.setup_spacecraft()
+        self.setup_spacecraft(spacecraft, oneshot=oneshot)
 
         if not self.opengl_renderer:
             # Setup Sun
@@ -164,13 +167,13 @@ class Environment():
                                        self.inst.focal_l,
                                        self.inst.chip_w)
 
-        self.renderer.create_scene("SssbConstDist")
-        self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
-        self.renderer.configure_camera("SssbConstDistCam", 
-                                       self.inst.focal_l,
-                                       self.inst.chip_w)
-
         if not self.opengl_renderer:
+            self.renderer.create_scene("SssbConstDist")
+            self.renderer.create_camera("SssbConstDistCam", scenes="SssbConstDist")
+            self.renderer.configure_camera("SssbConstDistCam",
+                                           self.inst.focal_l,
+                                           self.inst.chip_w)
+
             self.renderer.create_scene("LightRef")
             self.renderer.create_camera("LightRefCam", scenes="LightRef")
             self.renderer.configure_camera("LightRefCam",
@@ -184,8 +187,7 @@ class Environment():
                 'sispo_cam': self.inst,         # use sispo cam model instead of own (could use own if can give exposure & gain)
                 'stars': True,                  # use own star db
                 'lens_effects': False,          # includes the sun
-                'hapke_params': self.refl_model_params or rendergl.RenderObject.HAPKE_PARAMS,
-                # TODO: object specific refl_model_params, read from object files
+                'brdf_params': self.brdf_params,
             })
 
         self.renderer.set_device(self.render_settings["device"], 
@@ -237,25 +239,40 @@ class Environment():
                                          settings["trj"],
                                          settings["att"],
                                          model_file=sssb_model_file)
-        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file,
-                                                         settings["model"]["name"],
-                                                         ["SssbOnly", 
-                                                          "SssbConstDist"])
+        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, settings["model"]["name"], ["SssbOnly"]
+                                                         + ([] if self.opengl_renderer else ["SssbConstDist"]))
         self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
-        self.sssb.render_obj.location = (0, 0, 0)
+        self.sssb.render_obj.location = (0.0, 0.0, 0.0)
 
-    def setup_spacecraft(self):
+    def setup_spacecraft(self, spacecraft=None, oneshot=False):
         """Create Spacecraft and respective blender object."""
-        sssb_state = self.sssb.get_state(self.encounter_date)
-        sc_state = Spacecraft.calc_encounter_state(sssb_state,
-                                                   self.minimum_distance,
-                                                   self.relative_velocity,
-                                                   self.with_terminator,
-                                                   self.with_sunnyside)
-        self.spacecraft = Spacecraft("CI", 
+
+        sc_state = None
+        sc_rot_state = None
+        if spacecraft is None:
+            sssb_state = self.sssb.get_state(self.encounter_date)
+            sc_state = Spacecraft.calc_encounter_state(sssb_state,
+                                                       self.minimum_distance,
+                                                       self.relative_velocity,
+                                                       self.with_terminator,
+                                                       self.with_sunnyside)
+        else:
+            if 'r' in spacecraft:
+                sc_state = PVCoordinates(Vector3D(spacecraft['r']), Vector3D(spacecraft.get('v', [0.0, 0.0, 0.0])))
+            if 'angleaxis' in spacecraft:
+                # transform icrf camera where +x is forward and +z is up into -z is forward and +y is up
+                icrf2gl_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
+                sc_icrf_rot = Rotation(Vector3D(spacecraft['angleaxis'][1:4]), spacecraft['angleaxis'][0],
+                                       RotationConvention.FRAME_TRANSFORM)
+                sc_gl_rot = icrf2gl_rot.applyTo(sc_icrf_rot)
+                sc_rot_state = AngularCoordinates(sc_gl_rot, Vector3D(0., 0., 0.))
+
+        self.spacecraft = Spacecraft("CI",
                                      self.mu_sun,
                                      sc_state,
-                                     self.encounter_date)
+                                     self.encounter_date,
+                                     rot_state=sc_rot_state,
+                                     oneshot=oneshot)
 
     def setup_lightref(self, settings):
         """Create lightreference blender object."""
@@ -276,7 +293,7 @@ class Environment():
         self.lightref = self.renderer.load_object(lightref_model_file,
                                                   settings["model"]["name"],
                                                   scenes="LightRef")
-        self.lightref.location = (0, 0, 0)
+        self.lightref.location = (0.0, 0.0, 0.0)
 
     def simulate(self):
         """Do simulation."""
@@ -303,25 +320,25 @@ class Environment():
     def set_rotation(self, sssb_rot, sispoObj):
         """Set rotation and returns original transformation matrix"""
         """Assumes that the blender scaling is set to 1"""
-        #sssb_axis = sssb_rot.getAxis(self.sssb.rot_conv)
-        sssb_angle = sssb_rot.getAngle()
-        
-        eul0 = mathutils.Euler((0.0, 0.0, sssb_angle), 'XYZ')
-        eul1 = mathutils.Euler((0.0, sispoObj.Dec, 0.0), 'XYZ')
-        eul2 = mathutils.Euler((0.0, 0.0, sispoObj.RA), 'XYZ')
+        sssb_axis = np.array(sssb_rot.getAxis(self.sssb.rot_conv).toArray())
+        sssb_angle = -sssb_rot.getAngle()
+        M = mathutils.Matrix.Rotation(sssb_angle, 4, sssb_axis)
 
-        R0 = eul0.to_matrix()
-        R1 = eul1.to_matrix()
-        R2 = eul2.to_matrix()
-
-        try:
-            M = R2 @ R1 @ R0
-        except TypeError:
-            # earlier versions of mathutils (e.g. 2.78) does not yet support @ for matrix multiplication
-            M = R2 * R1 * R0
+        # eul0 = mathutils.Euler((0.0, 0.0, sssb_angle), 'XYZ')
+        # eul1 = mathutils.Euler((0.0, sispoObj.Dec, 0.0), 'XYZ')
+        # eul2 = mathutils.Euler((0.0, 0.0, sispoObj.RA), 'XYZ')
+        #
+        # R0 = eul0.to_matrix()
+        # R1 = eul1.to_matrix()
+        # R2 = eul2.to_matrix()
+        #
+        # try:
+        #     M = R2 @ R1 @ R0
+        # except TypeError:
+        #     # earlier versions of mathutils (e.g. 2.78) does not yet support @ for matrix multiplication
+        #     M = R2 * R1 * R0
 
         original_transform = sispoObj.render_obj.matrix_world
-
         sispoObj.render_obj.matrix_world = M.to_4x4()
         return original_transform
 
@@ -329,13 +346,17 @@ class Environment():
     def render(self):
         """Render simulation scenario."""
         self.logger.debug("Rendering simulation")
-        scaling = 1 if self.opengl_renderer else 1000.
+        scaling = 1. if self.opengl_renderer else 1000.
+        N = len(self.spacecraft.date_history)
 
         # Render frame by frame
-        for (date, sc_pos, sssb_pos, sssb_rot) in zip(self.spacecraft.date_history,
-                                                      self.spacecraft.pos_history,
-                                                      self.sssb.pos_history,
-                                                      self.sssb.rot_history):
+        print("Rendering in progress...")
+        for i, (date, sc_pos, sc_rot, sssb_pos, sssb_rot) in enumerate(zip(
+                                                                   self.spacecraft.date_history,
+                                                                   self.spacecraft.pos_history,
+                                                                   self.spacecraft.rot_history,
+                                                                   self.sssb.pos_history,
+                                                                   self.sssb.rot_history)):
 
             date_str = datetime.strptime(date.toString(), "%Y-%m-%dT%H:%M:%S.%f")
             date_str = date_str.strftime("%Y-%m-%dT%H%M%S-%f")
@@ -358,14 +379,18 @@ class Environment():
             # Update sssb and spacecraft
             pos_sc_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / scaling
             self.renderer.set_camera_location("ScCam", pos_sc_rel_sssb)
-            self.renderer.target_camera(self.sssb.render_obj, "ScCam")
-            
-            # Update scenes/cameras
-            pos_cam_const_dist = pos_sc_rel_sssb * scaling / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
-            self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
-            self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
+            if self.spacecraft.auto_targeting:
+                self.renderer.target_camera(self.sssb.render_obj, "ScCam")
+            else:
+                sc_rot_eul = sc_rot.getAngles(RotationOrder.ZYX, RotationConvention.FRAME_TRANSFORM)
+                self.renderer.set_camera_rot(sc_rot_eul, "ScCam")
 
             if not self.opengl_renderer:
+                # Update scenes/cameras
+                pos_cam_const_dist = pos_sc_rel_sssb * scaling / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
+                self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
+                self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
+
                 lightrefcam_pos = -np.asarray(sssb_pos.toArray()) * scaling \
                                   / np.sqrt(np.dot(np.asarray(sssb_pos.toArray()), np.asarray(sssb_pos.toArray())))
                 self.renderer.set_camera_location("LightRefCam", lightrefcam_pos)
@@ -377,7 +402,9 @@ class Environment():
             
             #set original rotation
             self.sssb.render_obj.matrix_world = orig_transform
-                
+
+            print('%d/%d' % (i+1, N))
+
         self.logger.debug("Rendering completed")
 
     def save_results(self):
