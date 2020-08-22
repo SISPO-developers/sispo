@@ -29,7 +29,8 @@
         "device": "GPU",
         "tile_size": 256,
         "starcat_dir": "data/stardb/deep_space_objects.sqlite",
-		"brdf_params": {
+        "brdf_params": 
+        {
 			"J": 0,
 			"th_p": 26,
 			"w": 0.31,
