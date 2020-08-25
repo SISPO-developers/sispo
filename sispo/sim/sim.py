@@ -264,8 +264,13 @@ class Environment():
                 icrf2gl_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
                 sc_icrf_rot = Rotation(Vector3D(spacecraft['angleaxis'][1:4]), spacecraft['angleaxis'][0],
                                        RotationConvention.FRAME_TRANSFORM)
-                sc_gl_rot = icrf2gl_rot.applyTo(sc_icrf_rot)
+
+                # sc_icrf_rot, _, _ = blend_to_icrf([-6.60, 4.49, -0.33], [-0.306, 0.144, 0.001], [0.678, -0.277, -0.667, -0.138], verbose=1)
+                sc_gl_rot = icrf2gl_rot.applyTo(sc_icrf_rot)       # == sc_icrf_q * icrf2gl_q
                 sc_rot_state = AngularCoordinates(sc_gl_rot, Vector3D(0., 0., 0.))
+                # print('sc rot q: %f, %f, %f, %f' % (sc_gl_rot.getQ0(), sc_gl_rot.getQ1(), sc_gl_rot.getQ2(), sc_gl_rot.getQ3()))
+                # print('sc rot xyz: %s' % ((180/np.pi)*np.flip(np.array(sc_gl_rot.getAngles(RotationOrder.ZYX, RotationConvention.FRAME_TRANSFORM)))))
+
 
         self.spacecraft = Spacecraft("CI",
                                      self.mu_sun,
@@ -431,6 +436,48 @@ class Environment():
                 file.write(line)
 
         self.logger.debug("Propagation results saved")
+
+
+def blend_to_icrf(sssb_cam_r, sssb_light_r, cam_quat, dist=1.5e11, verbose=False):
+    """
+    transform manually found (using blender) relative pose and light direction
+    to sc and sssb params in input definition file:
+
+    ...
+    "spacecraft":
+    {
+        "r": sun_sc_r,
+        "angleaxis": sc_rot
+    },
+    "sssb":
+    {
+        "traj": {
+            "r": sun_sssb_r,
+            ...
+        }
+        ...
+    }
+    ...
+    """
+    sssb_light_r = np.array(sssb_light_r)
+    sun_sssb_r = -sssb_light_r * (dist/np.linalg.norm(sssb_light_r))
+    sun_sc_r = sun_sssb_r + np.array(sssb_cam_r) * 1000     # km shows in meters in blender
+    sc_rot = Rotation(*cam_quat, False)
+    icrf2gl_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
+#    sc_rot = icrf2gl_rot.applyTo(sc_rot)
+    sc_rot = icrf2gl_rot.revert().applyTo(sc_rot)        # == sc_q * icrf2gl_q.conj()
+    #icrf2gl_rot.applyTo(sc_icrf_rot)            # == sc_icrf_q * icrf2gl_q
+
+    if verbose:
+        angle = sc_rot.getAngle()
+        axis = sc_rot.getAxis(RotationConvention.FRAME_TRANSFORM)
+        sc_rot_aa = np.array([angle, *axis.toArray()])
+        arr2str = lambda arr: '[%s]' % ', '.join(['%f' % v for v in arr])
+        print('sc angle-axis: %s' % arr2str(sc_rot_aa))
+        print('sun-sc vect: %s' % arr2str(sun_sc_r))
+        print('sun-sssb vect: %s' % arr2str(sun_sssb_r))
+
+    return sc_rot, sun_sc_r, sun_sssb_r,
 
 
 if __name__ == "__main__":

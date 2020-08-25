@@ -1,7 +1,7 @@
 {
-    "name": "oneshot_itokawa_opengl",
+    "name": "oneshot_itokawa",
     "res_dir": "data/results/oneshot",
-    "options": ["--with-render", "--opengl"],
+    "options": ["--with-render"],
     "plugins": ["/app/JetCreator/interface.py"],
     "orekit_path": "/app/sispo/sispo/sim/orekit-data.zip",
     "simulation":
@@ -26,25 +26,26 @@
         "timesampler_mode": 1,
         "slowmotion_factor": 10,
         "exposure": 0,
-        "samples": 4,
+        "samples": 8,
         "device": "GPU",
         "tile_size": 256,
-        "starcat_dir": "data/stardb/deep_space_objects.sqlite",
-        "brdf_params": 
+        "starcat_dir": "data/UCAC4",
+        "sun":
         {
-			"J": 0,
-			"th_p": 26,
-			"w": 0.31,
-			"b": -0.35,
-			"c": 0,
-			"B_SH0": 0.86,
-			"hs": 0.00021,
-			"B_CB0": 0,
-			"hc": 0.005,
-			"K": 1
-		},
-        "sun": null,
-        "lightref": null,
+            "model":
+            {
+                "file": "data/models/general_bodies.blend",
+                "name": "Sun"
+            }
+        },
+        "lightref":
+        {
+            "model":
+            {
+                "file": "data/models/general_bodies.blend",
+                "name": "CalibrationDisk"
+            }
+        },
         "spacecraft": 
         {
 			"r": [146226188132.0, -68812322442.0, -477863711.0],
@@ -74,7 +75,7 @@
             },
             "model":
             {
-                "file": "data/models/itokawa_f3145728.obj",
+                "file": "data/models/itokawa.blend",
                 "name": "Itokawa"
             },
             "albedo": 0.15,

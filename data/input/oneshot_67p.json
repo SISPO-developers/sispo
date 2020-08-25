@@ -1,7 +1,7 @@
 {
-    "name": "oneshot_itokawa_opengl",
+    "name": "oneshot_67p",
     "res_dir": "data/results/oneshot",
-    "options": ["--with-render", "--opengl"],
+    "options": ["--with-render"],
     "plugins": ["/app/JetCreator/interface.py"],
     "orekit_path": "/app/sispo/sispo/sim/orekit-data.zip",
     "simulation":
@@ -26,35 +26,35 @@
         "timesampler_mode": 1,
         "slowmotion_factor": 10,
         "exposure": 0,
-        "samples": 4,
+        "samples": 8,
         "device": "GPU",
         "tile_size": 256,
-        "starcat_dir": "data/stardb/deep_space_objects.sqlite",
-        "brdf_params": 
+        "starcat_dir": "data/UCAC4",
+        "sun":
         {
-			"J": 0,
-			"th_p": 26,
-			"w": 0.31,
-			"b": -0.35,
-			"c": 0,
-			"B_SH0": 0.86,
-			"hs": 0.00021,
-			"B_CB0": 0,
-			"hc": 0.005,
-			"K": 1
-		},
-        "sun": null,
-        "lightref": null,
-        "spacecraft": 
+            "model":
+            {
+                "file": "data/models/general_bodies.blend",
+                "name": "Sun"
+            }
+        },
+        "lightref":
         {
-			"r": [146226188132.0, -68812322442.0, -477863711.0],
-            "angleaxis": [1.847799, -0.929873, 0.266931, -0.253146]
+            "model":
+            {
+                "file": "data/models/general_bodies.blend",
+                "name": "CalibrationDisk"
+            }
+        },
+		"spacecraft": {
+			"r": [163613518304.0, 101637309778.0, 36457190373.0],
+			"angleaxis": [1.892926, 0.781228, -0.540109, -0.312995]
 		},
         "sssb":
         {
             "trj":
             {
-                "r": [146226194732.0, -68812326932.0, -477863381.0],
+                "r": [163613595198.0, 101637176823.0, 36457220690.0],
                 "date": 
                 {
                     "year": 2017, 
@@ -68,14 +68,14 @@
             "att": 
             {
                 "rotation_rate": 0.0,
-                "RA": 0,
-                "Dec": 90,
-				"ZLRA": 0
+                "RA": 69.54,
+                "Dec": 64.11,
+				"ZLRA": 162.976134
             },
             "model":
             {
-                "file": "data/models/itokawa_f3145728.obj",
-                "name": "Itokawa"
+                "file": "data/models/67P_MALMER.blend",
+                "name": "67P"
             },
             "albedo": 0.15,
             "max_dim": 512
@@ -83,11 +83,11 @@
         "instrument": 
         {
             "res": [1024, 1024],
-            "pix_l": 12.0,
-            "focal_l": 120.8,
-            "aperture_d": 1.5,
+            "pix_l": 13.0,
+            "focal_l": 152.5,
+            "aperture_d": 30,
             "wavelength": 550.0,
-            "quantum_eff": 0.25,
+            "quantum_eff": 0.8,
             "color_depth": 8
         },
         "with_infobox": 0,
