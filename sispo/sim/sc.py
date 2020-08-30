@@ -168,7 +168,7 @@ class Instrument():
         ksize = (kernel, kernel)
 
         img = self.quantum_eff * flux_img
-        img = cv2.GaussianBlur(img, ksize, sigma)
+        img = cv2.GaussianBlur(img, ksize, float(sigma + 0.))
         img += np.random.poisson(img)
 
         return img
