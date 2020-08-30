@@ -158,7 +158,7 @@ class Instrument():
         # Calculate Gaussian standard deviation for approx diffraction pattern
         sigma = (self.dlmult * 0.45 * self.wavelength
                 * self.focal_l / (self.aperture_d
-                * self.pix_l))
+                * self.pix_l)).decompose()
 
         # Kernel size calculated to equal skimage.filters.gaussian
         # Reference:
@@ -168,7 +168,7 @@ class Instrument():
         ksize = (kernel, kernel)
 
         img = self.quantum_eff * flux_img
-        img = cv2.GaussianBlur(img, ksize, float(sigma + 0.))
+        img = cv2.GaussianBlur(img, ksize, float(sigma))
         img += np.random.poisson(img)
 
         return img
