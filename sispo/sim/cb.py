@@ -4,11 +4,12 @@ import math
 from pathlib import Path
 
 import orekit
-from org.orekit.propagation.events.handlers import EventHandler, RecordAndContinue  # pylint: disable=import-error
+from org.orekit.propagation.events.handlers import RecordAndContinue  # pylint: disable=import-error
 from org.orekit.python import PythonEventHandler  # pylint: disable=import-error
 from org.orekit.propagation.events import DateDetector  # pylint: disable=import-error
 from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
+from org.hipparchus.ode.events import Action # pylint: disable=import-error
 
 
 class CelestialBodyError(RuntimeError):
@@ -117,7 +118,7 @@ class TimingEvent(PythonEventHandler):
         self.pos_history.append(s.getPVCoordinates().getPosition())
         self.vel_history.append(s.getPVCoordinates().getVelocity())
         self.rot_history.append(s.getAttitude().getRotation())
-        return EventHandler.Action.CONTINUE
+        return Action.CONTINUE
 
     def resetState(self, detector, oldState):
         """Reset TimingEvent handler to given state."""
