@@ -74,8 +74,8 @@
             },
             "model":
             {
-                "file": "data/models/cube.blend",
-                "name": "Cube"
+                "file": "data/models/sssb.blend",
+                "name": "Didymos.001"
             },
             "albedo": 0.15,
             "max_dim": 512
