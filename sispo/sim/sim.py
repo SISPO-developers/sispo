@@ -18,7 +18,7 @@ from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.utils import Constants, PVCoordinates, AngularCoordinates  # pylint: disable=import-error
 from org.hipparchus.geometry.euclidean.threed import Vector3D, Rotation, RotationOrder, RotationConvention  # pylint: disable=import-error
 
-from mathutils import Matrix
+import mathutils
 
 from . import cb
 from .cb import *
@@ -27,8 +27,6 @@ from .sc import *
 from . import sssb
 from .sssb import *
 from . import utils
-
-import  mathutils
 
 class SimulationError(RuntimeError):
     """Generic simulation error."""
