@@ -17,7 +17,7 @@ If you are using this package in a code project, please acknowledge by adding ou
 
 `[![sispo](https://img.shields.io/badge/powered%20by-sispo-orange?style=flat)](https://github.com/YgabrielsY/sispo)`
 
-There is another repository linked to sispo which uses Docker to simplify the installation. Can be found here [sispo_docker](https://github.com/thvaisa/sispo_docker)
+There is another repository linked to sispo which uses Docker to simplify the installation. Can be found here [sispo_docker](https://github.com/SISPO-developers/sispo_docker)
 
 # Acknowledgements
 Acknowledgements to packages used
