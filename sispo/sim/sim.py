@@ -320,31 +320,14 @@ class Environment():
         self.save_results()
 
 
-    def set_rotation(self, sssb_rot, sispoObj):
-        """Set rotation and returns original transformation matrix"""
+    def get_rotation(self, sssb_rot, sispoObj):
+        """Set rotation and return the transformation matrix"""
         """Assumes that the blender scaling is set to 1"""
-        sssb_axis = np.array(sssb_rot.getAxis(self.sssb.rot_conv).toArray())
+        sssb_axis = np.array(sssb_rot.getAxis(sispoObj.rot_conv).toArray())
         sssb_angle = -sssb_rot.getAngle()
         M = mathutils.Matrix.Rotation(sssb_angle, 4, sssb_axis)
 
-        # eul0 = mathutils.Euler((0.0, 0.0, sssb_angle), 'XYZ')
-        # eul1 = mathutils.Euler((0.0, sispoObj.Dec, 0.0), 'XYZ')
-        # eul2 = mathutils.Euler((0.0, 0.0, sispoObj.RA), 'XYZ')
-        #
-        # R0 = eul0.to_matrix()
-        # R1 = eul1.to_matrix()
-        # R2 = eul2.to_matrix()
-        #
-        # try:
-        #     M = R2 @ R1 @ R0
-        # except TypeError:
-        #     # earlier versions of mathutils (e.g. 2.78) does not yet support @ for matrix multiplication
-        #     M = R2 * R1 * R0
-
-        original_transform = sispoObj.render_obj.matrix_world
-        sispoObj.render_obj.matrix_world = M.to_4x4()
-        return original_transform
-
+        return M.to_4x4()
 
     def render(self):
         """Render simulation scenario."""
@@ -371,7 +354,8 @@ class Environment():
             metainfo["distance"] = sc_pos.distance(sssb_pos)
             metainfo["date"] = date_str
 
-            orig_transform = self.set_rotation(sssb_rot, self.sssb)
+            # Set Rotation
+            self.sssb.render_obj.matrix_world = self.get_rotation(sssb_rot, self.sssb)
 
             # Update environment
             if not self.opengl_renderer:
@@ -402,9 +386,6 @@ class Environment():
 
             # Render blender scenes
             self.renderer.render(metainfo)
-            
-            #set original rotation
-            self.sssb.render_obj.matrix_world = orig_transform
 
             print('%d/%d' % (i+1, N))
 
