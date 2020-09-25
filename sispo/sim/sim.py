@@ -326,8 +326,8 @@ class Environment():
         sssb_axis = np.array(sssb_rot.getAxis(sispoObj.rot_conv).toArray())
         sssb_angle = -sssb_rot.getAngle()
         M = mathutils.Matrix.Rotation(sssb_angle, 4, sssb_axis)
-
         return M.to_4x4()
+
 
     def render(self):
         """Render simulation scenario."""
