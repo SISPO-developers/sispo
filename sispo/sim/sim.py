@@ -18,8 +18,6 @@ from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.utils import Constants, PVCoordinates, AngularCoordinates  # pylint: disable=import-error
 from org.hipparchus.geometry.euclidean.threed import Vector3D, Rotation, RotationOrder, RotationConvention  # pylint: disable=import-error
 
-import mathutils
-
 from . import cb
 from .cb import *
 from . import sc
@@ -182,7 +180,8 @@ class Environment():
             self.renderer.set_scene_config({
                 'debug': False,
                 'flux_only': False,
-                'sispo_cam': self.inst,         # use sispo cam model instead of own (could use own if can give exposure & gain)
+                'sispo_cam': self.inst,         # use sispo cam model instead 
+                                                #of own (could use own if can give exposure & gain)
                 'stars': True,                  # use own star db
                 'lens_effects': False,          # includes the sun
                 'brdf_params': self.brdf_params,
@@ -237,8 +236,10 @@ class Environment():
                                          settings["trj"],
                                          settings["att"],
                                          model_file=sssb_model_file)
-        self.sssb.render_obj = self.renderer.load_object(self.sssb.model_file, settings["model"]["name"], ["SssbOnly"]
-                                                         + ([] if self.opengl_renderer else ["SssbConstDist"]))
+        self.sssb.render_obj = self.renderer.load_object(
+                                    self.sssb.model_file, 
+                                    settings["model"]["name"], 
+                                    ["SssbOnly"] + ([] if self.opengl_renderer else ["SssbConstDist"]))
         self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
         self.sssb.render_obj.location = (0.0, 0.0, 0.0)
 
@@ -256,18 +257,18 @@ class Environment():
                                                        self.with_sunnyside)
         else:
             if 'r' in spacecraft:
-                sc_state = PVCoordinates(Vector3D(spacecraft['r']), Vector3D(spacecraft.get('v', [0.0, 0.0, 0.0])))
+                sc_state = PVCoordinates(Vector3D(spacecraft['r']), 
+                                        Vector3D(spacecraft.get('v', [0.0, 0.0, 0.0])))
             if 'angleaxis' in spacecraft:
-                # transform icrf camera where +x is forward and +z is up into -z is forward and +y is up
-                icrf2gl_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
-                sc_icrf_rot = Rotation(Vector3D(spacecraft['angleaxis'][1:4]), spacecraft['angleaxis'][0],
-                                       RotationConvention.FRAME_TRANSFORM)
-
-                # sc_icrf_rot, _, _ = blend_to_icrf([-6.60, 4.49, -0.33], [-0.306, 0.144, 0.001], [0.678, -0.277, -0.667, -0.138], verbose=1)
-                sc_gl_rot = icrf2gl_rot.applyTo(sc_icrf_rot)       # == sc_icrf_q * icrf2gl_q
-                sc_rot_state = AngularCoordinates(sc_gl_rot, Vector3D(0., 0., 0.))
-                # print('sc rot q: %f, %f, %f, %f' % (sc_gl_rot.getQ0(), sc_gl_rot.getQ1(), sc_gl_rot.getQ2(), sc_gl_rot.getQ3()))
-                # print('sc rot xyz: %s' % ((180/np.pi)*np.flip(np.array(sc_gl_rot.getAngles(RotationOrder.ZYX, RotationConvention.FRAME_TRANSFORM)))))
+                # OLD: transform icrf camera where +x is forward and 
+                # +z is up into -z is forward and +y is up
+                # Should sispo's internals be ICRF?
+                sc_icrf_rot = Rotation(
+                                    Vector3D(spacecraft['angleaxis'][1:4]), 
+                                    spacecraft['angleaxis'][0], 
+                                    RotationConvention.FRAME_TRANSFORM)
+               
+                sc_rot_state = AngularCoordinates(sc_icrf_rot, Vector3D(0., 0., 0.))
 
 
         self.spacecraft = Spacecraft("CI",
@@ -276,6 +277,7 @@ class Environment():
                                      self.encounter_date,
                                      rot_state=sc_rot_state,
                                      oneshot=oneshot)
+
 
     def setup_lightref(self, settings):
         """Create lightreference blender object."""
@@ -319,16 +321,6 @@ class Environment():
         self.logger.debug("Simulation completed")
         self.save_results()
 
-
-    def get_rotation(self, sssb_rot, sispoObj):
-        """Set rotation and return the transformation matrix"""
-        """Assumes that the blender scaling is set to 1"""
-        sssb_axis = np.array(sssb_rot.getAxis(sispoObj.rot_conv).toArray())
-        sssb_angle = -sssb_rot.getAngle()
-        M = mathutils.Matrix.Rotation(sssb_angle, 4, sssb_axis)
-        return M.to_4x4()
-
-
     def render(self):
         """Render simulation scenario."""
         self.logger.debug("Rendering simulation")
@@ -355,13 +347,13 @@ class Environment():
             metainfo["date"] = date_str
 
             # Set Rotation
-            self.sssb.render_obj.matrix_world = self.get_rotation(sssb_rot, self.sssb)
+            angle, axis = convert_rot_to_angle_axis(sssb_rot, RotationConvention.FRAME_TRANSFORM)
+            self.renderer.set_object_rot(angle, axis , self.sssb.render_obj)
 
             # Update environment
-            if not self.opengl_renderer:
-                self.sun.render_obj.location = -np.asarray(sssb_pos.toArray()) / scaling
-            else:
-                self.renderer.set_sun_location(-np.asarray(sssb_pos.toArray()))
+            # Removed unnecessary conditional, opengl can omit the scaling
+            self.renderer.set_sun_location(-np.asarray(sssb_pos.toArray()), 
+                                            scaling, self.sun.render_obj)
 
             # Update sssb and spacecraft
             pos_sc_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / scaling
@@ -369,17 +361,19 @@ class Environment():
             if self.spacecraft.auto_targeting:
                 self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             else:
-                sc_rot_eul = sc_rot.getAngles(RotationOrder.ZYX, RotationConvention.FRAME_TRANSFORM)
-                self.renderer.set_camera_rot(sc_rot_eul, "ScCam")
+                angle, axis = convert_rot_to_angle_axis(sc_rot, RotationConvention.FRAME_TRANSFORM)
+                self.renderer.set_camera_rot(angle, axis, "ScCam")
 
             if not self.opengl_renderer:
                 # Update scenes/cameras
-                pos_cam_const_dist = pos_sc_rel_sssb * scaling / np.sqrt(np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
+                pos_cam_const_dist = pos_sc_rel_sssb * scaling / np.sqrt(
+                                        np.dot(pos_sc_rel_sssb, pos_sc_rel_sssb))
                 self.renderer.set_camera_location("SssbConstDistCam", pos_cam_const_dist)
                 self.renderer.target_camera(self.sssb.render_obj, "SssbConstDistCam")
 
                 lightrefcam_pos = -np.asarray(sssb_pos.toArray()) * scaling \
-                                  / np.sqrt(np.dot(np.asarray(sssb_pos.toArray()), np.asarray(sssb_pos.toArray())))
+                                  / np.sqrt(np.dot(np.asarray(sssb_pos.toArray()), 
+                                    np.asarray(sssb_pos.toArray())))
                 self.renderer.set_camera_location("LightRefCam", lightrefcam_pos)
                 self.renderer.target_camera(self.sun.render_obj, "CalibrationDisk")
                 self.renderer.target_camera(self.lightref, "LightRefCam")
@@ -415,6 +409,14 @@ class Environment():
                 file.write(line)
 
         self.logger.debug("Propagation results saved")
+
+
+def convert_rot_to_angle_axis(rot, rot_conv):
+    angle = rot.getAngle()
+    axis = np.array(rot.getAxis(rot_conv).toArray())
+
+    return angle, axis 
+
 
 
 def blend_to_icrf(sssb_cam_r, sssb_light_r, cam_quat, dist=1.5e11, verbose=False):

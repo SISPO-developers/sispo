@@ -202,6 +202,18 @@ class BlenderController:
             self.logger.debug("Invalid device: %s", self.device)
             raise BlenderControllerError(f"Invalid device: {self.device}")
 
+
+    def set_sun_location(self, sun_loc, scaling, sun):
+        sun.location = sun_loc / scaling
+        dist_to_sun_2 = sun_loc.dot(sun_loc)/(scaling**2)
+        ##Rename blend file
+        #This needs to be rethought
+        #sun_material = bpy.data.materials["Material.002"]
+        #sun_str = sun_material.node_tree.nodes["Emission"].inputs[1].default_value
+        #dist_to_earth = 149597870.7
+        #sun_str = sun_str/dist_to_sun_2*dist_to_earth*dist_to_earth
+        #sun_material.node_tree.nodes["Emission"].inputs[1].default_value = sun_str
+
     def _get_tile_size(self):
         """Determine size of tiles while rendering based on render device."""
         if self.device == "GPU":
@@ -287,13 +299,21 @@ class BlenderController:
         camera = bpy.data.objects[camera_name]
         camera.location = location
 
-    def set_camera_rot(self, rot, camera_name="Camera"):
+    def set_object_rot(self, angle, axis, obj):
+        obj.rotation_mode = 'AXIS_ANGLE'   
+        obj.rotation_axis_angle[0] = angle
+        obj.rotation_axis_angle[1] = axis[0]
+        obj.rotation_axis_angle[2] = axis[1]
+        obj.rotation_axis_angle[3] = axis[2]
+
+    def set_camera_rot(self, angle, axis, camera_name="Camera"):
         """Target camera towards target."""
         camera = bpy.data.objects[camera_name]
-        camera.rotation_mode = 'ZYX'    # TODO: check if works, if not, try XYZ order
-        camera.rotation_euler[0] = rot[0]
-        camera.rotation_euler[1] = rot[1]
-        camera.rotation_euler[2] = rot[2]
+        self.set_object_rot(angle, axis, camera)
+
+    def get_camera(self, camera_name="Camera"):
+        """Target camera towards target."""
+        return bpy.data.objects[camera_name]
 
     def target_camera(self, target, camera_name="Camera"):
         """Target camera towards target."""
@@ -484,7 +504,6 @@ class BlenderController:
         utils.write_openexr_image(filename, sm_scale)
 
         return (total_flux, np.sum(sm_scale[:, :, 0]))
-
 
 def get_fov_vecs(camera_name, scene_name):
     """Get camera position and direction vectors."""
