@@ -205,14 +205,6 @@ class BlenderController:
 
     def set_sun_location(self, sun_loc, scaling, sun):
         sun.location = sun_loc / scaling
-        dist_to_sun_2 = sun_loc.dot(sun_loc)/(scaling**2)
-        ##Rename blend file
-        #This needs to be rethought
-        #sun_material = bpy.data.materials["Material.002"]
-        #sun_str = sun_material.node_tree.nodes["Emission"].inputs[1].default_value
-        #dist_to_earth = 149597870.7
-        #sun_str = sun_str/dist_to_sun_2*dist_to_earth*dist_to_earth
-        #sun_material.node_tree.nodes["Emission"].inputs[1].default_value = sun_str
 
     def _get_tile_size(self):
         """Determine size of tiles while rendering based on render device."""
