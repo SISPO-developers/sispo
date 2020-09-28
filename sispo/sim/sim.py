@@ -263,12 +263,13 @@ class Environment():
                 # OLD: transform icrf camera where +x is forward and 
                 # +z is up into -z is forward and +y is up
                 # Should sispo's internals be ICRF?
+                icrf2gl_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
                 sc_icrf_rot = Rotation(
                                     Vector3D(spacecraft['angleaxis'][1:4]), 
                                     spacecraft['angleaxis'][0], 
                                     RotationConvention.FRAME_TRANSFORM)
-               
-                sc_rot_state = AngularCoordinates(sc_icrf_rot, Vector3D(0., 0., 0.))
+                sc_gl_rot = icrf2gl_rot.applyTo(sc_icrf_rot) 
+                sc_rot_state = AngularCoordinates(sc_gl_rot, Vector3D(0., 0., 0.))
 
 
         self.spacecraft = Spacecraft("CI",
