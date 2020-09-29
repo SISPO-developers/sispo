@@ -4,6 +4,7 @@ import datetime
 from pathlib import Path
 
 import math
+import mathutils
 import os
 
 import numpy as np
@@ -512,7 +513,7 @@ class RenderController:
         cam = self._cams[camera_name]
         cam.loc = np.array(location) if location is not None else None
 
-    def set_camera_rot(self, rot, camera_name="Camera", type='zyx'):
+    def set_camera_rot(self, rot, camera_name="Camera", type='zyx', *args, **kwargs):
         if rot is None:
             q = None
         elif type == 'zyx':
@@ -531,7 +532,7 @@ class RenderController:
         """Target camera towards target."""
         self._cams[camera_name].target = target_obj
 
-    def set_sun_location(self, loc, scenes=None):
+    def set_sun_location(self, loc, scaling=1.0, obj=None, scenes=None):
         RenderController.SOL.location = loc
         for s in self._iter_scenes(scenes):
             s.set_sun_location(loc)
@@ -605,6 +606,10 @@ class RenderController:
         if self._logger is not None:
             method = getattr(self._logger, level, None) or 'print'
             getattr(self._logger, level)(msg)
+
+    def set_object_rot(self, angle, axis, obj):
+        M = mathutils.Matrix.Rotation(-angle, 4, axis)
+        obj.matrix_world = M.to_4x4()
 
     @staticmethod
     def download_file(url, file, maybe=False):

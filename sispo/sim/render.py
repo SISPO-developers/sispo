@@ -204,7 +204,7 @@ class BlenderController:
 
 
     def set_sun_location(self, sun_loc, scaling, sun):
-        sun.location = sun_loc / scaling
+        sun.render_obj.location = sun_loc / scaling
 
     def _get_tile_size(self):
         """Determine size of tiles while rendering based on render device."""
@@ -298,7 +298,7 @@ class BlenderController:
         obj.rotation_axis_angle[2] = axis[1]
         obj.rotation_axis_angle[3] = axis[2]
 
-    def set_camera_rot(self, angle, axis, camera_name="Camera"):
+    def set_camera_rot(self, rot=None, camera_name="Camera", angle=0.0, axis=[0.0,0.0,0.0]):
         """Target camera towards target."""
         camera = bpy.data.objects[camera_name]
         self.set_object_rot(angle, axis, camera)

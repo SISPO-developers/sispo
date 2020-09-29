@@ -354,7 +354,7 @@ class Environment():
             # Update environment
             # Removed unnecessary conditional, opengl can omit the scaling
             self.renderer.set_sun_location(-np.asarray(sssb_pos.toArray()), 
-                                            scaling, self.sun.render_obj)
+                                            scaling, getattr(self,"sun", None))
 
             # Update sssb and spacecraft
             pos_sc_rel_sssb = np.asarray(sc_pos.subtract(sssb_pos).toArray()) / scaling
@@ -363,7 +363,8 @@ class Environment():
                 self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             else:
                 angle, axis = convert_rot_to_angle_axis(sc_rot, RotationConvention.FRAME_TRANSFORM)
-                self.renderer.set_camera_rot(angle, axis, "ScCam")
+                sc_eul_rot = sc_rot.getAngles(RotationOrder.ZYX, RotationConvention.FRAME_TRANSFORM)
+                self.renderer.set_camera_rot(sc_eul_rot, "ScCam", angle=angle, axis=axis)
 
             if not self.opengl_renderer:
                 # Update scenes/cameras
