@@ -205,7 +205,6 @@ class RenderObject(RenderAbstractObject):
             mx33 = np.asarray(mx44)[:3, :3]
             mx33 /= np.linalg.norm(mx33, axis=0)
             self.q = quaternion.from_rotation_matrix(mx33).conj()
-            print(str(self.q))
 
     def prepare(self, scene):
         self._check_params()
@@ -315,8 +314,6 @@ class RenderScene(RenderAbstractObject):
             for i, o in self._objs.values():
                 rel_pos_v[i] = tools.q_times_v(c.q.conj(), o.loc - c.loc)
                 rel_rot_q[i] = c.q.conj() * o.q
-
-            print('\n\ngf_cam_q, gf_ast_q: \n%s\n%s' % (c.q, o.q))
 
             # make sure correct order, correct scale
             rel_pos_v = [rel_pos_v[i]/self.object_scale for i in obj_idxs]
@@ -574,20 +571,13 @@ class RenderController:
             print('done')
         return obj
 
-    def load_coma(self, filename, dimensions, resolution, intensity, gf_ast_rot, scenes=None):
-
+    def load_coma(self, filename, dimensions, resolution, intensity, gf_ast_aa, scenes=None):
         if self.verbose:
             print('loading coma...', end='', flush=True)
 
         cell_size = dimensions[0] / resolution
-
-        icrf2gl_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
-        gf_ast_rot = gf_ast_rot.applyTo(icrf2gl_rot.revert())   # == icrf2gl_q.conj() * gf_ast_q
-        angle = gf_ast_rot.getAngle()
-        axis = np.array(gf_ast_rot.getAxis(RotationConvention.FRAME_TRANSFORM).toArray())
-        gf_ast_q = tools.angleaxis_to_q((angle, *axis))
-
-        gf_vx_cam_q = quaternion.one
+        gf_ast_q = tools.angleaxis_to_q(gf_ast_aa)
+        gf_vx_cam_q = np.quaternion(0.5, 0.5, -0.5, -0.5)
         lf_vx_ast_q = gf_vx_cam_q.conj() * gf_ast_q
 
         image = OpenEXR.InputFile(filename)

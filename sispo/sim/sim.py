@@ -248,14 +248,11 @@ class Environment():
                 coma.update(json.load(fh))
             assert self.opengl_renderer, '"coma" setting under "sssb" is currently only supported for opengl rendering'
             sssb_rot = coma.get('sssb_rot', False)
-            if sssb_rot:
-                icrf2gl_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
-                sc_icrf_rot = Rotation(Vector3D(sssb_rot[1:4]), sssb_rot[0], RotationConvention.FRAME_TRANSFORM)
-                sssb_rot = icrf2gl_rot.applyTo(sc_icrf_rot)
-            else:
+            if not sssb_rot:
                 # if param missing and one shot mode, assumes that coma is created with same asteroid orientation
                 assert self.sssb.rot_history, 'SSSB rotation state for cached coma is not given with "sssb_rot"'
                 sssb_rot = self.sssb.rot_history[0]
+                sssb_rot = (sssb_rot.getAngle(), *sssb_rot.getAxis(RotationConvention.FRAME_TRANSFORM).toArray())
 
             self.sssb.coma = self.renderer.load_coma(
                 coma['tiles_file'],
