@@ -258,19 +258,15 @@ class Environment():
         else:
             if 'r' in spacecraft:
                 sc_state = PVCoordinates(Vector3D(spacecraft['r']), 
-                                        Vector3D(spacecraft.get('v', [0.0, 0.0, 0.0])))
+                                         Vector3D(spacecraft.get('v', [0.0, 0.0, 0.0])))
             if 'angleaxis' in spacecraft:
-                # OLD: transform icrf camera where +x is forward and 
-                # +z is up into -z is forward and +y is up
-                # Should sispo's internals be ICRF?
-                icrf2gl_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
-                sc_icrf_rot = Rotation(
-                                    Vector3D(spacecraft['angleaxis'][1:4]), 
-                                    spacecraft['angleaxis'][0], 
-                                    RotationConvention.FRAME_TRANSFORM)
-                sc_gl_rot = icrf2gl_rot.applyTo(sc_icrf_rot) 
-                sc_rot_state = AngularCoordinates(sc_gl_rot, Vector3D(0., 0., 0.))
+                sc_pxpz_rot = Rotation(Vector3D(spacecraft['angleaxis'][1:4]),
+                                       spacecraft['angleaxis'][0],
+                                       RotationConvention.FRAME_TRANSFORM)
 
+                # transform camera where +x is forward and +z is up into -z is forward and +y is up
+                mzpy_rot = self.pxpz_to_mzpy(sc_pxpz_rot)
+                sc_rot_state = AngularCoordinates(mzpy_rot, Vector3D(0., 0., 0.))
 
         self.spacecraft = Spacecraft("CI",
                                      self.mu_sun,
@@ -279,6 +275,15 @@ class Environment():
                                      rot_state=sc_rot_state,
                                      oneshot=oneshot)
 
+    @staticmethod
+    def pxpz_to_mzpy(pxpz_rot):
+        pxpz_to_mzpy_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
+        return pxpz_to_mzpy_rot.applyTo(pxpz_rot)
+
+    @staticmethod
+    def mzpy_to_pxpz(mzpy_rot):
+        pxpz_to_mzpy_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
+        return pxpz_to_mzpy_rot.applyInverseTo(mzpy_rot)
 
     def setup_lightref(self, settings):
         """Create lightreference blender object."""
@@ -363,8 +368,7 @@ class Environment():
                 self.renderer.target_camera(self.sssb.render_obj, "ScCam")
             else:
                 angle, axis = convert_rot_to_angle_axis(sc_rot, RotationConvention.FRAME_TRANSFORM)
-                sc_eul_rot = sc_rot.getAngles(RotationOrder.ZYX, RotationConvention.FRAME_TRANSFORM)
-                self.renderer.set_camera_rot(sc_eul_rot, "ScCam", angle=angle, axis=axis)
+                self.renderer.set_camera_rot(angle, axis, "ScCam")
 
             if not self.opengl_renderer:
                 # Update scenes/cameras

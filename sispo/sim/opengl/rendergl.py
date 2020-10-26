@@ -293,6 +293,16 @@ class RenderScene(RenderAbstractObject):
                 if self.verbose:
                     print('done')
 
+    @staticmethod
+    def _sc2gl(q):
+        sc2gl_q = np.quaternion(0.5, 0.5, -0.5, -0.5)
+        return q * sc2gl_q
+
+    @staticmethod
+    def _gl2sc(q):
+        sc2gl_q = np.quaternion(0.5, 0.5, -0.5, -0.5)
+        return q * sc2gl_q.conj()
+
     def render(self, name_suffix):
         self.prepare()
         for i, o in self._objs.values():
@@ -319,7 +329,7 @@ class RenderScene(RenderAbstractObject):
 
             self._renderer.set_frustum(c.model.x_fov, c.model.y_fov, c.frustum_near, c.frustum_far)
             flux = TestLoop.render_navcam_image_static(None, self._renderer, obj_idxs, rel_pos_v, rel_rot_q,
-                                                       light_v, c.q, sun_distance, cam=c.model, auto_gain=False,
+                                                       light_v, self._gl2sc(c.q), sun_distance, cam=c.model, auto_gain=False,
                                                        use_shadows=True, use_textures=True, fluxes_only=True,
                                                        stars=self.stars, lens_effects=self.lens_effects,
                                                        reflmod_params=brdf_params, star_db=self._stardb)
@@ -513,19 +523,8 @@ class RenderController:
         cam = self._cams[camera_name]
         cam.loc = np.array(location) if location is not None else None
 
-    def set_camera_rot(self, rot, camera_name="Camera", type='zyx', *args, **kwargs):
-        if rot is None:
-            q = None
-        elif type == 'zyx':
-            q = tools.ypr_to_q(-rot[1], rot[0], rot[2])
-        elif type == 'ypr':
-            q = tools.ypr_to_q(*rot)
-        elif type == 'quat':
-            q = np.quaternion(*rot).normalized()
-        elif type == 'angleaxis':
-            q = tools.angleaxis_to_q(rot)
-        else:
-            assert False, 'invalid rotation type: %s' % type
+    def set_camera_rot(self, angle, axis, camera_name="Camera"):
+        q = tools.angleaxis_to_q((angle, *axis))
         self._cams[camera_name].q = q
 
     def target_camera(self, target_obj: RenderObject, camera_name="Camera"):
@@ -608,8 +607,7 @@ class RenderController:
             getattr(self._logger, level)(msg)
 
     def set_object_rot(self, angle, axis, obj):
-        M = mathutils.Matrix.Rotation(-angle, 4, axis)
-        obj.matrix_world = M.to_4x4()
+        obj.rotation_angleaxis = (angle, *axis)
 
     @staticmethod
     def download_file(url, file, maybe=False):

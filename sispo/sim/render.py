@@ -15,7 +15,7 @@ import zlib
 from astropy import units as u
 import bpy
 import cv2
-from mathutils import Vector # pylint: disable=import-error
+from mathutils import Vector, Quaternion  # pylint: disable=import-error
 import numpy as np
 
 from . import compositor as cp
@@ -154,7 +154,6 @@ class BlenderController:
             scene.render.tile_x = tile_size
             scene.render.tile_y = tile_size
 
-
     def _determine_device(self, device):
         """Determines the render device based on availability and input.
 
@@ -201,7 +200,6 @@ class BlenderController:
         else:
             self.logger.debug("Invalid device: %s", self.device)
             raise BlenderControllerError(f"Invalid device: {self.device}")
-
 
     def set_sun_location(self, sun_loc, scaling, sun):
         sun.render_obj.location = sun_loc / scaling
@@ -298,7 +296,7 @@ class BlenderController:
         obj.rotation_axis_angle[2] = axis[1]
         obj.rotation_axis_angle[3] = axis[2]
 
-    def set_camera_rot(self, rot=None, camera_name="Camera", angle=0.0, axis=[0.0,0.0,0.0]):
+    def set_camera_rot(self, angle, axis, camera_name="Camera"):
         """Target camera towards target."""
         camera = bpy.data.objects[camera_name]
         self.set_object_rot(angle, axis, camera)
