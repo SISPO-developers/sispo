@@ -8,6 +8,9 @@ import os
 
 import numpy as np
 import cv2
+import OpenEXR
+import Imath
+from org.hipparchus.geometry.euclidean.threed import Rotation, RotationConvention
 
 try:
     import quaternion
@@ -17,6 +20,7 @@ try:
     from visnav.algo import tools
     from visnav.missions.rosetta import ChuryumovGerasimenko
     from visnav.render.render import RenderEngine
+    from visnav.render.particles import Particles, VoxelParticles
     from visnav.testloop import TestLoop
 except Exception as e:
     raise Exception('OpenGL based rendering engine has extra dependencies, install like this:\n'
@@ -201,6 +205,7 @@ class RenderObject(RenderAbstractObject):
             mx33 = np.asarray(mx44)[:3, :3]
             mx33 /= np.linalg.norm(mx33, axis=0)
             self.q = quaternion.from_rotation_matrix(mx33).conj()
+            print(str(self.q))
 
     def prepare(self, scene):
         self._check_params()
@@ -235,6 +240,7 @@ class RenderScene(RenderAbstractObject):
         self._sun_loc = None
         self._renderer = None
         self._stardb = Path(stardb_path) if stardb_path else RenderScene.DEF_STAR_DB
+        self._particles = None
 
         self.object_scale = 1000   # objects given in km, locations expected in meters
         self.flux_only = flux_only
@@ -310,6 +316,8 @@ class RenderScene(RenderAbstractObject):
                 rel_pos_v[i] = tools.q_times_v(c.q.conj(), o.loc - c.loc)
                 rel_rot_q[i] = c.q.conj() * o.q
 
+            print('\n\ngf_cam_q, gf_ast_q: \n%s\n%s' % (c.q, o.q))
+
             # make sure correct order, correct scale
             rel_pos_v = [rel_pos_v[i]/self.object_scale for i in obj_idxs]
             rel_rot_q = [rel_rot_q[i] for i in obj_idxs]
@@ -321,6 +329,7 @@ class RenderScene(RenderAbstractObject):
                                                        light_v, c.q, sun_distance, cam=c.model, auto_gain=False,
                                                        use_shadows=True, use_textures=True, fluxes_only=True,
                                                        stars=self.stars, lens_effects=self.lens_effects,
+                                                       particles=self._particles,
                                                        reflmod_params=brdf_params, star_db=self._stardb)
 
             if self.flux_only:
@@ -391,6 +400,9 @@ class RenderScene(RenderAbstractObject):
     def link_object(self, obj: RenderObject):
         self._objs[obj.name] = [None, obj]
 
+    def link_particles(self, particles):
+        self._particles = particles
+
     def set_sun_location(self, loc):
         """
         :param loc: sun location in meters in the same frame (e.g. asteroid/comet centric) used for camera and object locations
@@ -415,6 +427,7 @@ class RenderController:
         self._cams = {}
         self._objs = {}
         self._stardb_path = stardb_path
+        self._particles = None
         self._logger = logger
         self.verbose = verbose
 
@@ -560,6 +573,61 @@ class RenderController:
         if self.verbose:
             print('done')
         return obj
+
+    def load_coma(self, filename, dimensions, resolution, intensity, gf_ast_rot, scenes=None):
+
+        if self.verbose:
+            print('loading coma...', end='', flush=True)
+
+        cell_size = dimensions[0] / resolution
+
+        icrf2gl_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
+        gf_ast_rot = gf_ast_rot.applyTo(icrf2gl_rot.revert())   # == icrf2gl_q.conj() * gf_ast_q
+        angle = gf_ast_rot.getAngle()
+        axis = np.array(gf_ast_rot.getAxis(RotationConvention.FRAME_TRANSFORM).toArray())
+        gf_ast_q = tools.angleaxis_to_q((angle, *axis))
+
+        gf_vx_cam_q = quaternion.one
+        lf_vx_ast_q = gf_vx_cam_q.conj() * gf_ast_q
+
+        image = OpenEXR.InputFile(filename)
+        header = image.header()
+        mono = 'Y' in header['channels']
+        size = header["displayWindow"]
+        shape = (size.max.x - size.min.x + 1, size.max.y - size.min.y + 1)
+
+        if mono:
+            data2d = np.frombuffer(image.channel('Y', Imath.PixelType(Imath.PixelType.FLOAT)), np.float32)
+        else:
+            g, b = 1.0, 0.3  # corresponds to gas? (~jets), particles? (~haze)
+            # data2d = r * np.frombuffer(image.channel('R', Imath.PixelType(Imath.PixelType.FLOAT)), np.float32)
+            data2d = g * np.frombuffer(image.channel('G', Imath.PixelType(Imath.PixelType.FLOAT)), np.float32)
+            data2d = data2d + b * np.frombuffer(image.channel('B', Imath.PixelType(Imath.PixelType.FLOAT)), np.float32)
+
+        data2d = data2d.reshape(shape)
+        n = int(np.prod(shape) ** (1 / 3) / 10) * 10
+        k = math.ceil(n ** (1 / 2))
+        voxel_data = np.zeros((n, n, n), dtype=np.float32)
+
+        assert n == resolution, 'something went wrong with the resolution calculation' \
+                                + ' while importing voxel data (%d != %d)' % (n, resolution)
+
+        for i in range(n):
+            x0, y0 = (i % k) * n, (i // k) * n
+            voxel_data[:, :, i] = data2d[y0:y0 + n, x0:x0 + n]
+
+        voxel_data = np.transpose(np.flip(voxel_data, axis=2), axes=(1, 0, 2))
+
+        voxels = VoxelParticles(voxel_data=voxel_data, cell_size=cell_size, intensity=intensity, lf_ast_q=lf_vx_ast_q)
+        self._particles = Particles(None, None, None, cones=None, haze=0.0, voxels=voxels)
+
+        for s in self._iter_scenes(scenes):
+            s.link_particles(self._particles)
+
+        if self.verbose:
+            print('done')
+
+        return self._particles
 
     def create_empty(self, name="Empty", scenes=None):
         assert False, 'seems like an unused / useless method'

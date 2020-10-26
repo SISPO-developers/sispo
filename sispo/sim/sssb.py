@@ -75,4 +75,6 @@ class SmallSolarSystemBody(CelestialBody):
 
         # Create propagator
         self.propagator = KeplerianPropagator(self.trajectory, att_provider)
-        
+
+        # Loaded coma object, currently only used with OpenGL based rendering
+        self.coma = None

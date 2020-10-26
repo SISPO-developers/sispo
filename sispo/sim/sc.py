@@ -164,7 +164,7 @@ class Instrument():
         # Kernel size calculated to equal skimage.filters.gaussian
         # Reference:
         # https://github.com/scipy/scipy/blob/4bfc152f6ee1ca48c73c06e27f7ef021d729f496/scipy/ndimage/filters.py#L214
-        kernel = int((4 * sigma + 0.5) * 2)
+        kernel = int(round(4 * float(sigma)) * 2 + 1)
         kernel = max(kernel, 5) # Don't use smaller than 5
         ksize = (kernel, kernel)
 

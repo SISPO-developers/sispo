@@ -66,8 +66,7 @@ class Environment():
                  oneshot=False,
                  spacecraft=None,
                  ext_logger=None,
-                 opengl_renderer=False,
-                 brdf_params=None):
+                 opengl_renderer=False):
 
         if ext_logger is not None:
             self.logger = ext_logger
@@ -75,7 +74,7 @@ class Environment():
             self.logger = utils.create_logger()
 
         self.opengl_renderer = opengl_renderer
-        self.brdf_params = brdf_params
+        self.brdf_params = sssb.get('brdf_params', None)
 
         self.root_dir = Path(__file__).parent.parent.parent
         data_dir = self.root_dir / "data"
@@ -241,6 +240,30 @@ class Environment():
                                                          + ([] if self.opengl_renderer else ["SssbConstDist"]))
         self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
         self.sssb.render_obj.location = (0.0, 0.0, 0.0)
+
+        # Setup previously generated coma
+        coma = settings.get('coma', None)
+        if coma:
+            with open(coma['file'], 'r') as fh:
+                coma.update(json.load(fh))
+            assert self.opengl_renderer, '"coma" setting under "sssb" is currently only supported for opengl rendering'
+            sssb_rot = coma.get('sssb_rot', False)
+            if sssb_rot:
+                icrf2gl_rot = Rotation(0.5, 0.5, -0.5, -0.5, False)
+                sc_icrf_rot = Rotation(Vector3D(sssb_rot[1:4]), sssb_rot[0], RotationConvention.FRAME_TRANSFORM)
+                sssb_rot = icrf2gl_rot.applyTo(sc_icrf_rot)
+            else:
+                # if param missing and one shot mode, assumes that coma is created with same asteroid orientation
+                assert self.sssb.rot_history, 'SSSB rotation state for cached coma is not given with "sssb_rot"'
+                sssb_rot = self.sssb.rot_history[0]
+
+            self.sssb.coma = self.renderer.load_coma(
+                coma['tiles_file'],
+                coma['dimensions'],
+                coma['resolution'],
+                coma.get('intensity', 1e-4),
+                sssb_rot
+            )
 
     def setup_spacecraft(self, spacecraft=None, oneshot=False):
         """Create Spacecraft and respective blender object."""

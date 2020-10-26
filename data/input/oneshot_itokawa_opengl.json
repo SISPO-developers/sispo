@@ -26,7 +26,7 @@
         "timesampler_mode": 1,
         "slowmotion_factor": 10,
         "exposure": 0,
-        "samples": 4,
+        "samples": 1,
         "device": "GPU",
         "tile_size": 256,
         "starcat_dir": "data/stardb/deep_space_objects.sqlite",
@@ -82,8 +82,8 @@
         },
         "instrument": 
         {
-            "res": [1024, 1024],
-            "pix_l": 12.0,
+            "res": [8192, 8192],
+            "pix_l": 1.5,
             "focal_l": 120.8,
             "aperture_d": 1.5,
             "wavelength": 550.0,

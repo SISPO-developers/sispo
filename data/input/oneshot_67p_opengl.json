@@ -30,19 +30,6 @@
         "device": "GPU",
         "tile_size": 256,
         "starcat_dir": "data/stardb/deep_space_objects.sqlite",
-        "brdf_params": 
-        {
-			"J": 0,
-			"th_p": 27.07,
-			"w": 0.034,
-			"b": -0.078577,
-			"c": 0,
-			"B_SH0": 2.25,
-			"hs": 0.00106,
-			"B_CB0": 0,
-			"hc": 0.005,
-			"K": 1
-		},
         "sun": null,
         "lightref": null,
 		"spacecraft": {
@@ -73,11 +60,28 @@
             },
             "model":
             {
-                "file": "data/models/67P_C-G_shape_model_MALMER_2015_11_20-in-km.obj",
+                "file": "data/models/67p+tex-16k.obj",
                 "name": "67P"
             },
-            "albedo": 0.15,
-            "max_dim": 512
+            "coma":
+            {
+                "file": "data/models/Jets--ROS_CAM1_20150710T074301.json",
+                "intensity": 1e-4
+            },
+            "max_dim": 512,
+            "brdf_params":
+            {
+                "J": 0,
+                "th_p": 27.07,
+                "w": 0.034,
+                "b": -0.078577,
+                "c": 0,
+                "B_SH0": 2.25,
+                "hs": 0.00106,
+                "B_CB0": 0,
+                "hc": 0.005,
+                "K": 1
+            }
         },
         "instrument": 
         {
