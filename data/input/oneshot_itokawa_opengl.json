@@ -30,19 +30,6 @@
         "device": "GPU",
         "tile_size": 256,
         "starcat_dir": "data/stardb/deep_space_objects.sqlite",
-        "brdf_params": 
-        {
-			"J": 0,
-			"th_p": 26,
-			"w": 0.31,
-			"b": -0.35,
-			"c": 0,
-			"B_SH0": 0.86,
-			"hs": 0.00021,
-			"B_CB0": 0,
-			"hc": 0.005,
-			"K": 1
-		},
         "sun": null,
         "lightref": null,
         "spacecraft": 
@@ -77,12 +64,24 @@
                 "file": "data/models/itokawa_f3145728.obj",
                 "name": "Itokawa"
             },
-            "albedo": 0.15,
-            "max_dim": 512
+            "max_dim": 512,
+            "brdf_params":
+            {
+                "J": 0,
+                "th_p": 26,
+                "w": 0.31,
+                "b": -0.35,
+                "c": 0,
+                "B_SH0": 0.86,
+                "hs": 0.00021,
+                "B_CB0": 0,
+                "hc": 0.005,
+                "K": 1
+            }
         },
         "instrument": 
         {
-            "res": [8192, 8192],
+            "res": [4096, 4096],
             "pix_l": 1.5,
             "focal_l": 120.8,
             "aperture_d": 1.5,

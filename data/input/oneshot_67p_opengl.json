@@ -60,13 +60,13 @@
             },
             "model":
             {
-                "file": "data/models/67p+tex-16k.obj",
+                "file": "data/models/67P_C-G_shape_model_MALMER_2015_11_20-in-km.obj",
                 "name": "67P"
             },
             "coma":
             {
                 "file": "data/models/Jets--ROS_CAM1_20150710T074301.json",
-                "intensity": 1e-4
+                "intensity": 2e-6
             },
             "max_dim": 512,
             "brdf_params":
@@ -85,8 +85,8 @@
         },
         "instrument": 
         {
-            "res": [1024, 1024],
-            "pix_l": 13.0,
+            "res": [2048, 2048],
+            "pix_l": 6.5,
             "focal_l": 152.5,
             "aperture_d": 30,
             "wavelength": 550.0,
