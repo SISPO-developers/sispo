@@ -1,0 +1,127 @@
+{
+    "name": "oneshot_67p_opengl",
+    "res_dir": "data/results/oneshot",
+    "options": ["--with-render", "--opengl"],
+    "plugins": ["/app/JetCreator/interface.py"],
+    "orekit_path": "/app/sispo/sispo/sim/orekit-data.zip",
+    "simulation":
+    {
+        "res_dir": "data/results/oneshot/rendering",
+		"oneshot": true,
+        "duration": 1,
+        "encounter_date": 
+        {
+            "year": 2017,
+            "month": 8,
+            "day": 15,
+            "hour": 12,
+            "minutes": 0,
+            "seconds": 0.0
+        },
+        "frames": 1,
+        "encounter_distance": null,
+        "relative_velocity": null,
+        "with_terminator": null,
+        "with_sunnyside": null,
+        "timesampler_mode": 1,
+        "slowmotion_factor": 10,
+        "exposure": 0,
+        "samples": 4,
+        "device": "GPU",
+        "tile_size": 256,
+        "starcat_dir": "data/stardb/deep_space_objects.sqlite",
+        "sun": null,
+        "lightref": null,
+		"spacecraft": {
+			"r": [163613518304.0, 101637309778.0, 36457190373.0],
+			"angleaxis": [1.892926, 0.781228, -0.540109, -0.312995]
+		},
+        "sssb":
+        {
+            "trj":
+            {
+                "r": [163613595198.0, 101637176823.0, 36457220690.0],
+                "date": 
+                {
+                    "year": 2017, 
+                    "month": 8,
+                    "day": 19,
+                    "hour": 0,
+                    "minutes": 0,
+                    "seconds": 0.0
+                }
+            },
+            "att": 
+            {
+                "rotation_rate": 0.0,
+                "RA": 69.54,
+                "Dec": 64.11,
+				"ZLRA": 162.976134
+            },
+            "model":
+            {
+                "file": "data/models/67P_C-G_shape_model_MALMER_2015_11_20-in-km.obj",
+                "name": "67P"
+            },
+            "coma":
+            {
+                "file": "data/models/Jets--ROS_CAM1_20150710T074301.json",
+                "intensity": 2e-6
+            },
+            "max_dim": 512,
+            "brdf_params":
+            {
+                "J": 0,
+                "th_p": 27.07,
+                "w": 0.034,
+                "b": -0.078577,
+                "c": 0,
+                "B_SH0": 2.25,
+                "hs": 0.00106,
+                "B_CB0": 0,
+                "hc": 0.005,
+                "K": 1
+            }
+        },
+        "instrument": 
+        {
+            "res": [2048, 2048],
+            "pix_l": 6.5,
+            "focal_l": 152.5,
+            "aperture_d": 30,
+            "wavelength": 550.0,
+            "quantum_eff": 0.8,
+            "color_depth": 8
+        },
+        "with_infobox": 0,
+        "with_clipping": 1
+    },
+    "compression":
+    {
+        "res_dir": "data/results/default/compressed",
+        "img_dir": "data/results/default/rendering",
+        "img_ext": "png",
+        "algo": "png",
+        "settings":
+        {
+            "level": 9
+        }
+    },
+    "reconstruction":
+    {
+        "res_dir": "data/results/default",
+        "export_type": "obj",
+        "focal": 66667,
+        "cam_model": 1,
+        "geo_model": "f",
+        "num_overlaps": 4,
+        "use_prior": 1,
+        "use_upright": 0,
+        "force_compute": 0,
+        "descriptor": "SIFT",
+        "d_preset": "ULTRA",
+        "method": "FASTCASCADEHASHINGL2",
+        "refine_options": "NONE",
+        "reduce_memory": 1
+    }
+}

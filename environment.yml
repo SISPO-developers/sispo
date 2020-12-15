@@ -1,0 +1,11 @@
+name: sispo
+channels:
+  - defaults
+  - conda-forge
+dependencies:
+  - python
+  - pip
+  - setuptools
+  - pylint
+  - numpy
+  - numpy-base

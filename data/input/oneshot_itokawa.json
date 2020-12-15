@@ -1,0 +1,125 @@
+{
+    "name": "oneshot_itokawa",
+    "res_dir": "data/results/oneshot",
+    "options": ["--with-render"],
+    "plugins": ["/app/JetCreator/interface.py"],
+    "orekit_path": "/app/sispo/sispo/sim/orekit-data.zip",
+    "simulation":
+    {
+        "res_dir": "data/results/oneshot/rendering",
+		"oneshot": true,
+        "duration": 1,
+        "encounter_date": 
+        {
+            "year": 2017,
+            "month": 8,
+            "day": 15,
+            "hour": 12,
+            "minutes": 0,
+            "seconds": 0.0
+        },
+        "frames": 1,
+        "encounter_distance": null,
+        "relative_velocity": null,
+        "with_terminator": null,
+        "with_sunnyside": null,
+        "timesampler_mode": 1,
+        "slowmotion_factor": 10,
+        "exposure": 0,
+        "samples": 8,
+        "device": "GPU",
+        "tile_size": 256,
+        "starcat_dir": "data/UCAC4",
+        "sun":
+        {
+            "model":
+            {
+                "file": "data/models/general_bodies.blend",
+                "name": "Sun"
+            }
+        },
+        "lightref":
+        {
+            "model":
+            {
+                "file": "data/models/general_bodies.blend",
+                "name": "CalibrationDisk"
+            }
+        },
+        "spacecraft": 
+        {
+			"r": [146226188132.0, -68812322442.0, -477863711.0],
+            "angleaxis": [1.847799, -0.929873, 0.266931, -0.253146]
+		},
+        "sssb":
+        {
+            "trj":
+            {
+                "r": [146226194732.0, -68812326932.0, -477863381.0],
+                "date": 
+                {
+                    "year": 2017, 
+                    "month": 8,
+                    "day": 19,
+                    "hour": 0,
+                    "minutes": 0,
+                    "seconds": 0.0
+                }
+            },
+            "att": 
+            {
+                "rotation_rate": 0.0,
+                "RA": 0,
+                "Dec": 90,
+				"ZLRA": 0
+            },
+            "model":
+            {
+                "file": "data/models/itokawa.blend",
+                "name": "Itokawa"
+            },
+            "albedo": 0.15,
+            "max_dim": 512
+        },
+        "instrument": 
+        {
+            "res": [1024, 1024],
+            "pix_l": 12.0,
+            "focal_l": 120.8,
+            "aperture_d": 1.5,
+            "wavelength": 550.0,
+            "quantum_eff": 0.25,
+            "color_depth": 8
+        },
+        "with_infobox": 0,
+        "with_clipping": 1
+    },
+    "compression":
+    {
+        "res_dir": "data/results/default/compressed",
+        "img_dir": "data/results/default/rendering",
+        "img_ext": "png",
+        "algo": "png",
+        "settings":
+        {
+            "level": 9
+        }
+    },
+    "reconstruction":
+    {
+        "res_dir": "data/results/default",
+        "export_type": "obj",
+        "focal": 66667,
+        "cam_model": 1,
+        "geo_model": "f",
+        "num_overlaps": 4,
+        "use_prior": 1,
+        "use_upright": 0,
+        "force_compute": 0,
+        "descriptor": "SIFT",
+        "d_preset": "ULTRA",
+        "method": "FASTCASCADEHASHINGL2",
+        "refine_options": "NONE",
+        "reduce_memory": 1
+    }
+}

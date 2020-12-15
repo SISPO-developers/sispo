@@ -1,0 +1,123 @@
+{
+    "name": "default_opengl",
+    "res_dir": "data/results/default",
+    "options": ["--with-sim", "--with-render", "--opengl"],
+    "plugins": ["/app/JetCreator/interface.py"],
+    "orekit_path": "/app/sispo/sispo/sim/orekit-data.zip",
+    "simulation":
+    {
+        "res_dir": "data/results/default/rendering",
+        "duration": 120,
+        "encounter_date": 
+        {
+            "year": 2017,
+            "month": 8,
+            "day": 15,
+            "hour": 12,
+            "minutes": 0,
+            "seconds": 0.0
+        },
+        "frames": 120,
+        "encounter_distance": 1E5,
+        "relative_velocity": 10000,
+        "with_terminator": 0,
+        "with_sunnyside": 1,
+        "timesampler_mode": 1,
+        "slowmotion_factor": 10,
+        "exposure": 0,
+        "samples": 4,
+        "device": "GPU",
+        "tile_size": 256,
+        "starcat_dir": "data/stardb/deep_space_objects.sqlite",
+        "brdf_params": 
+        {
+			"J": 0,
+			"th_p": 26,
+			"w": 0.31,
+			"b": -0.35,
+			"c": 0,
+			"B_SH0": 0.86,
+			"hs": 0.00021,
+			"B_CB0": 0,
+			"hc": 0.005,
+			"K": 1
+		},
+        "sun": null,
+        "lightref": null,
+        "sssb":
+        {
+            "trj":
+            {
+                "a": 1.644641475071416,
+                "e": 3.838774437558215E-01,
+                "i": 3.408231185574551E+00,
+                "P": 7.703805051391988E+02,
+                "omega": 3.192958853076784E+02,
+                "Omega": 7.320940216397703E+01, 
+                "M": 1.967164895190036E+02,
+                "date": 
+                {
+                    "year": 2017, 
+                    "month": 8,
+                    "day": 19,
+                    "hour": 0,
+                    "minutes": 0,
+                    "seconds": 0.0
+                }
+            },
+            "att": 
+            {
+                "rotation_rate": 0.01,
+                "RA": 0.0,
+                "Dec": 0.0
+            },
+            "model":
+            {
+                "file": "data/models/cube.obj",
+                "name": "Cube"
+            },
+            "albedo": 0.15,
+            "max_dim": 512
+        },
+        "instrument": 
+        {
+            "res": [800,600],
+            "pix_l": 3.45,
+            "focal_l": 230,
+            "aperture_d": 4,
+            "wavelength": 550,
+            "quantum_eff": 0.25,
+            "color_depth": 8
+        },
+        "with_infobox": 0,
+        "with_clipping": 1
+    },
+    "compression":
+    {
+        "res_dir": "data/results/default/compressed",
+        "img_dir": "data/results/default/rendering",
+        "img_ext": "png",
+        "algo": "png",
+        "settings":
+        {
+            "level": 9
+        }
+    },
+    "reconstruction":
+    {
+        "res_dir": "data/results/default",
+        "export_type": "obj",
+        "focal": 66667,
+        "cam_model": 1,
+        "geo_model": "f",
+        "num_overlaps": 4,
+        "use_prior": 1,
+        "use_upright": 0,
+        "force_compute": 0,
+        "descriptor": "SIFT",
+        "d_preset": "ULTRA",
+        "method": "FASTCASCADEHASHINGL2",
+        "refine_options": "NONE",
+        "reduce_memory": 1
+    }
+}
