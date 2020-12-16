@@ -4,12 +4,12 @@ Compares image resizing and gaussian filtering.
 """
 
 from datetime import datetime
+import logging
 from pathlib import Path
 import time
 import sys
 
 import cv2
-import logging
 import numpy as np
 import OpenEXR
 import Imath
@@ -18,7 +18,8 @@ import skimage
 logger = logging.getLogger("cv_skimage")
 logger.setLevel(logging.DEBUG)
 logger_formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+    "%(asctime)s - %(name)s - %(funcName)s - %(message)s"
+)
 
 now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
 filename = "cv_skimage.log"
@@ -128,40 +129,40 @@ def benchmark(filepath, iterations=10000):
 
     logger.debug("Gaussian filter statistics")
 
-    img_skimage = run_skimage_gauss(raw_img, sigma, trunc)
+    img_sk = run_skimage_gauss(raw_img, sigma, trunc)
     img_cv = run_cv_gauss(raw_img, sigma, kernel)
 
-    write_openexr_image(res_dir / "skimage.exr", img_skimage)
+    write_openexr_image(res_dir / "skimage.exr", img_sk)
     write_openexr_image(res_dir / "opencv.exr", img_cv)
 
-    diff = img_skimage - img_cv
+    diff = img_sk - img_cv
     logger.debug(f"Difference min: {np.min(diff)}; max: {np.max(diff)}")
     write_openexr_image(res_dir / "diff.exr", diff)
 
-    equality = (img_skimage[:, :, 0:2] == img_cv[:, :, 0:2])
+    equality = (img_sk[:, :, 0:2] == img_cv[:, :, 0:2])
     logger.debug(f"Equality all: {equality.all()}; any: {equality.any()}")
 
     logger.debug(
-        f"Image skimage min: {np.min(img_skimage)}; max: {np.max(img_skimage)}")
+        f"Image skimage min: {np.min(img_sk)}; max: {np.max(img_sk)}")
     logger.debug(f"Image OpenCV min: {np.min(img_cv)}; max: {np.max(img_cv)}")
 
     logger.debug("Resizing statistics")
 
-    img_skimage = run_skimage_resize(raw_img, scale)
+    img_sk = run_skimage_resize(raw_img, scale)
     img_cv = run_cv_resize(raw_img, scale)
 
-    write_openexr_image(res_dir / "skimage_resized.exr", img_skimage)
+    write_openexr_image(res_dir / "skimage_resized.exr", img_sk)
     write_openexr_image(res_dir / "opencv_resized.exr", img_cv)
 
-    diff = img_skimage - img_cv
+    diff = img_sk - img_cv
     logger.debug(f"Difference min: {np.min(diff)}; max: {np.max(diff)}")
     write_openexr_image(res_dir / "resized_diff.exr", diff)
 
-    equality = img_skimage[:, :, 0:2] == img_cv[:, :, 0:2]
+    equality = img_sk[:, :, 0:2] == img_cv[:, :, 0:2]
     logger.debug(f"Equality all: {equality.all()}; any: {equality.any()}")
 
     logger.debug(
-        f"Image skimage min: {np.min(img_skimage)}; max: {np.max(img_skimage)}")
+        f"Image skimage min: {np.min(img_sk)}; max: {np.max(img_sk)}")
     logger.debug(f"Image OpenCV min: {np.min(img_cv)}; max: {np.max(img_cv)}")
 
 
@@ -171,12 +172,12 @@ def read_openexr_image(filename):
     if not OpenEXR.isOpenExrFile(str(filename)):
         return None
 
-    image = OpenEXR.InputFile(str(filename))
+    img = OpenEXR.InputFile(str(filename))
 
-    if not image.isComplete():
+    if not img.isComplete():
         return None
 
-    header = image.header()
+    header = img.header()
 
     size = header["displayWindow"]
     resolution = (size.max.x - size.min.x + 1, size.max.y - size.min.y + 1)
@@ -192,14 +193,14 @@ def read_openexr_image(filename):
 
     image_o = np.zeros((resolution[1], resolution[0], channels), np.float32)
 
-    ch = ["R", "G", "B", "A"]
-    pt = Imath.PixelType(Imath.PixelType.FLOAT)
+    chn = ["R", "G", "B", "A"]
+    pix_t = Imath.PixelType(Imath.PixelType.FLOAT)
 
-    for c in range(0, channels):
-        image_channel = np.frombuffer(image.channel(ch[c], pt), np.float32)
-        image_o[:, :, c] = image_channel.reshape(resolution[1], resolution[0])
+    for channel in range(0, channels):
+        img_chn = np.frombuffer(img.channel(chn[channel], pix_t), np.float32)
+        image_o[:, :, channel] = img_chn.reshape(resolution[1], resolution[0])
 
-    image.close()
+    img.close()
 
     return image_o
 
