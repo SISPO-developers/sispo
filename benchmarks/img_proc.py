@@ -43,7 +43,7 @@ def run_cv_gauss(image, sigma, kernel):
 
 def run_cv_resize(image, scale):
     return cv2.resize(
-        image, None, fx=1/scale, fy=1/scale, interpolation=cv2.INTER_AREA
+        image, None, fx=1 / scale, fy=1 / scale, interpolation=cv2.INTER_AREA
     )
 
 
@@ -143,11 +143,10 @@ def benchmark(filepath, iterations=10000):
     logger.debug("Difference min: %f; max: %f", np.min(diff), np.max(diff))
     write_openexr_image(res_dir / "diff.exr", diff)
 
-    equality = (img_sk[:, :, 0:2] == img_cv[:, :, 0:2])
+    equality = img_sk[:, :, 0:2] == img_cv[:, :, 0:2]
     logger.debug("Equality all: %d; any: %d", equality.all(), equality.any())
 
-    logger.debug(
-        "Image skimage min: %f; max: %f", np.min(img_sk), np.max(img_sk))
+    logger.debug("Image skimage min: %f; max: %f", np.min(img_sk), np.max(img_sk))
     logger.debug("Image OpenCV min: %f; max: %f", np.min(img_cv), np.max(img_cv))
 
     logger.debug("Resizing statistics")
@@ -165,8 +164,7 @@ def benchmark(filepath, iterations=10000):
     equality = img_sk[:, :, 0:2] == img_cv[:, :, 0:2]
     logger.debug("Equality all: %d; any: %d", equality.all(), equality.any())
 
-    logger.debug(
-        "Image skimage min: %f; max: %f", np.min(img_sk), np.max(img_sk))
+    logger.debug("Image skimage min: %f; max: %f", np.min(img_sk), np.max(img_sk))
     logger.debug("Image OpenCV min: %f; max: %f", np.min(img_cv), np.max(img_cv))
 
 
