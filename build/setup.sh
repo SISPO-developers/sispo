@@ -4,7 +4,7 @@ echo "Setup system for MasterThesis project"
 
 ((
 echo "########## conda start ##########"
-cd conda
+cd conda || exit
 ./install.sh
 ./update.sh
 
@@ -14,13 +14,13 @@ cd conda
 ./install_pkgs.sh
 ./update_pkgs.sh
 
-cd ..
+cd .. || exit
 echo "########## conda done ##########"
 ) &
 
 (
 echo "########## vcpkg start ##########"
-cd vcpkg
+cd vcpkg || exit
 ./install.sh
 ./update.sh
 
@@ -28,16 +28,16 @@ cd vcpkg
 ./update_pkgs.sh
 
 ./delete_downloads.sh
-cd ..
+cd .. || exit
 echo "########## vcpkg done ##########"
 ) &
 
 (
 echo "########## star_cats start ##########"
-cd star_cats
+cd star_cats || exit
 ./install.sh
 
-cd ..
+cd .. || exit
 echo "########## star_cats done ##########"
 ) &
 
@@ -47,38 +47,38 @@ wait
 
 (
 echo "########## bpy start ##########"
-cd blender
+cd blender || exit
 ./install.sh
 
-cd ..
+cd .. || exit
 echo "########## bpy done ##########"
 ) &
 
 (
 echo "########## openMVG start ##########"
-cd openMVG
+cd openMVG || exit
 ./install.sh
 
-cd ..
+cd .. || exit
 echo "########## openMVG done ##########"
 ) &
 
 (
 echo "########## openMVS start ##########"
-cd openMVS
+cd openMVS || exit
 ./install.sh
 
-cd ..
+cd .. || exit
 echo "########## openMVS done ##########"
 ) & ) &
 
 (
 echo "########## download data start ##########"
-cd data
+cd data || exit
 #./download_orekit.sh
 #./download_ucac4.sh
 
-cd ..
+cd .. || exit
 echo "########## download data done ##########"
 ) &
 

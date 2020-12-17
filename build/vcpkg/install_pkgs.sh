@@ -3,7 +3,7 @@
 echo "Installing required packages start"
 
 # Go into vcpkg dir
-cd ../../software/vcpkg
+cd ../../software/vcpkg || exit
 
 # Install packages
 # General packages

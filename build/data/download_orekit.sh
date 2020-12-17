@@ -3,9 +3,9 @@
 echo "Downloading orekit-data.zip start"
 
 # Create folder
-cd ../..
+cd ../.. || exit
 [[ -d data ]] || mkdir data
-cd data
+cd data || exit
 
 # Download data
 wget https://gitlab.orekit.org/orekit/orekit-data/-/archive/master/orekit-data-master.zip

@@ -31,9 +31,9 @@ make update
 #./build_files/build_environment/install_deps.sh
 
 # Configure and install blender bpy
-cd ..
+cd .. || exit
 [[ -d build_blender_bpy ]] || mkdir build_blender_bpy
-cd build_blender_bpy
+cd build_blender_bpy || exit
 cmake \
 	-C ../blender/build_files/cmake/config/bpy_module.cmake \
 	-S ../blender \
