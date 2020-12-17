@@ -3,7 +3,7 @@
 echo "Updating all vcpkg packages start"
 
 # Change to vcpkg dir
-cd ../../software/vcpkg
+cd ../../software/vcpkg || exit
 
 # Update and upgrade packages
 ./vcpkg update

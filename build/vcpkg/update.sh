@@ -3,7 +3,7 @@
 echo "Updating vcpkg start"
 
 # Get latest git
-cd ../../software/vcpkg
+cd ../../software/vcpkg || exit
 git pull
 
 # Install and integrate
