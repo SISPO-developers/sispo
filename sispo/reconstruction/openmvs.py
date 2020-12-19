@@ -33,16 +33,18 @@ class OpenMVSController():
 
         self.res_dir = res_dir
 
-    def densify_pointcloud(self,
-                           p_prio=-1,
-                           max_threads=0,
-                           res_lvl=1,
-                           res_min=640,
-                           num_views=0,
-                           num_views_fuse=3,
-                           est_colors=False,
-                           est_normals=False,
-                           sample_mesh=0):
+    def densify_pointcloud(
+        self,
+        p_prio=-1,
+        max_threads=0,
+        res_lvl=1,
+        res_min=640,
+        num_views=0,
+        num_views_fuse=3,
+        est_colors=False,
+        est_normals=False,
+        sample_mesh=0
+    ):
         """Increases number of points to make 3D model smoother."""
         self.logger.debug("Densify point cloud to make model smoother")
 
@@ -72,19 +74,21 @@ class OpenMVSController():
         except OpenMVSControllerError as e:
             pass
 
-    def create_mesh(self,
-                    export_type="obj",
-                    p_prio=-1,
-                    max_threads=0,
-                    const_weight=1,
-                    free_space=0,
-                    thickness=1,
-                    quality=1,
-                    decimate=1,
-                    remove_spurious=20,
-                    remove_spikes=True,
-                    close_holes=30,
-                    smooth=2):
+    def create_mesh(
+        self,
+        export_type="obj",
+        p_prio=-1,
+        max_threads=0,
+        const_weight=1,
+        free_space=0,
+        thickness=1,
+        quality=1,
+        decimate=1,
+        remove_spurious=20,
+        remove_spikes=True,
+        close_holes=30,
+        smooth=2
+    ):
         """Create a mesh from a 3D point cloud."""
         self.logger.debug("Create mesh from point cloud")
 
@@ -118,26 +122,28 @@ class OpenMVSController():
         
         utils.execute(args, self.logger, OpenMVSControllerError)
         
-    def refine_mesh(self,
-                    export_type="obj",
-                    p_prio=-1,
-                    max_threads=0,
-                    res_lvl=0,
-                    res_min=640,
-                    max_views=8,
-                    decimate=1,
-                    holes=30,
-                    ensure_edge_size=1,
-                    max_face_area=64,
-                    scales=3,
-                    scale_step=0.5,
-                    reduce_memory=True,
-                    alt_pair=0,
-                    reg_weight=0.2,
-                    rig_ela_r=0.9,
-                    grad_step=45.05,
-                    vertex_ratio=0,
-                    use_cuda=False):
+    def refine_mesh(
+        self,
+        export_type="obj",
+        p_prio=-1,
+        max_threads=0,
+        res_lvl=0,
+        res_min=640,
+        max_views=8,
+        decimate=1,
+        holes=30,
+        ensure_edge_size=1,
+        max_face_area=64,
+        scales=3,
+        scale_step=0.5,
+        reduce_memory=True,
+        alt_pair=0,
+        reg_weight=0.2,
+        rig_ela_r=0.9,
+        grad_step=45.05,
+        vertex_ratio=0,
+        use_cuda=False
+    ):
         """
         Refine 3D mesh.
         
@@ -181,20 +187,22 @@ class OpenMVSController():
         except OpenMVSControllerError as e:
             pass
 
-    def texture_mesh(self,
-                     export_type="obj",
-                     p_prio=-1,
-                     max_threads=0,
-                     res_lvl=0,
-                     res_min=640,
-                     outlier_thres=0.6,
-                     cost_smooth_r=0.1,
-                     seam_level_global=1,
-                     seam_level_local=1,
-                     texture_size_multiple=0,
-                     patch_heuristic=3,
-                     empty_color=16744231,
-                     orthographic_res=0):
+    def texture_mesh(
+        self,
+        export_type="obj",
+        p_prio=-1,
+        max_threads=0,
+        res_lvl=0,
+        res_min=640,
+        outlier_thres=0.6,
+        cost_smooth_r=0.1,
+        seam_level_global=1,
+        seam_level_local=1,
+        texture_size_multiple=0,
+        patch_heuristic=3,
+        empty_color=16744231,
+        orthographic_res=0
+    ):
         """Add texture to mesh using images."""
         self.logger.debug("Add texture to mesh using images")
 

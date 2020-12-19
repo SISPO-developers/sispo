@@ -32,7 +32,7 @@ class OpenMVGController():
         else:
             self.openMVG_dir = openMVG_dir
         self.sensor_database = (root_dir / "data" /
-            "sensor_database" / "sensor_width_camera_database.txt")
+                                "sensor_database" / "sensor_width_camera_database.txt")
 
         self.logger.debug("openMVG executables dir %s", str(self.openMVG_dir))
 
@@ -40,12 +40,14 @@ class OpenMVGController():
         self.input_dir = res_dir / "compressed"
         self.res_dir = res_dir
 
-    def analyse_images(self,
-                       focal=65437,
-                       intrinsics=None,
-                       cam_model=1,
-                       prior=True,
-                       p_weights=(1.0, 1.0, 1.0)):
+    def analyse_images(
+        self,
+        focal=65437,
+        intrinsics=None,
+        cam_model=1,
+        prior=True,
+        p_weights=(1.0, 1.0, 1.0)
+    ):
         """ImageListing step of reconstruction."""
         self.logger.debug("Start Imagelisting")
 
@@ -67,12 +69,14 @@ class OpenMVGController():
 
         utils.execute(args, self.logger, OpenMVGControllerError)
 
-    def compute_features(self,
-                         force_compute=False,
-                         descriptor="SIFT",
-                         d_preset="ULTRA",
-                         use_upright=True,
-                         num_threads=0):
+    def compute_features(
+        self,
+        force_compute=False,
+        descriptor="SIFT",
+        d_preset="ULTRA",
+        use_upright=True,
+        num_threads=0
+    ):
         """Compute features in images."""
         self.logger.debug("Compute features of listed images")
 
@@ -90,15 +94,17 @@ class OpenMVGController():
 
         utils.execute(args, self.logger, OpenMVGControllerError)
 
-    def match_features(self,
-                       force_compute=False,
-                       ratio=0.8,
-                       geo_model="f",
-                       num_overlaps=3,
-                       pairlist_file=None,
-                       method="FASTCASCADEHASHINGL2",
-                       guided=False,
-                       cache_size=None):
+    def match_features(
+        self,
+        force_compute=False,
+        ratio=0.8,
+        geo_model="f",
+        num_overlaps=3,
+        pairlist_file=None,
+        method="FASTCASCADEHASHINGL2",
+        guided=False,
+        cache_size=None
+    ):
         """Match computed features of images."""
         self.logger.debug("Match features of images")
 
@@ -119,13 +125,15 @@ class OpenMVGController():
 
         utils.execute(args, self.logger, OpenMVGControllerError)
 
-    def reconstruct_multi(self,
-                          first_image=None,
-                          second_image=None,
-                          cam_model=3,
-                          refine_options="ADJUST_ALL",
-                          prior=True,
-                          match_file=None):
+    def reconstruct_multi(
+        self,
+        first_image=None,
+        second_image=None,
+        cam_model=3,
+        refine_options="ADJUST_ALL",
+        prior=True,
+        match_file=None
+    ):
         """Reconstructs using all algorithms provided by OpenMVG."""
         self.logger.debug("Do multi reconstruction and select best result")
 
@@ -172,13 +180,15 @@ class OpenMVGController():
         self.logger.debug(f"Copying {src} to {dst}")
         shutil.copyfile(src, dst)
 
-    def reconstruct_seq1(self,
-                         first_image=None,
-                         second_image=None,
-                         cam_model=3,
-                         refine_options="ADJUST_ALL",
-                         prior=True,
-                         match_file=None):
+    def reconstruct_seq1(
+        self,
+        first_image=None,
+        second_image=None,
+        cam_model=3,
+        refine_options="ADJUST_ALL",
+        prior=True,
+        match_file=None
+    ):
         """Reconstruct 3D models sequentially."""
         # set manually the initial pair to avoid the prompt question
         self.logger.debug("Do incremental/sequential reconstructions")
@@ -205,13 +215,15 @@ class OpenMVGController():
 
         return num_points
 
-    def reconstruct_seq2(self,
-                         first_image=None,
-                         second_image=None,
-                         cam_model=3,
-                         refine_options="ADJUST_ALL",
-                         prior=True,
-                         match_file=None):
+    def reconstruct_seq2(
+        self,
+        first_image=None,
+        second_image=None,
+        cam_model=3,
+        refine_options="ADJUST_ALL",
+        prior=True,
+        match_file=None
+    ):
         """Reconstruct 3D models sequentially."""
         # set manually the initial pair to avoid the prompt question
         self.logger.debug("Do incremental/sequential reconstructions")
@@ -238,12 +250,14 @@ class OpenMVGController():
 
         return num_points
 
-    def reconstruct_global(self,
-                           first_image=None,
-                           second_image=None,
-                           refine_options="ADJUST_ALL",
-                           prior=True,
-                           match_file=None):
+    def reconstruct_global(
+        self,
+        first_image=None,
+        second_image=None,
+        refine_options="ADJUST_ALL",
+        prior=True,
+        match_file=None
+    ):
         """Reconstruct 3D models globally."""
         # set manually the initial pair to avoid the prompt question
         self.logger.debug("Do global reconstructions")
