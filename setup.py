@@ -35,8 +35,7 @@ setuptools.setup(
     platforms=["Windows"],
     url="https://github.com/YgabrielsY/sispo",
     author="Gabriel J. Schwarzkopf, Mihkel Pajusalu",
-    license="BSD 2-Clause",
-
+    license="GNU General Public License v3",
     # Install package and all subpackages, ignore other folders
     packages=setuptools.find_namespace_packages(
         include=[
@@ -76,7 +75,6 @@ setuptools.setup(
         "Development Status :: 2 - Pre-Alpha",
         "Natural Language :: English",
     ],
-
     command_options={
         "build_sphinx": {
             "source_dir": ("setup.py", "doc/source"),
