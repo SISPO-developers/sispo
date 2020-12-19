@@ -96,9 +96,11 @@ class Reconstructor():
                 openMVG_dir = None
         else:
             openMVG_dir = None
-        self.oMVG = openmvg.OpenMVGController(self.res_dir,
-                                              ext_logger=self.logger,
-                                              openMVG_dir=openMVG_dir)
+        self.oMVG = openmvg.OpenMVGController(
+            self.res_dir,
+            ext_logger=self.logger,
+            openMVG_dir=openMVG_dir
+        )
 
         if openMVS_dir is not None:
             openMVS_dir = Path(openMVS_dir).resolve()
@@ -106,9 +108,11 @@ class Reconstructor():
                 openMVS_dir = None
         else:
             openMVS_dir = None
-        self.oMVS = openmvs.OpenMVSController(self.res_dir,
-                                              ext_logger=self.logger,
-                                              openMVS_dir=openMVS_dir)
+        self.oMVS = openmvs.OpenMVSController(
+            self.res_dir,
+            ext_logger=self.logger,
+            openMVS_dir=openMVS_dir
+        )
 
         self.focal = focal
         self.intrinsics = intrinsics

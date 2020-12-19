@@ -140,25 +140,31 @@ class OpenMVGController():
         self.reconstruct = utils.check_dir(self.res_dir / "reconstruct")
 
         points = {}
-        points["seq1"] = self.reconstruct_seq1(first_image,
-                                               second_image,
-                                               cam_model,
-                                               refine_options,
-                                               prior,
-                                               match_file)
+        points["seq1"] = self.reconstruct_seq1(
+            first_image,
+            second_image,
+            cam_model,
+            refine_options,
+            prior,
+            match_file
+        )
 
-        points["seq2"] = self.reconstruct_seq2(first_image,
-                                               second_image,
-                                               cam_model,
-                                               refine_options,
-                                               prior,
-                                               match_file)
+        points["seq2"] = self.reconstruct_seq2(
+            first_image,
+            second_image,
+            cam_model,
+            refine_options,
+            prior,
+            match_file
+        )
 
-        points["glob"] = self.reconstruct_global(first_image,
-                                                 second_image,
-                                                 refine_options,
-                                                 prior,
-                                                 match_file)
+        points["glob"] = self.reconstruct_global(
+            first_image,
+            second_image,
+            refine_options,
+            prior,
+            match_file
+        )
 
         best = max(points, key=points.get, default="seq1")
         self.logger.debug(f"########################################")
