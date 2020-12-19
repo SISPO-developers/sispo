@@ -124,12 +124,14 @@ def benchmark(filepath, iterations=10000):
     logger.debug("skimage gaussian filter timing: %f s", time_sk_gauss)
     logger.debug("OpenCV gaussian filter timing: %f s", time_cv_gauss)
     logger.debug(
-        "Gaussian filter timing ratio skimage/OpenCV: %f", time_sk_gauss / time_cv_gauss)
+        "Gaussian filter timing ratio skimage/OpenCV: %f", time_sk_gauss / time_cv_gauss
+    )
 
     logger.debug("skimage resize timing: %f s", time_sk_resize)
     logger.debug("OpenCV resize timing: %f s", time_cv_resize)
     logger.debug(
-        "Resize timing ratio skimage/OpenCV: %f", time_sk_resize / time_cv_resize)
+        "Resize timing ratio skimage/OpenCV: %f", time_sk_resize / time_cv_resize
+    )
 
     logger.debug("Gaussian filter statistics")
 

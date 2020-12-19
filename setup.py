@@ -78,9 +78,9 @@ setuptools.setup(
     ],
 
     command_options={
-        'build_sphinx': {
-            'source_dir': ('setup.py', 'doc/source'),
-            'build_dir': ('setup.py', 'doc/build'),
+        "build_sphinx": {
+            "source_dir": ("setup.py", "doc/source"),
+            "build_dir": ("setup.py", "doc/build"),
         }
     },
 )
