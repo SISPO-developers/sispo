@@ -19,6 +19,6 @@ cd build_star_cats || exit
 
 cp ../star_cats/* .
 make
-rm *.* LICENSE makefile
+rm -- *.* LICENSE makefile
 
 echo "Installing star catalogue library done"
