@@ -1,7 +1,6 @@
 """Class to control openMVS behaviour."""
 
 from pathlib import Path
-import subprocess
 
 from . import utils
 

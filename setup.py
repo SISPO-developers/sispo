@@ -1,3 +1,4 @@
+"""This file handles the SISPO setup"""
 import re
 from pathlib import Path
 

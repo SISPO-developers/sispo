@@ -5,24 +5,23 @@ This implementation uses the blender python module bpy.
 """
 
 import math
-from pathlib import Path
 import json
 import struct
 import time
 import threading
 import zlib
+from pathlib import Path
 
-from astropy import units as u
 import bpy
 import cv2
-from mathutils import Vector, Quaternion  # pylint: disable=import-error
 import numpy as np
+from astropy import units as u
+from mathutils import Vector, Quaternion  # pylint: disable=import-error
 
 from . import compositor as cp
+from . import starcat, utils
 from .compositor import *
-from . import starcat
 from .starcat import *
-from . import utils
 
 
 class RenderingError(RuntimeError):

@@ -4,12 +4,11 @@ Reconstruction module to create 3D models from images.
 Currently this module uses openMVG and openMVS.
 """
 
-from datetime import datetime
 import logging
+from datetime import datetime
 from pathlib import Path
 
-from . import openmvg
-from . import openmvs
+from . import openmvg, openmvs
 
 
 class Reconstructor():

@@ -5,14 +5,14 @@ This module is the main contribution of my master thesis.
 """
 
 import bz2
-from datetime import datetime
 import gzip
 import logging
 import lzma
-from pathlib import Path
 import shutil
 import threading
 import zlib
+from datetime import datetime
+from pathlib import Path
 
 import cv2
 import numpy as np

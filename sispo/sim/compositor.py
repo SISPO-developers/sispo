@@ -6,18 +6,17 @@ and because the intensity of the blender rendered images are not constant, the
 compositor is required to fix the intensity issue and add the star background.
 """
 
-from datetime import datetime
 import json
-from pathlib import Path
 import threading
+from pathlib import Path
+from datetime import datetime
 
-from astropy import constants as const
-from astropy import units as u
 import cv2
 import numpy as np
+from astropy import constants as const
+from astropy import units as u
 
 from . import utils
-
 
 #Astrometric calibrations 
 #https://www.cfa.harvard.edu/~dfabricant/huchra/ay145/mags.html
