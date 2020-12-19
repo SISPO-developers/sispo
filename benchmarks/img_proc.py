@@ -3,11 +3,11 @@ Benchmarks to compare scikit-image (skimage) against OpenCV performance.
 Compares image resizing and gaussian filtering.
 """
 
-from datetime import datetime
 import logging
-from pathlib import Path
 import time
 import sys
+from datetime import datetime
+from pathlib import Path
 
 import cv2
 import numpy as np

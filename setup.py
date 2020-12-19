@@ -1,5 +1,6 @@
-from pathlib import Path
 import re
+from pathlib import Path
+
 import setuptools
 
 here = Path(__file__).parent.resolve()
