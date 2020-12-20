@@ -2,7 +2,7 @@
 
 echo "Setup system for MasterThesis project"
 
-((
+( (
 echo "########## conda start ##########"
 cd conda || exit
 ./install.sh
