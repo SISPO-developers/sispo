@@ -9,6 +9,7 @@ import numpy as np
 import OpenEXR
 import Imath
 
+
 def check_dir(directory, create=True):
     """
     Resolves directory and creates it, if it doesn't existing.
@@ -73,12 +74,13 @@ def read_mat_string(string):
 
     return mat
 
+
 def write_mat_string(mat, prec):
     """Write data matrix into string."""
     o = "["
 
     for (n, m) in enumerate(mat):
-        o += (write_vec_string(m, prec))
+        o += write_vec_string(m, prec)
         if n < len(mat) - 1:
             o += ","
 
@@ -109,7 +111,7 @@ def read_openexr_image(filename):
         return None
 
     header = image.header()
-    
+
     size = header["displayWindow"]
     resolution = (size.max.x - size.min.x + 1, size.max.y - size.min.y + 1)
 
@@ -121,16 +123,16 @@ def read_openexr_image(filename):
             channels = 3
     else:
         return None
-    
+
     image_o = np.zeros((resolution[1],resolution[0],channels), np.float32)
-    
+
     ch = ["R", "G", "B", "A"]
     pt = Imath.PixelType(Imath.PixelType.FLOAT)
 
     for c in range(0, channels):
         image_channel = np.fromstring(image.channel(ch[c], pt), np.float32)
         image_o[:, :, c] = image_channel.reshape(resolution[1], resolution[0])
-    
+
     image.close()
 
     return image_o
@@ -182,7 +184,7 @@ def read_png_image(filename):
 def check_file_ext(filename, extension):
     """Checks whether filename ends with extension and adds it if not."""
     is_path = False
-    
+
     if isinstance(filename, Path):
         is_path = True
         filename = str(filename)    
@@ -190,10 +192,10 @@ def check_file_ext(filename, extension):
         pass
     else:
         raise RuntimeError("Wrong input type for file extension check.")
-    
+
     if filename[-len(extension):] != extension:
         filename += extension
-    
+
     if is_path:
         filename = Path(filename)
 
@@ -210,7 +212,8 @@ def create_logger():
     logger = logging.getLogger("sim")
     logger.setLevel(logging.INFO)
     logger_formatter = logging.Formatter(
-        "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+        "%(asctime)s - %(name)s - %(funcName)s - %(message)s"
+    )
     file_handler = logging.FileHandler(str(log_file))
     file_handler.setLevel(logging.INFO)
     file_handler.setFormatter(logger_formatter)

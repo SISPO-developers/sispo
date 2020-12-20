@@ -15,7 +15,7 @@ class StarCatalogError(RuntimeError):
     pass
 
 
-class StarCatalog():
+class StarCatalog:
     """Class to access star catalogs and render stars."""
 
     def __init__(self, res_dir, ext_logger, starcat_dir=None):
@@ -24,7 +24,7 @@ class StarCatalog():
         self.logger = ext_logger
 
         self.root_dir = Path(__file__).parent.parent.parent
-        
+
         if starcat_dir is None:
             self.starcat_dir = self.root_dir / "data" / "UCAC4"
         else:
@@ -36,8 +36,8 @@ class StarCatalog():
                 raise StarCatalogError(e)
 
             if not starcat_dir.is_dir():
-                    starcat_dir = self.models_dir / starcat_dir.name
-                    starcat_dir = starcat_dir.resolve()
+                starcat_dir = self.models_dir / starcat_dir.name
+                starcat_dir = starcat_dir.resolve()
 
             if not starcat_dir.is_dir():
                 raise StarCatalogError("Given star cat dir does not exist.")
@@ -47,18 +47,14 @@ class StarCatalog():
 
         exe_dir = self.root_dir / "software" / "star_cats"
 
-        if ((exe_dir / "u4test").is_file() or
-                (exe_dir / "u4test.exe").is_file()):
+        if (exe_dir / "u4test").is_file() or (exe_dir / "u4test.exe").is_file():
             self.exe = exe_dir / "u4test"
-
         elif ((exe_dir / "star_cats" / "u4test").is_file() or
                 (exe_dir / "star_cats" / "u4test.exe").is_file()):
             self.exe = exe_dir / "star_cats" / "u4test"
-
         elif ((exe_dir / "build_star_cats" / "u4test").is_file() or
                 (exe_dir / "build_star_cats" / "u4test.exe").is_file()):
             self.exe = exe_dir / "build_star_cats" / "u4test"
-            
         else:
             raise StarCatalogError("UCAC4 interface could not be found.")
 
@@ -69,6 +65,7 @@ class StarCatalog():
         if sys.platform.startswith("win"):
             self.logger.debug("Windows system, surrpressing GPF dialog.")
             import ctypes
+
             SEM_NOGPFAULTERRORBOX = 0x0002  # From MSDN
             ctypes.windll.kernel32.SetErrorMode(SEM_NOGPFAULTERRORBOX)
 
@@ -77,14 +74,16 @@ class StarCatalog():
         res_file = self.res_dir / filename
         res_file = res_file.with_suffix(".txt")
 
-        command = [str(self.exe),
-                   str(ra),
-                   str(dec),
-                   str(width),
-                   str(height),
-                   "-h",
-                   str(self.starcat_dir),
-                   str(res_file)]
+        command = [
+            str(self.exe),
+            str(ra),
+            str(dec),
+            str(width),
+            str(height),
+            "-h",
+            str(self.starcat_dir),
+            str(res_file)
+        ]
 
         for _ in range(5):
             ret = subprocess.run(command)
