@@ -187,13 +187,13 @@ def check_file_ext(filename, extension):
 
     if isinstance(filename, Path):
         is_path = True
-        filename = str(filename)    
+        filename = str(filename)
     elif isinstance(filename, str):
         pass
     else:
         raise RuntimeError("Wrong input type for file extension check.")
 
-    if filename[-len(extension):] != extension:
+    if filename[-len(extension) :] != extension:
         filename += extension
 
     if is_path:
@@ -204,7 +204,7 @@ def check_file_ext(filename, extension):
 def create_logger():
     """Creates a logger with the common formatting."""
     now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
-    filename = (now + "_sim.log")
+    filename = now + "_sim.log"
     log_dir = Path(__file__).parent.parent.parent / "data" / "logs"
     log_dir = check_dir(log_dir)
     log_file = log_dir / filename
