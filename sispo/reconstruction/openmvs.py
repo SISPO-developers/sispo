@@ -118,9 +118,9 @@ class OpenMVSController():
         args.extend(["--remove-spikes", str(int(remove_spikes))])
         args.extend(["--close-holes", str(close_holes)])
         args.extend(["--smooth", str(smooth)])
-        
+
         utils.execute(args, self.logger, OpenMVSControllerError)
-        
+
     def refine_mesh(
         self,
         export_type="obj",

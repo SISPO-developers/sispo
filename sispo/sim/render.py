@@ -37,15 +37,17 @@ class BlenderControllerError(RuntimeError):
 class BlenderController:
     """Class to control blender module behaviour."""
 
-    def __init__(self, 
-                 res_dir,
-                 raw_dir,
-                 starcat_dir,
-                 instrument,
-                 sssb,
-                 with_infobox,
-                 with_clipping,
-                 ext_logger=None):
+    def __init__(
+        self,
+        res_dir,
+        raw_dir,
+        starcat_dir,
+        instrument,
+        sssb,
+        with_infobox,
+        with_clipping,
+        ext_logger=None
+    ):
         """Initialise blender controller class."""
 
         if ext_logger is not None:
@@ -77,18 +79,20 @@ class BlenderController:
         background.inputs[0].default_value = (0, 0, 0, 1.0)
 
         # Star catalog
-        self.sta = starcat.StarCatalog(self.raw_dir,
-                                       ext_logger=self.logger,
-                                       starcat_dir=starcat_dir)
+        self.sta = starcat.StarCatalog(
+            self.raw_dir, ext_logger=self.logger, starcat_dir=starcat_dir
+        )
 
         # Create compositor
-        self.comp = cp.ImageCompositor(self.res_dir,
-                                       self.raw_dir,
-                                       instrument,
-                                       sssb,
-                                       with_infobox,
-                                       with_clipping,
-                                       ext_logger=self.logger)
+        self.comp = cp.ImageCompositor(
+            self.res_dir,
+            self.raw_dir,
+            instrument,
+            sssb,
+            with_infobox,
+            with_clipping,
+            ext_logger=self.logger
+        )
 
         self.render_id = zlib.crc32(struct.pack("!f", time.time()))
 
@@ -104,7 +108,7 @@ class BlenderController:
     def set_scene_defaults(self, scenes=None):
         """
         Sets default settings to a scene.
-        
+
         :type scenes: None, String, bpy.types.Scene, list
         :param scenes: Scene(s) which default settings are applied to.
         """
@@ -115,7 +119,7 @@ class BlenderController:
             scene.sequencer_colorspace_settings.name = "Raw"
             scene.view_settings.view_transform = "Raw"
             scene.view_settings.look = "None"
-        
+
             scene.render.engine = "CYCLES"
             scene.cycles.feature_set = "EXPERIMENTAL"
             scene.cycles.min_bounces = 3
@@ -129,7 +133,7 @@ class BlenderController:
             scene.cycles.transparent_min_bounces = 8
             scene.cycles.transparent_max_bounces = 128
             scene.cycles.use_square_samples = True
-            #scene.cycles.use_animated_seed = True
+            # scene.cycles.use_animated_seed = True
             scene.cycles.seed = time.time()
             scene.cycles.film_transparent = True
 
@@ -143,7 +147,7 @@ class BlenderController:
 
         self.device = self._determine_device(device)
         self._set_cycles_device()
-        
+
         if tile_size is None:
             tile_size = self._get_tile_size()
 
@@ -234,11 +238,9 @@ class BlenderController:
             scene.render.resolution_x = res_x
             scene.render.resolution_y = res_y
 
-    def set_output_format(self,
-                          file_format="OPEN_EXR",
-                          color_depth="32",
-                          use_preview=True,
-                          scenes=None):
+    def set_output_format(
+        self, file_format="OPEN_EXR", color_depth="32", use_preview=True, scenes=None
+    ):
         """Set output file format."""
         for scene in self._get_scenes_iter(scenes):
             scene.render.image_settings.file_format = file_format
@@ -267,14 +269,16 @@ class BlenderController:
             scene.camera = camera
             scene.collection.objects.link(camera)
 
-    def configure_camera(self,
-                         camera_name="Camera",
-                         lens=35*u.mm,
-                         sensor=32*u.mm,
-                         clip_start=1E-5,
-                         clip_end=1E32,
-                         mode="PERSP", # Modes ORTHO, PERSP
-                         ortho_scale=7):
+    def configure_camera(
+        self,
+        camera_name="Camera",
+        lens=35*u.mm,
+        sensor=32*u.mm,
+        clip_start=1E-5,
+        clip_end=1E32,
+        mode="PERSP",  # Modes ORTHO, PERSP
+        ortho_scale=7
+    ):
         """Set camera configuration values."""
         camera = self.cameras[camera_name]
         camera.clip_end = clip_end
@@ -289,7 +293,7 @@ class BlenderController:
         camera.location = location
 
     def set_object_rot(self, angle, axis, obj):
-        obj.rotation_mode = 'AXIS_ANGLE'   
+        obj.rotation_mode = "AXIS_ANGLE"
         obj.rotation_axis_angle[0] = angle
         obj.rotation_axis_angle[1] = axis[0]
         obj.rotation_axis_angle[2] = axis[1]
@@ -330,8 +334,10 @@ class BlenderController:
             self.save_blender_dfile(metainfo["date"], scene)
 
         # Render star background
-        res = (self.default_scene.render.resolution_x, 
-               self.default_scene.render.resolution_y)
+        res = (
+            self.default_scene.render.resolution_x, 
+            self.default_scene.render.resolution_y
+        )
         fluxes = self.render_starmap(res, metainfo["date"])
 
         metainfo["total_flux"] = fluxes[0]
@@ -346,11 +352,12 @@ class BlenderController:
 
         with bpy.data.libraries.load(filename) as (data_from, data_to):
             data_to.objects = [
-                name for name in data_from.objects if name == object_name]
+                name for name in data_from.objects if name == object_name
+            ]
         if data_to.objects:
             obj = data_to.objects[0]
             obj.animation_data_clear()
-            
+
             for scene in self._get_scenes_iter(scenes):
                 scene.collection.objects.link(obj)
             return obj
@@ -384,7 +391,7 @@ class BlenderController:
         filename = str(filename)
 
         file_extension = ".json"
-        if filename[-len(file_extension):] != file_extension:
+        if filename[-len(file_extension) :] != file_extension:
             filename += file_extension
 
         with open(filename, "w+") as metafile:
@@ -392,7 +399,7 @@ class BlenderController:
 
     def _get_scenes_iter(self, scenes):
         """Checks scenes input to allow different types and create iterator.
-        
+
         Input can either be None, a scene name (str), a list of scene names,
         a single scene, or a list of scenes.
         Output is an iterator which can be used for looping through scenes.
@@ -438,16 +445,16 @@ class BlenderController:
         right_edge -= direction
         up_norm = upper_edge.normalized()
         right_norm = right_edge.normalized()
-        f_over_h_ccd_2 = 1. / upper_edge.length
-        f_over_w_ccd_2 = 1. / right_edge.length
-        
+        f_over_h_ccd_2 = 1.0 / upper_edge.length
+        f_over_w_ccd_2 = 1.0 / right_edge.length
+
         ss = 2
         starmap = np.zeros((res_y * ss, res_x * ss, 4), np.float32)
         
         # Set alpha channel
-        starmap[:, :, 3] = 1.
+        starmap[:, :, 3] = 1.0
 
-        total_flux = 0.
+        total_flux = 0.0
         for star in stardata:
             mag_star = star[2]
             flux = np.power(10., -0.4 * mag_star)
@@ -463,7 +470,7 @@ class BlenderController:
             if np.dot(vec, direction) < np.dot(vec2, direction):
                 vec = vec2
             x_pix = ss * ((f_over_w_ccd_2 * np.dot(right_norm, vec)
-                    / np.dot(direction, vec) + 1.)) * (res_x - 1) / 2.
+                    / np.dot(direction, vec) + 1.0)) * (res_x - 1) / 2.0
             x_pix = min(round(x_pix), res_x * ss - 1)
             x_pix = max(0, int(x_pix))
             y_pix = ss * ((-f_over_h_ccd_2 * np.dot(up_norm, vec)
@@ -476,23 +483,26 @@ class BlenderController:
         # Kernel size calculated to equal skimage.filters.gaussian
         # Reference:
         # https://github.com/scipy/scipy/blob/4bfc152f6ee1ca48c73c06e27f7ef021d729f496/scipy/ndimage/filters.py#L214
-        sig = ss / 2.
+        sig = ss / 2.0
         kernel = int((4 * sig + 0.5) * 2)
         ksize = (kernel, kernel)
 
         # Border type replicate is equal to skimage.filters.gaussian nearest
-        sm_gauss = cv2.GaussianBlur(starmap, ksize, sig, 
-                                        borderType=cv2.BORDER_REPLICATE)
+        sm_gauss = cv2.GaussianBlur(
+            starmap, ksize, sig, borderType=cv2.BORDER_REPLICATE
+        )
 
         sm_scale = np.zeros((res_y, res_x, 4), np.float32)
-        sm_scale = cv2.resize(sm_gauss, None, fx=1/ss, fy=1/ss,
-                                interpolation=cv2.INTER_AREA)
-        sm_scale *= (ss * ss)
+        sm_scale = cv2.resize(
+            sm_gauss, None, fx=1 / ss, fy=1 / ss, interpolation=cv2.INTER_AREA
+        )
+        sm_scale *= ss * ss
 
         filename = self.raw_dir / ("Stars_" + name_suffix)
         utils.write_openexr_image(filename, sm_scale)
 
         return (total_flux, np.sum(sm_scale[:, :, 0]))
+
 
 def get_fov_vecs(camera_name, scene_name):
     """Get camera position and direction vectors."""
@@ -519,6 +529,7 @@ def get_fov_vecs(camera_name, scene_name):
 
     return (direction, right_edge, left_edge, upper_edge, lower_edge)
 
+
 def get_ra_dec(vec):
     """Calculate Right Ascension (RA) and Declination (DEC) in radians."""
     vec = vec.normalized()
@@ -544,12 +555,11 @@ def get_fov(camera_name, scene_name):
         width = math.fabs(ra_max - (ra_min + 360))
     else:
         ra = (ra_max + ra_min) / 2
-        width = (ra_max - ra_min)
+        width = ra_max - ra_min
 
     dec_min = math.degrees(get_ra_dec(lower_edge)[1])
     dec_max = math.degrees(get_ra_dec(upper_edge)[1])
     dec = (dec_max + dec_min) / 2
-    height = (dec_max - dec_min)
+    height = dec_max - dec_min
 
     return (ra, dec, width, height)
- 

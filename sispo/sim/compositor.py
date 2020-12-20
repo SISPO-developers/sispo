@@ -20,16 +20,17 @@ from . import utils
 
 #Astrometric calibrations 
 #https://www.cfa.harvard.edu/~dfabricant/huchra/ay145/mags.html
-FLUX0_VBAND = 3640 * 1.51E7 * 0.16 * u.ph / (u.s * u.m ** 2) # Photons per m^2
-SUN_MAG_VBAND = -26.74 * u.mag # 1 AU distance
+FLUX0_VBAND = 3640 * 1.51E7 * 0.16 * u.ph / (u.s * u.m ** 2)  # Photons per m^2
+SUN_MAG_VBAND = -26.74 * u.mag  # 1 AU distance
 SUN_FLUX_VBAND_1AU = np.power(10., -0.4 * SUN_MAG_VBAND.value) * FLUX0_VBAND
+
 
 class ImageCompositorError(RuntimeError):
     """This is a generic error for the compositor."""
     pass
 
 
-class Frame():
+class Frame:
     """Class to wrap all data of a single frame."""
 
     metadata = None
@@ -38,13 +39,15 @@ class Frame():
     sssb_const_dist = None
     light_ref = None
 
-    def __init__(self,
-                 frame_id,
-                 image_dir=None,
-                 stars=None,
-                 sssb_only=None,
-                 sssb_const_dist=None,
-                 light_ref=None):
+    def __init__(
+        self,
+        frame_id,
+        image_dir=None,
+        stars=None,
+        sssb_only=None,
+        sssb_const_dist=None,
+        light_ref=None
+    ):
 
         self.id = frame_id
 
@@ -67,7 +70,7 @@ class Frame():
         h_slice = (height // 2 - 35, height // 2 + 35)
         w_slice = (width // 2 - 35, width // 2 + 35)
 
-        area = self.light_ref[h_slice[0]:h_slice[1], w_slice[0]:w_slice[1], 0]
+        area = self.light_ref[h_slice[0] : h_slice[1], w_slice[0] : w_slice[1], 0]
         intensities = np.mean(area)
         return intensities
 
@@ -89,14 +92,14 @@ class Frame():
         """
         if const_dist:
             sssb_max = np.max(
-                self.sssb_const_dist[:, :, 0] * self.sssb_const_dist[:, :, 3])
+                self.sssb_const_dist[:, :, 0] * self.sssb_const_dist[:, :, 3]
+            )
             sssb_sum = np.sum(
-                self.sssb_const_dist[:, :, 0] * self.sssb_const_dist[:, :, 3])
+                self.sssb_const_dist[:, :, 0] * self.sssb_const_dist[:, :, 3]
+            )
         else:
-            sssb_max = np.max(
-                self.sssb_only[:, :, 0] * self.sssb_only[:, :, 3])
-            sssb_sum = np.sum(
-                self.sssb_only[:, :, 0] * self.sssb_only[:, :, 3])
+            sssb_max = np.max(self.sssb_only[:, :, 0] * self.sssb_only[:, :, 3])
+            sssb_sum = np.sum(self.sssb_only[:, :, 0] * self.sssb_only[:, :, 3])
 
         return (sssb_max, sssb_sum)
 
@@ -115,10 +118,10 @@ class Frame():
 
         filename = frame_fmt_str.format("SssbOnly")
         self.sssb_only = utils.read_openexr_image(filename)
-        
+
         filename = frame_fmt_str.format("SssbConstDist")
         self.sssb_const_dist = utils.read_openexr_image(filename)
-        
+
         filename = frame_fmt_str.format("LightRef")
         self.light_ref = utils.read_openexr_image(filename)
 
@@ -139,23 +142,25 @@ class Frame():
         return metadata
 
 
-class ImageCompositor():
+class ImageCompositor:
     """This class provides functions to combine the final simulation images."""
 
     IMG_MIN_SIZE_INFOBOX = (1200, 1000)
     INFOBOX_SIZE = {"default": (400, 100), "min": (200, 50)}
 
-    def __init__(self, 
-                 res_dir,
-                 img_dir,
-                 instrument,
-                 sssb,
-                 with_infobox,
-                 with_clipping,
-                 ext_logger):
+    def __init__(
+        self,
+        res_dir,
+        img_dir,
+        instrument,
+        sssb,
+        with_infobox,
+        with_clipping,
+        ext_logger
+    ):
 
         self.logger = ext_logger
-        
+
         self.res_dir = res_dir
         self.image_dir = img_dir
 
@@ -170,7 +175,7 @@ class ImageCompositor():
         self.with_infobox = with_infobox
         self.with_clipping = with_clipping
 
-        self.logger.debug(f"Infobox: {with_infobox}. Clip: {with_clipping}.")
+        self.logger.debug("Infobox: %d. Clip: %d.", with_infobox, with_clipping)
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of SssbOnly scenes."""
@@ -203,11 +208,10 @@ class ImageCompositor():
         distances = distances[ind_sorted]
         rel_intensity = rel_intensity[ind_sorted]
 
-
         for last in range(len(distances)):
             if rel_intensity[last] == 0:
                 break
-        #last -= 1
+        # last -= 1
 
         rel_intensity = rel_intensity[:last]
 
@@ -244,7 +248,8 @@ class ImageCompositor():
             pass
         else:
             raise ImageCompositorError(
-                "Compositor.compose requires frame or list of frames as input")
+                "Compositor.compose requires frame or list of frames as input"
+            )
 
         for frame in frames:
 
@@ -263,28 +268,27 @@ class ImageCompositor():
 
             for thr in self._threads:
                 thr.join()
-
     
     def _compose(self, frame):
         """
         Composes raw images and adjusts light intensities.
-        
+
         :type frame: Frame
         :param frame: Frame containing necessary inormation for composition.
         """
-        
+
         # SSSB photometry
         sc_sun_dist = np.linalg.norm(frame.metadata["sc_pos"]) * u.m
         ref_flux = SUN_FLUX_VBAND_1AU * ((const.au / sc_sun_dist) ** 2)
         ref_flux *= self.inst.aperture_a * self.inst.pix_a 
-        ref_flux /= ((self.inst.focal_l ** 2) * np.pi)
+        ref_flux /= (self.inst.focal_l ** 2) * np.pi
         ref_flux = ref_flux.decompose()
 
         # Star photometry
         starmap_flux = FLUX0_VBAND * frame.metadata["total_flux"]
         starmap_flux *= self.inst.aperture_a
         starmap_flux = starmap_flux.decompose()
-            
+
         # Calibrate starmap
         (_, stars_sums) = frame.calc_stars_stats()
         frame.stars[:, :, 0:3] *= starmap_flux.value / stars_sums[0]
@@ -292,8 +296,8 @@ class ImageCompositor():
         # Create composition image array
         composed_img = np.zeros(frame.stars.shape, dtype=np.float32)
 
-        # Calibrate SSSB, depending on visible size 
-        dist_scale = np.power(1E6 * u.m / frame.metadata["distance"], 2.)  
+        # Calibrate SSSB, depending on visible size
+        dist_scale = np.power(1E6 * u.m / frame.metadata["distance"], 2.0)
         vis_dim = self.sssb["max_dim"] * dist_scale
 
         if vis_dim < 0.1:
@@ -301,7 +305,7 @@ class ImageCompositor():
             # Generate point source reference image
             sssb_ref = self.create_sssb_ref(self.inst.res)
             alpha = frame.sssb_const_dist[:, :, 3]
-            scale = frame.sssb_const_dist[:, :, 0:3] * alpha 
+            scale = frame.sssb_const_dist[:, :, 0:3] * alpha
             sssb_ref[:, :, 0:3] *= np.sum(scale, axis=-1) * dist_scale
 
             composed_img = self.inst.sense(sssb_ref[:, :, 0:3] + frame.stars[:, :, 0:3])
@@ -335,8 +339,8 @@ class ImageCompositor():
             try:
                 self.add_infobox(infobox_img, frame.metadata)
             except ImageCompositorError as e:
-                self.logger.debug(f"No Infobox could be added. {str(e)}!")
-            
+                self.logger.debug("No Infobox could be added. %s!", str(e))
+
             filename = self.res_dir / ("Comp_" + str(frame.id) + ".png")
             cv2.imwrite(str(filename), infobox_img)
 
@@ -350,7 +354,7 @@ class ImageCompositor():
             cv2.imwrite(str(filename), clipped_img)
 
             rel_pos = frame.metadata["sc_pos"] - frame.metadata["sssb_pos"]
-            rel_pos = rel_pos.value / 1000.
+            rel_pos = rel_pos.value / 1000.0
             filename = str(filename) + ".xyz"
             with open(str(filename), "w") as priorfile:
                 priorfile.write(f"{rel_pos[0]} {rel_pos[1]} {rel_pos[2]}")
@@ -358,12 +362,12 @@ class ImageCompositor():
             exrfile = self.image_dir / ("Comp_" + str(frame.id))
         else:
             exrfile = self.res_dir / ("Comp_" + str(frame.id))
-   
+
         utils.write_openexr_image(exrfile, composed_img)
 
     def create_sssb_ref(self, res, scale=5):
         """Creates a reference sssb image for calibration.
-        
+
         Sort of natural look by using image increased by factor of scale,
         gaussian blur the result and decimate to match size of other images.
         opencv resize algorithm needs integer divisable number of pixels
@@ -378,21 +382,22 @@ class ImageCompositor():
         res_y_sc = res_y * scale
         sssb_point = np.zeros((res_x_sc, res_y_sc, 4), np.float32)
 
-        sig = scale / 2.
+        sig = scale / 2.0
         kernel = int((4 * sig + 0.5) * 2)
         ksize = (kernel, kernel)
-        
+
         # Create point source and blur
-        sssb_point[res_x_sc//2, res_y_sc//2, :] = [1., 1., 1., 1.]
+        sssb_point[res_x_sc // 2, res_y_sc // 2, :] = [1., 1., 1., 1.]
         sssb_point = cv2.GaussianBlur(sssb_point, ksize, sig)
 
         sssb = np.zeros((res_x, res_y, 4), np.float32)
-        sssb = cv2.resize(sssb_point, None, fx=1/scale, fy=1/scale,
-                            interpolation=cv2.INTER_AREA)
+        sssb = cv2.resize(
+            sssb_point, None, fx=1 / scale, fy=1 / scale, interpolation=cv2.INTER_AREA
+        )
 
-        sssb *= (scale * scale)
+        sssb *= scale * scale
         sssb[:, :, 0:3] /= np.sum(sssb[:, :, 0:3])
-            
+
         return sssb
 
     def add_infobox(self, img, metadata, height=None, width=None):
@@ -419,8 +424,10 @@ class ImageCompositor():
         if height is not None or width is not None:
             if height > y_res or width > x_res:
                 raise ImageCompositorError("Infobox is bigger than image.")
-            elif (height < self.INFOBOX_SIZE["min"][0] or
-                    width < self.INFOBOX_SIZE["min"][1]):
+            elif (
+                height < self.INFOBOX_SIZE["min"][0]
+                or width < self.INFOBOX_SIZE["min"][1]
+            ):
                 raise ImageCompositorError("Infobox is too small to read.")
 
         sig = 3
@@ -442,21 +449,21 @@ class ImageCompositor():
         cv2.putText(textbox, dist, org_dist, font, font_size, color, sig)
 
         # See link above for explanation
-        sigma = sig / 2.
+        sigma = sig / 2.0
         kernel = int((4 * sigma + 0.5) * 2)
         ksize = (kernel, kernel)
         textbox = cv2.GaussianBlur(textbox, ksize, sigma)
         textbox = cv2.resize(textbox, (width, height), 
                                 interpolation=cv2.INTER_AREA)
         alpha_s = textbox[:, :, 3] / 255.0
-        alpha_l = 1. - alpha_s
+        alpha_l = 1.0 - alpha_s
 
         for c in range(3):
             tb_a = alpha_s * textbox[:, :, c]
-            img_a = alpha_l * img[y_res-height:y_res+1, x_res-width:x_res+1, c]
-            img_channel = (tb_a + img_a)
-            img[y_res-height:y_res+1, x_res-width:x_res+1, c] = img_channel
-        
+            img_a = alpha_l * img[y_res - height : y_res + 1, x_res - width : x_res + 1, c]
+            img_channel = tb_a + img_a
+            img[y_res - height : y_res + 1, x_res - width : x_res + 1, c] = img_channel
+
         return img
 
     def clip_color_depth(self, img):
@@ -469,10 +476,11 @@ class ImageCompositor():
         else:
             img = img[:, :, 0:3] * max_val
             img = img.astype(np.uint16)
-            img = np.asarray(img * (65535. / max_val), np.float32)
+            img = np.asarray(img * (65535.0 / max_val), np.float32)
             img = img.astype(np.uint16)
 
         return img
+
 
 if __name__ == "__main__":
     pass

@@ -11,7 +11,7 @@ from pathlib import Path
 from . import openmvg, openmvs
 
 
-class Reconstructor():
+class Reconstructor:
     """Reconstruction of a 3D object from images."""
 
     def __init__(
@@ -96,9 +96,7 @@ class Reconstructor():
         else:
             openMVG_dir = None
         self.oMVG = openmvg.OpenMVGController(
-            self.res_dir,
-            ext_logger=self.logger,
-            openMVG_dir=openMVG_dir
+            self.res_dir, ext_logger=self.logger, openMVG_dir=openMVG_dir
         )
 
         if openMVS_dir is not None:
@@ -108,9 +106,7 @@ class Reconstructor():
         else:
             openMVS_dir = None
         self.oMVS = openmvs.OpenMVSController(
-            self.res_dir,
-            ext_logger=self.logger,
-            openMVS_dir=openMVS_dir
+            self.res_dir, ext_logger=self.logger, openMVS_dir=openMVS_dir
         )
 
         self.focal = focal
@@ -176,11 +172,7 @@ class Reconstructor():
     def create_pointcloud(self):
         """Creates point cloud from images."""
         self.oMVG.analyse_images(
-            self.focal,
-            self.intrinsics,
-            self.cam_model,
-            self.use_prior,
-            self.prior_weights
+            self.focal, self.intrinsics, self.cam_model, self.use_prior, self.prior_weights
         )
         self.oMVG.compute_features(
             self.force_compute,
@@ -386,7 +378,7 @@ class Reconstructor():
     def reconstruct(self):
         """
         Applies entire reconstruction pipeline
-        
+
         Going from images over dense point cloud to textured mesh model.
         """
         self.create_pointcloud()
@@ -399,8 +391,8 @@ class Reconstructor():
         Creates local logger in case no external logger was provided.
         """
         now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
-        filename = (now + "_reconstruction.log")
-        log_dir = Path(__file__).resolve().parent.parent.parent 
+        filename = now + "_reconstruction.log"
+        log_dir = Path(__file__).resolve().parent.parent.parent
         log_dir = log_dir / "data" / "logs"
         if not log_dir.is_dir:
             Path.mkdir(log_dir)
@@ -408,7 +400,8 @@ class Reconstructor():
         logger = logging.getLogger("reconstruction")
         logger.setLevel(logging.DEBUG)
         logger_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+            "%(asctime)s - %(name)s - %(funcName)s - %(message)s"
+        )
         file_handler = logging.FileHandler(str(log_file))
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(logger_formatter)

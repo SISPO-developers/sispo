@@ -3,6 +3,7 @@
 import subprocess
 from pathlib import Path
 
+
 def check_dir(directory, create=True):
     """
     Resolves directory and creates it, if it doesn't existing.

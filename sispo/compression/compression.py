@@ -98,7 +98,7 @@ class Compressor():
                 self.logger.debug(f"Images must have size {self._res}!")
                 raise CompressionError(f"Images must have size {self._res}!")
 
-        xyz_file = ("Inst_" + img_id + self.img_extension + ".xyz")
+        xyz_file = "Inst_" + img_id + self.img_extension + ".xyz"
         xyz_path = self.image_dir / xyz_file
         if xyz_path.is_file():
             self.xyzs[img_id] = xyz_path
@@ -115,7 +115,7 @@ class Compressor():
         for img_id in self.img_ids:
             self.load_image(img_id)
 
-        self.logger.debug(f"Loaded {len(self.imgs.keys())} images")       
+        self.logger.debug("Loaded %d images", len(self.imgs.keys()))
 
     def unload_image(self, img_id):
         """Unload image with given img_id, keeps ID."""
@@ -130,7 +130,7 @@ class Compressor():
         Compresses and decompresses multiple images using :py:func:comp_decomp
         """
         method = self.comp_decomp
-        self.logger.debug(f"{method} img series with {max_threads} threads")
+        self.logger.debug("%s img series with %d threads", method, max_threads)
 
         self.img_ids = self.get_frame_ids()
 
@@ -142,12 +142,12 @@ class Compressor():
 
             if len(self._threads) < max_threads - 1:
                 # Allow up to 2 additional threads
-                thr = threading.Thread(target=method, args=(None,img_id))
+                thr = threading.Thread(target=method, args=(None, img_id))
                 thr.start()
                 self._threads.append(thr)
             else:
                 # If too many, also compress in main thread to not drop a frame
-                method(None,img_id)
+                method(None, img_id)
 
         for thr in self._threads:
             thr.join()
@@ -177,11 +177,11 @@ class Compressor():
     def compress(self, img=None, img_id=None):
         """
         Compresses images using predefined algorithm or file format.
-        
+
         :param img: Image to be compressed.
         :returns: A compressed image.
         """
-        
+
         if img is None and img_id is not None:
             self.load_image(img_id)
             img = self.imgs[img_id]
@@ -192,7 +192,7 @@ class Compressor():
             filename_raw = self.raw_dir / (str(img_id) + "." + self.algo)
             with open(str(self.raw_dir / filename_raw), "wb") as file:
                 file.write(img_cmp)
-            
+
             self.unload_image(img_id)
 
         return img_cmp
@@ -243,8 +243,7 @@ class Compressor():
 
             if "progressive" in settings:
                 if isinstance(settings["progressive"], bool):
-                    params += (cv2.IMWRITE_JPEG_PROGRESSIVE, 
-                               settings["progressive"])
+                    params += (cv2.IMWRITE_JPEG_PROGRESSIVE, settings["progressive"])
                 else:
                     raise CompressionError("JPEG progressive requires bool")
 
@@ -256,22 +255,19 @@ class Compressor():
 
             if "rst_interval" in settings:
                 if isinstance(settings["rst_interval"], int):
-                    params += (cv2.IMWRITE_JPEG_RST_INTERVAL,
-                               settings["rst_interval"])
+                    params += (cv2.IMWRITE_JPEG_RST_INTERVAL, settings["rst_interval"])
                 else:
                     raise CompressionError("JPEG rst_interval requires int")
 
             if "luma_quality" in settings:
                 if isinstance(settings["luma_quality"], int):
-                    params += (cv2.IMWRITE_JPEG_LUMA_QUALITY,
-                               settings["luma_quality"])
+                    params += (cv2.IMWRITE_JPEG_LUMA_QUALITY, settings["luma_quality"])
                 else:
                     raise CompressionError("JPEG luma_quality requires int")
 
             if "chroma_quality" in settings:
                 if isinstance(settings["chroma_quality"], int):
-                    params += (cv2.IMWRITE_JPEG_CHROMA_QUALITY,
-                               settings["chroma_quality"])
+                    params += (cv2.IMWRITE_JPEG_CHROMA_QUALITY, settings["chroma_quality"])
                 else:
                     raise CompressionError("JPEG chroma_quality requires int")
 
@@ -282,7 +278,7 @@ class Compressor():
         elif algo == "jpeg2000" or algo == "jp2":
             comp = self._decorate_cv_compress(cv2.imencode)
             settings["ext"] = ".jp2"
-            level = int(settings["level"] * 100) # Ranges from 0 to 1000
+            level = int(settings["level"] * 100)  # Ranges from 0 to 1000
             params = (cv2.IMWRITE_JPEG2000_COMPRESSION_X1000, level)
 
             settings["params"] = params
@@ -328,8 +324,7 @@ class Compressor():
                 # 7: JPEG
                 # Also some more experimental ones exist
                 if isinstance(settings["scheme"], int):
-                    params += (cv2.IMWRITE_TIFF_COMPRESSION,
-                               settings["scheme"])
+                    params += (cv2.IMWRITE_TIFF_COMPRESSION, settings["scheme"])
                 
                 else:
                     raise CompressionError("TIFF scheme requires int")
@@ -385,14 +380,14 @@ class Compressor():
     @staticmethod
     def _decorate_builtin_compress(func):
         def compress(img, settings):
-            if img.dtype == np.float32 and np.max(img) <= 1.:
+            if img.dtype == np.float32 and np.max(img) <= 1.0:
                 img_temp = img * 255
                 img = img_temp.astype(np.uint8)
             elif img.dtype == np.uint16:
                 img_temp = img / 255
                 img = img_temp.astype(np.uint8)
             elif img.dtype == np.uint8:
-                pass            
+                pass
             else:
                 raise RuntimeError("Invalid compression input")
             img_cmp = func(img, **settings)
@@ -422,13 +417,13 @@ class Compressor():
                 pass            
             else:
                 raise RuntimeError("Invalid compression input")
-            #if settings["ext"] == ".jpg":
+            # if settings["ext"] == ".jpg":
             #    img_temp = img / 255
             #    img = img_temp.astype(np.uint8)
             _, img_cmp = func(settings["ext"], img, settings["params"])
             img_cmp = np.array(img_cmp).tobytes()
             return img_cmp
-        
+
         return compress
 
     def _decorate_cv_decompress(self, func):
@@ -445,8 +440,8 @@ class Compressor():
         Creates local logger in case no external logger was provided.
         """
         now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
-        filename = (now + "_compression.log")
-        log_dir = Path(__file__).resolve().parent.parent.parent 
+        filename = now + "_compression.log"
+        log_dir = Path(__file__).resolve().parent.parent.parent
         log_dir = log_dir / "data" / "logs"
         if not log_dir.is_dir:
             Path.mkdir(log_dir)
@@ -454,7 +449,8 @@ class Compressor():
         logger = logging.getLogger("compression")
         logger.setLevel(logging.DEBUG)
         logger_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+            "%(asctime)s - %(name)s - %(funcName)s - %(message)s"
+        )
         file_handler = logging.FileHandler(str(log_file))
         file_handler.setLevel(logging.DEBUG)
         file_handler.setFormatter(logger_formatter)
@@ -466,7 +462,7 @@ class Compressor():
     def _check_dir(self, directory, create=True):
         """
         Resolves directory and creates it, if it doesn't existing.
-        
+
         :type directory: Path or str
         :param directory: Directory to be created if not existing
 

@@ -23,15 +23,18 @@ class OpenMVGController():
             self.openMVG_dir = root_dir / "software" / "openMVG" / "build_openMVG"
 
             if (self.openMVG_dir / "Windows-AMD64-Release" / "Release").is_dir():
-                self.openMVG_dir = self.openMVG_dir / "Windows-AMD64-Release" / "Release"
+                self.openMVG_dir = (
+                    self.openMVG_dir / "Windows-AMD64-Release" / "Release"
+                )
             elif (self.openMVG_dir / "install" / "bin").is_dir():
                 self.openMVG_dir = self.openMVG_dir / "install" / "bin"
             else:
                 raise OpenMVGControllerError("Could not find executables dir!")
         else:
             self.openMVG_dir = openMVG_dir
-        self.sensor_database = (root_dir / "data" /
-                                "sensor_database" / "sensor_width_camera_database.txt")
+        self.sensor_database = (
+            root_dir / "data" /"sensor_database" / "sensor_width_camera_database.txt"
+        )
 
         self.logger.debug("openMVG executables dir %s", str(self.openMVG_dir))
 
@@ -140,21 +143,11 @@ class OpenMVGController():
 
         points = {}
         points["seq1"] = self.reconstruct_seq1(
-            first_image,
-            second_image,
-            cam_model,
-            refine_options,
-            prior,
-            match_file
+            first_image, second_image, cam_model, refine_options, prior, match_file
         )
 
         points["seq2"] = self.reconstruct_seq2(
-            first_image,
-            second_image,
-            cam_model,
-            refine_options,
-            prior,
-            match_file
+            first_image, second_image, cam_model, refine_options, prior, match_file
         )
 
         points["glob"] = self.reconstruct_global(
@@ -166,11 +159,11 @@ class OpenMVGController():
         )
 
         best = max(points, key=points.get, default="seq1")
-        self.logger.debug(f"########################################")
-        self.logger.debug(f"Best reconstruction is: {best}")
-        self.logger.debug(f"Number of points: {points[best]}")
-        self.logger.debug(f"All results: {points}")
-        self.logger.debug(f"########################################")
+        self.logger.debug("########################################")
+        self.logger.debug("Best reconstruction is: %s", best)
+        self.logger.debug("Number of points: %d", points[best])
+        self.logger.debug("All results: %d", points)
+        self.logger.debug("########################################")
 
         if points[best] < 1:
             raise OpenMVGControllerError("Reconstruction unsuccessful!")
@@ -305,7 +298,7 @@ class OpenMVGController():
             text = ret.stdout + "\n" + ret.stderr
             idx = text.rfind(search_str)
             if idx > 0:
-                sub_str = text[idx:idx+20]
+                sub_str = text[idx : idx + 20]
                 num_points = [int(s) for s in sub_str.split() if s.isdigit()]
                 num_points = num_points[0]
         except OpenMVGControllerError as e:
