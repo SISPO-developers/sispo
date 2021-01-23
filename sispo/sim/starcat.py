@@ -7,8 +7,6 @@ import subprocess
 import sys
 from pathlib import Path
 
-from . import utils
-
 
 class StarCatalogError(RuntimeError):
     """Generic error for star catalog module."""

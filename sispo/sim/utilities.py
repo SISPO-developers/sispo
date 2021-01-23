@@ -1,4 +1,4 @@
-"""Utils module contains functions possibly used by all modules."""
+"""Utilities module contains functions possibly used by all modules."""
 
 import logging
 from pathlib import Path

@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 
 import numpy as np
-import sispo.sim.utils as utils
+import sispo.sim.utilities as utils
 
 
 class TestUtils(unittest.TestCase):

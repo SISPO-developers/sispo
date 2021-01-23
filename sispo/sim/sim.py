@@ -1,7 +1,7 @@
 """Trajectory simulation and object rendering module."""
 
-from datetime import datetime
 import json
+from datetime import datetime
 from pathlib import Path
 
 import numpy as np
@@ -13,18 +13,27 @@ OREKIT_DATA_FILE = FILE_DIR / "orekit-data.zip"
 OREKIT_VM = orekit.initVM() # pylint: disable=no-member
 setup_orekit_curdir(str(OREKIT_DATA_FILE))
 #################### orekit VM init ####################
-from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
+from org.orekit.time import (
+    AbsoluteDate,
+    TimeScalesFactory
+)  # pylint: disable=import-error
 from org.orekit.frames import FramesFactory  # pylint: disable=import-error
-from org.orekit.utils import Constants, PVCoordinates, AngularCoordinates  # pylint: disable=import-error
-from org.hipparchus.geometry.euclidean.threed import Vector3D, Rotation, RotationOrder, RotationConvention  # pylint: disable=import-error
+from org.orekit.utils import (
+    Constants,
+    PVCoordinates,
+    AngularCoordinates
+)  # pylint: disable=import-error
+from org.hipparchus.geometry.euclidean.threed import (
+    Vector3D,
+    Rotation,
+    RotationOrder,
+    RotationConvention
+)  # pylint: disable=import-error
 
-from . import cb
+from . import cb, sc, sssb, utilities
 from .cb import *
-from . import sc
 from .sc import *
-from . import sssb
 from .sssb import *
-from . import utils
 
 class SimulationError(RuntimeError):
     """Generic simulation error."""
@@ -69,14 +78,14 @@ class Environment():
         if ext_logger is not None:
             self.logger = ext_logger
         else:
-            self.logger = utils.create_logger()
+            self.logger = utilities.create_logger()
 
         self.opengl_renderer = opengl_renderer
         self.brdf_params = sssb.get('brdf_params', None)
 
         self.root_dir = Path(__file__).parent.parent.parent
         data_dir = self.root_dir / "data"
-        self.models_dir = utils.check_dir(data_dir / "models")
+        self.models_dir = utilities.check_dir(data_dir / "models")
 
         self.res_dir = res_dir
         
@@ -138,8 +147,8 @@ class Environment():
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
 
-        render_dir = utils.check_dir(self.res_dir)
-        raw_dir = utils.check_dir(render_dir / "raw")
+        render_dir = utilities.check_dir(self.res_dir)
+        raw_dir = utilities.check_dir(render_dir / "raw")
 
         if self.opengl_renderer:
             from .opengl import rendergl
