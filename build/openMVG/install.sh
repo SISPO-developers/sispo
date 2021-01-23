@@ -3,19 +3,19 @@
 echo "Installing openMVG start"
 
 # create dir
-cd ../..
+cd ../.. || exit
 [[ -d software ]] || mkdir software
-cd software
+cd software || exit
 
 [[ -d openMVG ]] || mkdir openMVG
-cd openMVG
+cd openMVG || exit
 
 # Clone git repo
 git clone --recursive https://github.com/openMVG/openMVG.git
 
 # Building
 [[ -d build_openMVG ]] || mkdir build_openMVG
-cd build_openMVG
+cd build_openMVG || exit
 
 cmake \
 	-S ../openMVG/src \

@@ -3,15 +3,15 @@
 echo "vcpkg install start"
 
 # Go to automation root
-cd ../../
+cd ../../ || exit
 
 # Create software dir
-mkdir software
-cd software
+mkdir software || exit
+cd software || exit
 
 # Get vcpkg
 git clone https://github.com/Microsoft/vcpkg.git
-cd vcpkg
+cd vcpkg || exit
 
 # Install and integrate
 ./bootstrap-vcpkg.sh

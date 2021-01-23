@@ -5,7 +5,7 @@
 
 Currently, a problem exists with the `mathutils` import in the `sim.py`. An import of `bpy` must be done before running sispo.
 
-## Documentation: 
+## Documentation
 
 [![Documentation Status](https://readthedocs.org/projects/sispo/badge/?version=latest)](https://sispo.readthedocs.io/en/latest/?badge=latest)
 
@@ -19,7 +19,7 @@ If you are using this package in a code project, please acknowledge by adding ou
 
 There is another repository linked to sispo which uses Docker to simplify the installation. Can be found here [sispo_docker](https://github.com/SISPO-developers/sispo_docker)
 
-# Acknowledgements
+## Acknowledgements
 Acknowledgements to packages used
 
 [![astropy](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat)](http://www.astropy.org/)

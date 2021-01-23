@@ -3,16 +3,16 @@
 echo "Installing blender as a python module start"
 
 # Creating blender directory
-cd ../..
+cd ../.. || exit
 [[ -d software ]] || mkdir software
-cd software
+cd software || exit
 
 [[ -d blender ]] || mkdir blender
-cd blender
+cd blender || exit
 
 # Get blender repo
 git clone https://git.blender.org/blender.git
-cd blender
+cd blender || exit
 git submodule update --init --recursive
 git submodule foreach git checkout master
 git submodule foreach pull --rebase origin master
@@ -31,9 +31,9 @@ make update
 #./build_files/build_environment/install_deps.sh
 
 # Configure and install blender bpy
-cd ..
+cd .. || exit
 [[ -d build_blender_bpy ]] || mkdir build_blender_bpy
-cd build_blender_bpy
+cd build_blender_bpy || exit
 cmake \
 	-C ../blender/build_files/cmake/config/bpy_module.cmake \
 	-S ../blender \

@@ -9,7 +9,6 @@ reconstruct the trajectory.
 
 import argparse
 import cProfile
-from datetime import datetime
 import io
 import json
 import logging
@@ -19,16 +18,16 @@ import logging
 import os
 os.environ["OPENCV_IO_ENABLE_JASPER"] = "TRUE"
 ###############################################################################
-from pathlib import Path
 import pstats
 import sys
 import time
+from datetime import datetime
+from pathlib import Path
 
 from .__init__ import __version__
 from .compression import *
 from .reconstruction import *
 from .sim import *
-from .sim import utils
 from .plugins import plugins
 
 logger = logging.getLogger("sispo")
@@ -135,7 +134,7 @@ def read_input():
 
         if args.outputdir is not None:
             res_dir = Path(args.outputdir).resolve()
-            res_dir = utils.check_dir(res_dir)
+            res_dir = utilities.check_dir(res_dir)
 
             settings["res_dir"] = res_dir
 
@@ -191,9 +190,9 @@ def _parse_paths(settings):
     for key in settings.keys():
         if "dir" in key:
             if "res" in key:
-                path = utils.check_dir(settings[key])
+                path = utilities.check_dir(settings[key])
             else:
-                path = utils.check_dir(settings[key], False)
+                path = utilities.check_dir(settings[key], False)
 
             settings[key] = path
         elif "file" in key:
@@ -313,7 +312,7 @@ def main():
 
     if settings["options"].with_compression:
         logger.debug("With compression")
-        comp = Compressor(**comp_settings, ext_logger=logger)
+        comp = compression.Compressor(**comp_settings, ext_logger=logger)
         comp.comp_decomp_series()
 
     if settings["options"].with_reconstruction:

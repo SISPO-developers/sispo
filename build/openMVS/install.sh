@@ -3,12 +3,12 @@
 echo "Installing openMVS start"
 
 # Create dir
-cd ../..
+cd ../.. || exit
 [[ -d software ]] || mkdir software
-cd software
+cd software || exit
 
 [[ -d openMVS ]] || mkdir openMVS
-cd openMVS
+cd openMVS || exit
 
 # Clone git repo
 [[ -d VCG ]] || git clone https://github.com/cdcseacave/VCG.git
@@ -16,7 +16,7 @@ cd openMVS
 
 # MBuild openMVS
 [[ -d build_openMVS ]] || mkdir build_openMVS
-cd build_openMVS
+cd build_openMVS || exit
 cmake \
 	-S ../openMVS \
 	-DCMAKE_BUILD_TYPE=Release \

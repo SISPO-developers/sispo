@@ -1,7 +1,7 @@
 """Utils module contains functions possibly used by all modules."""
 
-from pathlib import Path
 import subprocess
+from pathlib import Path
 
 
 def check_dir(directory, create=True):

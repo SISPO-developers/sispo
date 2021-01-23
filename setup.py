@@ -1,19 +1,20 @@
-from pathlib import Path
+"""This file handles the SISPO setup"""
 import re
+from pathlib import Path
+
 import setuptools
 
 here = Path(__file__).parent.resolve()
 
 
 def read(*parts):
-    with open(Path(here, *parts), 'r') as fp:
+    with open(Path(here, *parts), "r") as fp:
         return fp.read()
 
 
 def find_version(*file_paths):
     version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]",
-                              version_file, re.M)
+    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
     if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
@@ -35,16 +36,15 @@ setuptools.setup(
     platforms=["Windows"],
     url="https://github.com/YgabrielsY/sispo",
     author="Gabriel J. Schwarzkopf, Mihkel Pajusalu",
-    license="BSD 2-Clause",
-
+    license="GNU General Public License v3",
     # Install package and all subpackages, ignore other folders
     packages=setuptools.find_namespace_packages(
         include=[
             "sispo",
             "sispo.sim",
             "sispo.compression",
-            "sispo.reconstruction"
-            "sispo.plugins"
+            "sispo.reconstruction",
+            "sispo.plugins",
         ],
         exclude=[
             "*test*",
@@ -53,8 +53,8 @@ setuptools.setup(
             "*doc*",
             "*.vs*",
             "*.vscode*",
-            "*.mypy_cache*"
-        ]
+            "*.mypy_cache*",
+        ],
     ),
     # Check dependencies
     install_requires=[
@@ -63,27 +63,23 @@ setuptools.setup(
         "opencv-contrib-python",
         "openexr",
         "orekit",
-        "mathutils"
+        "mathutils",
     ],
-    entry_points={
-        "console_scripts": [
-            "sispo = sispo:main"
-        ]
-    },
+    entry_points={"console_scripts": ["sispo = sispo:main"]},
     include_package_data=True,
     zip_safe=False,
     classifiers=[
-        "Programming Language :: Python :: 3.6",
-        "License :: OSI Approved :: BSD License",
+        "Programming Language :: Python :: 3.7",
+        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
         "Operating System :: Microsoft :: Windows :: Windows 10",
         "Operating System :: POSIX :: Linux",
-        "Development Status :: 2 - Pre-Alpha"
+        "Development Status :: 2 - Pre-Alpha",
+        "Natural Language :: English",
     ],
-
     command_options={
-        'build_sphinx': {
-            'source_dir': ('setup.py', 'doc/source'),
-            'build_dir': ('setup.py', 'doc/build')
+        "build_sphinx": {
+            "source_dir": ("setup.py", "doc/source"),
+            "build_dir": ("setup.py", "doc/build"),
         }
-    }
+    },
 )

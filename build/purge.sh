@@ -1,12 +1,12 @@
 #!/bin/bash
 
 echo "Purging software directory: Proceed [y/n]"
-read confirmation
+read -r confirmation
 
 conda deactivate
 
-if [ $confirmation = y ]
-    then \ 
+if [ "$confirmation" = y ]
+    then \
 	    rm -r ../software & 
 	    #rm -r ../data & \
 	    wait 

@@ -69,7 +69,7 @@ class CelestialBody():
 
     def propagate(self, start, end, steps, mode=1, factor=2):
         """Propagates CB either at given start time or from start to end.
-        
+
         If start and end are given start is shifted a bit earlier to detect
         event at start. end is shifted a bit later to detect event at end.
         """
@@ -77,22 +77,22 @@ class CelestialBody():
 
         if end is None:
             self.propagator.propagate(start)
-        
+
         elif None not in (start, end):
             # TODO: check value of shift, technically 1s should be enough
-            shifted_start = start.shiftedBy(-60.)
-            shifted_end = end.shiftedBy(60.)
+            shifted_start = start.shiftedBy(-60.0)
+            shifted_end = end.shiftedBy(60.0)
 
             self.propagator.propagate(shifted_start, shifted_end)
 
         else:
             raise CelestialBodyError("Invalid arguments for propagation.")
 
-
     def setup_timesampler(self, start, end, steps, mode=1, factor=2):
         """Create and attach TimeSampler to propagator."""
-        self.time_sampler = TimeSampler(
-            start, end, steps, mode, factor).withHandler(self.event_handler)
+        self.time_sampler = TimeSampler(start, end, steps, mode, factor).withHandler(
+            self.event_handler
+        )
         self.propagator.addEventDetector(self.time_sampler)
 
 
@@ -135,25 +135,26 @@ class TimeSampler(DateDetector):
         """
 
         duration = end.durationFrom(start)
-        dt = duration / (steps - 1)
-        dtout = dt
+        dtime = duration / (steps - 1)
+        dtout = dtime
         self.times = []
-        t = 0.
+        time = 0.0
         self.recorder = RecordAndContinue()
 
         if mode == 1:
             for _ in range(0, steps):
-                self.times.append(start.shiftedBy(t))
-                t += dt
+                self.times.append(start.shiftedBy(time))
+                time += dtime
 
         elif mode == 2:
-            halfdur = duration / 2.
+            halfdur = duration / 2.0
 
             for _ in range(0, steps):
-                t2 = (halfdur + math.sinh((t - halfdur) * factor / halfdur)
-                    * halfdur / math.sinh(factor))
-                self.times.append(start.shiftedBy(t2))
-                t += dt
+                time2 = (halfdur + math.sinh(
+                    (time - halfdur) * factor / halfdur
+                    ) * halfdur / math.sinh(factor))
+                self.times.append(start.shiftedBy(time2))
+                time += dtime
             dtout = duration * math.sinh(factor / steps) / math.sinh(factor)
 
-        DateDetector.__init__(self, dtout / 2., 1., self.times)
+        DateDetector.__init__(self, dtout / 2.0, 1.0, self.times)

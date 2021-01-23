@@ -3,12 +3,12 @@
 echo "Download ucac4 star catalogue start"
 
 # Creating dir
-cd ../..
+cd ../.. || exit
 [[ -d data ]] || mkdir data
-cd data
+cd data || exit
 
 [[ -d ucac4 ]] || mkdir ucac4
-cd ucac4
+cd ucac4 || exit
 
 # Download data
 wget -r --no-parent -P . http://casdc.china-vo.org/mirror/UCAC/UCAC4/u4b/ &

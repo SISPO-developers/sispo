@@ -1,8 +1,7 @@
 """Class to control openMVG behaviour."""
 
-from pathlib import Path
 import shutil
-import subprocess
+from pathlib import Path
 
 from . import utils
 
@@ -24,15 +23,18 @@ class OpenMVGController():
             self.openMVG_dir = root_dir / "software" / "openMVG" / "build_openMVG"
 
             if (self.openMVG_dir / "Windows-AMD64-Release" / "Release").is_dir():
-                self.openMVG_dir = self.openMVG_dir / "Windows-AMD64-Release" / "Release"
+                self.openMVG_dir = (
+                    self.openMVG_dir / "Windows-AMD64-Release" / "Release"
+                )
             elif (self.openMVG_dir / "install" / "bin").is_dir():
                 self.openMVG_dir = self.openMVG_dir / "install" / "bin"
             else:
                 raise OpenMVGControllerError("Could not find executables dir!")
         else:
             self.openMVG_dir = openMVG_dir
-        self.sensor_database = (root_dir / "data" /
-            "sensor_database" / "sensor_width_camera_database.txt")
+        self.sensor_database = (
+            root_dir / "data" /"sensor_database" / "sensor_width_camera_database.txt"
+        )
 
         self.logger.debug("openMVG executables dir %s", str(self.openMVG_dir))
 
@@ -40,12 +42,14 @@ class OpenMVGController():
         self.input_dir = res_dir / "compressed"
         self.res_dir = res_dir
 
-    def analyse_images(self,
-                       focal=65437,
-                       intrinsics=None,
-                       cam_model=1,
-                       prior=True,
-                       p_weights=(1.0, 1.0, 1.0)):
+    def analyse_images(
+        self,
+        focal=65437,
+        intrinsics=None,
+        cam_model=1,
+        prior=True,
+        p_weights=(1.0, 1.0, 1.0)
+    ):
         """ImageListing step of reconstruction."""
         self.logger.debug("Start Imagelisting")
 
@@ -67,12 +71,14 @@ class OpenMVGController():
 
         utils.execute(args, self.logger, OpenMVGControllerError)
 
-    def compute_features(self,
-                         force_compute=False,
-                         descriptor="SIFT",
-                         d_preset="ULTRA",
-                         use_upright=True,
-                         num_threads=0):
+    def compute_features(
+        self,
+        force_compute=False,
+        descriptor="SIFT",
+        d_preset="ULTRA",
+        use_upright=True,
+        num_threads=0
+    ):
         """Compute features in images."""
         self.logger.debug("Compute features of listed images")
 
@@ -90,15 +96,17 @@ class OpenMVGController():
 
         utils.execute(args, self.logger, OpenMVGControllerError)
 
-    def match_features(self,
-                       force_compute=False,
-                       ratio=0.8,
-                       geo_model="f",
-                       num_overlaps=3,
-                       pairlist_file=None,
-                       method="FASTCASCADEHASHINGL2",
-                       guided=False,
-                       cache_size=None):
+    def match_features(
+        self,
+        force_compute=False,
+        ratio=0.8,
+        geo_model="f",
+        num_overlaps=3,
+        pairlist_file=None,
+        method="FASTCASCADEHASHINGL2",
+        guided=False,
+        cache_size=None
+    ):
         """Match computed features of images."""
         self.logger.debug("Match features of images")
 
@@ -119,45 +127,43 @@ class OpenMVGController():
 
         utils.execute(args, self.logger, OpenMVGControllerError)
 
-    def reconstruct_multi(self,
-                          first_image=None,
-                          second_image=None,
-                          cam_model=3,
-                          refine_options="ADJUST_ALL",
-                          prior=True,
-                          match_file=None):
+    def reconstruct_multi(
+        self,
+        first_image=None,
+        second_image=None,
+        cam_model=3,
+        refine_options="ADJUST_ALL",
+        prior=True,
+        match_file=None
+    ):
         """Reconstructs using all algorithms provided by OpenMVG."""
         self.logger.debug("Do multi reconstruction and select best result")
 
         self.reconstruct = utils.check_dir(self.res_dir / "reconstruct")
 
         points = {}
-        points["seq1"] = self.reconstruct_seq1(first_image,
-                                               second_image,
-                                               cam_model,
-                                               refine_options,
-                                               prior,
-                                               match_file)
+        points["seq1"] = self.reconstruct_seq1(
+            first_image, second_image, cam_model, refine_options, prior, match_file
+        )
 
-        points["seq2"] = self.reconstruct_seq2(first_image,
-                                               second_image,
-                                               cam_model,
-                                               refine_options,
-                                               prior,
-                                               match_file)
+        points["seq2"] = self.reconstruct_seq2(
+            first_image, second_image, cam_model, refine_options, prior, match_file
+        )
 
-        points["glob"] = self.reconstruct_global(first_image,
-                                                 second_image,
-                                                 refine_options,
-                                                 prior,
-                                                 match_file)
+        points["glob"] = self.reconstruct_global(
+            first_image,
+            second_image,
+            refine_options,
+            prior,
+            match_file
+        )
 
         best = max(points, key=points.get, default="seq1")
-        self.logger.debug(f"########################################")
-        self.logger.debug(f"Best reconstruction is: {best}")
-        self.logger.debug(f"Number of points: {points[best]}")
-        self.logger.debug(f"All results: {points}")
-        self.logger.debug(f"########################################")
+        self.logger.debug("########################################")
+        self.logger.debug("Best reconstruction is: %s", best)
+        self.logger.debug("Number of points: %d", points[best])
+        self.logger.debug("All results: %d", points)
+        self.logger.debug("########################################")
 
         if points[best] < 1:
             raise OpenMVGControllerError("Reconstruction unsuccessful!")
@@ -172,13 +178,15 @@ class OpenMVGController():
         self.logger.debug(f"Copying {src} to {dst}")
         shutil.copyfile(src, dst)
 
-    def reconstruct_seq1(self,
-                         first_image=None,
-                         second_image=None,
-                         cam_model=3,
-                         refine_options="ADJUST_ALL",
-                         prior=True,
-                         match_file=None):
+    def reconstruct_seq1(
+        self,
+        first_image=None,
+        second_image=None,
+        cam_model=3,
+        refine_options="ADJUST_ALL",
+        prior=True,
+        match_file=None
+    ):
         """Reconstruct 3D models sequentially."""
         # set manually the initial pair to avoid the prompt question
         self.logger.debug("Do incremental/sequential reconstructions")
@@ -205,13 +213,15 @@ class OpenMVGController():
 
         return num_points
 
-    def reconstruct_seq2(self,
-                         first_image=None,
-                         second_image=None,
-                         cam_model=3,
-                         refine_options="ADJUST_ALL",
-                         prior=True,
-                         match_file=None):
+    def reconstruct_seq2(
+        self,
+        first_image=None,
+        second_image=None,
+        cam_model=3,
+        refine_options="ADJUST_ALL",
+        prior=True,
+        match_file=None
+    ):
         """Reconstruct 3D models sequentially."""
         # set manually the initial pair to avoid the prompt question
         self.logger.debug("Do incremental/sequential reconstructions")
@@ -238,12 +248,14 @@ class OpenMVGController():
 
         return num_points
 
-    def reconstruct_global(self,
-                           first_image=None,
-                           second_image=None,
-                           refine_options="ADJUST_ALL",
-                           prior=True,
-                           match_file=None):
+    def reconstruct_global(
+        self,
+        first_image=None,
+        second_image=None,
+        refine_options="ADJUST_ALL",
+        prior=True,
+        match_file=None
+    ):
         """Reconstruct 3D models globally."""
         # set manually the initial pair to avoid the prompt question
         self.logger.debug("Do global reconstructions")
@@ -286,7 +298,7 @@ class OpenMVGController():
             text = ret.stdout + "\n" + ret.stderr
             idx = text.rfind(search_str)
             if idx > 0:
-                sub_str = text[idx:idx+20]
+                sub_str = text[idx : idx + 20]
                 num_points = [int(s) for s in sub_str.split() if s.isdigit()]
                 num_points = num_points[0]
         except OpenMVGControllerError as e:

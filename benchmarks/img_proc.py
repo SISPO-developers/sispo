@@ -3,13 +3,13 @@ Benchmarks to compare scikit-image (skimage) against OpenCV performance.
 Compares image resizing and gaussian filtering.
 """
 
-from datetime import datetime
-from pathlib import Path
+import logging
 import time
 import sys
+from datetime import datetime
+from pathlib import Path
 
 import cv2
-import logging
 import numpy as np
 import OpenEXR
 import Imath
@@ -18,7 +18,8 @@ import skimage
 logger = logging.getLogger("cv_skimage")
 logger.setLevel(logging.DEBUG)
 logger_formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+    "%(asctime)s - %(name)s - %(funcName)s - %(message)s"
+)
 
 now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
 filename = "cv_skimage.log"
@@ -41,7 +42,9 @@ def run_cv_gauss(image, sigma, kernel):
 
 
 def run_cv_resize(image, scale):
-    return cv2.resize(image, None, fx=1/scale, fy=1/scale, interpolation=cv2.INTER_AREA)
+    return cv2.resize(
+        image, None, fx=1 / scale, fy=1 / scale, interpolation=cv2.INTER_AREA
+    )
 
 
 def run_skimage_gauss(image, sigma, trunc):
@@ -104,65 +107,67 @@ def benchmark(filepath, iterations=10000):
     scale = 4
 
     logger.debug("Starting opencv vs skimage benchmarking")
-    logger.debug(f"Using image {filepath}")
-    logger.debug(f"Gaussian Sigma: {sigma} and Kernel: {kernel}")
-    logger.debug(f"Resizing scale: {scale}")
-    logger.debug(f"Iterations: #{iterations}")
+    logger.debug("Using image %s", filepath)
+    logger.debug("Gaussian Sigma: %d and Kernel: %d", sigma, kernel)
+    logger.debug("Resizing scale: %d", scale)
+    logger.debug("Iterations: #%d", iterations)
 
     raw_img = read_openexr_image(filepath)
 
     time_sk_gauss, time_sk_resize = benchmark_sk(
-        raw_img, sigma, trunc, scale, iterations)
+        raw_img, sigma, trunc, scale, iterations
+    )
     time_cv_gauss, time_cv_resize = benchmark_cv(
-        raw_img, sigma, kernel, scale, iterations)
+        raw_img, sigma, kernel, scale, iterations
+    )
 
-    logger.debug(f"skimage gaussian filter timing: {time_sk_gauss} s")
-    logger.debug(f"OpenCV gaussian filter timing: {time_cv_gauss} s")
+    logger.debug("skimage gaussian filter timing: %f s", time_sk_gauss)
+    logger.debug("OpenCV gaussian filter timing: %f s", time_cv_gauss)
     logger.debug(
-        f"Gaussian filter timing ratio skimage/OpenCV: {time_sk_gauss / time_cv_gauss}")
+        "Gaussian filter timing ratio skimage/OpenCV: %f", time_sk_gauss / time_cv_gauss
+    )
 
-    logger.debug(f"skimage resize timing: {time_sk_resize} s")
-    logger.debug(f"OpenCV resize timing: {time_cv_resize} s")
+    logger.debug("skimage resize timing: %f s", time_sk_resize)
+    logger.debug("OpenCV resize timing: %f s", time_cv_resize)
     logger.debug(
-        f"Resize timing ratio skimage/OpenCV: {time_sk_resize / time_cv_resize}")
+        "Resize timing ratio skimage/OpenCV: %f", time_sk_resize / time_cv_resize
+    )
 
     logger.debug("Gaussian filter statistics")
 
-    img_skimage = run_skimage_gauss(raw_img, sigma, trunc)
+    img_sk = run_skimage_gauss(raw_img, sigma, trunc)
     img_cv = run_cv_gauss(raw_img, sigma, kernel)
 
-    write_openexr_image(res_dir / "skimage.exr", img_skimage)
+    write_openexr_image(res_dir / "skimage.exr", img_sk)
     write_openexr_image(res_dir / "opencv.exr", img_cv)
 
-    diff = img_skimage - img_cv
-    logger.debug(f"Difference min: {np.min(diff)}; max: {np.max(diff)}")
+    diff = img_sk - img_cv
+    logger.debug("Difference min: %f; max: %f", np.min(diff), np.max(diff))
     write_openexr_image(res_dir / "diff.exr", diff)
 
-    equality = (img_skimage[:, :, 0:2] == img_cv[:, :, 0:2])
-    logger.debug(f"Equality all: {equality.all()}; any: {equality.any()}")
+    equality = img_sk[:, :, 0:2] == img_cv[:, :, 0:2]
+    logger.debug("Equality all: %d; any: %d", equality.all(), equality.any())
 
-    logger.debug(
-        f"Image skimage min: {np.min(img_skimage)}; max: {np.max(img_skimage)}")
-    logger.debug(f"Image OpenCV min: {np.min(img_cv)}; max: {np.max(img_cv)}")
+    logger.debug("Image skimage min: %f; max: %f", np.min(img_sk), np.max(img_sk))
+    logger.debug("Image OpenCV min: %f; max: %f", np.min(img_cv), np.max(img_cv))
 
     logger.debug("Resizing statistics")
 
-    img_skimage = run_skimage_resize(raw_img, scale)
+    img_sk = run_skimage_resize(raw_img, scale)
     img_cv = run_cv_resize(raw_img, scale)
 
-    write_openexr_image(res_dir / "skimage_resized.exr", img_skimage)
+    write_openexr_image(res_dir / "skimage_resized.exr", img_sk)
     write_openexr_image(res_dir / "opencv_resized.exr", img_cv)
 
-    diff = img_skimage - img_cv
-    logger.debug(f"Difference min: {np.min(diff)}; max: {np.max(diff)}")
+    diff = img_sk - img_cv
+    logger.debug("Difference min: %f; max: %f", np.min(diff), np.max(diff))
     write_openexr_image(res_dir / "resized_diff.exr", diff)
 
-    equality = img_skimage[:, :, 0:2] == img_cv[:, :, 0:2]
-    logger.debug(f"Equality all: {equality.all()}; any: {equality.any()}")
+    equality = img_sk[:, :, 0:2] == img_cv[:, :, 0:2]
+    logger.debug("Equality all: %d; any: %d", equality.all(), equality.any())
 
-    logger.debug(
-        f"Image skimage min: {np.min(img_skimage)}; max: {np.max(img_skimage)}")
-    logger.debug(f"Image OpenCV min: {np.min(img_cv)}; max: {np.max(img_cv)}")
+    logger.debug("Image skimage min: %f; max: %f", np.min(img_sk), np.max(img_sk))
+    logger.debug("Image OpenCV min: %f; max: %f", np.min(img_cv), np.max(img_cv))
 
 
 def read_openexr_image(filename):
@@ -171,12 +176,12 @@ def read_openexr_image(filename):
     if not OpenEXR.isOpenExrFile(str(filename)):
         return None
 
-    image = OpenEXR.InputFile(str(filename))
+    img = OpenEXR.InputFile(str(filename))
 
-    if not image.isComplete():
+    if not img.isComplete():
         return None
 
-    header = image.header()
+    header = img.header()
 
     size = header["displayWindow"]
     resolution = (size.max.x - size.min.x + 1, size.max.y - size.min.y + 1)
@@ -192,14 +197,14 @@ def read_openexr_image(filename):
 
     image_o = np.zeros((resolution[1], resolution[0], channels), np.float32)
 
-    ch = ["R", "G", "B", "A"]
-    pt = Imath.PixelType(Imath.PixelType.FLOAT)
+    chn = ["R", "G", "B", "A"]
+    pix_t = Imath.PixelType(Imath.PixelType.FLOAT)
 
-    for c in range(0, channels):
-        image_channel = np.frombuffer(image.channel(ch[c], pt), np.float32)
-        image_o[:, :, c] = image_channel.reshape(resolution[1], resolution[0])
+    for channel in range(0, channels):
+        img_chn = np.frombuffer(img.channel(chn[channel], pix_t), np.float32)
+        image_o[:, :, channel] = img_chn.reshape(resolution[1], resolution[0])
 
-    image.close()
+    img.close()
 
     return image_o
 
@@ -241,11 +246,11 @@ if __name__ == "__main__":
     try:
         args["filepath"] = Path(sys.argv[1]).resolve()
     except Exception as e:
-        raise RuntimeError("Include filepath as argument")
+        raise e from None
 
     try:
         args["iterations"] = int(sys.argv[2])
-    except Exception as e:
+    except Exception:
         logger.debug("No number of iterations given")
 
     benchmark(**args)
