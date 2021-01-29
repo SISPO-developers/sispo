@@ -7,6 +7,9 @@ import subprocess
 import sys
 from pathlib import Path
 
+from astroquery.vizier import Vizier
+import astropy.coordinates as coord
+import astropy.units as u
 
 class StarCatalogError(RuntimeError):
     """Generic error for star catalog module."""
@@ -18,6 +21,9 @@ class StarCatalog:
 
     def __init__(self, res_dir, ext_logger, starcat_dir=None):
         """."""
+
+        self.catalog = Vizier(catalog="UCAC4", row_limit=1000000)
+        return
 
         self.logger = ext_logger
 
@@ -107,6 +113,20 @@ class StarCatalog:
         self.logger.debug("Found %d stars in catalog", len(star_data))
 
         return star_data
+
+    def get_stardata_vizier(self, ra, dec, width, height):
+        """
+        Retrieves star data from Vizier
+        """
+
+        crds = coord.SkyCoord(
+            ra=ra, dec=dec, unit=(u.deg, u.deg), frame='icrs')
+        result = self.catalog.query_region(
+            crds, width=width*u.deg, height=height*u.deg)[0]
+
+        star_data = zip(result['RAJ2000'], result['DEJ2000'], result['f.mag'])
+
+        return [(ra, de, mag) for ra, de, mag in star_data]
 
 
 # class StarCache:
