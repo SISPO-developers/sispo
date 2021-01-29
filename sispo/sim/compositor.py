@@ -16,7 +16,7 @@ import numpy as np
 from astropy import constants as const
 from astropy import units as u
 
-from . import utils
+from . import utilities
 
 #Astrometric calibrations 
 #https://www.cfa.harvard.edu/~dfabricant/huchra/ay145/mags.html
@@ -114,16 +114,16 @@ class Frame:
         self.metadata = self.read_meta_file(frame_id, image_dir)
 
         filename = frame_fmt_str.format("Stars")
-        self.stars = utils.read_openexr_image(filename)
+        self.stars = utilities.read_openexr_image(filename)
 
         filename = frame_fmt_str.format("SssbOnly")
-        self.sssb_only = utils.read_openexr_image(filename)
+        self.sssb_only = utilities.read_openexr_image(filename)
 
         filename = frame_fmt_str.format("SssbConstDist")
-        self.sssb_const_dist = utils.read_openexr_image(filename)
+        self.sssb_const_dist = utilities.read_openexr_image(filename)
 
         filename = frame_fmt_str.format("LightRef")
-        self.light_ref = utils.read_openexr_image(filename)
+        self.light_ref = utilities.read_openexr_image(filename)
 
     def read_meta_file(self, frame_id, image_dir):
         """Reads metafile of a frame."""
