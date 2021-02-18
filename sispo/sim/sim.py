@@ -30,7 +30,7 @@ from org.hipparchus.geometry.euclidean.threed import (
     RotationConvention
 )  # pylint: disable=import-error
 
-from . import cb, sc, sssb, utilities
+from . import cb, sc, sssb, utils
 from .cb import *
 from .sc import *
 from .sssb import *
