@@ -23,7 +23,6 @@ class StarCatalog:
         """."""
 
         self.catalog = Vizier(catalog="UCAC4", row_limit=1000000)
-        return
 
         self.logger = ext_logger
 
