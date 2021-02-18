@@ -47,10 +47,10 @@ class OpenMVSController():
         """Increases number of points to make 3D model smoother."""
         self.logger.debug("Densify point cloud to make model smoother")
 
-        self.export_dir = utils.check_dir(self.res_dir / "export")
+        self.export_dir = utilities2.check_dir(self.res_dir / "export")
         self.export_scene = self.export_dir / "scene.mvs"
 
-        working_dir = utils.check_dir(self.res_dir / "dense")
+        working_dir = utilities2.check_dir(self.res_dir / "dense")
         self.dense_scene = working_dir / "scene_densified.mvs"
 
         args = [str(self.openMVS_dir / "DensifyPointCloud")]
@@ -153,7 +153,7 @@ class OpenMVSController():
         """
         self.logger.debug("Refine 3D mesh")
 
-        working_dir = utils.check_dir(self.res_dir / "refined_mesh")
+        working_dir = utilities2.check_dir(self.res_dir / "refined_mesh")
         self.refined_mesh = working_dir / "mesh_refined.mvs"
 
         args = [str(self.openMVS_dir / "RefineMesh")]
@@ -205,7 +205,7 @@ class OpenMVSController():
         """Add texture to mesh using images."""
         self.logger.debug("Add texture to mesh using images")
 
-        working_dir = utils.check_dir(self.res_dir / "textured_mesh")
+        working_dir = utilities2.check_dir(self.res_dir / "textured_mesh")
         self.textured_obj = working_dir / "textured_model.obj"
 
         # If no refined mesh exists, use regular mesh
@@ -234,4 +234,4 @@ class OpenMVSController():
         args.extend(["--empty-color", str(empty_color)])
         args.extend(["--orthographic-image-resolution", str(orthographic_res)])
 
-        utils.execute(args, self.logger, OpenMVSControllerError)
+        utilities2.execute(args, self.logger, OpenMVSControllerError)
