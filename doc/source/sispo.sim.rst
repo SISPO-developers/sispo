@@ -53,10 +53,10 @@ sispo.sim.starcat module
    :members:
    :undoc-members:
 
-sispo.sim.utilities module
+sispo.sim.utils module
 ----------------------
 
-.. automodule:: sispo.sim.utilities
+.. automodule:: sispo.sim.utils
    :members:
    :undoc-members:
 
