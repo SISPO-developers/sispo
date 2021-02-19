@@ -274,7 +274,7 @@ def main():
     filename = (now + "_sispo.log")
     log_dir = settings["res_dir"]
     if not log_dir.is_dir:
-        Path.mkdir(log_dir)
+        Path.mkdir(log_dir, parents=True)
     log_file = log_dir / filename
     file_handler = logging.FileHandler(str(log_file))
     file_handler.setLevel(logging.DEBUG)
