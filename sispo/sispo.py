@@ -16,6 +16,7 @@ import logging
 ################## Hack to enable JPEG2000 format in OpenCV ###################
 ######## See https://github.com/opencv/opencv/issues/14058 for details ########
 import os
+
 os.environ["OPENCV_IO_ENABLE_JASPER"] = "TRUE"
 ###############################################################################
 import pstats
@@ -26,9 +27,9 @@ from pathlib import Path
 
 from .__init__ import __version__
 from .compression import *
+from .plugins import plugins
 from .reconstruction import *
 from .sim import *
-from .plugins import plugins
 
 logger = logging.getLogger("sispo")
 logger.setLevel(logging.DEBUG)
