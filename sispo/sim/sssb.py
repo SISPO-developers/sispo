@@ -1,6 +1,7 @@
 """Defining behaviour of the small solar system body (SSSB)."""
 
 import math
+import logging
 from pathlib import Path
 
 import orekit
@@ -13,6 +14,9 @@ from org.hipparchus.geometry.euclidean.threed import Rotation, RotationOrder, Ro
 
 from .cb import CelestialBody
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class SmallSolarSystemBody(CelestialBody):
     """Handling properties and behaviour of SSSB."""

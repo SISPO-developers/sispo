@@ -7,6 +7,7 @@ compositor is required to fix the intensity issue and add the star background.
 """
 
 import json
+import logging
 import threading
 from pathlib import Path
 from datetime import datetime
@@ -17,6 +18,10 @@ from astropy import constants as const
 from astropy import units as u
 
 from . import utils
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 #Astrometric calibrations 
 #https://www.cfa.harvard.edu/~dfabricant/huchra/ay145/mags.html

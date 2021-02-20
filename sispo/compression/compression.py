@@ -17,6 +17,9 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class CompressionError(RuntimeError):
     """Generic error class for compression errors."""

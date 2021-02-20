@@ -1,5 +1,6 @@
 """Defining behaviour of the spacecraft (sc)."""
 
+import logging
 from pathlib import Path
 
 from astropy import units as u
@@ -17,6 +18,9 @@ from org.hipparchus.geometry.euclidean.threed import Vector3D  # pylint: disable
 
 from .cb import CelestialBody
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class Spacecraft(CelestialBody):
     """Handling properties and behaviour of the spacecraft."""

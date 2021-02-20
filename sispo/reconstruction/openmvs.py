@@ -1,9 +1,13 @@
 """Class to control openMVS behaviour."""
 
+import logging
 from pathlib import Path
 
 from . import utils
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class OpenMVSControllerError(RuntimeError):
     """Generic openMVS error."""

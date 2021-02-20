@@ -1,6 +1,7 @@
 """Module to define common attributes of celestial bodies."""
 
 import math
+import logging
 from pathlib import Path
 
 import orekit
@@ -11,6 +12,9 @@ from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
 from org.hipparchus.ode.events import Action # pylint: disable=import-error
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class CelestialBodyError(RuntimeError):
     """Generic error for CelestialBody and child classes."""

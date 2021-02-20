@@ -3,10 +3,14 @@ Interface for handling data from a star catalogue. Retrieve data as well as
 render and write images.
 """
 
+import logging
 import subprocess
 import sys
 from pathlib import Path
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class StarCatalogError(RuntimeError):
     """Generic error for star catalog module."""

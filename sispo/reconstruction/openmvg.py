@@ -1,10 +1,14 @@
 """Class to control openMVG behaviour."""
 
+import logging
 import shutil
 from pathlib import Path
 
 from . import utils
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class OpenMVGControllerError(RuntimeError):
     """Generic openMVG error."""

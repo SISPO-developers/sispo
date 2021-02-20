@@ -6,6 +6,7 @@ This implementation uses the blender python module bpy.
 
 import math
 import json
+import logging
 import struct
 import time
 import threading
@@ -23,6 +24,9 @@ from . import starcat, utilities
 from .compositor import *
 from .starcat import *
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class RenderingError(RuntimeError):
     """Generic error for rendering process."""

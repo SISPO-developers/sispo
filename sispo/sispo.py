@@ -30,10 +30,9 @@ from .reconstruction import *
 from .sim import *
 from .plugins import plugins
 
-logger = logging.getLogger("sispo")
-logger.setLevel(logging.DEBUG)
-logger_formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 
 def _create_parser():
@@ -264,7 +263,6 @@ def main():
     if settings["options"].verbose:
         stream_handler = logging.StreamHandler(sys.stdout)
         stream_handler.setLevel(logging.DEBUG)
-        stream_handler.setFormatter(logger_formatter)
         logger.addHandler(stream_handler)
 
     if settings["options"].profile:
@@ -277,8 +275,6 @@ def main():
         Path.mkdir(log_dir)
     log_file = log_dir / filename
     file_handler = logging.FileHandler(str(log_file))
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(logger_formatter)
     logger.addHandler(file_handler)
     logger.debug("\n\n################### NEW SISPO LOG ###################\n")
 

@@ -1,6 +1,7 @@
 """Trajectory simulation and object rendering module."""
 
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -34,6 +35,10 @@ from . import cb, sc, sssb, utilities
 from .cb import *
 from .sc import *
 from .sssb import *
+
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class SimulationError(RuntimeError):
     """Generic simulation error."""

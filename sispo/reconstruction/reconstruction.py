@@ -10,6 +10,9 @@ from pathlib import Path
 
 from . import openmvg, openmvs
 
+logging.basicConfig(
+    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 class Reconstructor:
     """Reconstruction of a 3D object from images."""
