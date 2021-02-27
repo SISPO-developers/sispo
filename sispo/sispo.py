@@ -16,6 +16,7 @@ import logging
 ################## Hack to enable JPEG2000 format in OpenCV ###################
 ######## See https://github.com/opencv/opencv/issues/14058 for details ########
 import os
+
 os.environ["OPENCV_IO_ENABLE_JASPER"] = "TRUE"
 ###############################################################################
 import pstats
@@ -26,9 +27,9 @@ from pathlib import Path
 
 from .__init__ import __version__
 from .compression import *
+from .plugins import plugins
 from .reconstruction import *
 from .sim import *
-from .plugins import plugins
 
 logger = logging.getLogger("sispo")
 logger.setLevel(logging.DEBUG)
@@ -134,7 +135,7 @@ def read_input():
 
         if args.outputdir is not None:
             res_dir = Path(args.outputdir).resolve()
-            res_dir = utilities.check_dir(res_dir)
+            res_dir = utils.check_dir(res_dir)
 
             settings["res_dir"] = res_dir
 
@@ -190,9 +191,9 @@ def _parse_paths(settings):
     for key in settings.keys():
         if "dir" in key:
             if "res" in key:
-                path = utilities.check_dir(settings[key])
+                path = utils.check_dir(settings[key])
             else:
-                path = utilities.check_dir(settings[key], False)
+                path = utils.check_dir(settings[key], False)
 
             settings[key] = path
         elif "file" in key:
