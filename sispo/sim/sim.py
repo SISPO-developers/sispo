@@ -32,9 +32,6 @@ from org.hipparchus.geometry.euclidean.threed import (
 )  # pylint: disable=import-error
 
 from . import cb, sc, sssb, utils
-from .cb import *
-from .sc import *
-from .sssb import *
 
 logger = logging.getLogger(__name__)
 
@@ -88,7 +85,7 @@ class Environment():
         
         self.starcat_dir = starcat_dir
 
-        self.inst = Instrument(instrument)
+        self.inst = sc.Instrument(instrument)
 
         self.ts = TimeScalesFactory.getTDB()
         self.ref_frame = FramesFactory.getICRF()
@@ -125,8 +122,8 @@ class Environment():
         self.with_infobox = with_infobox
         self.with_clipping = with_clipping
 
-        # # Setup rendering engine (renderer)
-        # self.setup_renderer()
+        # Setup rendering engine (renderer)
+        self.setup_renderer()
 
         # Setup SSSB
         self.setup_sssb(sssb)
@@ -216,10 +213,10 @@ class Environment():
         if not sun_model_file.is_file():
             raise SimulationError("Given SSSB model filename does not exist.")
 
-        self.sun = CelestialBody(settings["model"]["name"],
+        self.sun = cb.CelestialBody(settings["model"]["name"],
                                  model_file=sun_model_file)
-        # self.sun.render_obj = self.renderer.load_object(self.sun.model_file,
-        #                                                 self.sun.name)
+        self.sun.render_obj = self.renderer.load_object(self.sun.model_file,
+                                                        self.sun.name)
 
     def setup_sssb(self, settings):
         """Create SmallSolarSystemBody and respective blender object."""
@@ -237,17 +234,17 @@ class Environment():
         if not sssb_model_file.is_file():
             raise SimulationError("Given SSSB model filename does not exist.")
 
-        self.sssb = SmallSolarSystemBody(settings["model"]["name"],
-                                         self.mu_sun, 
-                                         settings["trj"],
-                                         settings["att"],
-                                         model_file=sssb_model_file)
-        # self.sssb.render_obj = self.renderer.load_object(
-        #                             self.sssb.model_file, 
-        #                             settings["model"]["name"], 
-        #                             ["SssbOnly"] + ([] if self.opengl_renderer else ["SssbConstDist"]))
-        # self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
-        # self.sssb.render_obj.location = (0.0, 0.0, 0.0)
+        self.sssb = sssb.SmallSolarSystemBody(settings["model"]["name"],
+                                              self.mu_sun, 
+                                              settings["trj"],
+                                              settings["att"],
+                                              model_file=sssb_model_file)
+        self.sssb.render_obj = self.renderer.load_object(
+                                    self.sssb.model_file, 
+                                    settings["model"]["name"], 
+                                    ["SssbOnly"] + ([] if self.opengl_renderer else ["SssbConstDist"]))
+        self.sssb.render_obj.rotation_mode = "AXIS_ANGLE"
+        self.sssb.render_obj.location = (0.0, 0.0, 0.0)
 
         # Setup previously generated coma
         coma = settings.get('coma', None)
@@ -295,7 +292,7 @@ class Environment():
                 mzpy_rot = self.pxpz_to_mzpy(sc_pxpz_rot)
                 sc_rot_state = AngularCoordinates(mzpy_rot, Vector3D(0., 0., 0.))
 
-        self.spacecraft = Spacecraft("CI",
+        self.spacecraft = sc.Spacecraft("CI",
                                      self.mu_sun,
                                      sc_state,
                                      self.encounter_date,
@@ -328,10 +325,10 @@ class Environment():
         if not lightref_model_file.is_file():
             raise SimulationError("Given lightref model filename does not exist.")
 
-        # self.lightref = self.renderer.load_object(lightref_model_file,
-        #                                           settings["model"]["name"],
-        #                                           scenes="LightRef")
-        # self.lightref.location = (0.0, 0.0, 0.0)
+        self.lightref = self.renderer.load_object(lightref_model_file,
+                                                  settings["model"]["name"],
+                                                  scenes="LightRef")
+        self.lightref.location = (0.0, 0.0, 0.0)
 
     def simulate(self):
         """Do simulation."""
