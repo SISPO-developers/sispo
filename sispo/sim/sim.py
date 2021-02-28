@@ -31,7 +31,7 @@ from org.hipparchus.geometry.euclidean.threed import (
     RotationConvention
 )  # pylint: disable=import-error
 
-from . import cb, sc, sssb, utilities
+from . import cb, sc, sssb, utils
 from .cb import *
 from .sc import *
 from .sssb import *
@@ -82,7 +82,7 @@ class Environment():
 
         self.root_dir = Path(__file__).parent.parent.parent
         data_dir = self.root_dir / "data"
-        self.models_dir = utilities.check_dir(data_dir / "models")
+        self.models_dir = utils.check_dir(data_dir / "models")
 
         self.res_dir = res_dir
         
@@ -146,8 +146,8 @@ class Environment():
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
 
-        render_dir = utilities.check_dir(self.res_dir)
-        raw_dir = utilities.check_dir(render_dir / "raw")
+        render_dir = utils.check_dir(self.res_dir)
+        raw_dir = utils.check_dir(render_dir / "raw")
 
         if self.opengl_renderer:
             from .opengl import rendergl

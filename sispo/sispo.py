@@ -132,7 +132,7 @@ def read_input():
 
         if args.outputdir is not None:
             res_dir = Path(args.outputdir).resolve()
-            res_dir = utilities.check_dir(res_dir)
+            res_dir = utils.check_dir(res_dir)
 
             settings["res_dir"] = res_dir
 
@@ -188,9 +188,9 @@ def _parse_paths(settings):
     for key in settings.keys():
         if "dir" in key:
             if "res" in key:
-                path = utilities.check_dir(settings[key])
+                path = utils.check_dir(settings[key])
             else:
-                path = utilities.check_dir(settings[key], False)
+                path = utils.check_dir(settings[key], False)
 
             settings[key] = path
         elif "file" in key:
