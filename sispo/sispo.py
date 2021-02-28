@@ -16,6 +16,7 @@ import logging
 ################## Hack to enable JPEG2000 format in OpenCV ###################
 ######## See https://github.com/opencv/opencv/issues/14058 for details ########
 import os
+
 os.environ["OPENCV_IO_ENABLE_JASPER"] = "TRUE"
 ###############################################################################
 import pstats
@@ -26,12 +27,10 @@ from pathlib import Path
 
 from .__init__ import __version__
 from .compression import *
+from .plugins import plugins
 from .reconstruction import *
 from .sim import *
-from .plugins import plugins
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 
@@ -260,13 +259,8 @@ def main():
     if settings is None:
         return
 
-    if settings["options"].verbose:
-        stream_handler = logging.StreamHandler(sys.stdout)
-        stream_handler.setLevel(logging.DEBUG)
-        logger.addHandler(stream_handler)
-
-    if settings["options"].profile:
-        pr = cProfile.Profile()
+    # Initialise logging
+    loggers = []
 
     now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
     filename = (now + "_sispo.log")
@@ -274,8 +268,17 @@ def main():
     if not log_dir.is_dir:
         Path.mkdir(log_dir)
     log_file = log_dir / filename
-    file_handler = logging.FileHandler(str(log_file))
-    logger.addHandler(file_handler)
+    file_logger = logging.FileHandler(log_file)
+    loggers.append(file_logger)
+
+    if settings["options"].verbose:
+        term_logger = logging.StreamHandler(sys.stdout)
+        term_logger.setLevel(logging.DEBUG)
+        loggers.append(term_logger)
+
+    logging.basicConfig(handlers=loggers, level=logging.DEBUG, force=True,
+                        format="%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+
     logger.debug("\n\n################### NEW SISPO LOG ###################\n")
 
     logger.debug("Settings:")
@@ -286,6 +289,7 @@ def main():
     recon_settings = settings["reconstruction"]
 
     if settings["options"].profile:
+        pr = cProfile.Profile()
         logger.debug("Start Profiling")
         pr.enable()
 
@@ -295,7 +299,7 @@ def main():
 
     if settings["options"].with_sim or settings["options"].with_render:
         logger.debug("With either simulation or rendering")
-        env = Environment(**sim_settings, ext_logger=logger, opengl_renderer=settings["options"].opengl)
+        env = Environment(**sim_settings, opengl_renderer=settings["options"].opengl)
 
         if settings["options"].with_sim:
             env.simulate()
@@ -308,12 +312,12 @@ def main():
 
     if settings["options"].with_compression:
         logger.debug("With compression")
-        comp = compression.Compressor(**comp_settings, ext_logger=logger)
+        comp = compression.Compressor(**comp_settings)
         comp.comp_decomp_series()
 
     if settings["options"].with_reconstruction:
         logger.debug("With reconstruction")
-        recon = Reconstructor(**recon_settings, ext_logger=logger)
+        recon = Reconstructor(**recon_settings)
         recon.reconstruct()
 
     t_end = time.time()

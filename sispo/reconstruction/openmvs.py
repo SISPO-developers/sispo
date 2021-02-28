@@ -5,8 +5,6 @@ from pathlib import Path
 
 from . import utils
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class OpenMVSControllerError(RuntimeError):
@@ -17,9 +15,8 @@ class OpenMVSControllerError(RuntimeError):
 class OpenMVSController():
     """Controls behaviour of openMVS data processing."""
 
-    def __init__(self, res_dir, ext_logger, openMVS_dir=None):
+    def __init__(self, res_dir, openMVS_dir=None):
         """."""
-        self.logger = ext_logger
 
         root_dir = Path(__file__).parent.parent.parent
         if openMVS_dir is None:
@@ -36,6 +33,8 @@ class OpenMVSController():
 
         self.res_dir = res_dir
 
+        logger.debug("Init finished")
+
     def densify_pointcloud(
         self,
         p_prio=-1,
@@ -49,7 +48,7 @@ class OpenMVSController():
         sample_mesh=0
     ):
         """Increases number of points to make 3D model smoother."""
-        self.logger.debug("Densify point cloud to make model smoother")
+        logger.debug("Densify point cloud to make model smoother")
 
         self.export_dir = utils.check_dir(self.res_dir / "export")
         self.export_scene = self.export_dir / "scene.mvs"
@@ -73,7 +72,7 @@ class OpenMVSController():
         args.extend(["--sample-mesh", str(sample_mesh)])
 
         try:
-            utils.execute(args, self.logger, OpenMVSControllerError)
+            utils.execute(args, logger, OpenMVSControllerError)
         except OpenMVSControllerError as e:
             pass
 
@@ -93,7 +92,7 @@ class OpenMVSController():
         smooth=2
     ):
         """Create a mesh from a 3D point cloud."""
-        self.logger.debug("Create mesh from point cloud")
+        logger.debug("Create mesh from point cloud")
 
         working_dir = utils.check_dir(self.res_dir / "mesh")
         self.mesh_scene = working_dir / "mesh.mvs"
@@ -103,7 +102,7 @@ class OpenMVSController():
         if self.dense_scene.is_file():
             args.extend(["-i", str(self.dense_scene)])
         elif self.export_scene.is_file():
-            self.logger.debug("Using exported scene instead of dense scene.")
+            logger.debug("Using exported scene instead of dense scene.")
             args.extend(["-i", str(self.export_scene)])
         else:
             raise OpenMVSControllerError("No pointcloud found, will not mesh")
@@ -123,7 +122,7 @@ class OpenMVSController():
         args.extend(["--close-holes", str(close_holes)])
         args.extend(["--smooth", str(smooth)])
 
-        utils.execute(args, self.logger, OpenMVSControllerError)
+        utils.execute(args, logger, OpenMVSControllerError)
 
     def refine_mesh(
         self,
@@ -155,7 +154,7 @@ class OpenMVSController():
         https://github.com/cdcseacave/openMVS/issues/378
         https://github.com/cdcseacave/openMVS/issues/230
         """
-        self.logger.debug("Refine 3D mesh")
+        logger.debug("Refine 3D mesh")
 
         working_dir = utils.check_dir(self.res_dir / "refined_mesh")
         self.refined_mesh = working_dir / "mesh_refined.mvs"
@@ -186,7 +185,7 @@ class OpenMVSController():
         args.extend(["--use-cuda", str(int(use_cuda))])
 
         try:
-            utils.execute(args, self.logger, OpenMVSControllerError)
+            utils.execute(args, logger, OpenMVSControllerError)
         except OpenMVSControllerError as e:
             pass
 
@@ -207,7 +206,7 @@ class OpenMVSController():
         orthographic_res=0
     ):
         """Add texture to mesh using images."""
-        self.logger.debug("Add texture to mesh using images")
+        logger.debug("Add texture to mesh using images")
 
         working_dir = utils.check_dir(self.res_dir / "textured_mesh")
         self.textured_obj = working_dir / "textured_model.obj"
@@ -217,7 +216,7 @@ class OpenMVSController():
         if self.refined_mesh.is_file():
             args.extend(["-i", str(self.refined_mesh)])
         elif self.mesh_scene.is_file():
-            self.logger.debug("Using regular mesh instead of refined mesh.")
+            logger.debug("Using regular mesh instead of refined mesh.")
             args.extend(["-i", str(self.mesh_scene)])
         else:
             raise OpenMVSControllerError("No mesh found, will not texture")
@@ -238,4 +237,4 @@ class OpenMVSController():
         args.extend(["--empty-color", str(empty_color)])
         args.extend(["--orthographic-image-resolution", str(orthographic_res)])
 
-        utils.execute(args, self.logger, OpenMVSControllerError)
+        utils.execute(args, logger, OpenMVSControllerError)

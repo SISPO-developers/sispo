@@ -14,8 +14,6 @@ from org.hipparchus.geometry.euclidean.threed import Rotation, RotationOrder, Ro
 
 from .cb import CelestialBody
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class SmallSolarSystemBody(CelestialBody):

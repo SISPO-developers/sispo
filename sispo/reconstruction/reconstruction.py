@@ -10,8 +10,6 @@ from pathlib import Path
 
 from . import openmvg, openmvs
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 class Reconstructor:
@@ -80,15 +78,9 @@ class Reconstructor:
         empty_color=16744231,
         orthographic_res=0,
         openMVG_dir=None,
-        openMVS_dir=None,
-        ext_logger=None
+        openMVS_dir=None
     ):
         """Initialises main directory and file structure."""
-
-        if ext_logger is not None:
-            self.logger = ext_logger
-        else:
-            self.logger = self._create_logger()
 
         self.res_dir = res_dir
 
@@ -99,7 +91,7 @@ class Reconstructor:
         else:
             openMVG_dir = None
         self.oMVG = openmvg.OpenMVGController(
-            self.res_dir, ext_logger=self.logger, openMVG_dir=openMVG_dir
+            self.res_dir, openMVG_dir=openMVG_dir
         )
 
         if openMVS_dir is not None:
@@ -109,7 +101,7 @@ class Reconstructor:
         else:
             openMVS_dir = None
         self.oMVS = openmvs.OpenMVSController(
-            self.res_dir, ext_logger=self.logger, openMVS_dir=openMVS_dir
+            self.res_dir, openMVS_dir=openMVS_dir
         )
 
         self.focal = focal
@@ -171,6 +163,8 @@ class Reconstructor:
         self.patch_heuristic = patch_heuristic
         self.empty_color = empty_color
         self.orthographic_res = orthographic_res
+
+        logger.debug("Init finished")
 
     def create_pointcloud(self):
         """Creates point cloud from images."""

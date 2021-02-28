@@ -19,8 +19,6 @@ from astropy import units as u
 
 from . import utils
 
-logging.basicConfig(
-    format="%(asctime)s - %(name)s - %(funcName)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
 #Astrometric calibrations 
@@ -160,11 +158,8 @@ class ImageCompositor:
         instrument,
         sssb,
         with_infobox,
-        with_clipping,
-        ext_logger
+        with_clipping
     ):
-
-        self.logger = ext_logger
 
         self.res_dir = res_dir
         self.image_dir = img_dir
@@ -180,7 +175,9 @@ class ImageCompositor:
         self.with_infobox = with_infobox
         self.with_clipping = with_clipping
 
-        self.logger.debug("Infobox: %d. Clip: %d.", with_infobox, with_clipping)
+        logger.debug("Infobox: %d. Clip: %d.", with_infobox, with_clipping)
+
+        logger.debug("Init finished")
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of SssbOnly scenes."""
@@ -344,7 +341,7 @@ class ImageCompositor:
             try:
                 self.add_infobox(infobox_img, frame.metadata)
             except ImageCompositorError as e:
-                self.logger.debug("No Infobox could be added. %s!", str(e))
+                logger.debug("No Infobox could be added. %s!", str(e))
 
             filename = self.res_dir / ("Comp_" + str(frame.id) + ".png")
             cv2.imwrite(str(filename), infobox_img)
