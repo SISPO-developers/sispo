@@ -72,7 +72,7 @@ class OpenMVSController():
         args.extend(["--sample-mesh", str(sample_mesh)])
 
         try:
-            utils.execute(args, logger, OpenMVSControllerError)
+            utils.execute(args, OpenMVSControllerError)
         except OpenMVSControllerError as e:
             pass
 
@@ -122,7 +122,7 @@ class OpenMVSController():
         args.extend(["--close-holes", str(close_holes)])
         args.extend(["--smooth", str(smooth)])
 
-        utils.execute(args, logger, OpenMVSControllerError)
+        utils.execute(args, OpenMVSControllerError)
 
     def refine_mesh(
         self,
@@ -185,7 +185,7 @@ class OpenMVSController():
         args.extend(["--use-cuda", str(int(use_cuda))])
 
         try:
-            utils.execute(args, logger, OpenMVSControllerError)
+            utils.execute(args, OpenMVSControllerError)
         except OpenMVSControllerError as e:
             pass
 
@@ -237,4 +237,4 @@ class OpenMVSController():
         args.extend(["--empty-color", str(empty_color)])
         args.extend(["--orthographic-image-resolution", str(orthographic_res)])
 
-        utils.execute(args, logger, OpenMVSControllerError)
+        utils.execute(args, OpenMVSControllerError)

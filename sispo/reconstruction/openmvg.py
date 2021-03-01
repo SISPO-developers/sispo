@@ -71,7 +71,7 @@ class OpenMVGController():
             args.extend(["-P"])
             args.extend(["-W", ";".join([str(value) for value in p_weights])])
 
-        utils.execute(args, logger, OpenMVGControllerError)
+        utils.execute(args, OpenMVGControllerError)
 
     def compute_features(
         self,
@@ -96,7 +96,7 @@ class OpenMVGController():
         args.extend(["-p", str(d_preset)])
         args.extend(["-n", str(num_threads)])
 
-        utils.execute(args, logger, OpenMVGControllerError)
+        utils.execute(args, OpenMVGControllerError)
 
     def match_features(
         self,
@@ -127,7 +127,7 @@ class OpenMVGController():
         if cache_size is not None:
             args.extend(["-c", str(cache_size)])
 
-        utils.execute(args, logger, OpenMVGControllerError)
+        utils.execute(args, OpenMVGControllerError)
 
     def reconstruct_multi(
         self,
@@ -296,7 +296,7 @@ class OpenMVGController():
         """Common interface for multi reconstruction approach."""
         num_points = 0
         try:
-            ret = utils.execute(args, logger, OpenMVGControllerError)
+            ret = utils.execute(args, OpenMVGControllerError)
             text = ret.stdout + "\n" + ret.stderr
             idx = text.rfind(search_str)
             if idx > 0:
@@ -324,4 +324,4 @@ class OpenMVGController():
 
         args.extend(["-n", str(num_threads)])
 
-        utils.execute(args, logger, OpenMVGControllerError)
+        utils.execute(args, OpenMVGControllerError)
