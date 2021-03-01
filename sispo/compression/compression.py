@@ -431,31 +431,6 @@ class Compressor():
 
         return decompress
 
-    @staticmethod
-    def _create_logger():
-        """
-        Creates local logger in case no external logger was provided.
-        """
-        now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
-        filename = now + "_compression.log"
-        log_dir = Path(__file__).resolve().parent.parent.parent
-        log_dir = log_dir / "data" / "logs"
-        if not log_dir.is_dir:
-            Path.mkdir(log_dir)
-        log_file = log_dir / filename
-        logger = logging.getLogger("compression")
-        logger.setLevel(logging.DEBUG)
-        logger_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(funcName)s - %(message)s"
-        )
-        file_handler = logging.FileHandler(str(log_file))
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logger_formatter)
-        logger.addHandler(file_handler)
-        logger.debug("\n\n############## NEW COMPRESSION LOG ##############\n")
-
-        return logger
-
     def _check_dir(self, directory, create=True):
         """
         Resolves directory and creates it, if it doesn't existing.
