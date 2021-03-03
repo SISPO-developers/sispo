@@ -1,8 +1,8 @@
 """Utilities module contains functions possibly used by all modules."""
 
 import logging
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 import cv2
 import numpy as np
