@@ -19,7 +19,7 @@ from astropy import units as u
 from mathutils import Vector, Quaternion  # pylint: disable=import-error
 
 from . import compositor as cp
-from . import starcat, utilities
+from . import starcat, utils
 from .compositor import *
 from .starcat import *
 
@@ -53,7 +53,7 @@ class BlenderController:
         if ext_logger is not None:
             self.logger = ext_logger
         else:
-            self.logger = utilities.create_logger()
+            self.logger = utils.create_logger()
 
         self.raw_dir = raw_dir
         self.res_dir = res_dir
@@ -395,7 +395,7 @@ class BlenderController:
             filename += file_extension
 
         with open(filename, "w+") as metafile:
-            json.dump(metainfo, metafile, default=utilities.serialise)
+            json.dump(metainfo, metafile, default=utils.serialise)
 
     def _get_scenes_iter(self, scenes):
         """Checks scenes input to allow different types and create iterator.
@@ -499,7 +499,7 @@ class BlenderController:
         sm_scale *= ss * ss
 
         filename = self.raw_dir / ("Stars_" + name_suffix)
-        utilities.write_openexr_image(filename, sm_scale)
+        utils.write_openexr_image(filename, sm_scale)
 
         return (total_flux, np.sum(sm_scale[:, :, 0]))
 
