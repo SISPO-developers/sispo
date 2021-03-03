@@ -7,9 +7,10 @@ import subprocess
 import sys
 from pathlib import Path
 
-from astroquery.vizier import Vizier
 import astropy.coordinates as coord
 import astropy.units as u
+from astroquery.vizier import Vizier
+
 
 class StarCatalogError(RuntimeError):
     """Generic error for star catalog module."""

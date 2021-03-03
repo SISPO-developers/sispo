@@ -8,8 +8,8 @@ compositor is required to fix the intensity issue and add the star background.
 
 import json
 import threading
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 import cv2
 import numpy as np
