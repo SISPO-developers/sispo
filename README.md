@@ -23,3 +23,6 @@ There is another repository linked to sispo which uses Docker to simplify the in
 Acknowledgements to packages used
 
 [![astropy](http://img.shields.io/badge/powered%20by-AstroPy-orange.svg?style=flat)](http://www.astropy.org/)
+
+## License
+[GPL-3.0](LICENSE) © Gabriel J. Schwarzkopf
