@@ -3,6 +3,7 @@
 [![sispo](https://img.shields.io/badge/powered%20by-sispo-orange?style=flat)](https://github.com/YgabrielsY/sispo)
 [![Documentation Status](https://readthedocs.org/projects/sispo/badge/?version=latest)](https://sispo.readthedocs.io/en/latest/?badge=latest)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3661054.svg)](https://doi.org/10.5281/zenodo.3661054)
+[![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 
 Currently, a problem exists with the `mathutils` import in the `sim.py`. An import of `bpy` must be done before running sispo.
 
