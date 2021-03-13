@@ -8,11 +8,13 @@ here = Path(__file__).parent.resolve()
 
 
 def read(*parts):
-    with open(Path(here, *parts), "r") as fp:
-        return fp.read()
+    """Reads file and returns content."""
+    with open(Path(here, *parts), "r") as file:
+        return file.read()
 
 
 def find_version(*file_paths):
+    """Retrives __version__ from given file."""
     version_file = read(*file_paths)
     version_match = re.search(
         r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
@@ -22,6 +24,7 @@ def find_version(*file_paths):
 
 
 def find_readme(*file_paths):
+    """Finds readme file from filepaths/name."""
     readme_file = read(*file_paths)
 
     if readme_file:
