@@ -7,9 +7,10 @@ compositor is required to fix the intensity issue and add the star background.
 """
 
 import json
-import threading
-from pathlib import Path
+import multiprocessing
+#import threading
 from datetime import datetime
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -217,7 +218,7 @@ class ImageCompositor:
 
         return rel_intensity
 
-    def compose(self, frames=None, max_threads=3):
+    def compose(self, frames=None, max_procs=None):
         """
         Composes different images into final image, uses multi-threading.
         
@@ -251,23 +252,28 @@ class ImageCompositor:
                 "Compositor.compose requires frame or list of frames as input"
             )
 
-        for frame in frames:
+        cpus = multiprocessing.cpu_count()
+        pool = multiprocessing.Pool(processes=(cpus-1))
 
-            for thr in self._threads:
-                if not thr.is_alive():
-                    self._threads.pop(self._threads.index(thr))
+        pool.map(self._compose, (frames,))
 
-            if len(self._threads) < max_threads - 1:
-                # Allow up to 2 additional threads
-                thr = threading.Thread(target=self._compose, args=(frame,))
-                thr.start()
-                self._threads.append(thr)
-            else:
-                # If too many, also compose in main thread to not drop a frame
-                self._compose(frame)
+        # for frame in frames:
 
-            for thr in self._threads:
-                thr.join()
+        #     for thr in self._threads:
+        #         if not thr.is_alive():
+        #             self._threads.pop(self._threads.index(thr))
+
+        #     if len(self._threads) < max_threads - 1:
+        #         # Allow up to 2 additional threads
+        #         thr = threading.Thread(target=self._compose, args=(frame,))
+        #         thr.start()
+        #         self._threads.append(thr)
+        #     else:
+        #         # If too many, also compose in main thread to not drop a frame
+        #         self._compose(frame)
+
+        #     for thr in self._threads:
+        #         thr.join()
     
     def _compose(self, frame):
         """
