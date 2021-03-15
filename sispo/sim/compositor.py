@@ -221,8 +221,6 @@ class ImageCompositor:
         """
         Composes different images into final image, uses multi-threading.
         
-        !!! CAUTION !!! Call only once at a time.
-        
         :type frames: String, Frame or List of Frame
         :param frames: FrameID, Frame or list of frames for calibration and
                        composition.
