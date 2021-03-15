@@ -11,17 +11,18 @@ Example images created by SISPO using the Blender renderer
 ==========================================================
 A final image using the Blender rendering pipeline consists of 4 raw images.
 
-.. image:: /figs/Stars_2017-08-15T115845-789000.jpg
-.. image:: /figs/SssbOnly_2017-08-15T115845-789000.jpg
-.. image:: /figs/SssbConstDist_2017-08-15T115845-789000.jpg
-.. image:: /figs/LightRef_2017-08-15T115845-789000.jpg
+.. image:: figs/Stars_2017-08-15T115845-789000.jpg
+.. image:: figs/SssbOnly_2017-08-15T115845-789000.jpg
+.. image:: figs/SssbConstDist_2017-08-15T115845-789000.jpg
+.. image:: figs/LightRef_2017-08-15T115845-789000.jpg
 
 These four images are combined using the compositor module to give the final images.
-.. image:: /figs/Inst_2017-08-15T115845-789000.jpg
+
+.. image:: figs/Inst_2017-08-15T115845-789000.jpg
 
 Overall python software structure
 =================================
-.. image:: /figs/programme_structure.svg
+.. image:: figs/programme_structure.svg
 
 Figure 1: Overall software structure with main package, sub-packages, modules and sub-modules.
 
@@ -29,15 +30,15 @@ A more detailed definition of classes, methods and attributes can be found under
 
 SISPO execution flow diagram
 ============================
-.. image:: /figs/programme_flow.svg
+.. image:: figs/programme_flow.svg
 
 Figure 2: Software flow diagram showing how functions are executed step by step.
 
-.. image:: /figs/programme_flow_sim.svg
+.. image:: figs/programme_flow_sim.svg
 
 Figure 3: Software flow diagram showing how functions are executed step by step during simulation.
 
-.. image:: /figs/programme_flow_reconstruct.svg
+.. image:: figs/programme_flow_reconstruct.svg
 
 Figure 4: Software flow diagram showing how functions are executed step by step during reconstruction.
 
