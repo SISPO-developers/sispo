@@ -10,6 +10,7 @@ Welcome to SISPO's documentation!
 Example images created by SISPO using the Blender renderer
 ==========================================================
 A final image using the Blender rendering pipeline consists of 4 raw images.
+
 .. image:: /figs/Stars_2017-08-15T115845-789000.jpg
 .. image:: /figs/SssbOnly_2017-08-15T115845-789000.jpg
 .. image:: /figs/SssbConstDist_2017-08-15T115845-789000.jpg
