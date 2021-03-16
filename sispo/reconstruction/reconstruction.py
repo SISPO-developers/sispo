@@ -395,7 +395,7 @@ class Reconstructor:
         log_dir = Path(__file__).resolve().parent.parent.parent
         log_dir = log_dir / "data" / "logs"
         if not log_dir.is_dir:
-            Path.mkdir(log_dir)
+            Path.mkdir(log_dir, parents=True)
         log_file = log_dir / filename
         logger = logging.getLogger("reconstruction")
         logger.setLevel(logging.DEBUG)

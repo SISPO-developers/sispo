@@ -444,7 +444,7 @@ class Compressor():
         log_dir = Path(__file__).resolve().parent.parent.parent
         log_dir = log_dir / "data" / "logs"
         if not log_dir.is_dir:
-            Path.mkdir(log_dir)
+            Path.mkdir(log_dir, parents=True)
         log_file = log_dir / filename
         logger = logging.getLogger("compression")
         logger.setLevel(logging.DEBUG)
@@ -479,7 +479,7 @@ class Compressor():
         if not dir_resolved.exists():
             if create:
                 self.logger.debug(f"{directory} doesn't exist. Creating it...")
-                Path.mkdir(dir_resolved)
+                Path.mkdir(dir_resolved, parents=True)
                 self.logger.debug("Finished!")
             else:
                 raise RuntimeError(f"Directory {directory} does not exist!")
