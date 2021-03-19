@@ -266,15 +266,15 @@ def main():
     if not log_dir.is_dir:
         Path.mkdir(log_dir, parents=True)
     log_file = log_dir / filename
-    loggers = [logging.FileHandler(log_file)]
+    log_handlers = [logging.FileHandler(log_file)]
 
     if settings["options"].verbose:
         term_logger = logging.StreamHandler(sys.stdout)
         term_logger.setLevel(logging.DEBUG)
-        loggers.append(term_logger)
+        log_handlers.append(term_logger)
 
     # Force logging reset to ensure correct style
-    logging.basicConfig(handlers=loggers, level=logging.DEBUG, force=True,
+    logging.basicConfig(handlers=log_handlers, level=logging.DEBUG, force=True,
                         format="%(asctime)s - %(name)s - %(funcName)s - %(message)s")
 
     logger.debug("\n\n################### NEW SISPO LOG ###################\n")
