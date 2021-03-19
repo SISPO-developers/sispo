@@ -26,7 +26,7 @@ def check_dir(directory, create=True):
     if not dir_resolved.exists():
         if create:
             print(f"{directory} does not exist. Creating it...")
-            Path.mkdir(dir_resolved)
+            Path.mkdir(dir_resolved, parents=True)
             print("Done!")
         else:
             raise RuntimeError(f"Directory {directory} does not exist!")

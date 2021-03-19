@@ -8,19 +8,24 @@ here = Path(__file__).parent.resolve()
 
 
 def read(*parts):
-    with open(Path(here, *parts), "r") as fp:
-        return fp.read()
+    """Reads file and returns content."""
+    with open(Path(here, *parts), "r") as file:
+        return file.read()
 
 
 def find_version(*file_paths):
+    """Retrives __version__ from given file."""
     version_file = read(*file_paths)
-    version_match = re.search(r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M)
+    version_match = re.search(
+        r"^__version__ = ['\"]([^'\"]*)['\"]", version_file, re.M
+    )
     if version_match:
         return version_match.group(1)
     raise RuntimeError("Unable to find version string.")
 
 
 def find_readme(*file_paths):
+    """Finds readme file from filepaths/name."""
     readme_file = read(*file_paths)
 
     if readme_file:
@@ -33,10 +38,10 @@ setuptools.setup(
     version=find_version("sispo", "__init__.py"),
     description="Space Imaging Simulator for Proximity Operations",
     long_description=find_readme("README.md"),
+    long_description_content_type="text/markdown",
     platforms=["Windows"],
-    url="https://github.com/YgabrielsY/sispo",
+    url="https://github.com/SISPO-developers/sispo",
     author="Gabriel J. Schwarzkopf, Mihkel Pajusalu",
-    license="GNU General Public License v3",
     # Install package and all subpackages, ignore other folders
     packages=setuptools.find_namespace_packages(
         include=[
@@ -70,7 +75,7 @@ setuptools.setup(
     zip_safe=False,
     classifiers=[
         "Programming Language :: Python :: 3.7",
-        "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
         "Operating System :: Microsoft :: Windows :: Windows 10",
         "Operating System :: POSIX :: Linux",
         "Development Status :: 2 - Pre-Alpha",
