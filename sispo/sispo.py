@@ -190,7 +190,9 @@ def _parse_paths(settings):
     """
     for key in settings.keys():
         if "dir" in key:
-            if "res" in key:
+            if "None" in settings[key]:
+                path = None
+            elif "res" in key:
                 path = utils.check_dir(settings[key])
             else:
                 path = utils.check_dir(settings[key], False)

@@ -4,11 +4,11 @@ Module providing an interface to a rendering engine (renderer).
 This implementation uses the blender python module bpy.
 """
 
-import math
 import json
+import math
 import struct
-import time
 import threading
+import time
 import zlib
 from pathlib import Path
 
@@ -16,7 +16,7 @@ import bpy
 import cv2
 import numpy as np
 from astropy import units as u
-from mathutils import Vector, Quaternion  # pylint: disable=import-error
+from mathutils import Quaternion, Vector  # pylint: disable=import-error
 
 from . import compositor as cp
 from . import starcat, utils
