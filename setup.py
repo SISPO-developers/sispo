@@ -42,6 +42,7 @@ setuptools.setup(
     platforms=["Windows"],
     url="https://github.com/SISPO-developers/sispo",
     author="Gabriel J. Schwarzkopf, Mihkel Pajusalu",
+    author_email="sispo-devs@outlook.com",
     # Install package and all subpackages, ignore other folders
     packages=setuptools.find_namespace_packages(
         include=[
