@@ -10,12 +10,25 @@ Welcome to SISPO's documentation!
 Example images created by SISPO using the Blender renderer
 ==========================================================
 A final image using the Blender rendering pipeline consists of 4 raw images.
+
+The first image shows the star background.
+
 .. image:: figs/Stars_2017-08-15T115845-789000.jpg
+
+The second image shows the image which includes only the SSSB.
+
 .. image:: figs/SssbOnly_2017-08-15T115845-789000.jpg
+
+The third image shows the image with the SSSB at a constant distant.
+
 .. image:: figs/SssbConstDist_2017-08-15T115845-789000.jpg
+
+The fourth image shows the light reference which is needed to compose the final image.
+
 .. image:: figs/LightRef_2017-08-15T115845-789000.jpg
 
-These four images are combined using the compositor module to give the final images.
+These four images are combined using the compositor module to give the final images below.
+
 .. image:: figs/Inst_2017-08-15T115845-789000.jpg
 
 Overall python software structure
