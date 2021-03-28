@@ -20,7 +20,8 @@ temp/
 !data/input/definition.json
 !data/models/
 !software/README.md
-!LICENSE/*.txt
+!LICENSES/GPL-3.0-or-later.txt
+!LICENSES/CC0-1.0.txt
 
 ## Ignore mypy files
 .mypy_cache/*
