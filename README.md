@@ -1,3 +1,9 @@
+<!--
+SPDX-FileCopyrightText: 2021 Gabriel J. Schwarzkopf <sispo-devs@outlook.com>
+
+SPDX-License-Identifier: GPL-3.0-or-later
+-->
+
 # Space Imaging Simulator for Proximity Operations (SISPO)
 
 [![sispo](https://img.shields.io/badge/powered%20by-sispo-orange?style=flat)](https://github.com/YgabrielsY/sispo)
