@@ -17,6 +17,7 @@ from pathlib import Path
 import cv2
 import numpy as np
 
+logger = logging.getLogger(__name__)
 
 class CompressionError(RuntimeError):
     """Generic error class for compression errors."""
@@ -31,13 +32,7 @@ class Compressor():
                  img_dir,
                  img_ext="exr",
                  algo=None,
-                 settings=None,
-                 ext_logger=None):
-
-        if ext_logger is not None:
-            self.logger = ext_logger
-        else:
-            self.logger = self._create_logger()
+                 settings=None):
 
         self.res_dir = self._check_dir(res_dir)
         self.image_dir = self._check_dir(img_dir)
@@ -57,10 +52,12 @@ class Compressor():
         self.select_algo(algo, settings)
         self.algo = algo
 
-        self.logger.debug(f"Compressing with algorithm {self.algo}")
-        self.logger.debug(f"Compressing with settings {self._settings}")
+        logger.debug(f"Compressing with algorithm {self.algo}")
+        logger.debug(f"Compressing with settings {self._settings}")
 
         self._threads = []
+
+        logger.debug("Init finished")
 
     def get_frame_ids(self):
         """Extract list of frame ids from file names of Inst(rument) images."""
@@ -74,7 +71,7 @@ class Compressor():
             file_name = file_name.strip(scene_name)
             ids.append(file_name.strip("_"))
 
-        self.logger.debug(f"Found {len(ids)} frame ids")
+        logger.debug(f"Found {len(ids)} frame ids")
 
         return ids
 
@@ -85,7 +82,7 @@ class Compressor():
         :type img_id: str
         :param img_id: id of the image to load
         """
-        self.logger.debug(f"Load image {img_id}")
+        logger.debug(f"Load image {img_id}")
         img_path = self.image_dir / ("Inst_" + img_id + self.img_extension)
         img = cv2.imread(str(img_path), cv2.IMREAD_UNCHANGED)
         self.imgs[img_id] = img
@@ -95,7 +92,7 @@ class Compressor():
             if self.imgs[id0] is not None:
                 self._res = self.imgs[id0].shape
             if not img.shape == self._res:
-                self.logger.debug(f"Images must have size {self._res}!")
+                logger.debug(f"Images must have size {self._res}!")
                 raise CompressionError(f"Images must have size {self._res}!")
 
         xyz_file = "Inst_" + img_id + self.img_extension + ".xyz"
@@ -115,7 +112,7 @@ class Compressor():
         for img_id in self.img_ids:
             self.load_image(img_id)
 
-        self.logger.debug("Loaded %d images", len(self.imgs.keys()))
+        logger.debug("Loaded %d images", len(self.imgs.keys()))
 
     def unload_image(self, img_id):
         """Unload image with given img_id, keeps ID."""
@@ -130,7 +127,7 @@ class Compressor():
         Compresses and decompresses multiple images using :py:func:comp_decomp
         """
         method = self.comp_decomp
-        self.logger.debug("%s img series with %d threads", method, max_threads)
+        logger.debug("%s img series with %d threads", method, max_threads)
 
         self.img_ids = self.get_frame_ids()
 
@@ -164,7 +161,7 @@ class Compressor():
         decompressed_img = self.decompress(compressed_img)
 
         if img_id is not None:
-            self.logger.debug(f"Save image {img_id}")
+            logger.debug(f"Save image {img_id}")
             filename = self.res_dir / (str(img_id) + ".png")
             params = (cv2.IMWRITE_PNG_COMPRESSION, 9)
             cv2.imwrite(str(filename), decompressed_img, params)
@@ -172,7 +169,7 @@ class Compressor():
             if self.xyzs[img_id] is not None:
                 xyz_file = str(filename) + ".xyz"
                 shutil.copyfile(self.xyzs[img_id], xyz_file)
-                self.logger.debug(f"Save prior file {xyz_file}")
+                logger.debug(f"Save prior file {xyz_file}")
 
     def compress(self, img=None, img_id=None):
         """
@@ -434,31 +431,6 @@ class Compressor():
 
         return decompress
 
-    @staticmethod
-    def _create_logger():
-        """
-        Creates local logger in case no external logger was provided.
-        """
-        now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
-        filename = now + "_compression.log"
-        log_dir = Path(__file__).resolve().parent.parent.parent
-        log_dir = log_dir / "data" / "logs"
-        if not log_dir.is_dir:
-            Path.mkdir(log_dir, parents=True)
-        log_file = log_dir / filename
-        logger = logging.getLogger("compression")
-        logger.setLevel(logging.DEBUG)
-        logger_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(funcName)s - %(message)s"
-        )
-        file_handler = logging.FileHandler(str(log_file))
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logger_formatter)
-        logger.addHandler(file_handler)
-        logger.debug("\n\n############## NEW COMPRESSION LOG ##############\n")
-
-        return logger
-
     def _check_dir(self, directory, create=True):
         """
         Resolves directory and creates it, if it doesn't existing.
@@ -470,7 +442,7 @@ class Compressor():
         :param create: Set to false if directory should not be created and
                        instead an exception shall be raise
         """
-        self.logger.debug(f"Checking if directory {directory} exists...")
+        logger.debug(f"Checking if directory {directory} exists...")
         if isinstance(directory, str):
             directory = Path(directory)
 
@@ -478,12 +450,12 @@ class Compressor():
 
         if not dir_resolved.exists():
             if create:
-                self.logger.debug(f"{directory} doesn't exist. Creating it...")
-                Path.mkdir(dir_resolved, parents=True)
-                self.logger.debug("Finished!")
+                logger.debug(f"{directory} doesn't exist. Creating it...")
+                Path.mkdir(dir_resolved)
+                logger.debug("Finished!")
             else:
                 raise RuntimeError(f"Directory {directory} does not exist!")
         else:
-            self.logger.debug("Exists!")
+            logger.debug("Exists!")
 
         return dir_resolved

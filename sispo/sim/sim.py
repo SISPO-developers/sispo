@@ -1,6 +1,7 @@
 """Trajectory simulation and object rendering module."""
 
 import json
+import logging
 from datetime import datetime
 from pathlib import Path
 
@@ -31,9 +32,8 @@ from org.hipparchus.geometry.euclidean.threed import (
 )  # pylint: disable=import-error
 
 from . import cb, sc, sssb, utils
-from .cb import *
-from .sc import *
-from .sssb import *
+
+logger = logging.getLogger(__name__)
 
 class SimulationError(RuntimeError):
     """Generic simulation error."""
@@ -72,13 +72,7 @@ class Environment():
                  tile_size,
                  oneshot=False,
                  spacecraft=None,
-                 ext_logger=None,
                  opengl_renderer=False):
-
-        if ext_logger is not None:
-            self.logger = ext_logger
-        else:
-            self.logger = utils.create_logger()
 
         self.opengl_renderer = opengl_renderer
         self.brdf_params = sssb.get('brdf_params', None)
@@ -91,7 +85,7 @@ class Environment():
         
         self.starcat_dir = starcat_dir
 
-        self.inst = Instrument(instrument)
+        self.inst = sc.Instrument(instrument)
 
         self.ts = TimeScalesFactory.getTDB()
         self.ref_frame = FramesFactory.getICRF()
@@ -144,6 +138,8 @@ class Environment():
             # Setup Lightref
             self.setup_lightref(lightref)
 
+        logger.debug("Init finished")
+
     def setup_renderer(self):
         """Create renderer, apply common settings and create sc cam."""
 
@@ -152,7 +148,7 @@ class Environment():
 
         if self.opengl_renderer:
             from .opengl import rendergl
-            self.renderer = rendergl.RenderController(render_dir, stardb_path=self.starcat_dir, logger=self.logger)
+            self.renderer = rendergl.RenderController(render_dir, stardb_path=self.starcat_dir)
             self.renderer.create_scene("SssbOnly")
         else:
             from .render import BlenderController
@@ -162,8 +158,7 @@ class Environment():
                                               self.inst,
                                               self.sssb_settings,
                                               self.with_infobox,
-                                              self.with_clipping,
-                                              ext_logger=self.logger)
+                                              self.with_clipping)
 
         self.renderer.create_camera("ScCam")
 
@@ -218,7 +213,7 @@ class Environment():
         if not sun_model_file.is_file():
             raise SimulationError("Given SSSB model filename does not exist.")
 
-        self.sun = CelestialBody(settings["model"]["name"],
+        self.sun = cb.CelestialBody(settings["model"]["name"],
                                  model_file=sun_model_file)
         self.sun.render_obj = self.renderer.load_object(self.sun.model_file,
                                                         self.sun.name)
@@ -239,11 +234,11 @@ class Environment():
         if not sssb_model_file.is_file():
             raise SimulationError("Given SSSB model filename does not exist.")
 
-        self.sssb = SmallSolarSystemBody(settings["model"]["name"],
-                                         self.mu_sun, 
-                                         settings["trj"],
-                                         settings["att"],
-                                         model_file=sssb_model_file)
+        self.sssb = sssb.SmallSolarSystemBody(settings["model"]["name"],
+                                              self.mu_sun, 
+                                              settings["trj"],
+                                              settings["att"],
+                                              model_file=sssb_model_file)
         self.sssb.render_obj = self.renderer.load_object(
                                     self.sssb.model_file, 
                                     settings["model"]["name"], 
@@ -279,7 +274,7 @@ class Environment():
         sc_rot_state = None
         if spacecraft is None:
             sssb_state = self.sssb.get_state(self.encounter_date)
-            sc_state = Spacecraft.calc_encounter_state(sssb_state,
+            sc_state = sc.Spacecraft.calc_encounter_state(sssb_state,
                                                        self.minimum_distance,
                                                        self.relative_velocity,
                                                        self.with_terminator,
@@ -297,7 +292,7 @@ class Environment():
                 mzpy_rot = self.pxpz_to_mzpy(sc_pxpz_rot)
                 sc_rot_state = AngularCoordinates(mzpy_rot, Vector3D(0., 0., 0.))
 
-        self.spacecraft = Spacecraft("CI",
+        self.spacecraft = sc.Spacecraft("CI",
                                      self.mu_sun,
                                      sc_state,
                                      self.encounter_date,
@@ -328,7 +323,7 @@ class Environment():
                 lightref_model_file = lightref_model_file.resolve()
         
         if not lightref_model_file.is_file():
-            raise SimulationError("Given SSSB model filename does not exist.")
+            raise SimulationError("Given lightref model filename does not exist.")
 
         self.lightref = self.renderer.load_object(lightref_model_file,
                                                   settings["model"]["name"],
@@ -337,28 +332,28 @@ class Environment():
 
     def simulate(self):
         """Do simulation."""
-        self.logger.debug("Starting simulation")
+        logger.debug("Starting simulation")
 
-        self.logger.debug("Propagating SSSB")
+        logger.debug("Propagating SSSB")
         self.sssb.propagate(self.start_date,
                             self.end_date,
                             self.frames,
                             self.timesampler_mode,
                             self.slowmotion_factor)
 
-        self.logger.debug("Propagating Spacecraft")
+        logger.debug("Propagating Spacecraft")
         self.spacecraft.propagate(self.start_date,
                                   self.end_date,
                                   self.frames,
                                   self.timesampler_mode,
                                   self.slowmotion_factor)
 
-        self.logger.debug("Simulation completed")
+        logger.debug("Simulation completed")
         self.save_results()
 
     def render(self):
         """Render simulation scenario."""
-        self.logger.debug("Rendering simulation")
+        logger.debug("Rendering simulation")
         scaling = 1. if self.opengl_renderer else 1000.
         N = len(self.spacecraft.date_history)
 
@@ -418,11 +413,11 @@ class Environment():
 
             print('%d/%d' % (i+1, N))
 
-        self.logger.debug("Rendering completed")
+        logger.debug("Rendering completed")
 
     def save_results(self):
         """Save simulation results to a file."""
-        self.logger.debug("Saving propagation results")
+        logger.debug("Saving propagation results")
 
         float_formatter = "{:.16f}".format
         np.set_printoptions(formatter={'float_kind': float_formatter})
@@ -443,7 +438,7 @@ class Environment():
                 line = "\t".join([v[i] for v in print_list]) + "\n"
                 file.write(line)
 
-        self.logger.debug("Propagation results saved")
+        logger.debug("Propagation results saved")
 
 
 def convert_rot_to_angle_axis(rot, rot_conv):
@@ -489,9 +484,9 @@ def blend_to_icrf(sssb_cam_r, sssb_light_r, cam_quat, dist=1.5e11, verbose=False
         axis = sc_rot.getAxis(RotationConvention.FRAME_TRANSFORM)
         sc_rot_aa = np.array([angle, *axis.toArray()])
         arr2str = lambda arr: '[%s]' % ', '.join(['%f' % v for v in arr])
-        print('sc angle-axis: %s' % arr2str(sc_rot_aa))
-        print('sun-sc vect: %s' % arr2str(sun_sc_r))
-        print('sun-sssb vect: %s' % arr2str(sun_sssb_r))
+        logger.debug('sc angle-axis: %s' % arr2str(sc_rot_aa))
+        logger.debug('sun-sc vect: %s' % arr2str(sun_sc_r))
+        logger.debug('sun-sssb vect: %s' % arr2str(sun_sssb_r))
 
     return sc_rot, sun_sc_r, sun_sssb_r,
 

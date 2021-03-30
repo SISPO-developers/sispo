@@ -1,10 +1,12 @@
 """Class to control openMVG behaviour."""
 
+import logging
 import shutil
 from pathlib import Path
 
 from . import utils
 
+logger = logging.getLogger(__name__)
 
 class OpenMVGControllerError(RuntimeError):
     """Generic openMVG error."""
@@ -14,9 +16,7 @@ class OpenMVGControllerError(RuntimeError):
 class OpenMVGController():
     """Controls behaviour of openMVG data processing."""
 
-    def __init__(self, res_dir, ext_logger, openMVG_dir=None):
-
-        self.logger = ext_logger
+    def __init__(self, res_dir, openMVG_dir=None):
 
         root_dir = Path(__file__).parent.parent.parent
         if openMVG_dir is None:
@@ -36,11 +36,13 @@ class OpenMVGController():
             root_dir / "data" /"sensor_database" / "sensor_width_camera_database.txt"
         )
 
-        self.logger.debug("openMVG executables dir %s", str(self.openMVG_dir))
+        logger.debug("openMVG executables dir %s", str(self.openMVG_dir))
 
         #self.input_dir = root_dir / "data" / "ImageDataset_SceauxCastle-master" / "images"
         self.input_dir = res_dir / "compressed"
         self.res_dir = res_dir
+
+        logger.debug("Init finished")
 
     def analyse_images(
         self,
@@ -51,7 +53,7 @@ class OpenMVGController():
         p_weights=(1.0, 1.0, 1.0)
     ):
         """ImageListing step of reconstruction."""
-        self.logger.debug("Start Imagelisting")
+        logger.debug("Start Imagelisting")
 
         self.matches_dir = self.res_dir / "matches"
         self.matches_dir = utils.check_dir(self.matches_dir)
@@ -69,7 +71,7 @@ class OpenMVGController():
             args.extend(["-P"])
             args.extend(["-W", ";".join([str(value) for value in p_weights])])
 
-        utils.execute(args, self.logger, OpenMVGControllerError)
+        utils.execute(args, OpenMVGControllerError)
 
     def compute_features(
         self,
@@ -80,7 +82,7 @@ class OpenMVGController():
         num_threads=0
     ):
         """Compute features in images."""
-        self.logger.debug("Compute features of listed images")
+        logger.debug("Compute features of listed images")
 
         self.sfm_data = self.matches_dir / "sfm_data.json"
 
@@ -94,7 +96,7 @@ class OpenMVGController():
         args.extend(["-p", str(d_preset)])
         args.extend(["-n", str(num_threads)])
 
-        utils.execute(args, self.logger, OpenMVGControllerError)
+        utils.execute(args, OpenMVGControllerError)
 
     def match_features(
         self,
@@ -108,7 +110,7 @@ class OpenMVGController():
         cache_size=None
     ):
         """Match computed features of images."""
-        self.logger.debug("Match features of images")
+        logger.debug("Match features of images")
 
         args = [str(self.openMVG_dir / "openMVG_main_ComputeMatches")]
         args.extend(["-i", str(self.sfm_data)])
@@ -125,7 +127,7 @@ class OpenMVGController():
         if cache_size is not None:
             args.extend(["-c", str(cache_size)])
 
-        utils.execute(args, self.logger, OpenMVGControllerError)
+        utils.execute(args, OpenMVGControllerError)
 
     def reconstruct_multi(
         self,
@@ -137,7 +139,7 @@ class OpenMVGController():
         match_file=None
     ):
         """Reconstructs using all algorithms provided by OpenMVG."""
-        self.logger.debug("Do multi reconstruction and select best result")
+        logger.debug("Do multi reconstruction and select best result")
 
         self.reconstruct = utils.check_dir(self.res_dir / "reconstruct")
 
@@ -159,11 +161,11 @@ class OpenMVGController():
         )
 
         best = max(points, key=points.get, default="seq1")
-        self.logger.debug("########################################")
-        self.logger.debug("Best reconstruction is: %s", best)
-        self.logger.debug("Number of points: %d", points[best])
-        self.logger.debug("All results: %d", points)
-        self.logger.debug("########################################")
+        logger.debug("########################################")
+        logger.debug("Best reconstruction is: %s", best)
+        logger.debug("Number of points: %d", points[best])
+        logger.debug("All results: %d", points)
+        logger.debug("########################################")
 
         if points[best] < 1:
             raise OpenMVGControllerError("Reconstruction unsuccessful!")
@@ -175,7 +177,7 @@ class OpenMVGController():
             src = self.reconstruction2_dir / "sfm_data.bin"
         elif best == "glob":
             src = self.reconstruction3_dir / "sfm_data.bin"
-        self.logger.debug(f"Copying {src} to {dst}")
+        logger.debug(f"Copying {src} to {dst}")
         shutil.copyfile(src, dst)
 
     def reconstruct_seq1(
@@ -189,7 +191,7 @@ class OpenMVGController():
     ):
         """Reconstruct 3D models sequentially."""
         # set manually the initial pair to avoid the prompt question
-        self.logger.debug("Do incremental/sequential reconstructions")
+        logger.debug("Do incremental/sequential reconstructions")
 
         self.reconstruction1_dir = self.reconstruct / "raw1"
         self.reconstruction1_dir = utils.check_dir(self.reconstruction1_dir)
@@ -224,7 +226,7 @@ class OpenMVGController():
     ):
         """Reconstruct 3D models sequentially."""
         # set manually the initial pair to avoid the prompt question
-        self.logger.debug("Do incremental/sequential reconstructions")
+        logger.debug("Do incremental/sequential reconstructions")
 
         self.reconstruction2_dir = self.reconstruct / "raw2"
         self.reconstruction2_dir = utils.check_dir(self.reconstruction2_dir)
@@ -258,7 +260,7 @@ class OpenMVGController():
     ):
         """Reconstruct 3D models globally."""
         # set manually the initial pair to avoid the prompt question
-        self.logger.debug("Do global reconstructions")
+        logger.debug("Do global reconstructions")
 
         self.reconstruction3_dir = self.reconstruct / "raw3"
         self.reconstruction3_dir = utils.check_dir(self.reconstruction3_dir)
@@ -294,7 +296,7 @@ class OpenMVGController():
         """Common interface for multi reconstruction approach."""
         num_points = 0
         try:
-            ret = utils.execute(args, self.logger, OpenMVGControllerError)
+            ret = utils.execute(args, OpenMVGControllerError)
             text = ret.stdout + "\n" + ret.stderr
             idx = text.rfind(search_str)
             if idx > 0:
@@ -308,7 +310,7 @@ class OpenMVGController():
 
     def export_MVS(self, num_threads=0):
         """Export 3D model to MVS format."""
-        self.logger.debug("Exporting MVG result to MVS format")
+        logger.debug("Exporting MVG result to MVS format")
 
         input_file = self.reconstruct / "sfm_data.bin"
         self.export_dir = utils.check_dir(self.res_dir / "export")
@@ -322,4 +324,4 @@ class OpenMVGController():
 
         args.extend(["-n", str(num_threads)])
 
-        utils.execute(args, self.logger, OpenMVGControllerError)
+        utils.execute(args, OpenMVGControllerError)

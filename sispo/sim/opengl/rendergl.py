@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import datetime
+import logging
 from pathlib import Path
 
 import math
@@ -28,6 +29,7 @@ except Exception as e:
                     + '\tpip install numpy-quaternion\n'
                     + '\tpip install git+https://github.com/oknuutti/visnav-py.git#egg=visnav') from e
 
+logger = logging.getLogger(__name__)
 
 class RenderControllerError(RuntimeError):
     """Generic error for RenderController."""
@@ -428,7 +430,7 @@ class RenderController:
 
     SOL = RenderObject('Sol', None)
 
-    def __init__(self, render_dir, stardb_path=None, logger=None, verbose=True):
+    def __init__(self, render_dir, stardb_path=None, verbose=True):
         """Initialize controller class."""
         self._render_dir = render_dir
         self._scenes = {}

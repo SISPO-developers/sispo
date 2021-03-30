@@ -1,8 +1,10 @@
 """Utils module contains functions possibly used by all modules."""
 
+import logging
 import subprocess
 from pathlib import Path
 
+logger = logging.getLogger(__name__)
 
 def check_dir(directory, create=True):
     """
@@ -34,7 +36,7 @@ def check_dir(directory, create=True):
     return dir_resolved
 
 
-def execute(args, logger, exception):
+def execute(args, exception):
     """Utility function to execute all terminal programs."""
     logger.debug(f"{args[0]} is running with arguments {args[1:]}")
     ret = subprocess.run(args, capture_output=True, text=True)

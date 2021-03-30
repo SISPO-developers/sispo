@@ -10,6 +10,7 @@ from pathlib import Path
 
 from . import openmvg, openmvs
 
+logger = logging.getLogger(__name__)
 
 class Reconstructor:
     """Reconstruction of a 3D object from images."""
@@ -77,15 +78,9 @@ class Reconstructor:
         empty_color=16744231,
         orthographic_res=0,
         openMVG_dir=None,
-        openMVS_dir=None,
-        ext_logger=None
+        openMVS_dir=None
     ):
         """Initialises main directory and file structure."""
-
-        if ext_logger is not None:
-            self.logger = ext_logger
-        else:
-            self.logger = self._create_logger()
 
         self.res_dir = res_dir
 
@@ -96,7 +91,7 @@ class Reconstructor:
         else:
             openMVG_dir = None
         self.oMVG = openmvg.OpenMVGController(
-            self.res_dir, ext_logger=self.logger, openMVG_dir=openMVG_dir
+            self.res_dir, openMVG_dir=openMVG_dir
         )
 
         if openMVS_dir is not None:
@@ -106,7 +101,7 @@ class Reconstructor:
         else:
             openMVS_dir = None
         self.oMVS = openmvs.OpenMVSController(
-            self.res_dir, ext_logger=self.logger, openMVS_dir=openMVS_dir
+            self.res_dir, openMVS_dir=openMVS_dir
         )
 
         self.focal = focal
@@ -168,6 +163,8 @@ class Reconstructor:
         self.patch_heuristic = patch_heuristic
         self.empty_color = empty_color
         self.orthographic_res = orthographic_res
+
+        logger.debug("Init finished")
 
     def create_pointcloud(self):
         """Creates point cloud from images."""
@@ -384,31 +381,6 @@ class Reconstructor:
         self.create_pointcloud()
         self.densify_pointcloud()
         self.create_textured_model()
-
-    @staticmethod
-    def _create_logger():
-        """
-        Creates local logger in case no external logger was provided.
-        """
-        now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
-        filename = now + "_reconstruction.log"
-        log_dir = Path(__file__).resolve().parent.parent.parent
-        log_dir = log_dir / "data" / "logs"
-        if not log_dir.is_dir:
-            Path.mkdir(log_dir, parents=True)
-        log_file = log_dir / filename
-        logger = logging.getLogger("reconstruction")
-        logger.setLevel(logging.DEBUG)
-        logger_formatter = logging.Formatter(
-            "%(asctime)s - %(name)s - %(funcName)s - %(message)s"
-        )
-        file_handler = logging.FileHandler(str(log_file))
-        file_handler.setLevel(logging.DEBUG)
-        file_handler.setFormatter(logger_formatter)
-        logger.addHandler(file_handler)
-        logger.debug("\n\n############ NEW RECONSTRUCTION LOG ############\n")
-
-        return logger
 
 
 if __name__ == "__main__":

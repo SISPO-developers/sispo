@@ -1,6 +1,7 @@
 """Module to define common attributes of celestial bodies."""
 
 import math
+import logging
 from pathlib import Path
 
 import orekit
@@ -11,6 +12,7 @@ from org.orekit.frames import FramesFactory  # pylint: disable=import-error
 from org.orekit.time import AbsoluteDate, TimeScalesFactory  # pylint: disable=import-error
 from org.hipparchus.ode.events import Action # pylint: disable=import-error
 
+logger = logging.getLogger(__name__)
 
 class CelestialBodyError(RuntimeError):
     """Generic error for CelestialBody and child classes."""
@@ -44,6 +46,8 @@ class CelestialBody():
         self.pos_history = self.event_handler.pos_history
         self.vel_history = self.event_handler.vel_history
         self.rot_history = self.event_handler.rot_history
+
+        logger.debug("Init finished")
 
     def __repr__(self):
         """Objects are represented by their name."""
@@ -112,7 +116,7 @@ class TimingEvent(PythonEventHandler):
         """Handle occured event."""
         self.events += 1
         if self.events % 1 == 0:
-            print(f"{s.getDate()} : event {self.events}")
+            logger.debug(f"{s.getDate()} : event {self.events}")
 
         self.date_history.append(s.getDate())
         self.pos_history.append(s.getPVCoordinates().getPosition())

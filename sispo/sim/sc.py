@@ -1,5 +1,6 @@
 """Defining behaviour of the spacecraft (sc)."""
 
+import logging
 from pathlib import Path
 
 from astropy import units as u
@@ -17,6 +18,7 @@ from org.hipparchus.geometry.euclidean.threed import Vector3D  # pylint: disable
 
 from .cb import CelestialBody
 
+logger = logging.getLogger(__name__)
 
 class Spacecraft(CelestialBody):
     """Handling properties and behaviour of the spacecraft."""
@@ -45,6 +47,8 @@ class Spacecraft(CelestialBody):
 
         self.payload = None
 
+        logger.debug("Init finished")
+
     @classmethod
     def calc_encounter_state(cls,
                              sssb_state,
@@ -61,8 +65,8 @@ class Spacecraft(CelestialBody):
         sc_vel = sssb_vel.scalarMultiply(
             (sssb_vel.getNorm() - rel_vel) / sssb_vel.getNorm())
 
-        #self.logger.info("Spacecraft relative velocity: %s", sc_vel)
-        #self.logger.info("Spacecraft distance from sun: %s",
+        #logger.info("Spacecraft relative velocity: %s", sc_vel)
+        #logger.info("Spacecraft distance from sun: %s",
         #                 sc_pos.getNorm()/Constants.IAU_2012_ASTRONOMICAL_UNIT)
 
         return PVCoordinates(sc_pos, sc_vel)

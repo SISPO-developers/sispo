@@ -31,10 +31,7 @@ from .plugins import plugins
 from .reconstruction import *
 from .sim import *
 
-logger = logging.getLogger("sispo")
-logger.setLevel(logging.DEBUG)
-logger_formatter = logging.Formatter(
-    "%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+logger = logging.getLogger(__name__)
 
 
 def _create_parser():
@@ -262,25 +259,24 @@ def main():
     if settings is None:
         return
 
-    if settings["options"].verbose:
-        stream_handler = logging.StreamHandler(sys.stdout)
-        stream_handler.setLevel(logging.DEBUG)
-        stream_handler.setFormatter(logger_formatter)
-        logger.addHandler(stream_handler)
-
-    if settings["options"].profile:
-        pr = cProfile.Profile()
-
+    # Initialise logging
     now = datetime.now().strftime("%Y-%m-%dT%H%M%S%z")
     filename = (now + "_sispo.log")
     log_dir = settings["res_dir"]
     if not log_dir.is_dir:
         Path.mkdir(log_dir, parents=True)
     log_file = log_dir / filename
-    file_handler = logging.FileHandler(str(log_file))
-    file_handler.setLevel(logging.DEBUG)
-    file_handler.setFormatter(logger_formatter)
-    logger.addHandler(file_handler)
+    log_handlers = [logging.FileHandler(log_file)]
+
+    if settings["options"].verbose:
+        term_logger = logging.StreamHandler(sys.stdout)
+        term_logger.setLevel(logging.DEBUG)
+        log_handlers.append(term_logger)
+
+    # Force logging reset to ensure correct style
+    logging.basicConfig(handlers=log_handlers, level=logging.DEBUG, force=True,
+                        format="%(asctime)s - %(name)s - %(funcName)s - %(message)s")
+
     logger.debug("\n\n################### NEW SISPO LOG ###################\n")
 
     logger.debug("Settings:")
@@ -291,6 +287,7 @@ def main():
     recon_settings = settings["reconstruction"]
 
     if settings["options"].profile:
+        pr = cProfile.Profile()
         logger.debug("Start Profiling")
         pr.enable()
 
@@ -300,7 +297,7 @@ def main():
 
     if settings["options"].with_sim or settings["options"].with_render:
         logger.debug("With either simulation or rendering")
-        env = Environment(**sim_settings, ext_logger=logger, opengl_renderer=settings["options"].opengl)
+        env = Environment(**sim_settings, opengl_renderer=settings["options"].opengl)
 
         if settings["options"].with_sim:
             env.simulate()
@@ -313,12 +310,12 @@ def main():
 
     if settings["options"].with_compression:
         logger.debug("With compression")
-        comp = compression.Compressor(**comp_settings, ext_logger=logger)
+        comp = compression.Compressor(**comp_settings)
         comp.comp_decomp_series()
 
     if settings["options"].with_reconstruction:
         logger.debug("With reconstruction")
-        recon = Reconstructor(**recon_settings, ext_logger=logger)
+        recon = Reconstructor(**recon_settings)
         recon.reconstruct()
 
     t_end = time.time()
