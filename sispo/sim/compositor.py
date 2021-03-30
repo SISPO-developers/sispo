@@ -8,9 +8,9 @@ compositor is required to fix the intensity issue and add the star background.
 
 import json
 import logging
-import threading
-from pathlib import Path
+import multiprocessing
 from datetime import datetime
+from pathlib import Path
 
 import cv2
 import numpy as np
@@ -219,11 +219,9 @@ class ImageCompositor:
 
         return rel_intensity
 
-    def compose(self, frames=None, max_threads=3):
+    def compose(self, frames=None, max_procs=None):
         """
         Composes different images into final image, uses multi-threading.
-        
-        !!! CAUTION !!! Call only once at a time.
         
         :type frames: String, Frame or List of Frame
         :param frames: FrameID, Frame or list of frames for calibration and
@@ -253,23 +251,14 @@ class ImageCompositor:
                 "Compositor.compose requires frame or list of frames as input"
             )
 
-        for frame in frames:
+        if max_procs is not None:
+            procs = max_procs
+        else:
+            procs = multiprocessing.cpu_count()
 
-            for thr in self._threads:
-                if not thr.is_alive():
-                    self._threads.pop(self._threads.index(thr))
+        pool = multiprocessing.Pool(processes=(procs-1))
 
-            if len(self._threads) < max_threads - 1:
-                # Allow up to 2 additional threads
-                thr = threading.Thread(target=self._compose, args=(frame,))
-                thr.start()
-                self._threads.append(thr)
-            else:
-                # If too many, also compose in main thread to not drop a frame
-                self._compose(frame)
-
-            for thr in self._threads:
-                thr.join()
+        pool.map(self._compose, (frames,))
     
     def _compose(self, frame):
         """
