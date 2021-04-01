@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: 2021 Gabriel J. Schwarzkopf <sispo-devs@outlook.com>
+..
+.. SPDX-License-Identifier: GFDL-1.3-or-later
+
 Installation instructions
 =========================
 SISPO can be setup with Linux and Windows. The default case used in this description is a Windows setup. It is recommended to set SISPO up in a Windows environment since e.g. the reconstruction algorithms seemed to be more stable. Known differences or problems under Linux will be pointed out. While it should be possible to use a plain Python environment and pip, a miniconda environment manager was used for development. Also a C compiler is necessary. Linux provides the GCC, for Windows it is easiest to install Microsoft Visual Studio with MSVC and MSBuild. Another possibility when using Windows is to use `vcpkg <https://github.com/microsoft/vcpkg>`_. However, previously the openMVG and openMVS ports in vcpkg did not work. Vcpkg can also be used with Linux. However, there were unsolvable problems when using vcpkg so everything was installed natively.
