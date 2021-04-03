@@ -22,6 +22,8 @@ temp/
 !software/README.md
 !LICENSES/GPL-3.0-or-later.txt
 !LICENSES/CC0-1.0.txt
+!doc/source
+!doc/source/requirements.txt
 
 ## Ignore mypy files
 .mypy_cache/*
