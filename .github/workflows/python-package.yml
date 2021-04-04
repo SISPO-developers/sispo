@@ -44,5 +44,24 @@ jobs:
         git clone --recursive https://github.com/openMVG/openMVG.git
         cd build_openMVG
         cmake --version
-        cmake -DCMAKE_BUILD_TYPE=release . ../openMVG/src
+        cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=install . ../openMVG/src
         cmake --build . --target install
+        cd ../..
+    - name: Build openMVS
+      run: |
+        sudo apt update
+        sudo apt install -y buiild-essential cmake libpng-dev libjpeg-dev libtiff-dev libglu1-mesa-dev libboost-iostreams-dev libboost-program-options-dev libboost-system-dev libboost-serialization-dev libopencv-dev libcgal-dev libcgal-qt5-dev
+        cd software
+        mkdir openMVS && cd openMVS
+        git clone https://gitlab.com/libeigen/eigen.git --branch 3.2
+        mkdir eigen_build && cd eigen_build
+        cmake . ../eigen
+        make && sudo make install
+        cd ..
+        git clone https://github.com/cdcseacave/VCG.git vcglib
+        git clone https://github.com/cdcseacave/openMVS.git openMVS
+        mkdir openMVS_build && cd openMVS_build
+        cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install -DVCG_ROOT="../vcglib" . ../openMVS
+        cmake --build . --target install
+        cd ../..
+
