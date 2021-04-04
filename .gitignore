@@ -22,6 +22,8 @@ temp/
 !software/README.md
 !LICENSES/GPL-3.0-or-later.txt
 !LICENSES/CC0-1.0.txt
+!LICENSES/GFDL-1.3-or-later.txt
+!LICENSES/Apache-2.0.txt
 !doc/source
 !doc/source/requirements.txt
 
