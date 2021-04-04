@@ -42,7 +42,7 @@ jobs:
         mkdir openMVG && cd openMVG
         [[ -d build_openMVG ]] || mkdir build_openMVG
         git clone --recursive https://github.com/openMVG/openMVG.git
-
+        cd build_openMVG
         cmake --version
         cmake -DCMAKE_BUILD_TYPE=release . ../openMVG/src
         cmake --build . --target install
