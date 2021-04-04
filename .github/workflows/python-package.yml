@@ -37,7 +37,7 @@ jobs:
     - name: Build openMVG
       run: |
         sudo apt update
-        sudo apt install -y build-essential cmake libpng-dev libjpeg8-dev libtiff4-dev libxxf86vm1 libxxf86vm-dev x11proto-xf86vidmode-dev libxrandr-dev
+        sudo apt install -y build-essential cmake libpng-dev libjpeg8-dev libtiff-dev libxxf86vm1 libxxf86vm-dev x11proto-xf86vidmode-dev libxrandr-dev
         cd software
         mkdir openMVG && cd openMVG
         [[ -d build_openMVG ]] || mkdir build_openMVG
@@ -45,4 +45,4 @@ jobs:
 
         cmake --version
         cmake -DCMAKE_BUILD_TYPE=release . ../openMVG/src
-        make all -j 4
+        cmake --build . --target install
