@@ -50,7 +50,7 @@ jobs:
     - name: Build openMVS
       run: |
         sudo apt update
-        sudo apt install -y buiild-essential cmake libpng-dev libjpeg-dev libtiff-dev libglu1-mesa-dev libboost-iostreams-dev libboost-program-options-dev libboost-system-dev libboost-serialization-dev libopencv-dev libcgal-dev libcgal-qt5-dev
+        sudo apt install -y build-essential cmake libpng-dev libjpeg-dev libtiff-dev libglu1-mesa-dev libboost-iostreams-dev libboost-program-options-dev libboost-system-dev libboost-serialization-dev libopencv-dev libcgal-dev libcgal-qt5-dev
         cd software
         mkdir openMVS && cd openMVS
         git clone https://gitlab.com/libeigen/eigen.git --branch 3.2
