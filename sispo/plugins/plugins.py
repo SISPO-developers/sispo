@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 Timo Väisänen <sispo-devs@outlook.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 import importlib
 
 

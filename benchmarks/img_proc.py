@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 Gabriel J. Schwarzkopf <sispo-devs@outlook.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """
 Benchmarks to compare scikit-image (skimage) against OpenCV performance.
 Compares image resizing and gaussian filtering.

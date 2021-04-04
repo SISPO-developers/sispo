@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 Gabriel J. Schwarzkopf <sispo-devs@outlook.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 """
 Interface for handling data from a star catalogue. Retrieve data as well as
 render and write images.

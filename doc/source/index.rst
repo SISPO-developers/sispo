@@ -1,3 +1,7 @@
+.. SPDX-FileCopyrightText: 2021 Gabriel J. Schwarzkopf <sispo-devs@outlook.com>
+..
+.. SPDX-License-Identifier: GFDL-1.3-or-later
+
 .. SISPO documentation master file, created by
    sphinx-quickstart on Sun Mar  1 14:16:26 2020.
    You can adapt this file completely to your liking, but it should at least

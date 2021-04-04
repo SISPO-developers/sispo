@@ -1,3 +1,7 @@
+REM SPDX-FileCopyrightText: 2021 Gabriel J. Schwarzkopf <sispo-devs@outlook.com>
+REM
+REM SPDX-License-Identifier: GFDL-1.3-or-later
+
 @ECHO OFF
 
 pushd %~dp0
