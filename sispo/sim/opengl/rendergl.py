@@ -1,3 +1,7 @@
+# SPDX-FileCopyrightText: 2021 Olli Knuuttila <sispo-devs@outlook.com>
+#
+# SPDX-License-Identifier: GPL-3.0-or-later
+
 from __future__ import annotations
 
 import datetime
