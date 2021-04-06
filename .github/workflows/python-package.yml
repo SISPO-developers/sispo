@@ -47,6 +47,7 @@ jobs:
         cd blender
         make update
         make bpy
+        cd ../build_linux_bpy
         make install
         python3 -c "import bpy; bpy.ops.render.render(write_still=True)"
         cd ../..
@@ -59,7 +60,6 @@ jobs:
         [[ -d build_openMVG ]] || mkdir build_openMVG
         git clone --recursive https://github.com/openMVG/openMVG.git
         cd build_openMVG
-        cmake --version
         cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=install . ../openMVG/src
         cmake --build . --target install
         cd ../..
