@@ -49,6 +49,7 @@ jobs:
         make bpy
         make install
         python3 -c "import bpy; bpy.ops.render.render(write_still=True)"
+        cd ../..
     - name: Build openMVG
       run: |
         sudo apt update
