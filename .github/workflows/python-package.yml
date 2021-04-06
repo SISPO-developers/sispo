@@ -20,7 +20,7 @@ jobs:
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
-        python-version: '3.x'
+        python-version: '3.7'
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
@@ -34,6 +34,21 @@ jobs:
         twine check dist/*
     - name: REUSE Compliance Check
       uses: fsfe/reuse-action@v1.1
+    - name: Build bpy
+      run: |
+        sudo apt update
+        sudo apt install -y build-essential git subversion cmake libx11-dev libxxf86vm-dev libxcursor-dev libxi-dev libxrandr-dev libxinerama-dev libglew-dev
+        cd software
+        mkdir blender && cd blender
+        git clone https://git.blender.org/blender.git
+        mkdir lib && cd lib
+        svn checkout https://svn.blender.org/svnroot/bf-blender/trunk/lib/linux_centos7_x86_64
+        cd ..
+        cd blender
+        make update
+        make bpy
+        make install
+        python3 -c "import bpy; bpy.ops.render.render(write_still=True)"
     - name: Build openMVG
       run: |
         sudo apt update
