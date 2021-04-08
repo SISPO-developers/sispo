@@ -49,8 +49,8 @@ jobs:
         make bpy
         cd ../build_linux_bpy
         make install
-        cp ../lib/linux_centos7_x86_64/python/lib/python3.9/site-packages/bpy.so /opt/hostedtoolcache/Python/3.9.2/x64/lib/python3.9/site-packages/
-        cp -r ../lib/linux_centos7_x86_64/python/lib/python3.9/site-packages/2.93 /opt/hostedtoolcache/Python/3.9.2/x64/lib/python3.9/site-packages/
+        cp ../lib/linux_centos7_x86_64/python/lib/python3.9/site-packages/bpy.so /opt/hostedtoolcache/Python/3.9.4/x64/lib/python3.9/site-packages/
+        cp -r ../lib/linux_centos7_x86_64/python/lib/python3.9/site-packages/2.93 /opt/hostedtoolcache/Python/3.9.4/x64/lib/python3.9/site-packages/
         python -c "import bpy"
         cd ../..
     - name: Build openMVG
