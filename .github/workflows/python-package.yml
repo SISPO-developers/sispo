@@ -82,3 +82,7 @@ jobs:
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install -DVCG_ROOT="../vcglib" . ../openMVS
         cmake --build . --target install
         cd ../..
+    - name: Install sispo
+      run: |
+        pip install -e .
+        python -c "import sispo"
