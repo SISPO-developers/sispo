@@ -8,9 +8,11 @@ channels:
   - defaults
   - conda-forge
 dependencies:
+  - astropy
   - python=3.9
   - pip
   - setuptools
   - numpy
   - numpy-base
   - orekit
+  - opencv
