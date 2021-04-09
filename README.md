@@ -8,7 +8,7 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 [![sispo](https://img.shields.io/badge/powered%20by-sispo-orange?style=flat)](https://github.com/SISPO-developers/sispo)
 [![Documentation Status](https://readthedocs.org/projects/sispo/badge/?version=latest)](https://sispo.readthedocs.io/en/latest/?badge=latest)
-![python-package-workflow](https://github.com/SISPO-developers/sispo/actions/workflows/python-package.yml/badge.svg)
+[![python-package-workflow](https://github.com/SISPO-developers/sispo/actions/workflows/python-package.yml/badge.svg)](https://github.com/SISPO-developers/sispo/actions/workflows/python-package.yml)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3661054.svg)](https://doi.org/10.5281/zenodo.3661054)
 [![standard-readme compliant](https://img.shields.io/badge/readme%20style-standard-brightgreen.svg?style=flat-square)](https://github.com/RichardLitt/standard-readme)
 [![REUSE status](https://api.reuse.software/badge/github.com/SISPO-developers/sispo)](https://api.reuse.software/info/github.com/SISPO-developers/sispo)
