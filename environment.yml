@@ -8,9 +8,9 @@ channels:
   - defaults
   - conda-forge
 dependencies:
-  - python
+  - python=3.9
   - pip
   - setuptools
-  - pylint
   - numpy
   - numpy-base
+  - orekit
