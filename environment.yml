@@ -9,6 +9,7 @@ channels:
   - conda-forge
 dependencies:
   - astropy
+  - astroquery
   - python=3.9
   - pip
   - setuptools
