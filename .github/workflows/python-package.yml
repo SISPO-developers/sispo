@@ -15,7 +15,7 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      BLENDER_VERSION: 2.93
+      BLENDER_VERSION: 2.92
       PYTHON_VERSION: 3.9
 
     steps:
@@ -67,8 +67,6 @@ jobs:
         [[ -d build_star_cats ]] || mkdir build_star_cats
         make all
         cp u4test build_star_cats/
-        ls -l
-        ls -l build_star_cats/
         cd ../..
 
     - name: Build bpy
@@ -78,7 +76,7 @@ jobs:
         sudo apt install -y build-essential git subversion cmake libx11-dev libxxf86vm-dev libxcursor-dev libxi-dev libxrandr-dev libxinerama-dev libglew-dev
         cd software
         mkdir blender && cd blender
-        git clone https://git.blender.org/blender.git --branch v$BLENDER_VERSION.0
+        git clone --depth 1 --branch v$BLENDER_VERSION.0 https://git.blender.org/blender.git
         mkdir lib && cd lib
         svn checkout https://svn.blender.org/svnroot/bf-blender/trunk/lib/linux_centos7_x86_64
         cd ..
