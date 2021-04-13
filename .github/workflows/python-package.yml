@@ -114,4 +114,4 @@ jobs:
     
     - name: Test sispo
       run: |
-        python -c "import sispo"
+        python -c "import sispo; sispo.run()"
