@@ -17,3 +17,5 @@ dependencies:
   - numpy-base
   - orekit
   - opencv
+  - pip:
+    - OpenEXR
