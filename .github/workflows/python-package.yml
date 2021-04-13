@@ -62,7 +62,7 @@ jobs:
       if: steps.cache.outputs.cache-hit != 'true'
       run: |
         cd software
-        git clone https://github.com/Bill-Gray/star_cats.git
+        git clone --depth 1 https://github.com/Bill-Gray/star_cats.git
         cd star_cats
         [[ -d build_star_cats ]] || mkdir build_star_cats
         make all
@@ -78,7 +78,7 @@ jobs:
         mkdir blender && cd blender
         git clone --depth 1 --branch v$BLENDER_VERSION.0 https://git.blender.org/blender.git
         mkdir lib && cd lib
-        svn checkout https://svn.blender.org/svnroot/bf-blender/trunk/lib/linux_centos7_x86_64
+        svn checkout https://svn.blender.org/svnroot/bf-blender/tags/blender-$BLENDER_VERSION-release/lib/linux_centos7_x86_64/
         cd ..
         cd blender
         make update
@@ -98,7 +98,7 @@ jobs:
         cd software
         mkdir openMVG && cd openMVG
         [[ -d build_openMVG ]] || mkdir build_openMVG
-        git clone --recursive https://github.com/openMVG/openMVG.git
+        git clone --depth 1 --recursive https://github.com/openMVG/openMVG.git
         cd build_openMVG
         cmake -DCMAKE_BUILD_TYPE=release -DCMAKE_INSTALL_PREFIX=install . ../openMVG/src
         cmake --build . --target install
@@ -111,13 +111,13 @@ jobs:
         sudo apt install -y build-essential cmake libpng-dev libjpeg-dev libtiff-dev libglu1-mesa-dev libboost-iostreams-dev libboost-program-options-dev libboost-system-dev libboost-serialization-dev libopencv-dev libcgal-dev libcgal-qt5-dev
         cd software
         mkdir openMVS && cd openMVS
-        git clone https://gitlab.com/libeigen/eigen.git --branch 3.2
+        git clone --depth 1 --branch 3.2 https://gitlab.com/libeigen/eigen.git
         mkdir eigen_build && cd eigen_build
         cmake . ../eigen
         make && sudo make install
         cd ..
-        git clone https://github.com/cdcseacave/VCG.git vcglib
-        git clone https://github.com/cdcseacave/openMVS.git openMVS
+        git clone --depth 1 https://github.com/cdcseacave/VCG.git vcglib
+        git clone --depth 1 https://github.com/cdcseacave/openMVS.git openMVS
         mkdir openMVS_build && cd openMVS_build
         cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=install -DVCG_ROOT="../vcglib" . ../openMVS
         cmake --build . --target install
