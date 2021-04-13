@@ -18,4 +18,4 @@ dependencies:
   - orekit=10.3
   - opencv=4.5.0
   - pip:
-    - OpenEXR=1.3.2
+    - OpenEXR==1.3.2
