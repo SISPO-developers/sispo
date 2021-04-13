@@ -114,4 +114,8 @@ jobs:
     
     - name: Test sispo
       run: |
+        mkdir data/UCAC4
         python -c "import sispo; sispo.run()"
+    - name: sispo unittests
+      run: |
+        python test_basics.py
