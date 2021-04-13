@@ -35,7 +35,6 @@ jobs:
         conda update -n base -c defaults conda
         conda env update --file environment.yml --name base
         conda install setuptools wheel twine
-        conda list
     
     - name: Build and check
       run: |
@@ -57,6 +56,19 @@ jobs:
           /usr/share/miniconda/lib/python${{ env.PYTHON_VERSION }}/site-packages/bpy.so
         # An explicit key for restoring and saving the cache
         key: compiled-deps
+
+    - name: Build star_cats
+      if: steps.cache.outputs.cache-hit != 'true'
+      run: |
+        cd software
+        git clone https://github.com/Bill-Gray/star_cats.git
+        cd star_cats
+        [[ -d build_star_cats ]] || mkdir build_star_cats
+        make all
+        cp u4test build_star_cats/
+        ls -l
+        ls -l build_star_cats/
+        cd ../..
 
     - name: Build bpy
       if: steps.cache.outputs.cache-hit != 'true'
