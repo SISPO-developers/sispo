@@ -81,12 +81,13 @@ jobs:
         svn checkout https://svn.blender.org/svnroot/bf-blender/tags/blender-$BLENDER_VERSION-release/lib/linux_centos7_x86_64/
         cd ..
         cd blender
-        make update
         make bpy
         cd ../build_linux_bpy
         make install
+        echo "Successful compilation"
         cp ../lib/linux_centos7_x86_64/python/lib/python$PYTHON_VERSION/site-packages/bpy.so /usr/share/miniconda/lib/python$PYTHON_VERSION/site-packages/
         cp -r ../lib/linux_centos7_x86_64/python/lib/python$PYTHON_VERSION/site-packages/$BLENDER_VERSION /usr/share/miniconda/lib/python$PYTHON_VERSION/site-packages/
+        echo "Successful copying"
         python -c "import bpy"
         cd ../..
 
