@@ -88,7 +88,7 @@ jobs:
         cp ../lib/linux_centos7_x86_64/python/lib/python$PYTHON_VERSION/site-packages/bpy.so /usr/share/miniconda/lib/python$PYTHON_VERSION/site-packages/
         cp -r ../lib/linux_centos7_x86_64/python/lib/python$PYTHON_VERSION/site-packages/$BLENDER_VERSION /usr/share/miniconda/lib/python$PYTHON_VERSION/site-packages/
         echo "Successful copying"
-        python -c "import bpy"
+        python -c "import bpy; bpy.ops.render.render(write_still=True)"
         cd ../..
 
     - name: Build openMVG
@@ -127,6 +127,8 @@ jobs:
     - name: Test sispo
       run: |
         mkdir data/UCAC4
+        python -c "import sispo"
+        echo "Import successful"
         python -c "import sispo; sispo.run()"
     - name: sispo unittests
       run: |
