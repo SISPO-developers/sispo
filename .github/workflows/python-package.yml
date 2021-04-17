@@ -76,7 +76,7 @@ jobs:
         sudo apt install -y build-essential git subversion cmake libx11-dev libxxf86vm-dev libxcursor-dev libxi-dev libxrandr-dev libxinerama-dev libglew-dev
         cd software
         mkdir blender && cd blender
-        git clone  --depth 1 --recursive --branch $BLENDER_VERSION.0 https://git.blender.org/blender.git
+        git clone  --depth 1 --recursive --branch v$BLENDER_VERSION.0 https://git.blender.org/blender.git
         mkdir lib && cd lib
         svn checkout https://svn.blender.org/svnroot/bf-blender/tags/blender-$BLENDER_VERSION-release/lib/linux_centos7_x86_64/
         cd ..
