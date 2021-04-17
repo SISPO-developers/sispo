@@ -76,7 +76,7 @@ jobs:
         sudo apt install -y build-essential git subversion cmake libx11-dev libxxf86vm-dev libxcursor-dev libxi-dev libxrandr-dev libxinerama-dev libglew-dev
         cd software
         mkdir blender && cd blender
-        git clone https://git.blender.org/blender.git
+        git clone  --depth 1 --recursive --branch $BLENDER_VERSION.0 https://git.blender.org/blender.git
         mkdir lib && cd lib
         svn checkout https://svn.blender.org/svnroot/bf-blender/tags/blender-$BLENDER_VERSION-release/lib/linux_centos7_x86_64/
         cd ..
@@ -88,7 +88,7 @@ jobs:
         cp ../lib/linux_centos7_x86_64/python/lib/python$PYTHON_VERSION/site-packages/bpy.so /usr/share/miniconda/lib/python$PYTHON_VERSION/site-packages/
         cp -r ../lib/linux_centos7_x86_64/python/lib/python$PYTHON_VERSION/site-packages/$BLENDER_VERSION /usr/share/miniconda/lib/python$PYTHON_VERSION/site-packages/
         echo "Successful copying"
-        python -c "import bpy; bpy.ops.wm.save_as_mainfile(filepath='my.blend')"
+        python -c "import bpy; bpy.ops.wm.save_as_mainfile(filepath='./my.blend')"
         cd ../..
 
     - name: Build openMVG
