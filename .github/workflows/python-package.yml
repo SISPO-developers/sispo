@@ -15,8 +15,8 @@ jobs:
 
     runs-on: ubuntu-latest
     env:
-      BLENDER_VERSION: 2.90
-      PYTHON_VERSION: 3.7
+      BLENDER_VERSION: 2.93
+      PYTHON_VERSION: 3.9
 
     steps:
     - uses: actions/checkout@v2
@@ -76,7 +76,7 @@ jobs:
         sudo apt install -y build-essential git subversion cmake libx11-dev libxxf86vm-dev libxcursor-dev libxi-dev libxrandr-dev libxinerama-dev libglew-dev
         cd software
         mkdir blender && cd blender
-        git clone --depth 1 --branch v$BLENDER_VERSION.1 https://git.blender.org/blender.git
+        git clone --depth 1 https://git.blender.org/blender.git
         mkdir lib && cd lib
         svn checkout https://svn.blender.org/svnroot/bf-blender/tags/blender-$BLENDER_VERSION-release/lib/linux_centos7_x86_64/
         cd ..
