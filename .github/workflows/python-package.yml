@@ -16,7 +16,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       BLENDER_VERSION: 2.92
-      PYTHON_VERSION: 3.9
+      PYTHON_VERSION: 3.7
 
     steps:
     - uses: actions/checkout@v2
