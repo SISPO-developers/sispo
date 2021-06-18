@@ -129,7 +129,6 @@ jobs:
         mkdir data/UCAC4
         python -c "import sispo"
         echo "Import successful"
-        python -c "import sispo; sispo.run()"
     - name: sispo unittests
       run: |
         python test_basics.py
