@@ -82,12 +82,14 @@
         "instrument": 
         {
             "res": [1024, 1024],
-            "pix_l": 12,
+            "pix_l": 12.0,
             "focal_l": 120.8,
             "aperture_d": 1.5,
             "wavelength": 550.0,
             "quantum_eff": 0.9,
-            "color_depth": 8
+            "color_depth": 12,
+            "psf_sigma": [[0.845, 0.7215], [0.155, 1.363]],
+            "ignore_shot_noise": true
         },
         "with_infobox": 0,
         "with_clipping": 1

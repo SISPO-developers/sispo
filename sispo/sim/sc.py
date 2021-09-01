@@ -57,7 +57,7 @@ class Spacecraft(CelestialBody):
     def calc_encounter_state(cls,
                              sssb_state,
                              min_dist,
-                             rel_vel, 
+                             rel_vel,
                              terminator=True,
                              sunnyside=False):
         """Calculate the state of a Spacecraft at closest distance to SSSB."""
@@ -97,7 +97,7 @@ class Spacecraft(CelestialBody):
             sc_pos = sssb_pos.subtract(sssb_direction)
 
         return sc_pos
-        
+
 
 class Instrument():
     """Summarizes characteristics of an instrument."""
@@ -105,11 +105,11 @@ class Instrument():
     def __init__(self, charas=None):
         """
         Flexible init, all values have defaults.
-        
+
         :type charas: Dict
         :param charas: Required characteristics that describe the instrument.
         """
-        
+
         if charas is None:
             charas = {}
 
@@ -126,58 +126,62 @@ class Instrument():
             self.pix_l = np.sqrt(self.pix_a)
         else:
             self.pix_l = 3.45 * u.micron
-            self.pix_a = self.pix_l ** 2 * (1 / u.pix)    
+            self.pix_a = self.pix_l ** 2 * (1 / u.pix)
         self.chip_w = self.pix_l * self.res[0]
 
-        if "focal_l" in charas:
-            self.focal_l = charas["focal_l"] * u.mm
-        else:
-            self.focal_l = 230 * u.mm
+        self.focal_l = charas.get("focal_l", 230) * u.mm
+        self.aperture_d = charas.get("aperture_d", 4) * u.cm
+        self.wavelength = charas.get("wavelength", 550) * u.nm
+        self.chip_noise = charas.get("chip_noise", 10)
+        self.quantum_eff = charas.get("quantum_eff", 0.25)
+        self.color_depth = charas.get("color_depth", 12)
+        self.ignore_shot_noise = charas.get("ignore_shot_noise", False)
 
-        if "aperture_d" in charas:
-            self.aperture_d = charas["aperture_d"] * u.cm
-        else:
-            self.aperture_d = 4 * u.cm
-
-        if "wavelength" in charas:
-            self.wavelength = charas["wavelength"] * u.nm
-        else:
-            self.wavelength = 550 * u.nm
-
-        if "chip_noise" in charas:
-            self.chip_noise = charas["chip_noise"]
-        else:
-            self.chip_noise = 10
-
-        if "quantum_eff" in charas:
-            self.quantum_eff = charas["quantum_eff"]
-        else:
-            self.quantum_eff = 0.25
-      
-        if "color_depth" in charas:
-            self.color_depth = charas["color_depth"]
-        else:
-            self.color_depth = 12
-
-        self.aperture_a = ((2 * u.cm) ** 2 - (1.28 * u.cm) ** 2) * np.pi/4
+        self.aperture_a = np.pi * (self.aperture_d / 2)**2
         self.dlmult = 2
 
-    def sense(self, flux_img):
-        # Calculate Gaussian standard deviation for approx diffraction pattern
-        sigma = (self.dlmult * 0.45 * self.wavelength
+        if "psf_sigma" in charas:
+            if isinstance(charas["psf_sigma"], (tuple, list)):
+                self.psf_sigma = np.array(charas["psf_sigma"])
+                assert len(self.psf_sigma.shape) == 2 and self.psf_sigma.shape[1] == 2, \
+                        'psf_sigma defines a mix of Gaussians model for the PSF, it needs to be a list of tuples, ' \
+                        'where the first value is a weight and the second one is the sigma of ' \
+                        'the corresponding a Gaussian distribution'
+                assert np.isclose(np.sum(self.psf_sigma[:, 0]), 1.0), 'psf sigma weights need to sum to one'
+            else:
+                self.psf_sigma = np.array([[1.0, charas["psf_sigma"]]])
+        else:
+            # Calculate Gaussian standard deviation for approx diffraction pattern
+            sigma = (self.dlmult * 0.45 * self.wavelength
                 * self.focal_l / (self.aperture_d
                 * self.pix_l)).decompose()
-        sigma = float(sigma.value)
+            self.psf_sigma = np.array([[1.0, float(sigma.value)]])
+
+    def sense(self, flux_img):
+
+        # Calculates a single 2D Gaussian kernel
+        def gkern(ksize, sigma, dtype):
+            ax = np.arange(-ksize // 2 + 1., ksize // 2 + 1., dtype=dtype)
+            ay = np.arange(-ksize // 2 + 1., ksize // 2 + 1., dtype=dtype)
+            xx, yy = np.meshgrid(ax, ay)
+            kernel = np.exp(-((xx / sigma) ** 2 + (yy / sigma) ** 2) / 2)
+            return kernel / np.sum(kernel)
 
         # Kernel size calculated to equal skimage.filters.gaussian
         # Reference:
         # https://github.com/scipy/scipy/blob/4bfc152f6ee1ca48c73c06e27f7ef021d729f496/scipy/ndimage/filters.py#L214
-        kernel = int(round(4 * float(sigma)) * 2 + 1)
-        kernel = max(kernel, 5) # Don't use smaller than 5
-        ksize = (kernel, kernel)
+        max_sigma = np.max(self.psf_sigma[:, 1])
+        ksize = max(5, int(round(4 * float(max_sigma)) * 2 + 1))  # Don't use smaller than 5
+
+        # Kernel for mixture of Gaussians, weights sum to one
+        kernel = np.zeros((ksize, ksize), dtype=flux_img.dtype)
+        for weight, sigma in self.psf_sigma:
+            kernel += weight * gkern(ksize, sigma, flux_img.dtype)
 
         img = self.quantum_eff * flux_img
-        img = cv2.GaussianBlur(img, ksize, sigma)
-        img += np.random.poisson(img)
+        img = cv2.filter2D(img, -1, kernel)
+
+        if not self.ignore_shot_noise:
+            img += np.random.poisson(img)
 
         return img
