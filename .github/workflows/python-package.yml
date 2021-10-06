@@ -9,6 +9,7 @@ name: Create Python Package
 
 on:
   pull_request:
+  workflow_dispatch:
 
 jobs:
   build_check:
