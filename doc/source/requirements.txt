@@ -2,5 +2,5 @@
 #
 # SPDX-License-Identifier: GFDL-1.3-or-later
 
-astropy==4.0.0
+astropy==5.3.3
 m2r>=0.2.1
